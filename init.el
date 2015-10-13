@@ -26,7 +26,7 @@
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)
-;(setq use-package-verbose t)
+(setq use-package-verbose t)
 
 ;;; Load the config
 (org-babel-load-file (concat user-emacs-directory "config.org"))

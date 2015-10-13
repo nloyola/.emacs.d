@@ -1,0 +1,23 @@
+# -*- mode: snippet -*-
+# name: ngs
+# key: ngs
+# --
+define([], function() {
+  'use strict';
+
+  `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`.$inject = [];
+
+  /**
+   * ${1:Description}
+   */
+  function `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`() {
+    var service = {
+    };
+    return service;
+
+    //-------
+
+  }
+
+  return `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`;
+});

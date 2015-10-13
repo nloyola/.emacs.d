@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: ngd
+# key: ngd
+# --
+define([], function() {
+  'use strict';
+
+  /**
+   * ${1:Description}
+   */
+  function `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`() {
+    var directive = {
+      restrict: 'EA',
+      link: link,
+      templateUrl : ''
+    };
+    return directive;
+
+    function link(scope, element, attrs) {
+
+    }
+
+  }
+
+  return `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`;
+
+});

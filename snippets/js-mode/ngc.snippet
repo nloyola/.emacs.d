@@ -1,0 +1,19 @@
+# -*- mode: snippet -*-
+# name: ngc
+# key: ngc
+# --
+define([], function() {
+  'use strict';
+
+  `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`.$inject = [];
+
+  /**
+   * ${1:Description}
+   */
+  function `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`() {
+
+  }
+
+  return `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`;
+
+});
