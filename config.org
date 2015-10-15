@@ -58,10 +58,6 @@ customize settings in [[file:init.el][init.el]].
     (setq monokai-use-variable-pitch nil)))
 #+end_src
 
-* Remove trailing whitespace
-#+BEGIN_SRC emacs-lisp
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-#+END_SRC
 * Font
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
@@ -149,7 +145,6 @@ Some commands are disabled by default. They are enabled in our config using the 
 
 (column-number-mode t)
 
-(global-visual-line-mode)
 (diminish 'visual-line-mode)
 (diminish 'abbrev-mode)
 
@@ -175,6 +170,8 @@ Some commands are disabled by default. They are enabled in our config using the 
 (setq compilation-ask-about-save nil)
 (setq query-replace-highlight t)
 (setq frame-title-format "%S: %f")
+
+(global-visual-line-mode -1)
 #+end_src
 ** Dired
 #+BEGIN_SRC emacs-lisp
@@ -279,6 +276,10 @@ at point as the default value for occur.
 (add-hook 'term-exec-hook 'my-term-hook)
 #+end_src
 
+** Remove trailing whitespace
+#+BEGIN_SRC emacs-lisp
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+END_SRC
 * Key bindings
 
 #+begin_src emacs-lisp
