@@ -512,6 +512,7 @@ Complete anything.
 
 #+begin_src emacs-lisp
 (use-package company
+  :ensure t
   :diminish company-mode
   :config
   (progn
