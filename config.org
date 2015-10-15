@@ -58,6 +58,10 @@ customize settings in [[file:init.el][init.el]].
     (setq monokai-use-variable-pitch nil)))
 #+end_src
 
+* Remove trailing whitespace
+#+BEGIN_SRC emacs-lisp
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+#+END_SRC
 * Font
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
@@ -105,9 +109,9 @@ Some commands are disabled by default. They are enabled in our config using the 
  scroll-step 1                    ; don't scroll to middle of page
  visible-bell t                   ; get rid of the !%!$@$ bell
  require-final-newline t          ; add \n to end of file if required
- backup-by-copying-when-linked t  ; 
+ backup-by-copying-when-linked t  ;
  font-lock-maximum-decoration t   ; level of decoration {1 - 3}, t = max
- vc-follow-symlinks nil           ; don't ask about symlinks 
+ vc-follow-symlinks nil           ; don't ask about symlinks
 )
 
 (setq-default case-fold-search t)       ; make searches case insensitive
@@ -172,6 +176,17 @@ Some commands are disabled by default. They are enabled in our config using the 
 (setq query-replace-highlight t)
 (setq frame-title-format "%S: %f")
 #+end_src
+** Dired
+#+BEGIN_SRC emacs-lisp
+(setq dired-listing-switches "-aBhl  --group-directories-first")
+#+END_SRC
+** Ediff
+#+BEGIN_SRC emacs-lisp
+(setq ediff-split-window-function 'split-window-horizontally
+      ediff-diff-options "-bw"
+      ediff-window-setup-function 'ediff-setup-windows-plain)
+
+#+END_SRC
 
 ** Emacs client
 
@@ -278,11 +293,10 @@ at point as the default value for occur.
 
 (global-set-key (kbd "<f1>")          'indent-for-tab-command)
 (global-set-key [(shift f1)]          'indent-region)
-(global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))        
+(global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))
 (global-set-key [(shift f2)]          '(lambda () (interactive) (revert-buffer t t)))
 ;;(global-set-key [f3]                ')
 (global-set-key [(shift f3)]          'helm-recentf)
-(global-set-key [(control shift f3)]  'projectile-grep)
 (global-set-key [(meta shift f3)]     'sbt-grep)
 (global-set-key [f4]                  'next-error)
 (global-set-key [(control f4)]        '(lambda () (interactive) (kill-buffer nil)))
@@ -661,14 +675,29 @@ Required for gradle build files.
             :ensure t
             :commands helm-projectile
             :bind (("C-c p h" . helm-projectile)
-                   ("C-S-r" .  helm-projectile-find-file)))
+                   ("C-S-r" .  helm-projectile-find-file))
+            :config
+            (progn
+              (setq projectile-indexing-method 'alien
+                    projectile-remember-window-configs t
+                    projectile-switch-project-action 'projectile-dired
+                    projectile-completion-system 'default
+                    projectile-enable-caching nil
+                    compilation-read-command nil ; do not prompt for a compilation command
+                    )
+
+              (projectile-global-mode)
+              (setq projectile-completion-system 'helm)
+              ))
           (require 'helm-projectile)
-          (use-package helm-ag :ensure t)
-          (use-package helm-c-yasnippet 
+          (use-package helm-ag :ensure t :commands helm-ag)
+          (use-package helm-c-yasnippet
             :ensure t
             :init (use-package yasnippet)
             :config (global-set-key (kbd "C-c y") 'helm-yas-complete))
           (use-package helm-swoop :ensure t)
+
+          (helm-projectile-on)
           ;; rebihnd tab to do persistent action
           (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
           ;; make TAB works in terminal
@@ -717,6 +746,12 @@ Required for gradle build files.
                 helm-display-header-line nil
                 helm-buffer-max-length 45
                 helm-yas-display-key-on-candidate t)
+
+          ;; helm windows shows at the bottom
+          ;;
+          ;; from http://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
+          ;;
+          ;; see also http://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
           (cond (window-system
                  (add-to-list 'display-buffer-alist
                               `("\\*helm"
@@ -740,8 +775,8 @@ Required for gradle build files.
 
 ** Hl-anything
 
-#+BEGIN_SRC emacs-lisp :tangle no 
-(use-package hl-anything 
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package hl-anything
   :ensure t
   :config
   (progn
@@ -773,7 +808,7 @@ Required for gradle build files.
                  (use-package lv)
                  (use-package ace-window :ensure t)
                  (use-package avy :ensure t)
-                 (use-package key-chord 
+                 (use-package key-chord
                       :ensure t
                       :config (key-chord-mode 1))
                  )
@@ -973,7 +1008,7 @@ Using revive
 - use ~M-x resume~ to load window configuration.
 
 #+begin_src emacs-lisp
-(use-package revive 
+(use-package revive
   :ensure t)
 #+end_src
 ** Scratch
@@ -1066,7 +1101,7 @@ idle time.
 
 ** Whole line or region
 #+begin_src emacs-lisp
-(use-package whole-line-or-region 
+(use-package whole-line-or-region
   :ensure t
   :diminish whole-line-or-region-mode
   :config (whole-line-or-region-mode t))
@@ -1187,11 +1222,11 @@ Utillity function to restart the Eclim server.
 
 ** SQL
 #+BEGIN_SRC emacs-lisp
-;; Taken from: 
+;; Taken from:
 ;;   http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
 ;;
 (require 'epa-file)
-(epa-file-enable) 
+(epa-file-enable)
 
 (defvar my-sql-servers-list
   '(("Server che" my-sql-server-che)
@@ -1208,7 +1243,7 @@ Utillity function to restart the Eclim server.
                     (sql-port 3306)
                     (sql-server "localhost")
                     (sql-user "root")
-                    (sql-database "mysql"))))  
+                    (sql-database "mysql"))))
 
 (defun nl/sql-che-dev ()
   "Connects to the MySQL server running on machine 'che'."
