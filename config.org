@@ -624,6 +624,12 @@ Allow windmove to jump between frames.
   :commands gist-list)
 #+END_SRC
 
+** Ggtags
+#+BEGIN_SRC emacs-lisp
+(use-package ggtags
+  :ensure t
+  :commands ggtags-mode)
+#+END_SRC
 ** Gradle
 
 #+BEGIN_SRC emacs-lisp
@@ -658,6 +664,8 @@ Required for gradle build files.
 #+END_SRC
 
 ** Helm
+
+GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 #+begin_src emacs-lisp
 (use-package helm
@@ -696,9 +704,16 @@ Required for gradle build files.
             :ensure t
             :init (use-package yasnippet)
             :config (global-set-key (kbd "C-c y") 'helm-yas-complete))
+          (use-package helm-flx :ensure t :commands helm-flx-mode)
+          (use-package helm-gtags
+            :ensure t
+            :commands helm-gtags-mode
+            :bind (("M-." . helm-gtags-find-tag)
+                   ("M-," . helm-gtags-find-rtag)))
           (use-package helm-swoop :ensure t)
 
           (helm-projectile-on)
+          (helm-flx-mode +1)
           ;; rebihnd tab to do persistent action
           (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
           ;; make TAB works in terminal
@@ -1136,6 +1151,8 @@ are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's
 Programming mode hook.
 
 #+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'subword-mode)
+
 (defun my-common-prog-mode-settings ()
   "Enables settings common between programming language modes."
   (progn
@@ -1159,18 +1176,31 @@ Programming mode hook.
     (setq comment-column 0)
     ))
 
-(setq makefile-mode-hook        'my-common-prog-mode-settings)
-(setq sh-mode-hook              'my-common-prog-mode-settings)
+(setq makefile-mode-hook 'my-common-prog-mode-settings)
+(setq sh-mode-hook       'my-common-prog-mode-settings)
 
 #+end_src
 
 ** C
 
 #+begin_src emacs-lisp
-(defun my-c-mode-hook ()
+(defconst nelson-c-style
+  '((c-tab-always-indent . t)
+    (c-set-style "K&R")
+    (c-basic-offset . 3)
+    (c-offsets-alist . ((statement-block-intro . +)
+                        (substatement-open     . 0)
+                        (label                 . 0)
+                        (case-label            . +)
+                        (statement-cont        . +)
+                        )))
+  "Nelson programming style.")
+
+;; Customizations for all of c-mode, c++-mode, and objc-mode
+(defun my-c-mode-common-hook ()
   ;; add my personal style and set it for the current buffer
-  (c-add-style "AICML" aicml-c-style t)
-  ;; offset customizations not in aicml-c-style
+  (c-add-style "NELSON" nelson-c-style t)
+  ;; offset customizations not in nelson-c-style
   (c-set-offset 'member-init-intro '++)
   ;; other customizations
   ;(c-toggle-auto-state 1) ;; Turn on auto newline
@@ -1178,24 +1208,31 @@ Programming mode hook.
   ; makes the underscore part of a word in C and C++ modes
   (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
   (modify-syntax-entry ?_ "w" c-mode-syntax-table)
-  (function (lambda ()
-              ;; more stuff here
-              (flymake-mode t)
-              (global-set-key "C-cC-v" 'my-flymake-show-next-error)
-              ))
-  (setq c-basic-offset 4))         ; Switch case statements alignment
+  (lambda ()
+    (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+      (ggtags-mode 1)))
+  )
 
-(add-hook 'c-mode-hook 'my-c-mode-hook)
-
+(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
 #+end_src
+
+** Emacs lisp
+
+#+BEGIN_SRC emacs-lisp
+(setq emacs-lisp-mode-hook 'my-common-prog-mode-settings)
+#+END_SRC
 
 ** Java
 
 #+begin_src emacs-lisp
-(add-hook 'java-mode-hook (lambda ()
-                            (setq c-basic-offset 4
-                                  tab-width 4
-                                  indent-tabs-mode nil)))
+(defun my-java-mode-hook ()
+  (setq c-basic-offset 4
+        tab-width 4
+        indent-tabs-mode nil)
+  )
+
+
+(add-hook 'java-mode-hook 'my-java-mode-hook)
 #+END_SRC
 
 Utillity function to restart the Eclim server.
@@ -1285,5 +1322,22 @@ Utillity function to restart the Eclim server.
   (funcall func))
 #+END_SRC
 * Misc
+** Aligning things
+
+Borrowed from:
+
+http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value_data_in_emacs
+
 #+BEGIN_SRC emacs-lisp
+(defun align-colons (beg end)
+  (interactive "r")
+  (align-regexp beg end ":\\(\\s-*\\)" 1 1 t))
+
+(defun align-commas (beg end)
+  (interactive "r")
+  (align-regexp beg end ",\\(\\s-*\\)" 1 1 t))
+
+(defun align-equals (beg end)
+  (interactive "r")
+  (align-regexp beg end "\\(\\s-*\\)=" 1 1 t))
 #+END_SRC
