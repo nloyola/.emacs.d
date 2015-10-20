@@ -172,6 +172,8 @@ Some commands are disabled by default. They are enabled in our config using the 
 (setq frame-title-format "%S: %f")
 
 (global-visual-line-mode -1)
+
+(setq revert-without-query (quote (".*")))
 #+end_src
 ** Dired
 #+BEGIN_SRC emacs-lisp
@@ -188,9 +190,11 @@ Some commands are disabled by default. They are enabled in our config using the 
 ** Emacs client
 
 #+begin_src emacs-lisp
-(require 'server)
-(unless (server-running-p)
-  (server-start))
+(use-package edit-server
+  :if window-system
+  :init
+  (add-hook 'after-init-hook 'server-start t)
+  (add-hook 'after-init-hook 'edit-server-start t))
 #+end_src
 
 ** Occur
@@ -625,6 +629,10 @@ Allow windmove to jump between frames.
 #+END_SRC
 
 ** Ggtags
+
+Generate tags on command line with ~gtags~.
+Updte tags on command line with ~global -u~.
+
 #+BEGIN_SRC emacs-lisp
 (use-package ggtags
   :ensure t
@@ -996,13 +1004,14 @@ http://batsov.com/projectile/
                :config
                (progn
                  (setq powerline-arrow-shape 'arrow14)
+                 (setq powerline-default-separator-dir '(right . left))
 
-                 (custom-set-faces
-                  '(mode-line ((t (:foreground "#030303" :background "#6b6b6b" :box nil))))
-                  '(mode-line-inactive ((t (:foreground "#f9f9f9" :background "#6b6b6b" :box nil)))))
+                 ;; (custom-set-faces
+                 ;;  '(mode-line ((t (:foreground "#030303" :background "#6b6b6b" :box nil))))
+                 ;;  '(mode-line-inactive ((t (:foreground "#f9f9f9" :background "#6b6b6b" :box nil)))))
 
-                 (setq powerline-color1 "#49483E")
-                 (setq powerline-color2 "#333333")
+                 ;; (setq powerline-color1 "#49483E")
+                 ;; (setq powerline-color2 "#333333")
                  (powerline-default-theme)
                  ))
 #+end_src
@@ -1074,7 +1083,10 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 ** Vimish fold
 #+BEGIN_SRC emacs-lisp
-(use-package vimish-fold :ensure t)
+(use-package vimish-fold
+  :ensure t
+  :config (vimish-fold-global-mode 1)
+  )
 #+END_SRC
 ** Visual-regexp
 
