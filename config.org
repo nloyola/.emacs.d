@@ -1353,3 +1353,50 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
   (interactive "r")
   (align-regexp beg end "\\(\\s-*\\)=" 1 1 t))
 #+END_SRC
+
+** Journal
+
+#+BEGIN_SRC emacs-lisp
+(defconst nl/tl_dts-format-string "%e %b %Y %H:%M:%S"
+  "A string specifying the format of the date-time stamp.
+Refer to the documentation for 'format-time-string' for an explanation of the
+meta characters available for use in this string.  Non-meta characters will
+be inserted into the buffer without interpretation.")
+
+;; Function: insert-dts
+;;   Insert the date and time into the current buffer at the current location.
+;;
+(defun nl/insert-dts ()
+  "Insert the date and time into the current buffer at the current location.
+See the documentation for nl/tl_dts-format-string to change the format of the
+date-time stamp."
+  (interactive)
+  (insert (format-time-string nl/tl_dts-format-string (current-time))))
+
+(defvar nl/tl_ds-format-string "%b%e/%Y"
+  "A string specifying the format of the date stamp.
+Refer to the documentation for 'format-time-string' for an explanation of the
+meta characters available for use in this string.  Non-meta characters will
+be inserted into the buffer without interpretation.")
+
+;; Function: insert-ds
+;;   Insert the date into the current buffer at the current location.
+;;
+(defun nl/insert-ds ()
+  "Insert the date into the current buffer at the current location.
+See the documentation for nl/tl_dts-format-string to change the format of the
+date-time stamp."
+  (interactive)
+  (insert (format-time-string nl/tl_ds-format-string (current-time))))
+
+ (defun nl/journal ()
+  "Add an entry in the journal file."
+  (interactive)
+  (find-file "~/Dropbox/journal.org")
+  (end-of-buffer)
+  (insert "\n\n")
+  (insert "* ")
+  (nl/insert-dts)
+  (insert "\n")
+  )
+#+END_SRC
