@@ -1271,17 +1271,13 @@ Utillity function to restart the Eclim server.
 #+end_src
 
 ** SQL
+
+Taken from:
+- http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
+
 #+BEGIN_SRC emacs-lisp
-;; Taken from:
-;;   http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
-;;
 (require 'epa-file)
 (epa-file-enable)
-
-(defvar my-sql-servers-list
-  '(("Server che" my-sql-server-che)
-    ("Server obelix" my-sql-server-obelix))
-  "Alist of server name and the function to connect")
 
 (setq sql-connection-alist
       '((che.dev (sql-product 'mysql)
@@ -1295,6 +1291,24 @@ Utillity function to restart the Eclim server.
                     (sql-user "root")
                     (sql-database "mysql"))))
 
+(defun nl/sql-connect (product connection)
+  "Connects to a database server of type PRODUCT using the CONNECTION type."
+  (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
+
+  ;; update the password to the sql-connection-alist
+  (let ((connection-info (assoc connection sql-connection-alist))
+        (sql-password (car (last (assoc connection nl-sql-passwords)))))
+    (delete sql-password connection-info)
+    (nconc connection-info `((sql-password ,sql-password)))
+    (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
+    (add-to-list 'sql-connection-alist connection-info))
+
+  ;; connect to database
+  (setq sql-product product)
+  (if current-prefix-arg
+      (sql-connect connection connection)
+    (sql-connect connection)))
+
 (defun nl/sql-che-dev ()
   "Connects to the MySQL server running on machine 'che'."
   (nl/sql-connect 'mysql 'che.dev))
@@ -1302,25 +1316,6 @@ Utillity function to restart the Eclim server.
 (defun nl/sql-obelix-dev ()
   "Connects to the MySQL server running on machine 'obelix'."
   (nl/sql-connect 'mysql 'obelix.dev))
-
-(defun nl/sql-connect (product connection)
-  "Connects to a database server of type PRODUCT using the CONNECTION type."
-  (require 'nl-identica "~/.emacs.d/my-password.el.gpg")
-
-  ;; update the password to the sql-connection-alist
-  (let ((connection-info (assoc connection sql-connection-alist))
-        (sql-password (car (last (assoc connection nl-sql-password))))
-        new-name)3
-        (delete sql-password connection-info)
-        (nconc connection-info `((sql-password ,sql-password)))
-        (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
-        (add-to-list 'sql-connection-alist connection-info))
-
-  ;; connect to database
-  (setq sql-product product)
-  (if current-prefix-arg
-      (sql-connect connection new-name)
-    (sql-connect connection)))
 
 (defvar nl/sql-servers-list
   '(("Che Dev" nl/sql-che-dev)
