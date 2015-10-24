@@ -412,7 +412,6 @@ at point as the default value for occur.
 ibuffer is the improved version of list-buffers.
 
 #+begin_src emacs-lisp
-;; make ibuffer the default buffer lister.
 (defalias 'list-buffers 'ibuffer)
 #+end_src
 
@@ -732,9 +731,9 @@ and allows you.
 
 These are the packages that are not built into Emacs.
 
-** Ace Window
+** [[https://github.com/abo-abo/ace-window][ace-window]]
 
-[[https://github.com/abo-abo/ace-window][ace-window]] is a package that uses the same idea from ace-jump-mode for
+A package that uses the same idea from ace-jump-mode for
 buffer navigation, but applies it to windows. The default keys are
 1-9, but it's faster to access the keys on the home row, so that's
 what I have them set to (with respect to Dvorak, of course).
@@ -743,7 +742,7 @@ what I have them set to (with respect to Dvorak, of course).
 (use-package ace-window)
 #+end_src
 
-** Avy
+** [[https://github.com/abo-abo/avy][avy]]
 
 A quick way to jump around text in buffers.
 
@@ -770,7 +769,7 @@ A quick way to jump around text in buffers.
                                          ))))
 #+END_SRC
 
-** Color identifiers
+** [[https://github.com/ankurdave/color-identifiers-mode][color-identifiers]]
 
 Color Identifiers is a minor mode for Emacs that highlights each source code identifier uniquely
 based on its name.
@@ -784,7 +783,7 @@ based on its name.
     (add-hook 'after-init-hook 'global-color-identifiers-mode)))
 #+end_src
 
-** Company
+** [[https://github.com/company-mode/company-mode][company-mode]]
 
 Complete anything.
 
@@ -800,7 +799,7 @@ Complete anything.
     ))
 #+end_src
 
-** Eclim
+** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
 
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
 can be downloaded from [[http://eclim.org/install.html][here]].
@@ -835,7 +834,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   )
 #+end_src
 
-** Expand region
+** [[https://github.com/magnars/expand-region.el][expand-region]]
 
 #+begin_src emacs-lisp
 (use-package expand-region
@@ -843,7 +842,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :bind ("C-=" . er/expand-region))
 #+end_src
 
-** Fic-mode
+** [[http://www.emacswiki.org/emacs/fic-mode.el][fic-mode]]
 
 Show FIXME/TODO/BUG/KLUDGE in special face only in comments and
 strings.
@@ -861,7 +860,7 @@ strings.
     ))
 #+END_SRC
 
-** Framemove
+** [[http://www.emacswiki.org/emacs/framemove.el][framemove]]
 
 Allow windmove to jump between frames.
 
@@ -872,7 +871,7 @@ Allow windmove to jump between frames.
   )
 #+END_SRC
 
-** Flycheck
+** [[https://github.com/flycheck/flycheck][flycheck]]
 
 #+begin_src emacs-lisp
 (use-package flycheck
@@ -890,17 +889,7 @@ Allow windmove to jump between frames.
       )))
 #+end_src
 
-** Gists
-
-#+BEGIN_SRC emacs-lisp
-(use-package gist
-  :ensure t
-  :commands gist-list)
-#+END_SRC
-
-** Ggtags
-
-Generate tags on command line with ~gtags~.
+** [[https://github.com/leoliu/ggtags][ggtags]]Generate tags on command line with ~gtags~.
 Updte tags on command line with ~global -u~.
 
 #+BEGIN_SRC emacs-lisp
@@ -908,7 +897,7 @@ Updte tags on command line with ~global -u~.
   :ensure t
   :commands ggtags-mode)
 #+END_SRC
-** Gradle
+** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package gradle-mode
@@ -919,7 +908,8 @@ Updte tags on command line with ~global -u~.
     (gradle-mode 1)))
 #+END_SRC
 
-** Goto last change
+** [[https://github.com/camdez/goto-last-change.el][goto-last-change]]
+
 #+begin_src emacs-lisp
       (use-package goto-last-change
         :ensure t
@@ -932,7 +922,7 @@ Updte tags on command line with ~global -u~.
           ))
 #+end_src
 
-** Groovy
+** [[https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes][groovy-mode]]
 
 Required for gradle build files.
 
@@ -941,7 +931,7 @@ Required for gradle build files.
                :ensure t)
 #+END_SRC
 
-** Guide-key
+** [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 Guide the following key bindings automatically and dynamically.
 
@@ -956,7 +946,7 @@ Guide the following key bindings automatically and dynamically.
   ))
 #+END_SRC
 
-** COMMENT [[https://github.com/emacs-helm/helm][helm]]
+** [[https://github.com/emacs-helm/helm][helm]]
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
@@ -1111,7 +1101,9 @@ stop:
 (setq helm-display-function 'pop-to-buffer)
 #+END_SRC
 
-** Hl-anything
+** [[https://github.com/boyw165/hl-anything][hl-anything]]
+
+Not used for now since it breaks ERC font lock.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package hl-anything
@@ -1125,7 +1117,10 @@ stop:
     ))
 #+END_SRC
 
-** Hungry delete
+** [[https://github.com/nflath/hungry-delete][hungry-delete]]
+
+So that hungry deletion can be used in all modes.
+
 #+begin_src emacs-lisp
   (use-package hungry-delete
                :ensure t
@@ -1135,7 +1130,10 @@ stop:
                  ))
 #+end_src
 
-** Hydra
+** [[https://github.com/abo-abo/hydra][hydra]]
+
+This package can be used to tie related commands into a family of
+short bindings with a common prefix - a Hydra.
 
 #+begin_src emacs-lisp
 (use-package hydra
@@ -1224,7 +1222,7 @@ _u_: Update
   (define-key eclim-mode-map (kbd "C-c e") 'hydra-eclim/body))
 #+end_src
 
-** Macrostep
+** [[https://github.com/joddie/macrostep][macrostep]]
 
 Macrostep allows you to see what Elisp macros expand to. Learned about
 it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight talk for use-package]].
@@ -1234,7 +1232,7 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
   :ensure t)
 #+end_src
 
-** Magit
+** [[https://github.com/magit/magit][magit]]
 
 A great interface for git projects. It's much more pleasant to use than the git interface on the
 command line. Use an easy keybinding to access magit.
@@ -1273,7 +1271,7 @@ No more juggling windows after commiting. It's magit bliss.
   (jump-to-register :magit-fullscreen))
 #+end_src
 
-** Markdown mode
+** [[https://github.com/defunkt/markdown-mode][markdown-mode]]
 
 #+begin_src emacs-lisp
 (use-package markdown-mode
@@ -1282,7 +1280,7 @@ No more juggling windows after commiting. It's magit bliss.
          ("\\.md\\'"       . markdown-mode)))
 #+end_src
 
-** Multiple cursors
+** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
 
 We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/magnars/multiple-cursors.el/issues/105][an autoload issue]].
 
@@ -1298,19 +1296,9 @@ We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/
          ("s-d"         . mc/mark-all-dwim)))
 #+end_src
 
-** Olivetti
+** [[https://github.com/nex3/perspective-el][perspective]]
 
-Olivetti is a simple Emacs minor mode for a nice writing environment.
-
-#+begin_src emacs-lisp
-(use-package olivetti
-  :ensure t
-  :bind ("S-<f6>" . olivetti-mode))
-#+end_src
-
-** Perspective
-
-This package provides tagged workspaces in Emacs. View on [[https://github.com/nex3/perspective-el][GitHub]].
+This package provides tagged workspaces.
 
 #+begin_src emacs-lisp :tangle no
 (use-package perspective
@@ -1318,7 +1306,7 @@ This package provides tagged workspaces in Emacs. View on [[https://github.com/n
   :config (persp-mode))
 #+end_src
 
-** Projectile
+** [[https://github.com/bbatsov/projectile][projectile]]
 
 #+BEGIN_QUOTE
 Project navigation and management library for Emacs.
@@ -1349,27 +1337,27 @@ http://batsov.com/projectile/
         :ensure t)))
 #+end_src
 
-** Powerline
+** [[https://github.com/milkypostman/powerline][powerline]]
 
 #+begin_src emacs-lisp
-  (use-package powerline
-               :ensure t
-               :config
-               (progn
-                 (setq powerline-arrow-shape 'arrow14)
-                 (setq powerline-default-separator-dir '(right . left))
+(use-package powerline
+  :ensure t
+  :config
+  (progn
+    (setq powerline-arrow-shape 'arrow14)
+    (setq powerline-default-separator-dir '(right . left))
 
-                 ;; (custom-set-faces
-                 ;;  '(mode-line ((t (:foreground "#030303" :background "#6b6b6b" :box nil))))
-                 ;;  '(mode-line-inactive ((t (:foreground "#f9f9f9" :background "#6b6b6b" :box nil)))))
+    (custom-set-faces
+     '(mode-line ((t (:foreground "#030303" :background "#6b6b6b" :box nil))))
+     '(mode-line-inactive ((t (:foreground "#f9f9f9" :background "#6b6b6b" :box nil)))))
 
-                 ;; (setq powerline-color1 "#49483E")
-                 ;; (setq powerline-color2 "#333333")
-                 (powerline-default-theme)
-                 ))
+    (setq powerline-color1 "#49483E")
+    (setq powerline-color2 "#333333")
+    (powerline-default-theme)
+    ))
 #+end_src
 
-** Python
+** [[https://melpa.org/#/python-mode][python-mode]]
 
 Integrates with IPython.
 
@@ -1378,7 +1366,7 @@ Integrates with IPython.
     :ensure t)
 #+end_src
 
-** Revive
+** [[https://github.com/emacsmirror/revive][revive]]
 
 Using revive
 
@@ -1389,7 +1377,7 @@ Using revive
 (use-package revive
   :ensure t)
 #+end_src
-** Rainbow delimiters
+** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
 
 Highlight brackets according to their depth
 
@@ -1398,7 +1386,7 @@ Highlight brackets according to their depth
   :ensure t)
 #+END_SRC
 
-** Scratch
+** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
 This is more convienent than manually creating a buffer to do some scratch work or reusing the
@@ -1425,8 +1413,7 @@ Declarative popup window rules.
        shackle-inhibit-window-quit-on-same-windows t)
 #+END_SRC
 
-
-** Smartparens mode
+** [[https://github.com/Fuco1/smartparens][smartparens]]
 
 #+begin_src emacs-lisp
 (use-package smartparens
@@ -1446,13 +1433,10 @@ activate by default; they'll only apply for wrapping regions.
 (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
 (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
 #+end_src
-** Smartscan
+** [[https://github.com/mickeynp/smart-scan][smart-scan]]
 
-#+BEGIN_QUOTE
 Quickly jumps between other symbols found at point in Emacs.
-#+END_QUOTE
 http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
-
 
 #+begin_src emacs-lisp
 (use-package smartscan
@@ -1460,14 +1444,14 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :config (global-smartscan-mode 1))
 #+end_src
 
-** Vimish fold
+** [[https://github.com/mrkkrp/vimish-fold][vimish-fold]]
 #+BEGIN_SRC emacs-lisp
 (use-package vimish-fold
   :ensure t
   :config (vimish-fold-global-mode 1)
   )
 #+END_SRC
-** Visual-regexp
+** [[https://github.com/benma/visual-regexp.el][visual-regexp]]
 
 #+begin_src emacs-lisp
 (use-package visual-regexp
@@ -1481,14 +1465,13 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
          ("C-M-s" . vr/isearch-forward)))
 #+end_src
 
-** Yasnippet
-
-Yeah, snippets! I start with snippets from [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]]
-and have also modified them and added my own.
+** [[https://github.com/capitaomorte/yasnippet][yasnippet]]
 
 It takes a few seconds to load and I don't need them immediately when
 Emacs starts up, so we can defer loading yasnippet until there's some
 idle time.
+
+Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]].
 
 #+begin_src emacs-lisp
 (use-package yasnippet
@@ -1499,14 +1482,15 @@ idle time.
   (yas-global-mode))
 #+end_src
 
-** Webmode
+** [[https://github.com/fxbois/web-mode][web-mode]]
 
 #+begin_src emacs-lisp :tangle no
 (use-package web-mode
   :ensure t)
 #+end_src
 
-** Whole line or region
+** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
+
 #+begin_src emacs-lisp
 (use-package whole-line-or-region
   :ensure t
