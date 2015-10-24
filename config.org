@@ -7,7 +7,7 @@ which is a fantastic way to manage package configurations.
 I've gotten ideas for this document from the following:
 
 - [[https://github.com/danielmai/.emacs.d][Daniel Mai]]'s configuration.
-- [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua site]]
+- [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's site]]
 - [[https://github.com/wasamasa/dotemacs/blob/master/init.org][Wasamasa]]
 
 This file is used to generate ~config.el~ using ~org-babel~ in
@@ -106,24 +106,12 @@ Sentences end with a single space.
 (setq sentence-end-double-space nil)
 #+END_SRC
 
-Set the default major mode to ~text-mode~. By default it's fundamental mode which is
-not what we want. Also, use ~text-mode~ for the scratch buffer.
+Set the default major mode to =text-mode=. By default it's =fundamental= mode which is
+not what we want. Also, use =text-mode= for the scratch buffer.
 
 #+BEGIN_SRC emacs-lisp
 (setq default-major-mode 'text-mode
       initial-major-mode 'text-mode)
-#+END_SRC
-
-Don't make any backup files.
-
-#+BEGIN_SRC emacs-lisp
-(setq make-backup-files nil)
-#+END_SRC
-
-Don't add new lines past end of file.
-
-#+BEGIN_SRC emacs-lisp
-(setq next-line-add-newlines nil)
 #+END_SRC
 
 Don't scroll to middle of page. Also, scroll line by line, without
@@ -136,25 +124,13 @@ scrolling by page.
       scroll-preserve-screen-position t)
 #+END_SRC
 
-Don't want an audible bell.
-
-#+BEGIN_SRC emacs-lisp
-(setq visible-bell t)
-#+END_SRC
-
-Add \n to end of file if required.
-
-#+BEGIN_SRC emacs-lisp
-(setq require-final-newline t)
-#+END_SRC
-
 Level of decoration {1 - 3}, t = max.
 
 #+BEGIN_SRC emacs-lisp
 (setq font-lock-maximum-decoration t)
 #+END_SRC
 
-For symlinks, automatically follow the link and visits the real file instead.
+For symlinks, automatically follow the link and visit the real file instead.
 
 #+BEGIN_SRC emacs-lisp
 (setq vc-follow-symlinks nil)
@@ -172,12 +148,6 @@ Use spaces instead of ~\t~ character.
 (setq-default indent-tabs-mode nil)
 #+END_SRC
 
-Turn off auto-save.
-
-#+BEGIN_SRC emacs-lisp
-(setq auto-save-default nil)
-#+END_SRC
-
 Autosave files are created between saves after a sufficient timeout in
 the current directory for crash detection, they begin and end with
 =#=.  Change this location to the emacs directory.
@@ -187,15 +157,13 @@ the current directory for crash detection, they begin and end with
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosave/" t)))
 #+END_SRC
 
-
-
 Set line wrap at column 100.
 
 #+BEGIN_SRC emacs-lisp
 (setq fill-column 100)
 #+END_SRC
 
-Replace "yes or no" prompt with "y or n" prompt.
+Replace =yes or no= prompt with =y or n= prompt.
 
 #+BEGIN_SRC emacs-lisp
 (fset 'yes-or-no-p 'y-or-n-p)
@@ -217,19 +185,6 @@ Use spaces instead of tabs.
 (setq-default indent-tabs-mode nil)
 #+END_SRC
 
-Turn off the blinking cursor.
-
-#+BEGIN_SRC emacs-lisp
-(blink-cursor-mode -1)
-#+END_SRC
-
-Indicate unused lines at the end of the window with a small image in
-the left fringe.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default indicate-empty-lines t)
-#+END_SRC
-
 Delete the region when typing, just like as we expect nowadays.
 
 #+BEGIN_SRC emacs-lisp
@@ -240,27 +195,6 @@ Highlight matching delimiters.
 
 #+BEGIN_SRC emacs-lisp
 (show-paren-mode t)
-#+END_SRC
-
-Display the column number in the mode line.
-
-#+BEGIN_SRC emacs-lisp
-(column-number-mode t)
-#+END_SRC
-
-Use the directory name to make buffer names unique.
-
-#+BEGIN_SRC emacs-lisp
-(setq uniquify-buffer-name-style 'forward)
-#+END_SRC
-
-Window management. ~C-c left (winner-undo)~ undoes the last window
-configuration change. Redo the changes using ~C-c right
-(winner-redo)~. Also move from window to window using Meta and the
-direction keys.
-
-#+BEGIN_SRC emacs-lisp
-(winner-mode 1)
 #+END_SRC
 
 Highlight matches in query-replace mode.
@@ -282,26 +216,12 @@ with a (arguably) more aesthetically pleasing representation.
 (global-prettify-symbols-mode +1)
 #+END_SRC
 
-Frame title.
-
-#+BEGIN_SRC emacs-lisp
-(setq frame-title-format
-      '("" invocation-name ": " (:eval (replace-regexp-in-string
-                                        "^ +" "" (buffer-name)))))
-#+END_SRC
-
 Make completion buffers disappear after 10 seconds.
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'completion-setup-hook
           (lambda () (run-at-time 10 nil
                                   (lambda () (delete-windows-on "*Completions*")))))
-#+END_SRC
-
-Get rid of the menu bar.
-
-#+BEGIN_SRC emacs-lisp
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 #+END_SRC
 
 Do not ask me to save files before compiling.
@@ -329,6 +249,64 @@ and paste at the then adjusted point.
 (setq mouse-yank-at-point t)
 #+END_SRC
 
+Save clipboard data of other programs in the kill ring when possible.
+
+#+BEGIN_SRC emacs-lisp
+(setq save-interprogram-paste-before-kill t)
+#+END_SRC
+
+** Disabled features
+
+Turn off auto-save.
+
+#+BEGIN_SRC emacs-lisp
+(setq auto-save-default nil)
+#+END_SRC
+
+Don't make any backup files.
+
+#+BEGIN_SRC emacs-lisp
+(setq make-backup-files nil)
+#+END_SRC
+
+Get rid of the menu bar.
+
+#+BEGIN_SRC emacs-lisp
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+#+END_SRC
+
+Turn off the blinking cursor.
+
+#+BEGIN_SRC emacs-lisp
+(blink-cursor-mode -1)
+#+END_SRC
+
+Don't use dialog boxes
+
+#+BEGIN_SRC emacs-lisp
+(setq use-dialog-box nil)
+#+END_SRC
+
+Don't want an audible bell.
+
+#+BEGIN_SRC emacs-lisp
+(setq visible-bell t)
+#+END_SRC
+
+** Mode line
+
+Display the column number in the mode line.
+
+#+BEGIN_SRC emacs-lisp
+(column-number-mode t)
+#+END_SRC
+
+Use the directory name to make buffer names unique.
+
+#+BEGIN_SRC emacs-lisp
+(setq uniquify-buffer-name-style 'forward)
+#+END_SRC
+
 Do not show thees modes in the mode line.
 
 #+begin_src emacs-lisp
@@ -336,16 +314,30 @@ Do not show thees modes in the mode line.
 (diminish 'abbrev-mode)
 #+end_src
 
-Save clipboard data of other programs in the kill ring when possible.
+** Frame Title
+
+Display the running program and the selected buffer in the frame title.
 
 #+BEGIN_SRC emacs-lisp
-(setq save-interprogram-paste-before-kill t)
+(setq frame-title-format
+      '("" invocation-name ": " (:eval (replace-regexp-in-string
+                                        "^ +" "" (buffer-name)))))
 #+END_SRC
 
-Don't use dialog boxes
+** End of file
+
+Don't add new lines past end of file, and indicate unused lines at the
+end of the window with a small image in the left fringe.
 
 #+BEGIN_SRC emacs-lisp
-(setq use-dialog-box nil)
+(setq next-line-add-newlines nil)
+(setq-default indicate-empty-lines t)
+#+END_SRC
+
+Add =\n= to end of file if required.
+
+#+BEGIN_SRC emacs-lisp
+(setq require-final-newline t)
 #+END_SRC
 
 * Emacs client
@@ -641,10 +633,12 @@ direction.
 
 *** =winner-mode=
 
-Winner mode allows you to undo/redo changes to window changes in Emacs
-and allows you.
+Window management. ~C-c left (winner-undo)~ undoes the last window
+configuration change. Redo the changes using ~C-c right
+(winner-redo)~. Also move from window to window using Meta and the
+direction keys.
 
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (winner-mode t)
 #+end_src
 
