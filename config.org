@@ -633,13 +633,12 @@ Remember position in a file.
 *** =windmove=
 
 =windmove= provides useful commands for moving window focus by
-direction, I prefer having wraparound instead of getting errors
-though.
+direction.
 
 #+BEGIN_SRC emacs-lisp
 (windmove-default-keybindings 'meta)
-(setq windmove-wrap-around t)
 #+END_SRC
+
 *** =winner-mode=
 
 Winner mode allows you to undo/redo changes to window changes in Emacs
@@ -932,12 +931,13 @@ Guide the following key bindings automatically and dynamically.
   :diminish guide-key-mode
   :config
   (progn
-    (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h"))
+    (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h"))
     (guide-key-mode 1)
   ))
 #+END_SRC
 
 ** [[https://github.com/emacs-helm/helm][helm]]
+*** Config
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
@@ -986,20 +986,9 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
           (helm-projectile-on)
           (helm-flx-mode +1)
-          ;; rebihnd tab to do persistent action
-          (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-          ;; make TAB works in terminal
-          (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
-          ;; list actions using C-z
-          (define-key helm-map (kbd "C-z")  'helm-select-action)
-
-          (with-eval-after-load 'helm-files
-            (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
-            (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
-            (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
 
           (setq helm-ff-newfile-prompt-p nil
-                helm-M-x-fuzzy-match t
+                ;;helm-M-x-fuzzy-match t ; using flx for now
                 helm-google-suggest-use-curl-p t
                 ;; scroll 4 lines other window using M-<next>/M-<prior>
                 helm-scroll-amount 4
@@ -1012,9 +1001,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
                 ;; search for library in `require` and `declare-function` sexp.
                 helm-ff-search-library-in-sexp t
 
-                helm-split-window-default-side 'below
-                helm-split-window-in-side-p nil
-                helm-always-two-windows nil
                 helm-buffers-favorite-modes (append helm-buffers-favorite-modes
                                                     '(picture-mode artist-mode))
                 ;; limit the number of displayed canidates
@@ -1036,20 +1022,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
                 helm-buffer-max-length 45
                 helm-yas-display-key-on-candidate t)
 
-          ;; helm windows shows at the bottom
-          ;;
-          ;; from http://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
-          ;;
-          ;; see also http://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
-          ;; (cond (window-system
-          ;;        (add-to-list 'display-buffer-alist
-          ;;                     `("\\*helm"
-          ;;                       (display-buffer-in-side-window)
-          ;;                       (inhibit-same-window . nil)
-          ;;                       (reusable-frames . visible)
-          ;;                       (side            . bottom)
-          ;;                       (window-height   . 0.15)))
-          ;;        ))
           ;; Save current position to mark ring when jumping to a different place
           (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
           (helm-mode)
@@ -1058,7 +1030,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
          ("C-x C-f" . helm-find-files)
-         ("C-c h" . helm-command-prefix)
          ("C-`" . helm-resume)))
 #+end_src
 
@@ -1077,7 +1048,43 @@ something, but so far hasn't shown any obvious side-effects
 (setq helm-grep-default-command "ag --vimgrep -z %p %f"
       helm-grep-default-recurse-command "ag --vimgrep -z %p %f")
 #+END_SRC
-**** Other
+
+*** Key bindings
+
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'helm-files
+  ;; rebind tab to do persistent action
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+  ;; make TAB works in terminal
+  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
+  ;; list actions using C-z
+  (define-key helm-map (kbd "C-z")  'helm-select-action)
+  (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
+  (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
+  (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
+#+END_SRC
+
+*** Window config
+
+So that helm windows shows at the bottom.
+
+- from http://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
+- see also http://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
+
+#+BEGIN_SRC emacs-lisp
+;; (with-eval-after-load 'helm
+;;   (cond (window-system
+;;          (add-to-list 'display-buffer-alist
+;;                       `("^\\*[Hh]elm"
+;;                         (display-buffer-in-side-window)
+;;                         (inhibit-same-window . nil)
+;;                         (reusable-frames . visible)
+;;                         (side            . bottom)
+;;                         (window-height   . 0.15)))
+;;          )))
+#+END_SRC
+
+*** Other
 
 Highlighting of token matches is a tad slow, let's speed it up.
 
@@ -1393,15 +1400,21 @@ initial =*scratch*= buffer.
 Declarative popup window rules.
 
 #+BEGIN_SRC emacs-lisp
-(setq shackle-rules
-      '((svg-2048-mode :same t)
-        ("*Help*" :align t :ratio 0.4 :select t)
-        ("\\`\\*helm.*?\\*\\'" :regexp t :align t :ratio 0.4)
-        ((compilation-mode "\\`\\*firestarter\\*\\'"
-          "\\`\\*magit-diff: .*?\\*\\'") :regexp t :noselect t)
-        ((inferior-scheme-mode "*shell*" "*eshell*") :popup t))
-       shackle-default-rule '(:select t)
-       shackle-inhibit-window-quit-on-same-windows t)
+(use-package shackle
+  :ensure t
+  :config
+  (progn
+    (setq shackle-rules
+          '((svg-2048-mode :same t)
+            ("*Help*" :align t :ratio 0.4 :select t)
+            ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
+            ((compilation-mode "\\`\\*firestarter\\*\\'"
+                               "\\`\\*magit-diff: .*?\\*\\'") :regexp t :noselect t)
+            ((inferior-scheme-mode "*shell*" "*eshell*") :popup t))
+          shackle-default-rule '(:same t)
+          shackle-inhibit-window-quit-on-same-windows t)
+    (shackle-mode)
+    ))
 #+END_SRC
 
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
