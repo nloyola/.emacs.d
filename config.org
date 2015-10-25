@@ -16,24 +16,21 @@ This file is used to generate ~config.el~ using ~org-babel~ in
 * Installing Emacs
 ** Ubuntu
 
-I've installed Emacs from source and use the ~emacs-24.5~ tag. I used
+I've installed Emacs from [[git://git.savannah.gnu.org/emacs.git][source]] and used the ~emacs-24.5~ tag. I used
 the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]], but first the
 following command has to be run.
 
 #+begin_src sh
 ./autogen.conf
+#+end_src
+
+Then to compile and install, do the following.
+
+#+BEGIN_SRC
 ./configure
 make
 sudo make install
-#+end_src
-
-*** Utility constants
-
-#+begin_src emacs-lisp
-(defconst ostype-linux
-  (if (integer-or-marker-p
-       (string-match "linux" system-configuration)) t nil))
-#+end_src
+#+END_SRC
 
 * Personal Information
 
@@ -1676,6 +1673,16 @@ Taken from:
   (funcall func))
 #+END_SRC
 * Misc
+** Constants
+
+Is some cases we need to know what type of OS Emacs is running under.
+
+#+begin_src emacs-lisp
+(defconst ostype-linux
+  (if (integer-or-marker-p
+       (string-match "linux" system-configuration)) t nil))
+#+end_src
+
 ** Aligning things
 
 Align by colons (handy for JavaScript), align by commas, and align by
