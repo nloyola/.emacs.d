@@ -6,9 +6,9 @@ which is a fantastic way to manage package configurations.
 
 I've gotten ideas for this document from the following:
 
-- [[https://github.com/danielmai/.emacs.d][Daniel Mai]]'s configuration.
 - [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's site]]
 - [[https://github.com/wasamasa/dotemacs/blob/master/init.org][Wasamasa]]
+- [[https://github.com/danielmai/.emacs.d][Daniel Mai]]'s configuration.
 
 This file is used to generate ~config.el~ using ~org-babel~ in
 ~init.el~.
@@ -66,6 +66,7 @@ customize settings in [[file:init.el][init.el]].
 #+end_src
 
 * Font
+** Installation
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
 
@@ -75,7 +76,9 @@ cd ~/.fonts
 unzip Input-Font.zip
 #+end_src
 
-And here's how we tell Emacs how to use a font. Copy the following line to your
+** Emacs config
+
+And here's how to tell Emacs to use this font. Copy the following line to your
 =~/.Xresources= file.
 
 #+begin_src sh :tangle no
@@ -87,6 +90,7 @@ And then merge the setting to your X server resource database.
 #+begin_src sh :tangle no
 xrdb -merge ~/.Xresources
 #+end_src
+
 * Sane defaults
 ** General
 
