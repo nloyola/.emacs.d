@@ -21,7 +21,7 @@ the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building
 following command has to be run.
 
 #+begin_src sh
-./autogen.conf
+./autogen.sh
 #+end_src
 
 Then to compile and install, do the following.
@@ -461,11 +461,13 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 #+begin_src emacs-lisp
 (use-package edit-server
+  :ensure t
   :if window-system
   :init
   (add-hook 'after-init-hook 'server-start t)
   (add-hook 'after-init-hook 'edit-server-start t))
 #+end_src
+
 ** =ibuffer=
 
 ibuffer is the improved version of list-buffers.
@@ -762,7 +764,8 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :init (use-package cl)
   :config
   (progn
-    (global-eclim-mode)
+    (add-to-list 'eclim-eclipse-dirs (expand-file-name "~/apps/eclipse/rcp/mars/eclipse"))
+    ;;(global-eclim-mode)
     (use-package eclimd)
     (use-package company)
     (use-package company-emacs-eclim)
@@ -773,7 +776,12 @@ can be downloaded from [[http://eclim.org/install.html][here]].
           eclimd-wait-for-process nil
           eclimd-default-workspace "~/workspace/"
           help-at-pt-display-when-idle t
-          help-at-pt-timer-delay 0.1)
+          help-at-pt-timer-delay 0.1
+
+          eclim-executable (or (executable-find "eclim")
+                               "/home/nelson/apps/eclipse/rcp/mars/eclipse/eclim")
+          eclimd-executable (or (executable-find "eclimd")
+                                "/home/nelson/apps/eclipse/rcp/mars/eclipse/eclimd"))
     ;; Call the help framework with the settings above & activate eclim-mode
     (help-at-pt-set-timer)
 
@@ -928,7 +936,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
                     projectile-switch-project-action 'projectile-dired
                     projectile-completion-system 'default
                     projectile-enable-caching nil
-                    compilation-read-command nil ; do not prompt for a compilation command
+                    compilation-read-command t ; do prompt for a compilation command
                     )
 
               (projectile-global-mode)
@@ -1375,7 +1383,7 @@ Declarative popup window rules.
             ((compilation-mode "\\`\\*firestarter\\*\\'"
                                "\\`\\*magit-diff: .*?\\*\\'") :regexp t :noselect t)
             ((inferior-scheme-mode "*shell*" "*eshell*") :popup t))
-          shackle-default-rule '(:same t)
+          shackle-default-rule '(:select t)
           shackle-inhibit-window-quit-on-same-windows t)
     (shackle-mode)
     ))
