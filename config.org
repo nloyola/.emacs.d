@@ -211,10 +211,12 @@ Make completion buffers disappear after 10 seconds.
                                   (lambda () (delete-windows-on "*Completions*")))))
 #+END_SRC
 
-Do not ask me to save files before compiling.
+Do not ask me to save files before compiling. Also scroll to the end
+of the compilation buffer when it is opened.
 
 #+BEGIN_SRC emacs-lisp
-(setq compilation-ask-about-save nil)
+(setq compilation-ask-about-save nil
+      compilation-scroll-output t)
 #+END_SRC
 
 Revert these files without asking.
@@ -774,6 +776,18 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     (custom-set-faces
      '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
      '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
+
+    (defun nl/eclim-run-configuartion (configuration-name)
+      "Runs the configuration given in CONFIGURATION-NAME in the compilation buffer."
+      (interactive (list (eclim-java-run--ask-which-configuration)))
+      (let* ((configurations (eclim-java-run--load-configurations (eclim-project-name)))
+             (configuration (eclim-java-run--configuration configuration-name configurations))
+             (project-dir (eclim-java-run--project-dir (eclim-project-name)))
+             (classpath (eclim/java-classpath (eclim-project-name)))
+             (command (eclim-java-run--command configuration (eclim-java-run--java-vm-args classpath))))
+        (setq default-directory project-dir)
+        (compile command)
+        ))
     )
   )
 #+end_src
