@@ -16,7 +16,7 @@ This file is used to generate ~config.el~ using ~org-babel~ in
 * Installing Emacs
 ** Ubuntu
 
-I've installed Emacs from [[git://git.savannah.gnu.org/emacs.git][source]] and used the ~emacs-24.5~ tag. I used
+I've installed Emacs from source (=git://git.savannah.gnu.org/emacs.git=) and used the =emacs-24.5= tag. I used
 the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]], but first the
 following command has to be run.
 
@@ -49,19 +49,6 @@ customize settings in [[file:init.el][init.el]].
 (load custom-file)
 #+end_src
 
-* Theme
-*** Monokai theme
-
-#+begin_src emacs-lisp
-(use-package monokai-theme
-  :ensure t
-  :init
-  (progn
-    (load-theme 'monokai t)
-    (setq frame-background-mode `dark)
-    (setq monokai-use-variable-pitch nil)))
-#+end_src
-
 * Font
 ** Installation
 
@@ -87,7 +74,6 @@ And then merge the setting to your X server resource database.
 #+begin_src sh :tangle no
 xrdb -merge ~/.Xresources
 #+end_src
-
 * Sane defaults
 ** General
 
@@ -679,7 +665,6 @@ direction keys.
 (use-package whitespace
   :bind ("S-<f10>" . whitespace-mode))
 #+end_src
-
 * ELPA packages
 
 These are the packages that are not built into Emacs.
@@ -1248,6 +1233,19 @@ No more juggling windows after commiting. It's magit bliss.
   :ensure t
   :mode (("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'"       . markdown-mode)))
+#+end_src
+** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
+
+TextMate like theme.
+
+#+begin_src emacs-lisp
+(use-package monokai-theme
+  :ensure t
+  :config
+  (progn
+    (load-theme 'monokai t)
+    (setq frame-background-mode `dark)
+    (setq monokai-use-variable-pitch nil)))
 #+end_src
 
 ** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
