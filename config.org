@@ -737,7 +737,7 @@ Complete anything.
     ))
 #+end_src
 
-** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
+** COMMENT [[https://github.com/senny/emacs-eclim][emacs-eclim]]
 
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
 can be downloaded from [[http://eclim.org/install.html][here]].
@@ -764,9 +764,9 @@ can be downloaded from [[http://eclim.org/install.html][here]].
           help-at-pt-timer-delay 0.1
 
           eclim-executable (or (executable-find "eclim")
-                               "/home/nelson/apps/eclipse/rcp/mars/eclipse/eclim")
+                               (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclim")))
           eclimd-executable (or (executable-find "eclimd")
-                                "/home/nelson/apps/eclipse/rcp/mars/eclipse/eclimd"))
+                               (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclimd"))))
     ;; Call the help framework with the settings above & activate eclim-mode
     (help-at-pt-set-timer)
 
