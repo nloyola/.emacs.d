@@ -605,12 +605,13 @@ reason though the =read= syntax is default. I prefer having the
 
 #+begin_src emacs-lisp
 (use-package recentf
-  :commands ido-recentf-open
-  :init
+  :commands helm-recentf
+  :config
   (progn
     (recentf-mode t)
     (setq recentf-save-file "~/.emacs.d/etc/recentf"
-          recentf-max-saved-items 50)))
+          recentf-max-saved-items 100)))
+
 #+end_src
 ** =savehist=
 
@@ -987,8 +988,8 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
                 helm-buffers-fuzzy-matching t
                 ;; truncate long lines
                 helm-truncate-lines t
-                helm-autoresize-min-height 15
-                helm-autoresize-max-height 15
+                helm-autoresize-min-height 30
+                helm-autoresize-max-height 30
                 helm-display-header-line nil
                 helm-buffer-max-length 45
                 helm-yas-display-key-on-candidate t)
@@ -1476,8 +1477,10 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   :ensure t
   :diminish yas-minor-mode
   :config
-  (setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
-  (yas-global-mode))
+  (progn
+    ;;(setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
+    (yas-reload-all)
+    (yas-global-mode)))
 #+end_src
 
 ** [[https://github.com/fxbois/web-mode][web-mode]]
@@ -1786,7 +1789,6 @@ date-time stamp."
   (insert (format-time-string nl/ds-format-string (current-time))))
 
 #+END_SRC
-
 ** Journal
 
 I keep notes in an org-mode file in my Dropbox folder. When I add
@@ -1823,3 +1825,14 @@ at point as the default value for occur.
         regexp-history)
   (call-interactively 'occur))
 #+end_src
+
+** Camelcase to upper
+
+Coverts camel case words to uppercase with underscore as delimiters.
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/camelcase-to-upper ()
+  (interactive)
+  (replace-regexp "\\([A-Z]\\)" "_\\1" nil (region-beginning)(region-end))
+  (upcase-region (region-beginning)(region-end)))
+#+END_SRC
