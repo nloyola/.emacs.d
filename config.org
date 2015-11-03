@@ -606,6 +606,8 @@ reason though the =read= syntax is default. I prefer having the
 Recentf is a minor mode that builds a list of recently opened files.
 This list is is automatically saved across Emacs sessions.
 
+Prefer saving the history of opened files somewhere other than the default.
+
 #+begin_src emacs-lisp
 (use-package recentf
   :init
@@ -616,14 +618,17 @@ This list is is automatically saved across Emacs sessions.
     (recentf-mode 1)
     (setq recentf-max-saved-items 100)))
 #+end_src
+
 ** =savehist=
 
 The history of prompts like =M-:= can be saved, but let's change its
-save file and history length first.
+save file and history length first. Also save search entries.
 
 #+BEGIN_SRC emacs-lisp
-(setq savehist-file "~/.emacs.d/etc/savehist"
+(setq savehist-additional-variables '(search-ring regexp-search-ring)
+      savehist-file "~/.emacs.d/etc/savehist"
       history-length 150)
+(savehist-mode)
 #+END_SRC
 
 ** =save-place=
