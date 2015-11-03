@@ -636,9 +636,14 @@ save file and history length first. Also save search entries.
 Remember position in a file.
 
 #+BEGIN_SRC emacs-lisp
-(setq-default save-place t)
-(setq save-place-file "~/.emacs.d/etc/saveplace")
+(use-package saveplace
+  :init
+  (progn
+    (setq save-place-file "~/.emacs.d/etc/saveplace"
+          save-place-forget-unreadable-files nil)
+    (setq-default save-place t)))
 #+END_SRC
+
 ** =shell=
 
 #+begin_src emacs-lisp
