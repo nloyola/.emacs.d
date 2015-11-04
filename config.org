@@ -788,13 +788,16 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     (defun nl/eclim-run-configuartion (configuration-name)
       "Runs the configuration given in CONFIGURATION-NAME in the compilation buffer."
       (interactive (list (eclim-java-run--ask-which-configuration)))
-      (let* ((configurations (eclim-java-run--load-configurations (eclim-project-name)))
+      (let* ((current-directory default-directory)
+             (configurations (eclim-java-run--load-configurations (eclim-project-name)))
              (configuration (eclim-java-run--configuration configuration-name configurations))
              (project-dir (eclim-java-run--project-dir (eclim-project-name)))
              (classpath (eclim/java-classpath (eclim-project-name)))
              (command (eclim-java-run--command configuration (eclim-java-run--java-vm-args classpath))))
         (setq default-directory project-dir)
         (compile command)
+        ;; restore the buffer's directory
+        (setq default-directory current-directory)
         ))
     )
   )
@@ -1563,6 +1566,7 @@ A way to set up indentation for all programming modes. Taken from
 
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook 'subword-mode)
+(add-hook 'prog-mode-hook 'flyspell-prog-mode)
 
 (defun my-common-prog-mode-settings ()
   "Enables settings common between programming language modes."
@@ -1659,6 +1663,19 @@ Utillity function to restart the Eclim server.
   (switch-to-buffer "*eclimd*")
   )
 #+end_src
+
+A gradle function to generate Javadoc for the project.
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/gradle-javadoc ()
+  "Uses gradle to build the Javadoc for the project."
+  (interactive)
+  (let* ((current-directory default-directory))
+    (setq default-directory (locate-dominating-file default-directory "build.gradle"))
+    (compile "gradle -q --console=plain javadoc")
+    (setq default-directory current-directory)
+    ))
+#+END_SRC
 
 ** Perl
 

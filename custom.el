@@ -6,6 +6,12 @@
  '(safe-local-variable-values
    (quote
     ((eval global-set-key
+           [(control f5)]
+           (quote
+            (lambda nil
+              (interactive)
+              (nl/gradle-javadoc))))
+     (eval global-set-key
            [f5]
            (quote
             (lambda nil
