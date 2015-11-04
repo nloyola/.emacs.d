@@ -129,12 +129,6 @@ Make searches case insensitive.
 (setq-default case-fold-search t)
 #+END_SRC
 
-Use spaces instead of ~\t~ character.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default indent-tabs-mode nil)
-#+END_SRC
-
 Autosave files are created between saves after a sufficient timeout in
 the current directory for crash detection, they begin and end with
 =#=.  Change this location to the emacs directory.
@@ -753,7 +747,7 @@ Complete anything.
     ))
 #+end_src
 
-** COMMENT [[https://github.com/senny/emacs-eclim][emacs-eclim]]
+** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
 
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
 can be downloaded from [[http://eclim.org/install.html][here]].
@@ -950,6 +944,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
                     projectile-completion-system 'default
                     projectile-enable-caching nil
                     compilation-read-command t ; do prompt for a compilation command
+                    projectile-use-git-grep t
                     )
 
               (projectile-global-mode)
@@ -1537,7 +1532,34 @@ are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's
 
 * Languages
 
-Programming mode hook.
+** Identation config
+
+Use spaces instead of ~\t~ character.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+
+A way to set up indentation for all programming modes. Taken from
+[[http://blog.binchen.org/posts/easy-indentation-setup-in-emacs-for-web-development.html][here]].
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/setup-indent (n)
+  ;; java/c/c++
+  (setq c-basic-offset n)
+  ;; web development
+  (setq coffee-tab-width n) ; coffeescript
+  (setq javascript-indent-level n) ; javascript-mode
+  (setq js-indent-level n) ; js-mode
+  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+  (setq css-indent-offset n) ; css-mode
+  )
+#+END_SRC
+
+** Programming mode hook.
 
 #+begin_src emacs-lisp
 (add-hook 'prog-mode-hook 'subword-mode)
@@ -1545,6 +1567,7 @@ Programming mode hook.
 (defun my-common-prog-mode-settings ()
   "Enables settings common between programming language modes."
   (progn
+    (nl/setup-indent 3) ; indent 2 spaces width
     ;
     ; Set tab and CR/LF keys to call their corresponding more-general
     ; functions.  This needs to be here to override the settings of some modes
@@ -1572,14 +1595,12 @@ Programming mode hook.
 (setq makefile-mode-hook 'my-common-prog-mode-settings)
 (setq sh-mode-hook       'my-common-prog-mode-settings)
 #+end_src
-
 ** C
 
 #+begin_src emacs-lisp
 (defconst nelson-c-style
   '((c-tab-always-indent . t)
     (c-set-style "K&R")
-    (c-basic-offset . 3)
     (c-offsets-alist . ((statement-block-intro . +)
                         (substatement-open     . 0)
                         (label                 . 0)
@@ -1618,14 +1639,13 @@ Programming mode hook.
 
 #+begin_src emacs-lisp
 (defun my-java-mode-hook ()
-  (setq c-basic-offset 4
-        tab-width 4
-        indent-tabs-mode nil)
+  (setq indent-tabs-mode nil)
   )
-
 
 (add-hook 'java-mode-hook 'my-java-mode-hook)
 #+END_SRC
+
+*** =emacs-eclim=
 
 Utillity function to restart the Eclim server.
 
