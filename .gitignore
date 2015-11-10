@@ -10,6 +10,8 @@
 /url/
 /tramp
 /vimish-fold
+/.cask
+/semanticdb
 ac-comphist.dat
 my-password.el.gpg
 .hl-save

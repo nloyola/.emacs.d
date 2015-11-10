@@ -238,6 +238,13 @@ Save clipboard data of other programs in the kill ring when possible.
 (setq save-interprogram-paste-before-kill t)
 #+END_SRC
 
+Revert file buffers updated outside of emacs, unless I've made changes to
+the buffer which I haven't saved.
+
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode 1)
+#+END_SRC
+
 ** Disabled features
 
 Turn off auto-save.
@@ -754,12 +761,13 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+begin_src emacs-lisp
 (use-package eclim
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :ensure emacs-eclim
   :diminish eclim-mode
   :init (use-package cl)
   :config
   (progn
-    (add-to-list 'eclim-eclipse-dirs (expand-file-name "~/apps/eclipse/rcp/mars/eclipse"))
+    (add-to-list 'eclim-eclipse-dirs (expand-file-name "~/apps/eclipse/mars/eclipse"))
     ;;(global-eclim-mode)
     (use-package eclimd)
     (use-package company)
@@ -776,7 +784,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
           eclim-executable (or (executable-find "eclim")
                                (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclim")))
           eclimd-executable (or (executable-find "eclimd")
-                               (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclimd"))))
+                                (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclimd"))))
     ;; Call the help framework with the settings above & activate eclim-mode
     (help-at-pt-set-timer)
 
@@ -799,8 +807,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
         ;; restore the buffer's directory
         (setq default-directory current-directory)
         ))
-    )
-  )
+    ))
 #+end_src
 
 ** [[https://github.com/magnars/expand-region.el][expand-region]]
@@ -1647,6 +1654,7 @@ A way to set up indentation for all programming modes. Taken from
   )
 
 (add-hook 'java-mode-hook 'my-java-mode-hook)
+(add-hook 'java-mode-hook 'semantic-mode)
 #+END_SRC
 
 *** =emacs-eclim=
