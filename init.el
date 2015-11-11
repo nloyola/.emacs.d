@@ -29,9 +29,6 @@
 (require 'bind-key)
 (setq use-package-verbose t)
 
-;;; Load the config
-;;(org-babel-load-file (concat user-emacs-directory "config.org"))
-
 ;; see http://emacs.stackexchange.com/questions/539/how-do-i-measure-performance-of-elisp-code
 (defmacro with-timer (&rest forms)
   "Run the given FORMS, counting and displaying the elapsed time."
@@ -44,21 +41,24 @@
            (when (> elapsed 0.001)
              (message "spent (%.3fs)" elapsed)))))))
 
+;; Parses the config.org file and processes the emacs-lisp blocks. If any of the blocks generates an
+;; error, Emacs will not halt, instead it will continue and accumulate the errors. If any errors
+;; were encountered, they will be reported in the *init errors* buffer.
+;;
 ;; see http://emacsninja.com/posts/failing-gracefully.html
 (let (errors)
   (with-temp-buffer
     (insert-file "~/.emacs.d/config.org")
     (goto-char (point-min))
-    (search-forward "\n* Init")
     (while (not (eobp))
       (forward-line 1)
       (cond
-       ;; skip headers marked as TODO
-       ((looking-at "^\\(\\*+\\) TODO +.*$")
-        (search-forward (format "\n%s " (match-string 1))))
-       ;; report headers
-       ((looking-at "\\*\\{2,3\\} +.*$")
+       ;; report headers - look at headers of levels 1, 2, or 3
+       ((looking-at "\\*\\{1,3\\} +.*$")
         (message "%s" (match-string 0)))
+       ;; skip untangled blocks
+       ((looking-at "^#\\+BEGIN_SRC +emacs-lisp +:tangle +no$")
+        (message "...skipped"))
        ;; evaluate code blocks
        ((looking-at "^#\\+BEGIN_SRC +emacs-lisp$")
         (let (src-beg src-end)
