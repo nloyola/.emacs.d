@@ -27,7 +27,12 @@
   (require 'use-package))
 (require 'diminish)                ;; if you use :diminish
 (require 'bind-key)
-(setq use-package-verbose t)
+(setq use-package-verbose nil)
+
+(use-package pl
+  :load-path "~/src/github/elisp/emacs-pl"
+  :commands pl-parse
+  )
 
 ;; see http://emacs.stackexchange.com/questions/539/how-do-i-measure-performance-of-elisp-code
 (defmacro with-timer (&rest forms)
@@ -46,36 +51,37 @@
 ;; were encountered, they will be reported in the *init errors* buffer.
 ;;
 ;; see http://emacsninja.com/posts/failing-gracefully.html
+
 (let (errors)
   (with-temp-buffer
-    (insert-file "~/.emacs.d/config.org")
+    (insert-file-contents "~/.emacs.d/config.org")
     (goto-char (point-min))
-    (while (not (eobp))
-      (forward-line 1)
-      (cond
-       ;; report headers - look at headers of levels 1, 2, or 3
-       ((looking-at "\\*\\{1,3\\} +.*$")
-        (message "%s" (match-string 0)))
-       ;; skip untangled blocks
-       ((looking-at "^#\\+BEGIN_SRC +emacs-lisp +:tangle +no$")
-        (message "...skipped"))
-       ;; evaluate code blocks
-       ((looking-at "^#\\+BEGIN_SRC +emacs-lisp$")
-        (let (src-beg src-end)
-          (condition-case error
-              (progn
-                (setq src-beg (match-end 0))
-                (search-forward "\n#+END_SRC")
-                (setq src-end (match-beginning 0))
-                (with-timer (eval-region src-beg src-end)))
-            (error
-             (push (format "%s for:\n%s\n\n---\n"
-                           (error-message-string error)
-                           (buffer-substring src-beg src-end))
-                   errors)))))
-       ;; finish on the next level-1 header
-       ((looking-at "^\\* ")
-        (goto-char (point-max))))))
+    (let (heading section-decl src-beg src-end)
+      (while (not (eobp))
+        (forward-line 1)
+        (pl-parse
+         (pl-re "^\\*\\{1,3\\} +.*$" :beg)
+         (setq heading (match-string 0)))
+        (pl-parse
+         (pl-re "^#\\+BEGIN_SRC +emacs-lisp.*$" :beg)
+         (setq src-beg (match-end 0))
+         (setq section-decl (match-string 0))
+         (pl-until
+          (pl-re "\n#\\+END_SRC$" :end))
+         (setq src-end (match-beginning 0))
+
+         (if (string-match ":tangle +no" section-decl)
+             (message "Skipped: %s %d %d" heading src-beg src-end)
+           (condition-case error
+               (progn
+                 (message "%s %d %d" heading src-beg src-end)
+                 (with-timer (eval-region src-beg src-end)))
+             (error
+              (push (format "%s for:\n%s\n\n---\n"
+                            (error-message-string error)
+                            (buffer-substring src-beg src-end))
+                    errors)))
+             )))))
   (when errors
     (with-current-buffer (get-buffer-create "*init errors*")
       (insert (format "%i error(s) found\n\n" (length errors)))
