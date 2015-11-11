@@ -16,9 +16,10 @@ This file is used to generate ~config.el~ using ~org-babel~ in
 * Installing Emacs
 ** Ubuntu
 
-I've installed Emacs from source (=git://git.savannah.gnu.org/emacs.git=) and used the =emacs-24.5= tag. I used
-the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]], but first the
-following command has to be run.
+I've installed Emacs from source
+(=git://git.savannah.gnu.org/emacs.git=) and used the =emacs-24.5=
+tag. I used the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]], but first
+the following command has to be run.
 
 #+begin_src sh
 ./autogen.sh
@@ -32,14 +33,15 @@ make
 sudo make install
 #+END_SRC
 
-* Personal Information
+* Init
+** Personal Information
 
 #+begin_src emacs-lisp
 (setq user-full-name "Nelson Loyola"
       user-mail-address "nloyola@gmail.com")
 #+end_src
 
-* Customize settings
+** Customize settings
 
 Set up the customize file to its own separate file, instead of saving
 customize settings in [[file:init.el][init.el]].
@@ -49,7 +51,7 @@ customize settings in [[file:init.el][init.el]].
 (load custom-file)
 #+end_src
 
-* Font
+** Font
 ** Installation
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
@@ -74,7 +76,7 @@ And then merge the setting to your X server resource database.
 #+begin_src sh :tangle no
 xrdb -merge ~/.Xresources
 #+end_src
-* Sane defaults
+** Sane defaults
 ** General
 
 Some commands are disabled by default. They are enabled in our config
@@ -419,7 +421,7 @@ Do not show thees modes in the mode line.
          (turn-on-auto-fill)            ; Enable automatic line wrapping.
          (setq-default indent-tabs-mode nil)))    ; Use real tabs.
 #+end_src
-* Packages bundled with Emacs
+** Packages bundled with Emacs
 ** =bookmark=
 
 Prefer saving this file somewhere other than the default.
@@ -682,7 +684,7 @@ direction keys.
 (use-package whitespace
   :bind ("S-<f10>" . whitespace-mode))
 #+end_src
-* ELPA packages
+** ELPA packages
 
 These are the packages that are not built into Emacs.
 
@@ -1299,11 +1301,14 @@ We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/
 
 ** [[https://github.com/nex3/perspective-el][perspective]]
 
+*** TODO
+
 This package provides tagged workspaces.
 
 #+begin_src emacs-lisp :tangle no
 (use-package perspective
   :ensure t
+  :commands persp-mode
   :config (persp-mode))
 #+end_src
 
@@ -1517,7 +1522,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   :config (whole-line-or-region-mode t))
 #+end_src
 
-* Computer-specific settings
+** Computer-specific settings
 
 Load some computer-specific settings, such as the name and and email address. The way the settings
 are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's]] config.
@@ -1540,7 +1545,7 @@ are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's
   (mapc 'load (directory-files nl/user-settings-dir nil "^[^#].*el$")))
 #+end_src
 
-* Languages
+** Languages
 
 ** Identation config
 
@@ -1753,7 +1758,7 @@ Taken from:
    (helm-comp-read "Select server: " nl/sql-servers-list))
   (funcall func))
 #+END_SRC
-* Misc
+** Misc
 ** Constants
 
 Is some cases we need to know what type of OS Emacs is running under.
