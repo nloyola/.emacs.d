@@ -421,20 +421,6 @@ Do not show thees modes in the mode line.
          (setq-default indent-tabs-mode nil)))    ; Use real tabs.
 #+END_SRC
 * Packages bundled with Emacs
-** =[[https://github.com/Malabarba/beacon][beacon]]=
-
-Never lose your cursor again
-
-#+BEGIN_SRC emacs-lisp
-(use-package beacon
-  :ensure t
-  :init
-  (progn
-    (setq beacon-push-mark 35)
-    (setq beacon-color "#666600"))
-  :config (beacon-mode 1)
-  )
-#+END_SRC
 
 ** =bookmark=
 
@@ -702,6 +688,7 @@ direction keys.
 (use-package whitespace
   :bind ("S-<f10>" . whitespace-mode))
 #+END_SRC
+
 * ELPA packages
 
 These are the packages that are not built into Emacs.
@@ -728,7 +715,22 @@ A quick way to jump around text in buffers.
                       ("M-g M-g" . avy-goto-line)))
 #+END_SRC
 
-** [[https://github.com/jorgenschaefer/circe][Circe]]
+** [[https://github.com/Malabarba/beacon][beacon]]
+
+Never lose your cursor again
+
+#+BEGIN_SRC emacs-lisp
+(use-package beacon
+  :ensure t
+  :init
+  (progn
+    (setq beacon-push-mark 35)
+    (setq beacon-color "#666600"))
+  :config (beacon-mode 1)
+  )
+#+END_SRC
+
+** [[https://github.com/jorgenschaefer/circe][circe]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package circe
@@ -929,7 +931,6 @@ Required for gradle build files.
   (use-package groovy-mode
                :ensure t)
 #+END_SRC
-
 ** [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 Guide the following key bindings automatically and dynamically.
@@ -946,54 +947,20 @@ Guide the following key bindings automatically and dynamically.
 #+END_SRC
 
 ** [[https://github.com/emacs-helm/helm][helm]]
-*** Config
+*** Helm Config
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
+  :commands (helm-config helm-eshell helm-files helm-grep helm-projectile)
   :diminish helm-mode
   :init (progn
           ;; must set before helm-config, otherwise helm uses the default
           ;; prefix "C-x c", which is inconvenient because you can
           ;; accidentially press "C-x C-c"
           (setq helm-command-prefix-key "C-c h")
-          (require 'helm-config)
-          (require 'helm-eshell)
-          (require 'helm-files)
-          (require 'helm-grep)
-          (use-package helm-projectile
-            :ensure t
-            :commands helm-projectile
-            :bind (("C-c p h" . helm-projectile))
-            :config
-            (progn
-              (setq projectile-remember-window-configs t
-                    projectile-switch-project-action 'projectile-dired
-                    projectile-completion-system 'default
-                    projectile-enable-caching nil
-                    compilation-read-command t ; do prompt for a compilation command
-                    projectile-use-git-grep t
-                    )
-
-              (projectile-global-mode)
-              (setq projectile-completion-system 'helm)
-              ))
-          (require 'helm-projectile)
-          (use-package helm-ag :ensure t :commands helm-ag)
-          (use-package helm-c-yasnippet
-            :ensure t
-            :init (use-package yasnippet)
-            :config (global-set-key (kbd "C-c y") 'helm-yas-complete))
-          (use-package helm-flx :ensure t :commands helm-flx-mode)
-          (use-package helm-gtags
-            :ensure t
-            :commands helm-gtags-mode
-            :bind (("M-." . helm-gtags-find-tag)
-                   ("M-," . helm-gtags-find-rtag)))
-          (use-package helm-swoop :ensure t)
-
           (helm-projectile-on)
           (helm-flx-mode +1)
 
@@ -1043,7 +1010,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
          ("C-`" . helm-resume)))
 #+END_SRC
 
-*** Search
+*** Helm Search
 
 [[http://www.gnu.org/software/grep/][grep]] is very fast, but not the best tool for code search, especially
 not within compressed files. That's why I'll go for [[https://github.com/ggreer/the_silver_searcher/][ag]] instead, its
@@ -1059,7 +1026,7 @@ something, but so far hasn't shown any obvious side-effects
       helm-grep-default-recurse-command "ag --vimgrep -z %p %f")
 #+END_SRC
 
-*** Key bindings
+*** Helm Key bindings
 
 #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'helm-files
@@ -1074,7 +1041,7 @@ something, but so far hasn't shown any obvious side-effects
   (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
 #+END_SRC
 
-*** Window config
+*** Helm Window config
 
 So that helm windows shows at the bottom.
 
@@ -1094,7 +1061,7 @@ So that helm windows shows at the bottom.
 ;;          )))
 #+END_SRC
 
-*** Other
+*** Helm Other
 
 Highlighting of token matches is a tad slow, let's speed it up.
 
@@ -1107,6 +1074,67 @@ stop:
 
 #+BEGIN_SRC emacs-lisp
 (setq helm-display-function 'pop-to-buffer)
+#+END_SRC
+
+** [[https://github.com/syohex/emacs-helm-ag][helm-ag]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-ag :ensure t :commands helm-ag)
+#+END_SRC
+
+** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-c-yasnippet
+  :ensure t
+  :init (use-package yasnippet)
+  :config (global-set-key (kbd "C-c y") 'helm-yas-complete))
+#+END_SRC
+
+** [[https://github.com/PythonNut/helm-flx][helm-flx]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-flx :ensure t :commands helm-flx-mode)
+#+END_SRC
+
+** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-gtags
+  :ensure t
+  :commands (helm-gtags-find-tag helm-gtags-find-rtag)
+  :bind (("M-." . helm-gtags-find-tag)
+         ("M-," . helm-gtags-find-rtag)))
+#+END_SRC
+
+** [[https://github.com/bbatsov/projectile][helm-projectile]]
+
+Included with Projectile.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-projectile
+  :ensure t
+  :commands (helm-projectile-on)
+  :bind (("C-c p h" . helm-projectile))
+  :config
+  (progn
+    (setq projectile-remember-window-configs t
+          projectile-switch-project-action 'projectile-dired
+          projectile-completion-system 'default
+          projectile-enable-caching nil
+          compilation-read-command t ; do prompt for a compilation command
+          projectile-use-git-grep t
+          )
+
+    (projectile-global-mode)
+    (setq projectile-completion-system 'helm)
+    ))
+#+END_SRC
+
+** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-swoop :ensure t)
 #+END_SRC
 
 ** [[https://github.com/boyw165/hl-anything][hl-anything]]

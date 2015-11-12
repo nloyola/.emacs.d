@@ -71,10 +71,10 @@
          (setq src-end (match-beginning 0))
 
          (if (string-match ":tangle +no" section-decl)
-             (message "Skipped: %s %d %d" heading src-beg src-end)
+             (message "Skipped: %s" heading)
            (condition-case error
                (progn
-                 (message "%s %d %d" heading src-beg src-end)
+                 (message "%s" heading)
                  (with-timer (eval-region src-beg src-end)))
              (error
               (push (format "%s for:\n%s\n\n---\n"
