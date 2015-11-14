@@ -1835,6 +1835,10 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
 (defun align-equals (beg end)
   (interactive "r")
   (align-regexp beg end "\\(\\s-*\\)=" 1 1 t))
+
+(defun align-parameters (beg end)
+  (interactive "r")
+  (align-regexp beg end "\\w+\\(\\s-*\\)\\w+,?" 1 1 t))
 #+END_SRC
 
 ** Font size
