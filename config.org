@@ -1087,7 +1087,8 @@ stop:
 #+BEGIN_SRC emacs-lisp
 (use-package helm-c-yasnippet
   :ensure t
-  :init (use-package yasnippet)
+  :commands helm-yas-complete
+  ;;:init (use-package yasnippet)
   :config (global-set-key (kbd "C-c y") 'helm-yas-complete))
 #+END_SRC
 
@@ -1812,6 +1813,10 @@ Is some cases we need to know what type of OS Emacs is running under.
 (defconst ostype-linux
   (if (integer-or-marker-p
        (string-match "linux" system-configuration)) t nil))
+
+(defconst ostype-windows
+  (if (integer-or-marker-p
+       (string-match "pc-mingw32" system-configuration)) t nil))
 #+END_SRC
 
 ** Aligning things
@@ -1918,7 +1923,6 @@ something to it in automatially inserts a time stamp.
   (insert "\n")
   )
 #+END_SRC
-
 ** Occur
 
 The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
@@ -1947,4 +1951,11 @@ Coverts camel case words to uppercase with underscore as delimiters.
   (interactive)
   (replace-regexp "\\([A-Z]\\)" "_\\1" nil (region-beginning)(region-end))
   (upcase-region (region-beginning)(region-end)))
+#+END_SRC
+
+** Windows Font
+
+#+BEGIN_SRC emacs-lisp
+(when ostype-windows
+    (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
 #+END_SRC
