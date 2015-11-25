@@ -51,6 +51,7 @@ customize settings in [[file:init.el][init.el]].
 #+END_SRC
 
 * Font
+
 ** Installation
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
@@ -75,7 +76,9 @@ And then merge the setting to your X server resource database.
 #+BEGIN_SRC sh :tangle no
 xrdb -merge ~/.Xresources
 #+END_SRC
+
 * Sane defaults
+
 ** General
 
 Some commands are disabled by default. They are enabled in our config
@@ -86,6 +89,7 @@ using the following:
 (put 'upcase-region 'disabled nil)
 (put 'narrow-to-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)
+(put 'erase-buffer 'disabled nil)
 #+END_SRC
 
 Sentences end with a single space.
@@ -1558,7 +1562,6 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 (use-package web-mode
   :ensure t)
 #+END_SRC
-
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1566,6 +1569,20 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   :ensure t
   :diminish whole-line-or-region-mode
   :config (whole-line-or-region-mode t))
+#+END_SRC
+
+** [[https://github.com/jinzhu/zeal-at-point][zeal-at-point]]
+
+Search the word at point with Zeal
+
+Zeal is a simple offline API documentation browser inspired by Dash
+(OS X app), available for Linux and Windows.
+
+#+BEGIN_SRC emacs-lisp
+(use-package zeal-at-point
+  :ensure t
+  ;;:diminish
+  :commands zeal-at-point)
 #+END_SRC
 
 * Computer-specific settings
@@ -1701,8 +1718,8 @@ A way to set up indentation for all programming modes. Taken from
 
 #+BEGIN_SRC emacs-lisp
 (defun my-java-mode-hook ()
-  (setq indent-tabs-mode nil)
-  )
+  (setq indent-tabs-mode nil
+        zeal-at-point-docset "java"))
 
 (add-hook 'java-mode-hook 'my-java-mode-hook)
 (add-hook 'java-mode-hook 'semantic-mode)
