@@ -736,7 +736,7 @@ Never lose your cursor again
 
 ** [[https://github.com/jorgenschaefer/circe][circe]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package circe
   :ensure t
   :config (setq circe-default-nick "chucho"
@@ -882,13 +882,14 @@ Allow windmove to jump between frames.
   :config
   (progn
     (add-hook 'after-init-hook #'global-flycheck-mode)
-    (setq flycheck-standard-error-navigation nil)
-    (use-package flycheck-protobuf
-      :config
-      (progn
-        (add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
-        )
-      )))
+    (setq flycheck-standard-error-navigation nil)))
+
+(use-package flycheck-protobuf
+  :config
+  (progn
+    (add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
+    )
+  ))
 #+END_SRC
 
 ** [[https://github.com/leoliu/ggtags][ggtags]]
@@ -911,6 +912,14 @@ Updte tags on command line with ~global -u~.
   :init
   (progn
     (gradle-mode 1)))
+#+END_SRC
+
+** [[https://github.com/pidu/git-timemachine][git-timemachine]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package git-timemachine
+  :ensure t
+  :commands git-timemachine)
 #+END_SRC
 
 ** [[https://github.com/camdez/goto-last-change.el][goto-last-change]]
@@ -1338,7 +1347,7 @@ TextMate like theme.
 
 We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/magnars/multiple-cursors.el/issues/105][an autoload issue]].
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package multiple-cursors
   :ensure t
   :init (require 'multiple-cursors)
@@ -1516,13 +1525,23 @@ Allows for transposing window arrangements.
   :bind ("S-M-t" . transpose-frame))
 #+END_SRC
 
-** [[https://github.com/mrkkrp/vimish-fold][vimish-fold]]
+** [[http://melpa.org/#/undo-tree][undo-tree]]
+
 #+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :ensure t
+  :commands global-undo-tree-mode)
+#+END_SRC
+
+** [[https://github.com/mrkkrp/vimish-fold][vimish-fold]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package vimish-fold
   :ensure t
   :config (vimish-fold-global-mode 1)
   )
 #+END_SRC
+
 ** [[https://github.com/benma/visual-regexp.el][visual-regexp]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1975,4 +1994,46 @@ Coverts camel case words to uppercase with underscore as delimiters.
 #+BEGIN_SRC emacs-lisp
 (when ostype-windows
     (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
+#+END_SRC
+
+** Narrow or widen
+
+From [[http://endlessparentheses.com/emacs-narrow-or-widen-dwim.html][Artur Malabarba]]'s blog:
+
+#+BEGIN_SRC emacs-lisp
+(defun narrow-or-widen-dwim (p)
+  "Widen if buffer is narrowed, narrow-dwim otherwise.
+Dwim means: region, org-src-block, org-subtree, or defun,
+whichever applies first. Narrowing to org-src-block actually
+calls `org-edit-src-code'.
+
+With prefix P, don't widen, just narrow even if buffer is
+already narrowed."
+  (interactive "P")
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+        ((region-active-p)
+         (narrow-to-region (region-beginning) (region-end)))
+        ((derived-mode-p 'org-mode)
+         ;; `org-edit-src-code' is not a real narrowing
+         ;; command. Remove this first conditional if you
+         ;; don't want it.
+         (cond ((ignore-errors (org-edit-src-code))
+                (delete-other-windows))
+               ((ignore-errors (org-narrow-to-block) t))
+               (t (org-narrow-to-subtree))))
+        ((derived-mode-p 'latex-mode)
+         (LaTeX-narrow-to-environment))
+        (t (narrow-to-defun))))
+
+;;(define-key endless/toggle-map "n" #'narrow-or-widen-dwim)
+;; This line actually replaces Emacs' entire narrowing
+;; keymap, that's how much I like this command. Only copy it
+;; if that's what you want.
+(define-key ctl-x-map "n" #'narrow-or-widen-dwim)
+(add-hook 'LaTeX-mode-hook
+          (lambda () (define-key LaTeX-mode-map "\C-xn" nil)))
+(eval-after-load 'org-src
+  '(define-key org-src-mode-map
+     "\C-x\C-s" #'org-edit-src-exit))
 #+END_SRC
