@@ -6,6 +6,11 @@
  '(safe-local-variable-values
    (quote
     ((eval global-set-key
+           [f5]
+           (quote sbt-command))
+     (eval setq-default indent-tabs-mode nil)
+     (eval setq projectile-find-dir-includes-top-level t)
+     (eval global-set-key
            [(control f5)]
            (quote
             (lambda nil

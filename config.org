@@ -786,31 +786,34 @@ Provides Emacs with some Eclipse features for Java development. Eclim has to be 
 can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
+(use-package eclimd
+  :commands start-eclimd)
+(use-package company-emacs-eclim
+  :commands company-emacs-eclim-setup)
 (use-package eclim
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :ensure emacs-eclim
   :diminish eclim-mode
+  :commands eclim-mode
   :init (use-package cl)
   :config
   (progn
-    (add-to-list 'eclim-eclipse-dirs (expand-file-name "~/apps/eclipse/mars/eclipse"))
-    ;;(global-eclim-mode)
-    (use-package eclimd)
-    (use-package company)
-    (use-package company-emacs-eclim)
+    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/mars/eclipse")))
+      (if (file-accessible-directory-p eclipse-dir)
+          (progn
+            (add-to-list 'eclim-eclipse-dirs eclipse-dir)
+            (setq eclim-executable (or (executable-find "eclim") (concat (eclipse-dir "/eclim")))
+                  eclimd-executable (or (executable-find "eclimd") (concat (eclipse-dir "/eclimd")))
+                  ))))
     (company-emacs-eclim-setup)
     (global-company-mode t)
-    (add-hook 'java-mode-hook (lambda() (eclim-mode t)))
     (setq eclim-auto-save t
           eclimd-wait-for-process nil
           eclimd-default-workspace "~/workspace/"
           help-at-pt-display-when-idle t
           help-at-pt-timer-delay 0.1
 
-          eclim-executable (or (executable-find "eclim")
-                               (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclim")))
-          eclimd-executable (or (executable-find "eclimd")
-                                (concat (substitute-in-file-name "$HOME/apps/eclipse/rcp/mars/eclipse/eclimd"))))
+          )
     ;; Call the help framework with the settings above & activate eclim-mode
     (help-at-pt-set-timer)
 
@@ -883,7 +886,10 @@ Allow windmove to jump between frames.
   (progn
     (add-hook 'after-init-hook #'global-flycheck-mode)
     (setq flycheck-standard-error-navigation nil)))
+#+END_SRC
 
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck-protobuf
   :config
   (progn
@@ -1740,6 +1746,7 @@ A way to set up indentation for all programming modes. Taken from
   (setq indent-tabs-mode nil
         zeal-at-point-docset "java"))
 
+(add-hook 'java-mode-hook (lambda() (eclim-mode t)))
 (add-hook 'java-mode-hook 'my-java-mode-hook)
 (add-hook 'java-mode-hook 'semantic-mode)
 #+END_SRC
@@ -1780,6 +1787,73 @@ A gradle function to generate Javadoc for the project.
   (my-common-prog-mode-settings))
 
 (add-hook 'cperl-mode-hook 'my-cperl-setup)
+#+END_SRC
+
+** Scala
+
+#+BEGIN_SRC emacs-lisp
+(use-package scala-mode2
+  :ensure t
+  :config
+  (progn
+    (setq
+     scala-indent:default-run-on-strategy '3 ;; scala-indent:keywords-only-strategy
+     scala-indent:indent-value-expression nil
+     scala-indent:align-parameters t
+     scala-indent:align-forms t
+     scala-indent:use-javadoc-style t)
+
+    (add-hook 'scala-mode-hook
+              '(lambda ()
+                 (yas-minor-mode)
+                 ;; sbt-find-definitions is a command that tries to find (with grep)
+                 ;; the definition of the thing at point.
+                 ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+
+                 ;; use sbt-run-previous-command to re-compile your code after changes
+                 (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
+                 (local-set-key (kbd "RET") 'newline-and-indent)
+
+                 ;; Bind the backtab (shift tab) to
+                 ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+                 ;; when using the 'eager' mode by default and you want to "outdent" a
+                 ;; code line as a new statement.
+                 (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+
+                 (setq-default indent-tabs-mode nil)
+
+                 (setq compilation-ask-about-save nil)
+                 ))
+
+    ))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(use-package sbt-mode
+  :ensure t
+  :config
+  (progn
+    (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
+    (add-hook 'sbt-mode-hook
+              '(lambda ()
+                 ;; compilation-skip-threshold tells the compilation minor-mode
+                 ;; which type of compiler output can be skipped. 1 = skip info
+                 ;; 2 = skip info and warnings.
+                 (setq compilation-skip-threshold 1)
+
+                 ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the
+                 ;; cursor to just after prompt.
+                 (local-set-key (kbd "C-a") 'comint-bol)
+
+                 ;; Bind M-RET to 'comint-accumulate. This will allow you to add
+                 ;; more than one line to scala console prompt before sending it
+                 ;; for interpretation. It will keep your command history cleaner.
+                 (local-set-key (kbd "M-RET") 'comint-accumulate)
+                 ))
+
+    ;; set this regex so that it knows about Play Framework SBT prompt
+    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*")
+    ))
 #+END_SRC
 
 ** SQL
