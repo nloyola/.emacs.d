@@ -791,7 +791,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 (use-package company-emacs-eclim
   :commands company-emacs-eclim-setup)
 (use-package eclim
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :ensure emacs-eclim
   :diminish eclim-mode
   :commands eclim-mode
@@ -821,21 +821,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     (custom-set-faces
      '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
      '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
-
-    (defun nl/eclim-run-configuartion (configuration-name)
-      "Runs the configuration given in CONFIGURATION-NAME in the compilation buffer."
-      (interactive (list (eclim-java-run--ask-which-configuration)))
-      (let* ((current-directory default-directory)
-             (configurations (eclim-java-run--load-configurations (eclim-project-name)))
-             (configuration (eclim-java-run--configuration configuration-name configurations))
-             (project-dir (eclim-java-run--project-dir (eclim-project-name)))
-             (classpath (eclim/java-classpath (eclim-project-name)))
-             (command (eclim-java-run--command configuration (eclim-java-run--java-vm-args classpath))))
-        (setq default-directory project-dir)
-        (compile command)
-        ;; restore the buffer's directory
-        (setq default-directory current-directory)
-        ))
     ))
 #+END_SRC
 
@@ -1394,9 +1379,7 @@ http://batsov.com/projectile/
             projectile-remember-window-configs t
             projectile-switch-project-action 'projectile-dired
             projectile-completion-system 'default
-            projectile-enable-caching nil
-            compilation-read-command nil ; do not prompt for a compilation command
-            )
+            projectile-enable-caching nil)
 
       (projectile-global-mode)
       (setq projectile-completion-system 'helm)
@@ -1699,7 +1682,7 @@ A way to set up indentation for all programming modes. Taken from
 (setq makefile-mode-hook 'my-common-prog-mode-settings)
 (setq sh-mode-hook       'my-common-prog-mode-settings)
 #+END_SRC
-** C
+** C / C++
 
 #+BEGIN_SRC emacs-lisp
 (defconst nelson-c-style
@@ -1710,13 +1693,13 @@ A way to set up indentation for all programming modes. Taken from
                         (label                 . 0)
                         (case-label            . +)
                         (statement-cont        . +)
-                        )))
+                        (innamespace           . 0))))
   "Nelson programming style.")
 
 ;; Customizations for all of c-mode, c++-mode, and objc-mode
 (defun my-c-mode-common-hook ()
   ;; add my personal style and set it for the current buffer
-  (c-add-style "NELSON" nelson-c-style t)
+  (c-add-style "NELSON-c-mode" nelson-c-style t)
   ;; offset customizations not in nelson-c-style
   (c-set-offset 'member-init-intro '++)
   ;; other customizations
@@ -1730,6 +1713,7 @@ A way to set up indentation for all programming modes. Taken from
       (ggtags-mode 1)))
   )
 
+(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
 (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
 #+END_SRC
 

@@ -7,6 +7,124 @@
    (quote
     ((eval global-set-key
            [f5]
+           (quote
+            (lambda nil
+              (interactive)
+              (eclim-run-configuartion "Run PlateDecoder"))))
+     (eval when
+           (and
+            (buffer-file-name)
+            (file-regular-p
+             (buffer-file-name))
+            (string-match-p "^[^.]"
+                            (buffer-file-name)))
+           (emacs-lisp-mode)
+           (when
+               (fboundp
+                (quote flycheck-mode))
+             (flycheck-mode -1))
+           (unless
+               (featurep
+                (quote package-build))
+             (let
+                 ((load-path
+                   (cons ".." load-path)))
+               (require
+                (quote package-build))))
+           (package-build-minor-mode)
+           (set
+            (make-local-variable
+             (quote package-build-working-dir))
+            (expand-file-name "../working/"))
+           (set
+            (make-local-variable
+             (quote package-build-archive-dir))
+            (expand-file-name "../packages/"))
+           (set
+            (make-local-variable
+             (quote package-build-recipes-dir))
+            default-directory))
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el"))
+           my-project-include-dir
+           (expand-file-name
+            (concat my-project-dir "src"))
+           flycheck-gcc-include-path
+           (list my-project-include-dir)
+           flycheck-gcc-language-standard "c++11")
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el"))
+           my-project-include-dir
+           (expand-file-name
+            (concat my-project-dir "src"))
+           flycheck-gcc-include-path
+           (list my-project-include-dir)
+           flycheck-clang-language-standard "c++11")
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el"))
+           my-project-include-dir
+           (expand-file-name
+            (concat my-project-dir "src"))
+           flycheck-gcc-include-path
+           (list my-project-include-dir))
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el"))
+           my-project-include-dir
+           (expand-file-name
+            (concat my-project-dir "src"))
+           flycheck-gcc-include-path my-project-include-dir)
+     (eval add-hook
+           (quote flycheck-before-syntax-check-hook)
+           (lambda nil
+             (setq flycheck-clang-include-path
+                   (list my-project-include-dir))))
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el"))
+           my-project-include-dir
+           (expand-file-name
+            (concat my-project-dir "src")))
+     (eval add-hook
+           (quote c++-mode-hook)
+           (lambda nil
+             (setq flycheck-clang-include-path
+                   (list my-project-include-dir))))
+     (eval message "my-project-include-dir: %s" my-project-include-dir)
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el"))
+           my-project-include-dir
+           (concat my-project-dir "src"))
+     (eval add-hook
+           (quote c++-mode-hook)
+           (lambda nil
+             (setq flycheck-clang-include-path
+                   (list
+                    (concat my-project-dir "src")))))
+     (eval add-hook
+           (quote c++-mode-hook)
+           (lambda nil
+             (setq flycheck-clang-include-path
+                   (list
+                    (concat my-project-dir "/src")))))
+     (eval global-set-key
+           [f5]
+           (quote
+            (lambda nil
+              (interactive)
+              (let*
+                  ((default-directory my-project-dir))
+                (call-interactively
+                 (function compile))))))
+     (eval setq my-project-dir
+           (concat
+            (locate-dominating-file default-directory ".dir-locals.el")))
+     (eval global-set-key
+           [f5]
            (quote sbt-command))
      (eval setq-default indent-tabs-mode nil)
      (eval setq projectile-find-dir-includes-top-level t)
