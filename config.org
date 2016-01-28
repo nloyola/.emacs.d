@@ -1263,6 +1263,46 @@ _u_: Update
   (define-key eclim-mode-map (kbd "C-c e") 'hydra-eclim/body))
 #+END_SRC
 
+** [[https://github.com/mooz/js2-mode][js2-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package js2-mode
+  :ensure t
+  :commands (js2-mode)
+  :init
+  (setq js-indent-level 2
+        js2-global-externs '("define"
+                             "jasmine"
+                             "describe"
+                             "fdescribe"
+                             "beforeEach"
+                             "afterEach"
+                             "inject"
+                             "expect"
+                             "spyOn"
+                             "it"
+                             "fit"
+                             "xit"))
+  :config
+  (progn
+    (custom-set-variables
+     '(js2-basic-offset 2)
+     '(js2-bounce-indent-p t)
+     '(js2-highlight-level 3)
+     )
+
+    ;;(eval-after-load 'js2-mode
+    ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+
+    ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
+    ;;(setq ac-js2-evaluate-calls t)
+
+    (setq-default js2-mode-show-parse-errors t)
+    (setq-default js2-strict-missing-semi-warning t)
+    (setq-default js2-strict-trailing-comma-warning t)
+    ))
+#+END_SRC
+
 ** [[https://github.com/joddie/macrostep][macrostep]]
 
 Macrostep allows you to see what Elisp macros expand to. Learned about
@@ -1502,6 +1542,14 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 (use-package smartscan
   :ensure t
   :config (global-smartscan-mode 1))
+#+END_SRC
+
+** [[https://github.com/jbondeson/smooth-scrolling][smooth-scrolling]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package smooth-scrolling
+  :ensure t
+  :config (setq smooth-scroll-margin 6))
 #+END_SRC
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
@@ -1761,6 +1809,21 @@ A gradle function to generate Javadoc for the project.
     (compile "gradle -q --console=plain javadoc")
     (setq default-directory current-directory)
     ))
+#+END_SRC
+
+** Javascript
+
+#+BEGIN_SRC emacs-lisp
+(add-hook 'js-mode-hook 'js2-minor-mode)
+
+(defun my-javascript-mode-hook ()
+  (setq indent-tabs-mode nil
+        js-indent-level 2)
+  (local-set-key [f5] 'sbt-command)
+  (flycheck-mode 1)
+  )
+
+(add-hook 'js-mode-hook 'my-javascript-mode-hook)
 #+END_SRC
 
 ** Perl
