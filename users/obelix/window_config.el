@@ -3,9 +3,8 @@
   (interactive)
   (let ((frame (selected-frame)))
     (set-frame-position frame -1 0)
-    (set-frame-size frame 220 (/ (x-display-pixel-height) (frame-char-height)))
-    )
-  )
+    (set-frame-size frame 229 (/ (x-display-pixel-height) (frame-char-height)))
+    ))
 
 (defun nl/set-frame-size-and-position ()
   "Set the size and position of the Emacs window."
@@ -26,4 +25,4 @@
                                (nl/set-size-and-position)
                                (resume)
                                (make-frame-command)
-                               ))  
+                               ))

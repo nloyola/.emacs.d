@@ -932,8 +932,8 @@ Updte tags on command line with ~global -u~.
 Required for gradle build files.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package groovy-mode
-               :ensure t)
+(use-package groovy-mode
+  :ensure t)
 #+END_SRC
 ** [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
@@ -1303,6 +1303,14 @@ _u_: Update
     ))
 #+END_SRC
 
+** [[https://github.com/tonini/karma.el][karma]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package karma
+  :ensure t
+  :commands karma-mode)
+#+END_SRC
+
 ** [[https://github.com/joddie/macrostep][macrostep]]
 
 Macrostep allows you to see what Elisp macros expand to. Learned about
@@ -1550,6 +1558,20 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 (use-package smooth-scrolling
   :ensure t
   :config (setq smooth-scroll-margin 6))
+#+END_SRC
+
+** [[https://github.com/ternjs/tern][tern]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package tern
+  :load-path "/home/nelson/src/github/elisp/tern/emacs"
+  :commands tern-mode)
+
+(use-package company-tern
+  :ensure t
+  :config (add-to-list 'company-backends 'company-tern))
+
+(add-hook 'js-mode-hook (lambda () (tern-mode t)))
 #+END_SRC
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
@@ -1901,6 +1923,24 @@ A gradle function to generate Javadoc for the project.
     ;; set this regex so that it knows about Play Framework SBT prompt
     (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*")
     ))
+
+(defun nl/scalatest-test-only-buffer ()
+  "Run the scalatest tests for class in the SBT process. The class name must have the postfix 'Spec' for this function to work."
+  (interactive)
+  (let ((current-point (point)) p1 p2 line spec-name)
+    (goto-char (point-min))
+    (re-search-forward "class.*Spec")
+    (setq p1 (line-beginning-position) )
+    (setq p2 (line-end-position) )
+    (setq line (buffer-substring-no-properties p1 p2))
+    (save-match-data ; is usually a good idea
+      (and (string-match "class \\(\\w+\\).* extends" line)
+           (setq spec-name (match-string 1 line))))
+    ;;(message "%s" spec-name)
+    ;; return to where cursor was
+    (goto-char current-point)
+    (sbt-command (message "test-only *%s" spec-name))
+    ))
 #+END_SRC
 
 ** SQL
@@ -2116,7 +2156,6 @@ Coverts camel case words to uppercase with underscore as delimiters.
 (when ostype-windows
     (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
 #+END_SRC
-
 ** Narrow or widen
 
 From [[http://endlessparentheses.com/emacs-narrow-or-widen-dwim.html][Artur Malabarba]]'s blog:
@@ -2157,4 +2196,32 @@ already narrowed."
 (eval-after-load 'org-src
   '(define-key org-src-mode-map
      "\C-x\C-s" #'org-edit-src-exit))
+
+(defun modi/multi-pop-to-mark (orig-fun &rest args)
+  "Call ORIG-FUN until the cursor moves.
+Try the repeated popping up to 10 times."
+  (let ((p (point)))
+    (dotimes (i 10)
+      (when (= p (point))
+        (apply orig-fun args)))))
+(advice-add 'pop-to-mark-command :around
+            #'modi/multi-pop-to-mark)
+#+END_SRC
+
+** Search symbol
+
+From [[http://endlessparentheses.com/quickly-search-for-occurrences-of-the-symbol-at-point.html?source%3Drss][Endless Parentheses blog]].
+
+#+BEGIN_SRC emacs-lisp
+(defun endless/isearch-symbol-with-prefix (p)
+  "Like isearch, unless prefix argument is provided.
+With a prefix argument P, isearch for the symbol at point."
+  (interactive "P")
+  (let ((current-prefix-arg nil))
+    (call-interactively
+     (if p #'isearch-forward-symbol-at-point
+       #'isearch-forward))))
+
+(global-set-key [remap isearch-forward]
+                #'endless/isearch-symbol-with-prefix)
 #+END_SRC
