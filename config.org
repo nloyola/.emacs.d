@@ -440,10 +440,10 @@ Make dired show directories first. Dired buffers should auto revert
 and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]).
 
 #+BEGIN_SRC emacs-lisp
-(setq dired-listing-switches "-aBhl  --group-directories-first")
+(setq dired-listing-switches "-aBhl  --group-directories-first"
+      global-auto-revert-non-file-buffers t
+      auto-revert-verbose nil)
 (add-hook 'dired-mode-hook 'auto-revert-mode)
-(setq global-auto-revert-non-file-buffers t)
-(setq auto-revert-verbose nil)
 #+END_SRC
 
 ** =ediff=
@@ -759,9 +759,7 @@ based on its name.
 (use-package color-identifiers-mode
   :ensure t
   :diminish color-identifiers-mode
-  :config
-  (progn
-    (add-hook 'after-init-hook 'global-color-identifiers-mode)))
+  :config (add-hook 'after-init-hook 'global-color-identifiers-mode))
 #+END_SRC
 
 ** [[https://github.com/company-mode/company-mode][company-mode]]
@@ -778,6 +776,14 @@ Complete anything.
     (global-set-key (kbd "M-/") 'company-complete-common)
     (use-package company-tern)
     ))
+#+END_SRC
+
+** [[https://github.com/thamer/diredful][diredful]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package diredful
+  :ensure t
+  :config (diredful-mode 1))
 #+END_SRC
 
 ** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
@@ -1270,8 +1276,7 @@ _u_: Update
   :ensure t
   :commands (js2-mode)
   :init
-  (setq js-indent-level 2
-        js2-global-externs '("define"
+  (setq js2-global-externs '("define"
                              "jasmine"
                              "describe"
                              "fdescribe"
@@ -1723,35 +1728,36 @@ A way to set up indentation for all programming modes. Taken from
 
 (defun my-common-prog-mode-settings ()
   "Enables settings common between programming language modes."
-  (progn
-    (nl/setup-indent 3) ; indent 2 spaces width
-    ;
-    ; Set tab and CR/LF keys to call their corresponding more-general
-    ; functions.  This needs to be here to override the settings of some modes
-    ; (e.g. c++-mode changes the tab key to do a re-indent).
-    ;
-    (local-set-key "\t" 'tab-to-tab-stop)
-    (local-set-key "\n" 'newline-and-indent)
-    (local-set-key "\r" 'newline-and-indent)
-    ;
-    ; Set paragraph/comment auto-formatting to wrap at column 100.
-    ;
-    (set-fill-column 100)
-    ;
-    ; Set the comment column to zero so that lisp comment lines will act like
-    ; C++ comments (i.e. line up with the code), and not automatically indent
-    ; to column 50.
-    ;
-    (setq comment-column 0)
-    (rainbow-delimiters-mode) ;; See unbalanced parens
-    (push '(">=" . ?≥) prettify-symbols-alist)
-    (push '("<=" . ?≤) prettify-symbols-alist)
-    (push '("->" . ?→) prettify-symbols-alist)
-    ))
+  (message "**** my-common-prog-mode-settings")
+  (nl/setup-indent 3) ; indent 2 spaces width
+  ;;
+  ;; Set tab and CR/LF keys to call their corresponding more-general
+  ;; functions.  This needs to be here to override the settings of some modes
+  ;; (e.g. c++-mode changes the tab key to do a re-indent).
+  ;;
+  (local-set-key "\t" 'tab-to-tab-stop)
+  (local-set-key "\n" 'newline-and-indent)
+  (local-set-key "\r" 'newline-and-indent)
+  ;;
+  ;; Set paragraph/comment auto-formatting to wrap at column 100.
+  ;;
+  (set-fill-column 100)
+  ;;
+  ;; Set the comment column to zero so that lisp comment lines will act like
+  ;; C++ comments (i.e. line up with the code), and not automatically indent
+  ;; to column 50.
+  ;;
+  (setq comment-column 0)
+  (rainbow-delimiters-mode) ;; See unbalanced parens
+  (push '(">=" . ?≥) prettify-symbols-alist)
+  (push '("<=" . ?≤) prettify-symbols-alist)
+  (push '("->" . ?→) prettify-symbols-alist)
+  )
 
 (setq makefile-mode-hook 'my-common-prog-mode-settings)
 (setq sh-mode-hook       'my-common-prog-mode-settings)
 #+END_SRC
+
 ** C / C++
 
 #+BEGIN_SRC emacs-lisp
@@ -1839,13 +1845,14 @@ A gradle function to generate Javadoc for the project.
 (add-hook 'js-mode-hook 'js2-minor-mode)
 
 (defun my-javascript-mode-hook ()
-  (setq indent-tabs-mode nil
-        js-indent-level 2)
+  (message "**** my-javascript-mode-hook")
+  (nl/setup-indent 2) ; indent 2 spaces width
+  (setq indent-tabs-mode nil)
   (local-set-key [f5] 'sbt-command)
-  (flycheck-mode 1)
-  )
+  (flycheck-mode 1))
 
 (add-hook 'js-mode-hook 'my-javascript-mode-hook)
+(add-hook 'js-mode-hook 'my-common-prog-mode-settings)
 #+END_SRC
 
 ** Perl
