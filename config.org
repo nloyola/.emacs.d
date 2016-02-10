@@ -314,6 +314,16 @@ Add =\n= to end of file if required.
 (setq require-final-newline t)
 #+END_SRC
 
+** Hi Lock
+
+Automatically cycle through the highlighting faces listed in
+~hi-lock-face-defaults~ instead of bothering the user to pick a face
+each time.
+
+#+BEGIN_SRC emacs-lisp
+(setq hi-lock-auto-select-face t)
+#+END_SRC
+
 ** Key bindings
 
 #+BEGIN_SRC emacs-lisp
@@ -1873,8 +1883,8 @@ A gradle function to generate Javadoc for the project.
   :config
   (progn
     (setq
-     scala-indent:default-run-on-strategy '3 ;; scala-indent:keywords-only-strategy
-     scala-indent:indent-value-expression nil
+     scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+     scala-indent:indent-value-expression t
      scala-indent:align-parameters t
      scala-indent:align-forms t
      scala-indent:use-javadoc-style t)
