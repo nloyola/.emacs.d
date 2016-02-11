@@ -1,27 +1,31 @@
 # -*- mode: snippet -*-
-# name: ngd
+# name: AngularJS Directive
 # key: ngd
 # --
-define([], function() {
+define(function () {
   'use strict';
 
   /**
-   * ${1:Description}
+   * ${3:Description}
    */
-  function `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`() {
+  function ${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}() {
     var directive = {
-      restrict: 'EA',
-      link: link,
-      templateUrl : ''
+      restrict: 'E',
+      scope: {},
+      bindTocontroller: {
+      },
+      templateUrl : '',
+      controller: ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))},
+      controllerAs: 'vm'
     };
+
     return directive;
+  }
 
-    function link(scope, element, attrs) {
-
-    }
+  function ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))}() {
 
   }
 
-  return `(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`;
+  return $1;
 
 });

@@ -1944,7 +1944,7 @@ A gradle function to generate Javadoc for the project.
 (defun nl/scalatest-test-only-buffer ()
   "Run the scalatest tests for class in the SBT process. The class name must have the postfix 'Spec' for this function to work."
   (interactive)
-  (let ((current-point (point)) p1 p2 line spec-name)
+  (let (((current-point (point)) p1 p2 line spec-name))
     (goto-char (point-min))
     (re-search-forward "class.*Spec")
     (setq p1 (line-beginning-position) )
