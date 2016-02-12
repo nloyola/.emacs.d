@@ -6,13 +6,13 @@ define(function () {
   'use strict';
 
   /**
-   * ${3:Description}
+   *
    */
   function ${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}() {
     var directive = {
       restrict: 'E',
       scope: {},
-      bindTocontroller: {
+      bindToController: {
       },
       templateUrl : '',
       controller: ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))},
@@ -21,6 +21,8 @@ define(function () {
 
     return directive;
   }
+
+  ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))}.$inject = [];
 
   function ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))}() {
 
