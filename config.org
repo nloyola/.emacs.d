@@ -1401,7 +1401,7 @@ TextMate like theme.
 
 We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/magnars/multiple-cursors.el/issues/105][an autoload issue]].
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
   :ensure t
   :init (require 'multiple-cursors)
