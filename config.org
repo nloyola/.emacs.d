@@ -1941,10 +1941,16 @@ A gradle function to generate Javadoc for the project.
     (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*")
     ))
 
-(defun nl/scalatest-test-only-buffer ()
+(defun nl/scalatest-test-only ()
+  (interactive)
+  (helm :sources '(helm-scala-project-test-spec))
+  )
+
+(defun nl/scalatest-test-only-this-buffer ()
   "Run the scalatest tests for class in the SBT process. The class name must have the postfix 'Spec' for this function to work."
   (interactive)
-  (let (((current-point (point)) p1 p2 line spec-name))
+  (let ((current-point (point))
+        p1 p2 line spec-name)
     (goto-char (point-min))
     (re-search-forward "class.*Spec")
     (setq p1 (line-beginning-position) )
@@ -1957,6 +1963,41 @@ A gradle function to generate Javadoc for the project.
     ;; return to where cursor was
     (goto-char current-point)
     (sbt-command (message "test-only *%s" spec-name))
+    ))
+
+(defun nl/scalatest-remove-tag()
+  "Removes a ScalaTest tag searching forward in the buffer"
+  (interactive)
+  (search-forward "taggedAs")
+  (skip-chars-backward "A-Za-z0-9")
+  (setq head-point (point))
+  (skip-chars-forward "A-Za-z0-9(\")")
+  (forward-char)
+  (setq tail-point (point))
+  (kill-region head-point tail-point))
+
+(defun nl/scalatest-find-file ()
+  "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
+  (interactive)
+  (let (p1 p2 err-line filename line-num file-with-proj-path)
+    (save-some-buffers t)
+    (setq p1 (line-beginning-position) )
+    (setq p2 (line-end-position) )
+    (setq err-line (buffer-substring-no-properties p1 p2))
+    (save-match-data ; is usually a good idea
+      (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
+           (setq filename (match-string 1 err-line)
+                 line-num (string-to-number (match-string 2 err-line))
+                 )))
+    (setq file-with-proj-path
+          (car (remove-if-not
+                (lambda (projfile)
+                  (string-match filename projfile))
+                (projectile-current-project-files))))
+    (message "%s %s" file-with-proj-path line-num)
+    (find-file-other-window (expand-file-name file-with-proj-path (projectile-project-root)))
+    (goto-char (point-min))
+    (forward-line line-num)
     ))
 #+END_SRC
 
