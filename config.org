@@ -922,6 +922,14 @@ Updte tags on command line with ~global -u~.
     (gradle-mode 1)))
 #+END_SRC
 
+** [[https://github.com/edvorg/flycheck-protobuf][flycheck-protobuf]]
+
+#+begin_src emacs-lisp
+(use-package flycheck-protobuf
+  :ensure t)
+(add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
+#+end_src
+
 ** [[https://github.com/pidu/git-timemachine][git-timemachine]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1423,6 +1431,13 @@ This package provides tagged workspaces.
   :ensure t
   :config (persp-mode))
 #+END_SRC
+
+** [[https://github.com/google/protobuf][protobuf]]
+
+#+begin_src emacs-lisp
+(use-package protobuf-mode
+  :ensure t)
+#+end_src
 
 ** [[https://github.com/bbatsov/projectile][projectile]]
 
