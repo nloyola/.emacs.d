@@ -672,8 +672,9 @@ Remember position in a file.
 
 ** =tramp=
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package tramp)
+#+BEGIN_SRC emacs-lisp
+(use-package tramp
+  :init (setq tramp-ssh-controlmaster-options ""))
 #+END_SRC
 
 ** =windmove=
