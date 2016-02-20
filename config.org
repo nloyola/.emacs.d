@@ -1869,6 +1869,7 @@ A gradle function to generate Javadoc for the project.
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'js-mode-hook 'js2-minor-mode)
+(add-hook 'js-mode-hook 'turn-on-fic-mode)
 
 (defun my-javascript-mode-hook ()
   (message "**** my-javascript-mode-hook")
@@ -1926,8 +1927,7 @@ A gradle function to generate Javadoc for the project.
 
                  (setq compilation-ask-about-save nil)
                  ))
-
-    ))
+    (add-hook 'scala-mode-hook 'turn-on-fic-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
