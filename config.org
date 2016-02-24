@@ -29,6 +29,7 @@ Then to compile and install, do the following.
 
 #+BEGIN_SRC sh
 ./configure
+make bootstrap
 make
 sudo make install
 #+END_SRC
@@ -890,16 +891,6 @@ Allow windmove to jump between frames.
     (setq flycheck-standard-error-navigation nil)))
 #+END_SRC
 
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package flycheck-protobuf
-  :config
-  (progn
-    (add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
-    )
-  ))
-#+END_SRC
-
 ** [[https://github.com/leoliu/ggtags][ggtags]]
 
 Generate tags on command line with ~gtags~.
@@ -960,6 +951,13 @@ Required for gradle build files.
 (use-package groovy-mode
   :ensure t)
 #+END_SRC
+** [[*][grunt]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package grunt
+  :ensure t)
+#+END_SRC
+
 ** [[https://github.com/kai2nenobu/guide-key][guide-key]]
 
 Guide the following key bindings automatically and dynamically.
@@ -1144,7 +1142,7 @@ Included with Projectile.
 #+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
   :ensure t
-  :commands (helm-projectile-on)
+  :commands (helm-projectile)
   :bind (("C-c p h" . helm-projectile))
   :config
   (progn
@@ -1431,13 +1429,6 @@ This package provides tagged workspaces.
   :ensure t
   :config (persp-mode))
 #+END_SRC
-
-** [[https://github.com/google/protobuf][protobuf]]
-
-#+begin_src emacs-lisp
-(use-package protobuf-mode
-  :ensure t)
-#+end_src
 
 ** [[https://github.com/bbatsov/projectile][projectile]]
 

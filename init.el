@@ -52,41 +52,45 @@
 ;;
 ;; see http://emacsninja.com/posts/failing-gracefully.html
 
-(let (errors)
-  (with-temp-buffer
-    (insert-file-contents "~/.emacs.d/config.org")
-    (goto-char (point-min))
-    (let (heading section-decl src-beg src-end)
-      (while (not (eobp))
-        (forward-line 1)
-        (pl-parse
-         (pl-re "^\\*\\{1,3\\} +.*$" :beg)
-         (setq heading (match-string 0)))
-        (pl-parse
-         (pl-re "^#\\+BEGIN_SRC +emacs-lisp.*$" :beg)
-         (setq src-beg (match-end 0))
-         (setq section-decl (match-string 0))
-         (pl-until
-          (pl-re "\n#\\+END_SRC$" :end))
-         (setq src-end (match-beginning 0))
-
-         (if (string-match ":tangle +no" section-decl)
-             (message "Skipped: %s" heading)
-           (condition-case error
-               (progn
-                 (message "%s" heading)
-                 (with-timer (eval-region src-beg src-end)))
-             (error
-              (push (format "%s for:\n%s\n\n---\n"
-                            (error-message-string error)
-                            (buffer-substring src-beg src-end))
-                    errors)))
-             )))))
-  (when errors
-    (with-current-buffer (get-buffer-create "*init errors*")
-      (insert (format "%i error(s) found\n\n" (length errors)))
-      (dolist (error (nreverse errors))
-        (insert error "\n"))
+(defun load-config-org()
+  (let (errors)
+    (with-temp-buffer
+      (insert-file-contents "~/.emacs.d/config.org")
       (goto-char (point-min))
-      (special-mode))
-    (setq initial-buffer-choice (lambda () (get-buffer "*init errors*")))))
+      (let (heading section-decl src-beg src-end)
+	(while (not (eobp))
+	  (forward-line 1)
+	  (pl-parse
+	   (pl-re "^\\*\\{1,3\\} +.*$" :beg)
+	   (setq heading (match-string 0)))
+	  (pl-parse
+	   (pl-re "^#\\+BEGIN_SRC +emacs-lisp.*$" :beg)
+	   (setq src-beg (match-end 0))
+	   (setq section-decl (match-string 0))
+	   (pl-until
+	    (pl-re "\n#\\+END_SRC$" :end))
+	   (setq src-end (match-beginning 0))
+
+	   (if (string-match ":tangle +no" section-decl)
+	       (message "Skipped: %s" heading)
+	     (condition-case error
+		 (progn
+		   (message "%s" heading)
+		   (with-timer (eval-region src-beg src-end)))
+	       (error
+		(push (format "%s for:\n%s\n\n---\n"
+			      (error-message-string error)
+			      (buffer-substring src-beg src-end))
+		      errors)))
+             )))))
+    (when errors
+      (with-current-buffer (get-buffer-create "*init errors*")
+	(insert (format "%i error(s) found\n\n" (length errors)))
+	(dolist (error (nreverse errors))
+	  (insert error "\n"))
+	(goto-char (point-min))
+	(special-mode))
+      (setq initial-buffer-choice (lambda () (get-buffer "*init errors*"))))))
+
+(load-config-org)
+
