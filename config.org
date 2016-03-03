@@ -1297,6 +1297,7 @@ _u_: Update
                              "jasmine"
                              "describe"
                              "fdescribe"
+"fail"
                              "beforeEach"
                              "afterEach"
                              "inject"
@@ -1415,9 +1416,11 @@ We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/
   :bind (("C-S-c C-S-c" . mc/edit-lines)
          ("C->"         . mc/mark-next-like-this)
          ("C-<"         . mc/mark-previous-like-this)
+         ("C-M->"       . mc/unmark-next-like-this)
+         ("C-M-<"       . mc/unmark-previous-like-this)
          ("C-c C-<"     . mc/mark-all-like-this)
          ("C-!"         . mc/mark-next-symbol-like-this)
-         ("s-d"         . mc/mark-all-dwim)))
+         ("C-x C-m"     . mc/mark-all-dwim)))
 #+END_SRC
 
 ** [[https://github.com/nex3/perspective-el][perspective]]
@@ -1745,7 +1748,6 @@ A way to set up indentation for all programming modes. Taken from
 
 (defun my-common-prog-mode-settings ()
   "Enables settings common between programming language modes."
-  (message "**** my-common-prog-mode-settings")
   (nl/setup-indent 3) ; indent 2 spaces width
   ;;
   ;; Set tab and CR/LF keys to call their corresponding more-general
@@ -1863,7 +1865,6 @@ A gradle function to generate Javadoc for the project.
 (add-hook 'js-mode-hook 'turn-on-fic-mode)
 
 (defun my-javascript-mode-hook ()
-  (message "**** my-javascript-mode-hook")
   (nl/setup-indent 2) ; indent 2 spaces width
   (setq indent-tabs-mode nil)
   (local-set-key [f5] 'sbt-command)
