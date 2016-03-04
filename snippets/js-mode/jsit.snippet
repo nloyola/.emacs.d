@@ -2,6 +2,6 @@
 # name: jsit
 # key: jsit
 # --
-it('$1', function() {
-  jasmine.getEnv().fail();
+it('${1:name}', function() {
+  fail('${2:should fail}');
 });
