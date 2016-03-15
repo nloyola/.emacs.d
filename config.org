@@ -1352,6 +1352,7 @@ command line. Use an easy keybinding to access magit.
 #+BEGIN_SRC emacs-lisp
   (use-package magit
     :ensure t
+    :bind (("C-x g" . magit-status))
     :config
     (progn
      (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
@@ -1480,6 +1481,19 @@ http://batsov.com/projectile/
     (setq powerline-color2 "#333333")
     (powerline-default-theme)
     ))
+#+END_SRC
+
+** [[https://github.com/bmag/helm-purpose][purpose]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package window-purpose
+  :ensure t
+  :commands purpose-mode
+  :config
+  (progn
+    (add-to-list 'purpose-user-mode-purposes '(scala-mode2 . scala))
+    (add-to-list 'purpose-user-mode-purposes '(sbt-mode . scala))
+    (purpose-compile-user-configuration)))
 #+END_SRC
 
 ** [[https://melpa.org/#/python-mode][python-mode]]

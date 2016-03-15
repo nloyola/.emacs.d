@@ -15,3 +15,5 @@
 ac-comphist.dat
 my-password.el.gpg
 .hl-save
+/layouts
+projectile.cache
