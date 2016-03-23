@@ -858,13 +858,14 @@ strings.
 #+BEGIN_SRC emacs-lisp
 (use-package fic-mode
   :ensure t
+  :commands fic-mode
   :config
   (progn
-    (add-hook 'c++-mode-hook 'turn-on-fic-mode)
-    (add-hook 'c-mode-hook 'turn-on-fic-mode)
-    (add-hook 'java-mode-hook 'turn-on-fic-mode)
-    (add-hook 'vala-mode-hook 'turn-on-fic-mode)
-    (add-hook 'python-mode-hook 'turn-on-fic-mode)
+    (add-hook 'c++-mode-hook 'fic-mode)
+    (add-hook 'c-mode-hook 'fic-mode)
+    (add-hook 'java-mode-hook 'fic-mode)
+    (add-hook 'vala-mode-hook 'fic-mode)
+    (add-hook 'python-mode-hook 'fic-mode)
     ))
 #+END_SRC
 
@@ -1610,6 +1611,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :config (add-to-list 'company-backends 'company-tern))
 
+(message "********************** adding tern hook")
 (add-hook 'js-mode-hook (lambda () (tern-mode t)))
 #+END_SRC
 
@@ -1876,7 +1878,7 @@ A gradle function to generate Javadoc for the project.
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'js-mode-hook 'js2-minor-mode)
-(add-hook 'js-mode-hook 'turn-on-fic-mode)
+(add-hook 'js-mode-hook 'fic-mode)
 
 (defun my-javascript-mode-hook ()
   (nl/setup-indent 2) ; indent 2 spaces width
@@ -1933,7 +1935,7 @@ A gradle function to generate Javadoc for the project.
 
                  (setq compilation-ask-about-save nil)
                  ))
-    (add-hook 'scala-mode-hook 'turn-on-fic-mode)))
+    (add-hook 'scala-mode-hook 'fic-mode)))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
