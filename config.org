@@ -251,6 +251,12 @@ the buffer which I haven't saved.
 (global-auto-revert-mode 1)
 #+END_SRC
 
+Turn this off for better perfomance since we are using Magit.
+
+#+BEGIN_SRC emacs-lisp
+(setq vc-handled-backends nil)
+#+END_SRC
+
 ** Disabled features
 
 Turn off auto-save.
@@ -1884,7 +1890,7 @@ A gradle function to generate Javadoc for the project.
   (nl/setup-indent 2) ; indent 2 spaces width
   (setq indent-tabs-mode nil)
   (local-set-key [f5] 'sbt-command)
-  (flycheck-mode 1))
+  (flycheck-mode t))
 
 (add-hook 'js-mode-hook 'my-javascript-mode-hook)
 (add-hook 'js-mode-hook 'my-common-prog-mode-settings)
