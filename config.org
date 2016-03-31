@@ -1889,7 +1889,6 @@ A gradle function to generate Javadoc for the project.
 (defun my-javascript-mode-hook ()
   (nl/setup-indent 2) ; indent 2 spaces width
   (setq indent-tabs-mode nil)
-  (local-set-key [f5] 'sbt-command)
   (flycheck-mode t))
 
 (add-hook 'js-mode-hook 'my-javascript-mode-hook)
