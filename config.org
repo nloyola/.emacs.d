@@ -1970,11 +1970,12 @@ A gradle function to generate Javadoc for the project.
     (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*")
     ))
 
-(defun nl/sbt-next-error ()
-  (interactive)
-  (sbt:switch-to-active-sbt-buffer)
-  (next-error)
-  )
+(defun nl/sbt-next-error (orig-fun &rest args)
+  (if (derived-mode-p 'scala-mode)
+      (sbt:switch-to-active-sbt-buffer))
+  (apply orig-fun args))
+
+(advice-add 'next-error :around #'nl/sbt-next-error)
 
 (defun nl/scalatest-test-only ()
   (interactive)
