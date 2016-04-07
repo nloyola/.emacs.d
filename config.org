@@ -1153,17 +1153,7 @@ Included with Projectile.
   :bind (("C-c p h" . helm-projectile))
   :config
   (progn
-    (setq projectile-remember-window-configs t
-          projectile-switch-project-action 'projectile-dired
-          projectile-completion-system 'default
-          projectile-enable-caching nil
-          compilation-read-command t ; do prompt for a compilation command
-          projectile-use-git-grep t
-          )
-
-    (projectile-global-mode)
-    (setq projectile-completion-system 'helm)
-    ))
+    (setq compilation-read-command t))) ; do prompt for a compilation command
 #+END_SRC
 
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
@@ -1457,7 +1447,7 @@ http://batsov.com/projectile/
     :config
     (progn
       (setq projectile-indexing-method 'alien
-            projectile-remember-window-configs t
+            projectile-remember-window-configs nil
             projectile-switch-project-action 'projectile-dired
             projectile-completion-system 'default
             projectile-enable-caching nil)
@@ -1492,7 +1482,7 @@ http://batsov.com/projectile/
 
 ** [[https://github.com/bmag/helm-purpose][purpose]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package window-purpose
   :ensure t
   :commands purpose-mode
@@ -1545,9 +1535,14 @@ initial =*scratch*= buffer.
 
 ** [[https://github.com/wasamasa/shackle][shackle]]
 
+#+BEGIN_QUOTE
 Declarative popup window rules.
+#+END_QUOTE
 
-#+BEGIN_SRC emacs-lisp
+2016-04-07 No longer using this package since it makes ~sbt-mode~ behave
+weird when using ~next-error~.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package shackle
   :ensure t
   :config
@@ -1625,7 +1620,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 Allows for transposing window arrangements.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package transpose-frame
   :ensure t
   :bind ("S-M-t" . transpose-frame))
@@ -1970,12 +1965,12 @@ A gradle function to generate Javadoc for the project.
     (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*")
     ))
 
-(defun nl/sbt-next-error (orig-fun &rest args)
-  (if (derived-mode-p 'scala-mode)
-      (sbt:switch-to-active-sbt-buffer))
-  (apply orig-fun args))
+;; (defun nl/sbt-next-error (orig-fun &rest args)
+;;   (if (derived-mode-p 'scala-mode)
+;;       (sbt:switch-to-active-sbt-buffer))
+;;   (apply orig-fun args))
 
-(advice-add 'next-error :around #'nl/sbt-next-error)
+;; (advice-add 'next-error :around #'nl/sbt-next-error)
 
 (defun nl/scalatest-test-only ()
   (interactive)
@@ -2170,13 +2165,13 @@ current buffer at the current location. I define my own format for
 these.
 
 #+BEGIN_SRC emacs-lisp
-(defconst nl/dts-format-string "%e %b %Y %H:%M:%S"
+(defconst nl/dts-format-string "%Y-%m-%d %H:%M:%S"
   "A string specifying the format of the date-time stamp.
 Refer to the documentation for 'format-time-string' for an explanation of the
 meta characters available for use in this string.  Non-meta characters will
 be inserted into the buffer without interpretation.")
 
-(defvar nl/ds-format-string "%b%e/%Y"
+(defvar nl/ds-format-string "%Y-%m-%d"
   "A string specifying the format of the date stamp.
 Refer to the documentation for 'format-time-string' for an explanation of the
 meta characters available for use in this string.  Non-meta characters will
