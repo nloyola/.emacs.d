@@ -998,35 +998,35 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
           (helm-projectile-on)
           (helm-flx-mode +1)
 
-          (setq helm-ff-newfile-prompt-p nil
-                ;;helm-M-x-fuzzy-match t ; using flx for now
-                helm-google-suggest-use-curl-p t
-                ;; scroll 4 lines other window using M-<next>/M-<prior>
-                helm-scroll-amount 4
-                ;; do not display invisible candidates
-                helm-quick-update t
-                ;; be idle for this many seconds, before updating in delayed sources.
-                helm-idle-delay 0.01
-                ;; be idle for this many seconds, before updating candidate buffer
-                helm-input-idle-delay 0.01
-                ;; search for library in `require` and `declare-function` sexp.
-                helm-ff-search-library-in-sexp t
+          (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
+                                                        ; not occupy whole other window
+                helm-ff-newfile-prompt-p nil
+                ;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
+                helm-scroll-amount 4                    ; scroll 4 lines other window using
+                                                        ; M-<next>/M-<prior>
+                ;helm-quick-update t                     ; do not display invisible candidates
+                ;helm-idle-delay 0.01                    ; be idle for this many seconds, before
+                                                        ; updating in delayed sources.
+                ;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
+                                                        ; updating candidate buffer
+                helm-ff-search-library-in-sexp t        ; search for library in `require` and
+                                                        ; `declare-function` sexp.
 
-                helm-buffers-favorite-modes (append helm-buffers-favorite-modes
-                                                    '(picture-mode artist-mode))
+                ;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
+                ;                                    '(picture-mode artist-mode))
                 ;; limit the number of displayed canidates
-                helm-candidate-number-limit 100
+                ;helm-candidate-number-limit 100
                 ;; show all candidates when set to 0
-                helm-M-x-requires-pattern 0
+                ;helm-M-x-requires-pattern 0
                 helm-ff-file-name-history-use-recentf t
                 ;; move to end or beginning of source when reaching top or bottom of source.
                 helm-move-to-line-cycle-in-source t
                 ;; Needed in helm-buffers-list
-                ido-use-virtual-buffers t
+                ;ido-use-virtual-buffers t
                 ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
-                helm-buffers-fuzzy-matching t
+                ;helm-buffers-fuzzy-matching t
                 ;; truncate long lines
-                helm-truncate-lines t
+                ;helm-truncate-lines t
                 helm-autoresize-min-height 30
                 helm-autoresize-max-height 30
                 helm-display-header-line nil
@@ -1539,22 +1539,17 @@ initial =*scratch*= buffer.
 Declarative popup window rules.
 #+END_QUOTE
 
-2016-04-07 No longer using this package since it makes ~sbt-mode~ behave
-weird when using ~next-error~.
-
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package shackle
   :ensure t
   :config
   (progn
     (setq shackle-rules
-          '((svg-2048-mode :same t)
-            ("*Help*" :align t :ratio 0.4 :select t)
+          '(("*Help*" :align t :ratio 0.4 :select t)
             ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
-            ((compilation-mode "\\`\\*firestarter\\*\\'"
-                               "\\`\\*magit-diff: .*?\\*\\'") :regexp t :noselect t)
+            ;;(compilation-mode :noselect t)
             ((inferior-scheme-mode "*shell*" "*eshell*") :popup t))
-          shackle-default-rule '(:select t)
+          shackle-default-rule '(:same t)
           shackle-inhibit-window-quit-on-same-windows t)
     (shackle-mode)
     ))
@@ -1612,7 +1607,6 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :config (add-to-list 'company-backends 'company-tern))
 
-(message "********************** adding tern hook")
 (add-hook 'js-mode-hook (lambda () (tern-mode t)))
 #+END_SRC
 
