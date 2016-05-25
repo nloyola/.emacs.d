@@ -1,0 +1,27 @@
+# -*- mode: snippet -*-
+# name: AngularJS Directive
+# key: ngcomp
+# --
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
+ */
+define(function () {
+  'use strict';
+
+  ${1:`(upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))`}.$inject = [];
+
+  /**
+   * $0
+   */
+  function ${1:$(yas-text)}() {
+
+  }
+
+  return {
+    templateUrl : '',
+    controller: ${1:$(yas-text)},
+    bindings: {
+    }
+  };
+});

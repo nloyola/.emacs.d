@@ -804,6 +804,21 @@ Complete anything.
   :config (diredful-mode 1))
 #+END_SRC
 
+** [[https://github.com/jacktasia/dumb-jump/blob/master/README.md][dumb-jump]]
+
+#+BEGIN_QUOTE
+Dumb Jump is an Emacs "jump to definition" package with support for
+multiple programming languages that favors "just working". This means
+minimal -- and ideally zero -- configuration with absolutely no stored
+indexes (TAGS) or persistent background processes.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package dumb-jump
+  :ensure t)
+
+#+END_SRC
+
 ** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
 
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
@@ -1450,10 +1465,15 @@ http://batsov.com/projectile/
             projectile-remember-window-configs nil
             projectile-switch-project-action 'projectile-dired
             projectile-completion-system 'default
-            projectile-enable-caching nil)
+            projectile-enable-caching nil
+            projectile-create-missing-test-files t)
 
       (projectile-global-mode)
       (setq projectile-completion-system 'helm)
+
+      (def-projectile-commander-method ?d
+        "Open project root in dired."
+        (projectile-dired))
 
       (use-package ag
         :commands ag
@@ -1547,9 +1567,11 @@ Declarative popup window rules.
     (setq shackle-rules
           '(("*Help*" :align t :ratio 0.4 :select t)
             ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
-            ;;(compilation-mode :noselect t)
-            ((inferior-scheme-mode "*shell*" "*eshell*") :popup t))
-          shackle-default-rule '(:same t)
+            ;;("\\*sbt\\*.*" :regexp t :other t)
+            ("\\*sbt\\*.*" :regexp t :other t)
+            ;;(compilation-mode :popup t)
+            (("*shell*" "*eshell*") :popup t))
+          shackle-default-rule '(:select t)
           shackle-inhibit-window-quit-on-same-windows t)
     (shackle-mode)
     ))
@@ -1600,14 +1622,15 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 #+BEGIN_SRC emacs-lisp
 (use-package tern
+  :ensure t
   :load-path "/home/nelson/src/github/elisp/tern/emacs"
+  :diminish tern-mode
+  :init (add-hook 'js-mode-hook (lambda () (tern-mode t)))
   :commands tern-mode)
 
 (use-package company-tern
   :ensure t
-  :config (add-to-list 'company-backends 'company-tern))
-
-(add-hook 'js-mode-hook (lambda () (tern-mode t)))
+  :init (add-to-list 'company-backends 'company-tern))
 #+END_SRC
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
@@ -1877,6 +1900,9 @@ A gradle function to generate Javadoc for the project.
 
 (defun my-javascript-mode-hook ()
   (nl/setup-indent 2) ; indent 2 spaces width
+  (setq comment-multi-line t)
+  (define-key js-mode-map [remap indent-new-comment-line]
+    'c-indent-new-comment-line)
   (setq indent-tabs-mode nil)
   (flycheck-mode t))
 
@@ -1894,11 +1920,20 @@ A gradle function to generate Javadoc for the project.
 (add-hook 'cperl-mode-hook 'my-cperl-setup)
 #+END_SRC
 
+** PHP
+
+#+BEGIN_SRC emacs-lisp
+(use-package php-mode
+  :ensure t)
+#+END_SRC
+
 ** Scala
 
 #+BEGIN_SRC emacs-lisp
-(use-package scala-mode2
+(use-package scala-mode
   :ensure t
+  :interpreter
+  ("scala" . scala-mode)
   :config
   (progn
     (setq
@@ -2015,7 +2050,7 @@ A gradle function to generate Javadoc for the project.
     (message "%s %s" file-with-proj-path line-num)
     (find-file-other-window (expand-file-name file-with-proj-path (projectile-project-root)))
     (goto-char (point-min))
-    (forward-line line-num)
+    (forward-line (- line-num 1))
     ))
 #+END_SRC
 
@@ -2226,12 +2261,42 @@ Coverts camel case words to uppercase with underscore as delimiters.
   (upcase-region (region-beginning)(region-end)))
 #+END_SRC
 
-** Windows Font
+** Windows
+
+*** Functions
+
+Views the same file side by side:
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/frame-grow-horizontally ()
+  "Set the size and position of the Emacs window."
+  (interactive)
+  (let ((frame (selected-frame)))
+    (set-frame-size frame (* 2 (frame-width)) (frame-height))
+    ))
+
+(defun nl/frame-shrink-horizontally ()
+  "Set the size and position of the Emacs window."
+  (interactive)
+  (let ((frame (selected-frame)))
+    (set-frame-size frame (/ (frame-width) 2) (frame-height))
+    ))
+
+(defun nl/split-view-same-file ()
+  (interactive)
+  (windmove-right)
+  (delete-window)
+  (split-window-right))
+#+END_SRC
+
+*** Font
 
 #+BEGIN_SRC emacs-lisp
 (when ostype-windows
     (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
 #+END_SRC
+
+
 ** Narrow or widen
 
 From [[http://endlessparentheses.com/emacs-narrow-or-widen-dwim.html][Artur Malabarba]]'s blog:
