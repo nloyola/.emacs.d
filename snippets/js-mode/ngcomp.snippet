@@ -9,19 +9,22 @@
 define(function () {
   'use strict';
 
-  ${1:`(upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))`}.$inject = [];
+  var component = {
+    templateUrl : '',
+    controller: ${1:$(yas-text)},
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
+
+  ${1:$(yas-text)}.$inject = [];
 
   /**
    * $0
    */
-  function ${1:$(yas-text)}() {
+  function ${1:`(upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))`}() {
 
   }
 
-  return {
-    templateUrl : '',
-    controller: ${1:$(yas-text)},
-    bindings: {
-    }
-  };
+  return component;
 });
