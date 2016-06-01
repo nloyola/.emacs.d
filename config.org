@@ -1003,16 +1003,16 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
-  :commands (helm-config helm-eshell helm-files helm-grep helm-projectile)
+  :after (helm-projectile)
+  :commands (helm-config helm-eshell helm-files helm-grep)
   :diminish helm-mode
   :init (progn
           ;; must set before helm-config, otherwise helm uses the default
           ;; prefix "C-x c", which is inconvenient because you can
           ;; accidentially press "C-x C-c"
           (setq helm-command-prefix-key "C-c h")
-          (helm-projectile-on)
           (helm-flx-mode +1)
-
+          (helm-projectile-on)
           (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
                                                         ; not occupy whole other window
                 helm-ff-newfile-prompt-p nil
@@ -1128,7 +1128,10 @@ stop:
 ** [[https://github.com/syohex/emacs-helm-ag][helm-ag]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package helm-ag :ensure t :commands helm-ag)
+(use-package helm-ag
+  :ensure t
+  :after (helm)
+  :commands helm-ag)
 #+END_SRC
 
 ** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
@@ -1256,46 +1259,7 @@ short bindings with a common prefix - a Hydra.
       "zoom"
       ("g" text-scale-increase "in")
       ("l" text-scale-decrease "out"))
-    )
-
-  (defhydra hydra-eclim (:color teal
-                                :hint nil)
-    "
-Eclim:
- ╭─────────────────────────────────────────────────────┐
- │ Java                                                │       Problems
-╭┴─────────────────────────────────────────────────────┴────────────────────────────────────╯
-  _d_: Show Doc             _i_: Implement (Override)          _p_: Show Problems
-  _g_: Make getter/setter  _fd_: Find Declarations             _c_: Show Corrections
-  _o_: Organize Imports    _fr_: Find References               _r_: Buffer Refresh
-  _h_: Hierarchy            _R_: Refactor
-  _s_: Semantic
-Project
-──────────────────
-_j_: Jump to proj
-_b_: Create
-_k_: Import Proj
-_u_: Update
-"
-    ("d"   eclim-java-show-documentation-for-current-element)
-    ("g"   eclim-java-generate-getter-and-setter)
-    ("o"   eclim-java-import-organize)
-    ("h"   eclim-java-call-hierarchy)
-    ("s"   helm-semantic)
-    ("i"   eclim-java-implement)
-    ("fd"  eclim-java-find-declaration)
-    ("fr"  eclim-java-find-references)
-    ("R"   eclim-java-refactor-rename-symbol-at-point)
-    ("p"   eclim-problems)
-    ("c"   eclim-problems-correct)
-    ("r"   eclim-problems-buffer-refresh)
-    ("j"   eclim-project-goto)
-    ("b"   eclim-project-create)
-    ("k"   eclim-project-import)
-    ("u"   (lambda () (interactive) (eclim-project-update (eclim-project-name))))
-    ("q"   nil "cancel" :color blue))
-
-  (define-key eclim-mode-map (kbd "C-c e") 'hydra-eclim/body))
+    ))
 #+END_SRC
 
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
@@ -1455,29 +1419,29 @@ http://batsov.com/projectile/
 
 
 #+BEGIN_SRC emacs-lisp
-  (use-package projectile
-    :ensure t
-    :diminish projectile-mode
-    :commands projectile-mode
-    :config
-    (progn
-      (setq projectile-indexing-method 'alien
-            projectile-remember-window-configs nil
-            projectile-switch-project-action 'projectile-dired
-            projectile-completion-system 'default
-            projectile-enable-caching nil
-            projectile-create-missing-test-files t)
+(use-package projectile
+  :ensure t
+  :diminish projectile-mode
+  :commands projectile-mode
+  :config
+  (progn
+    (setq projectile-indexing-method 'alien
+          projectile-remember-window-configs nil
+          projectile-switch-project-action 'projectile-dired
+          projectile-completion-system 'default
+          projectile-enable-caching nil
+          projectile-create-missing-test-files t)
 
-      (projectile-global-mode)
-      (setq projectile-completion-system 'helm)
+    (projectile-global-mode)
+    (setq projectile-completion-system 'helm)
 
-      (def-projectile-commander-method ?d
-        "Open project root in dired."
-        (projectile-dired))
+    (def-projectile-commander-method ?d
+      "Open project root in dired."
+      (projectile-dired))
 
-      (use-package ag
-        :commands ag
-        :ensure t)))
+    (use-package ag
+      :commands ag
+      :ensure t)))
 #+END_SRC
 
 ** [[https://github.com/milkypostman/powerline][powerline]]
@@ -2214,6 +2178,7 @@ date-time stamp."
   (insert (format-time-string nl/ds-format-string (current-time))))
 
 #+END_SRC
+
 ** Journal
 
 I keep notes in an org-mode file in my Dropbox folder. When I add
@@ -2231,6 +2196,7 @@ something to it in automatially inserts a time stamp.
   (insert "\n")
   )
 #+END_SRC
+
 ** Occur
 
 The following function for ~occur-dwim~ is taken from [[https://github.com/abo-abo][Oleh Krehel]] from
@@ -2282,11 +2248,21 @@ Views the same file side by side:
     (set-frame-size frame (/ (frame-width) 2) (frame-height))
     ))
 
+(defhydra hydra-nl-frame-resize (:hint nil)
+  "Frame resize"
+  ("g" nl/frame-grow-horizontally "grow" :color blue)
+  ("s" nl/frame-shrink-horizontally "shrink" :color blue))
+
+(global-set-key [f9] 'hydra-nl-frame-resize/body)
+
 (defun nl/split-view-same-file ()
   (interactive)
   (windmove-right)
   (delete-window)
-  (split-window-right))
+  (split-window-right)
+  (windmove-right))
+
+(global-set-key [S-f9] 'nl/split-view-same-file)
 #+END_SRC
 
 *** Font
