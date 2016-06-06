@@ -1003,6 +1003,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
+  :pin melpa-stable
   :after (helm-projectile)
   :commands (helm-config helm-eshell helm-files helm-grep)
   :diminish helm-mode
@@ -1147,7 +1148,31 @@ stop:
 ** [[https://github.com/PythonNut/helm-flx][helm-flx]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package helm-flx :ensure t :commands helm-flx-mode)
+(use-package helm-flx
+  :ensure t
+  :after (helm)
+  :commands helm-flx-mode
+  :init (progn
+          (helm-flx-mode +1)
+
+          ;; From: https://github.com/hatschipuh/helm-better-defaults
+          ;;
+          (defun my-helm-make-source (f &rest args)
+            (nconc args '(:fuzzy-match t))
+            (apply f args))
+
+          (advice-add 'helm-make-source :around 'my-helm-make-source)
+          ;;
+          ;; garbage collections
+          (defun my-minibuffer-setup-hook ()
+            (setq gc-cons-threshold most-positive-fixnum))
+
+          (defun my-minibuffer-exit-hook ()
+            (setq gc-cons-threshold 800000))
+
+          (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
+          (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
+          ))
 #+END_SRC
 
 ** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
