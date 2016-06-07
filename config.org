@@ -1003,56 +1003,56 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
-  :pin melpa-stable
-  :after (helm-projectile)
+  :after (helm-flx)
   :commands (helm-config helm-eshell helm-files helm-grep)
   :diminish helm-mode
-  :init (progn
-          ;; must set before helm-config, otherwise helm uses the default
-          ;; prefix "C-x c", which is inconvenient because you can
-          ;; accidentially press "C-x C-c"
-          (setq helm-command-prefix-key "C-c h")
-          (helm-flx-mode +1)
-          (helm-projectile-on)
-          (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
-                                                        ; not occupy whole other window
-                helm-ff-newfile-prompt-p nil
-                ;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
-                helm-scroll-amount 4                    ; scroll 4 lines other window using
-                                                        ; M-<next>/M-<prior>
-                ;helm-quick-update t                     ; do not display invisible candidates
-                ;helm-idle-delay 0.01                    ; be idle for this many seconds, before
-                                                        ; updating in delayed sources.
-                ;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
-                                                        ; updating candidate buffer
-                helm-ff-search-library-in-sexp t        ; search for library in `require` and
-                                                        ; `declare-function` sexp.
+  :init
+  (progn
+    ;; must set before helm-config, otherwise helm uses the default
+    ;; prefix "C-x c", which is inconvenient because you can
+    ;; accidentially press "C-x C-c"
+    (setq helm-command-prefix-key "C-c h")
+    (helm-flx-mode +1)
+    (helm-projectile-on)
+    (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
+          ;; not occupy whole other window
+          helm-ff-newfile-prompt-p nil
+          ;;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
+          helm-scroll-amount 4                    ; scroll 4 lines other window using
+          ;; M-<next>/M-<prior>
+          ;;helm-quick-update t                     ; do not display invisible candidates
+          ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
+          ;; updating in delayed sources.
+          ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
+          ;; updating candidate buffer
+          helm-ff-search-library-in-sexp t        ; search for library in `require` and
+          ;; `declare-function` sexp.
 
-                ;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
-                ;                                    '(picture-mode artist-mode))
-                ;; limit the number of displayed canidates
-                ;helm-candidate-number-limit 100
-                ;; show all candidates when set to 0
-                ;helm-M-x-requires-pattern 0
-                helm-ff-file-name-history-use-recentf t
-                ;; move to end or beginning of source when reaching top or bottom of source.
-                helm-move-to-line-cycle-in-source t
-                ;; Needed in helm-buffers-list
-                ;ido-use-virtual-buffers t
-                ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
-                ;helm-buffers-fuzzy-matching t
-                ;; truncate long lines
-                ;helm-truncate-lines t
-                helm-autoresize-min-height 30
-                helm-autoresize-max-height 30
-                helm-display-header-line nil
-                helm-buffer-max-length 45
-                helm-yas-display-key-on-candidate t)
+          ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
+          ;;                                    '(picture-mode artist-mode))
+          ;; limit the number of displayed canidates
+          ;;helm-candidate-number-limit 100
+          ;; show all candidates when set to 0
+          ;;helm-M-x-requires-pattern 0
+          helm-ff-file-name-history-use-recentf t
+          ;; move to end or beginning of source when reaching top or bottom of source.
+          helm-move-to-line-cycle-in-source t
+          ;; Needed in helm-buffers-list
+          ;;ido-use-virtual-buffers t
+          ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
+          ;;helm-buffers-fuzzy-matching t
+          ;; truncate long lines
+          ;;helm-truncate-lines t
+          helm-autoresize-min-height 30
+          helm-autoresize-max-height 30
+          helm-display-header-line nil
+          helm-buffer-max-length 45
+          helm-yas-display-key-on-candidate t)
 
-          ;; Save current position to mark ring when jumping to a different place
-          (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
-          (helm-mode)
-          (helm-autoresize-mode 1))
+    ;; Save current position to mark ring when jumping to a different place
+    (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
+    (helm-mode)
+    (helm-autoresize-mode 1))
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
@@ -1131,7 +1131,6 @@ stop:
 #+BEGIN_SRC emacs-lisp
 (use-package helm-ag
   :ensure t
-  :after (helm)
   :commands helm-ag)
 #+END_SRC
 
@@ -1150,29 +1149,29 @@ stop:
 #+BEGIN_SRC emacs-lisp
 (use-package helm-flx
   :ensure t
-  :after (helm)
   :commands helm-flx-mode
-  :init (progn
-          (helm-flx-mode +1)
+  :init
+  (progn
+    (helm-flx-mode +1)
 
-          ;; From: https://github.com/hatschipuh/helm-better-defaults
-          ;;
-          (defun my-helm-make-source (f &rest args)
-            (nconc args '(:fuzzy-match t))
-            (apply f args))
+    ;; From: https://github.com/hatschipuh/helm-better-defaults
+    ;;
+    (defun my-helm-make-source (f &rest args)
+      (nconc args '(:fuzzy-match t))
+      (apply f args))
 
-          (advice-add 'helm-make-source :around 'my-helm-make-source)
-          ;;
-          ;; garbage collections
-          (defun my-minibuffer-setup-hook ()
-            (setq gc-cons-threshold most-positive-fixnum))
+    (advice-add 'helm-make-source :around 'my-helm-make-source)
+    ;;
+    ;; garbage collections
+    (defun my-minibuffer-setup-hook ()
+      (setq gc-cons-threshold most-positive-fixnum))
 
-          (defun my-minibuffer-exit-hook ()
-            (setq gc-cons-threshold 800000))
+    (defun my-minibuffer-exit-hook ()
+      (setq gc-cons-threshold 800000))
 
-          (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
-          (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
-          ))
+    (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
+    (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
+    ))
 #+END_SRC
 
 ** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
@@ -1192,6 +1191,7 @@ Included with Projectile.
 #+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
   :ensure t
+  :after (projectile)
   :commands (helm-projectile)
   :bind (("C-c p h" . helm-projectile))
   :config
@@ -1911,7 +1911,7 @@ A gradle function to generate Javadoc for the project.
 
 ** PHP
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package php-mode
   :ensure t)
 #+END_SRC

@@ -13,6 +13,7 @@
 ;;; Set up package
 (require 'package)
 (add-to-list 'package-archives
+             ;;'("melpa-stable" . "http://stable.melpa.org/packages/") t)
              '("melpa" . "http://melpa.org/packages/") t)
 (package-initialize)
 
@@ -93,4 +94,3 @@
       (setq initial-buffer-choice (lambda () (get-buffer "*init errors*"))))))
 
 (load-config-org)
-
