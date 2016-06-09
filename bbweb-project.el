@@ -1,8 +1,8 @@
-;;; bbweb-project --- package to help with development of the bbweb projectile
+;;; bbweb-project --- package to help with development of the bbweb project
 
 ;;; Commentary:
 
-;; Functions to support software development.
+;; Settings and functions to support software development.
 
 ;;; Code:
 
@@ -35,7 +35,7 @@
   ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("s" sbt-command "sbt command" :color blue)
   ("k" karma-start "karma unit test" :color blue)
-  ("c" compile "compile" :color blue))
+  ("c" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "karma coverage" :color blue))
 
 (global-set-key [f5] '(lambda () (interactive)
                         (hydra-nl-bbweb-project/body)))
