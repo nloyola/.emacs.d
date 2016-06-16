@@ -505,7 +505,8 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
       org-src-preserve-indentation t
       org-enforce-todo-dependencies t
       org-enforce-todo-checkbox-dependencies t
-      org-link-frame-setup '((file . find-file)))
+      org-link-frame-setup '((file . find-file))
+      org-export-backends '(ascii html icalendar latex md))
 #+END_SRC
 
 *** Org activation bindings
@@ -527,7 +528,7 @@ Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a
       (delq nil
             (mapcar (lambda (x) (and (file-exists-p x) x))
                     '("~/Dropbox/todo.org"
-                      "~/Dropbox/todo.org"))))
+                      "~/Dropbox/cbsr_todo.org"))))
 #+END_SRC
 
 *** Org capture
@@ -1003,7 +1004,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
-  :after (helm-flx)
   :commands (helm-config helm-eshell helm-files helm-grep)
   :diminish helm-mode
   :init
@@ -1013,7 +1013,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
     ;; accidentially press "C-x C-c"
     (setq helm-command-prefix-key "C-c h")
     (helm-flx-mode +1)
-    (helm-projectile-on)
     (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
           ;; not occupy whole other window
           helm-ff-newfile-prompt-p nil
@@ -1186,16 +1185,13 @@ stop:
 
 ** [[https://github.com/bbatsov/projectile][helm-projectile]]
 
-Included with Projectile.
-
 #+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
   :ensure t
-  :after (projectile)
-  :commands (helm-projectile)
-  :bind (("C-c p h" . helm-projectile))
+  ;;:bind (("C-c p h" . helm-projectile))
   :config
   (progn
+    (helm-projectile-on)
     (setq compilation-read-command t))) ; do prompt for a compilation command
 #+END_SRC
 
@@ -2141,6 +2137,15 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
 (defun align-parameters (beg end)
   (interactive "r")
   (align-regexp beg end "\\w+\\(\\s-*\\)\\w+,?" 1 1 t))
+
+(defhydra hydra-nl-align (:hint nil)
+  "Align things"
+  (":" align-colons "colons" :color blue)
+  ("," align-commas "commas" :color blue)
+  ("=" align-equals "equals" :color blue)
+  ("p" align-parameters "parameters" :color blue))
+
+(key-chord-define-global "aa" 'hydra-nl-align/body)
 #+END_SRC
 
 ** Font size
