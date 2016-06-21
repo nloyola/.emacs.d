@@ -506,10 +506,11 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
       org-enforce-todo-dependencies t
       org-enforce-todo-checkbox-dependencies t
       org-link-frame-setup '((file . find-file))
-      org-export-backends '(ascii html icalendar latex md))
+      org-export-backends '(ascii html icalendar latex md)
+      org-log-into-drawer t)
 #+END_SRC
 
-*** Org activation bindings
+** Org activation bindings
 
 Set up some global key bindings that integrate with Org Mode features.
 
@@ -1198,7 +1199,27 @@ stop:
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package helm-swoop :ensure t)
+(use-package helm-swoop
+  :ensure t
+  :bind (("M-i" . helm-swoop))
+  :config
+  (progn
+    ;; When doing isearch, hand the word over to helm-swoop
+    (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+    ;; From helm-swoop to helm-multi-swoop-all
+    (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+    ;; Move up and down like isearch
+    (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
+    (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
+    (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
+    (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
+    ;; Save buffer when helm-multi-swoop-edit complete
+    (setq helm-multi-swoop-edit-save t)
+    ;; If this value is t, split window inside the current window
+    (setq helm-swoop-split-with-multiple-windows nil)
+    ;; Optional face for line numbers
+    ;; Face name is `helm-swoop-line-number-face`
+    (setq helm-swoop-use-line-number-face t)))
 #+END_SRC
 
 ** [[https://github.com/boyw165/hl-anything][hl-anything]]
@@ -1331,6 +1352,14 @@ short bindings with a common prefix - a Hydra.
   :commands karma-mode)
 #+END_SRC
 
+** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
+
+Add filler lorem ipsum text to Emacs.
+
+#+BEGIN_SRC emacs-lisp
+(use-package lorem-ipsum
+  :ensure t)
+#+END_SRC
 ** [[https://github.com/joddie/macrostep][macrostep]]
 
 Macrostep allows you to see what Elisp macros expand to. Learned about
@@ -1493,7 +1522,7 @@ http://batsov.com/projectile/
   :commands purpose-mode
   :config
   (progn
-    (add-to-list 'purpose-user-mode-purposes '(scala-mode2 . scala))
+    (add-to-list 'purpose-user-mode-purposes '(scala-mode . scala))
     (add-to-list 'purpose-user-mode-purposes '(sbt-mode . scala))
     (purpose-compile-user-configuration)))
 #+END_SRC
@@ -1647,6 +1676,13 @@ Allows for transposing window arrangements.
 
 ** [[https://github.com/benma/visual-regexp.el][visual-regexp]]
 
+visual-regexp for Emacs is like replace-regexp, but with live visual
+feedback directly in the buffer.
+
+visual-regexp-steroids is an extension to visual-regexp which enables
+the use of modern regexp engines (no more escaped group parentheses,
+and other goodies!).
+
 #+BEGIN_SRC emacs-lisp
 (use-package visual-regexp
   :ensure t
@@ -1657,6 +1693,15 @@ Allows for transposing window arrangements.
          ("C-c m" . vr/mc-mark) ; Need multiple cursors
          ("C-M-r" . vr/isearch-backward)
          ("C-M-s" . vr/isearch-forward)))
+
+(defun nl/query-replace-regexp-history-clear ()
+    "Using visual-regexp functions and query-replace-regexp in
+the same session fails if there are invalid history characters in
+the history (visual-regexp uses PCRE regexes). This function
+clears the history"
+  (interactive)
+  ;;(setq query-replace-defaults nil)
+  (setq query-replace-history nil))
 #+END_SRC
 
 ** [[https://github.com/capitaomorte/yasnippet][yasnippet]]
@@ -1915,6 +1960,13 @@ A gradle function to generate Javadoc for the project.
 ** Scala
 
 #+BEGIN_SRC emacs-lisp
+(defun scala-mode-newline-comments ()
+  "Custom newline appropriate for `scala-mode'."
+  ;; shouldn't this be in a post-insert hook?
+  (interactive)
+  (newline-and-indent)
+  (scala-indent:insert-asterisk-on-multiline-comment))
+
 (use-package scala-mode
   :ensure t
   :interpreter
@@ -1948,6 +2000,9 @@ A gradle function to generate Javadoc for the project.
                  (setq-default indent-tabs-mode nil)
 
                  (setq compilation-ask-about-save nil)
+
+                 (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map)
+
                  ))
     (add-hook 'scala-mode-hook 'fic-mode)))
 #+END_SRC
@@ -1955,6 +2010,7 @@ A gradle function to generate Javadoc for the project.
 #+BEGIN_SRC emacs-lisp
 (use-package sbt-mode
   :ensure t
+  :commands sbt-start sbt-command
   :config
   (progn
     (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)

@@ -37,8 +37,34 @@
   ("k" karma-start "karma unit test" :color blue)
   ("c" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "karma coverage" :color blue))
 
-(global-set-key [f5] '(lambda () (interactive)
-                        (hydra-nl-bbweb-project/body)))
+;; this def uses a lambda to show that it is possible, id does not need to use it
+(key-chord-define-global "c." '(lambda () (interactive)
+                                 (hydra-nl-bbweb-project/body)))
+
+;;
+;;
+(defun nl-karma-compile-filter ()
+  "Filters unwanted lines from karma compile buffer."
+  (interactive)
+  (if (get-buffer "*karma start*")
+      (progn
+        (switch-to-buffer "*karma start*")
+        (read-only-mode -1)
+        (delete-matching-lines "\\bbweb\/(node_modules\\|target\\)" (point-min) (point-max))
+        (read-only-mode 1))))
+
+;;
+;;
+(defun nl-sbt-buffer-filter ()
+  "Filters unwanted lines from karma compile buffer."
+  (interactive)
+  (if (get-buffer "*sbt*")
+      (progn
+        (switch-to-buffer "*sbt*")
+        (read-only-mode -1)
+        (delete-matching-lines "\\bbweb\/(node_modules\\|target\\)" (point-min) (point-max))
+        (read-only-mode 1))))
+
 
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here
