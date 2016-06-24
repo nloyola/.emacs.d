@@ -257,6 +257,13 @@ Turn this off for better perfomance since we are using Magit.
 (setq vc-handled-backends nil)
 #+END_SRC
 
+Set environment variable for shells.
+
+#+BEGIN_SRC emacs-lisp
+(setenv "PAGER" "cat")
+#+END_SRC
+
+
 ** Disabled features
 
 Turn off auto-save.
@@ -925,7 +932,6 @@ Updte tags on command line with ~global -u~.
   :ensure t
   :commands ggtags-mode)
 #+END_SRC
-
 ** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
 
 #+BEGIN_SRC emacs-lisp
@@ -935,6 +941,14 @@ Updte tags on command line with ~global -u~.
   :init
   (progn
     (gradle-mode 1)))
+#+END_SRC
+
+** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package ensime
+  :ensure t
+  :commands ensime ensime-mode))
 #+END_SRC
 
 ** [[https://github.com/edvorg/flycheck-protobuf][flycheck-protobuf]]
@@ -1700,7 +1714,7 @@ the same session fails if there are invalid history characters in
 the history (visual-regexp uses PCRE regexes). This function
 clears the history"
   (interactive)
-  ;;(setq query-replace-defaults nil)
+  (setq query-replace-defaults nil)
   (setq query-replace-history nil))
 #+END_SRC
 
