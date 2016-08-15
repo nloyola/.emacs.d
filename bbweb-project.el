@@ -15,7 +15,7 @@
       eclimd-default-workspace (concat (locate-dominating-file default-directory ".dir-locals.el") ".."))
 
 (setq-default indent-tabs-mode nil)
-(puthash (projectile-project-root) "grunt --no-color karma:coverage" projectile-test-cmd-map)
+(puthash (projectile-project-root) "grunt karma:unit" projectile-test-cmd-map)
 
 ;;
 ;; override this function, from the projectile package, so that tests are created in the proper
@@ -35,7 +35,7 @@
   ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("s" sbt-command "sbt command" :color blue)
   ("k" karma-start "karma unit test" :color blue)
-  ("c" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "karma coverage" :color blue))
+  ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
 (key-chord-define-global "c." '(lambda () (interactive)

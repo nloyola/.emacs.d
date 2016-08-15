@@ -263,6 +263,16 @@ Set environment variable for shells.
 (setenv "PAGER" "cat")
 #+END_SRC
 
+Enable ANSI colors for compilation buffers.
+
+#+BEGIN_SRC emacs-lisp
+;;(require 'ansi-color)
+(defun colorize-compilation-buffer ()
+  (toggle-read-only)
+  (ansi-color-apply-on-region compilation-filter-start (point))
+  (toggle-read-only))
+(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+#+END_SRC
 
 ** Disabled features
 
@@ -806,7 +816,11 @@ based on its name.
 (use-package color-identifiers-mode
   :ensure t
   :diminish color-identifiers-mode
-  :config (add-hook 'after-init-hook 'global-color-identifiers-mode))
+  :config
+  (progn
+    (add-hook 'after-init-hook 'global-color-identifiers-mode)
+    (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
+    (set-face-attribute 'font-lock-comment-face nil :slant 'italic)))
 #+END_SRC
 
 ** [[https://github.com/company-mode/company-mode][company-mode]]
@@ -855,23 +869,23 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package eclimd
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd)
 (use-package company-emacs-eclim
   :commands company-emacs-eclim-setup)
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :ensure emacs-eclim
   :diminish eclim-mode
   :commands eclim-mode
   :init (use-package cl)
   :config
   (progn
-    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/mars/eclipse")))
+    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
       (if (file-accessible-directory-p eclipse-dir)
           (progn
             (add-to-list 'eclim-eclipse-dirs eclipse-dir)
-            (setq eclim-executable (or (executable-find "eclim") (concat (eclipse-dir "/eclim")))
-                  eclimd-executable (or (executable-find "eclimd") (concat (eclipse-dir "/eclimd")))
+            (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
+                  eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
                   ))))
     (company-emacs-eclim-setup)
     (global-company-mode t)
@@ -1349,7 +1363,7 @@ short bindings with a common prefix - a Hydra.
                              "jasmine"
                              "describe"
                              "fdescribe"
-"fail"
+                             "fail"
                              "beforeEach"
                              "afterEach"
                              "inject"
@@ -1363,8 +1377,7 @@ short bindings with a common prefix - a Hydra.
     (custom-set-variables
      '(js2-basic-offset 2)
      '(js2-bounce-indent-p t)
-     '(js2-highlight-level 3)
-     )
+     '(js2-highlight-level 3))
 
     ;;(eval-after-load 'js2-mode
     ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
@@ -1374,8 +1387,17 @@ short bindings with a common prefix - a Hydra.
 
     (setq-default js2-mode-show-parse-errors t)
     (setq-default js2-strict-missing-semi-warning t)
-    (setq-default js2-strict-trailing-comma-warning t)
-    ))
+    (setq-default js2-strict-trailing-comma-warning t)))
+#+END_SRC
+
+** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package js2-refactor
+    :ensure t
+    :diminish js2-refactor-mode
+    :init (add-hook 'js-mode-hook #'js2-refactor-mode)
+    :config (js2r-add-keybindings-with-prefix "C-c C-m"))
 #+END_SRC
 
 ** [[https://github.com/tonini/karma.el][karma]]
@@ -1384,6 +1406,14 @@ short bindings with a common prefix - a Hydra.
 (use-package karma
   :ensure t
   :commands karma-mode)
+#+END_SRC
+
+** [[https://github.com/purcell/less-css-mode][less-css-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package less-css-mode
+  :ensure t
+  :commands less-css-mode)
 #+END_SRC
 
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
@@ -1456,7 +1486,7 @@ No more juggling windows after commiting. It's magit bliss.
 
 TextMate like theme.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle-no
 (use-package monokai-theme
   :ensure t
   :config
@@ -1666,6 +1696,16 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :config (setq smooth-scroll-margin 6))
 #+END_SRC
 
+** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package solarized-theme
+  :ensure t
+  :config
+  (progn
+    (load-theme 'solarized-dark t)))
+#+END_SRC
+
 ** [[https://github.com/ternjs/tern][tern]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1673,7 +1713,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :load-path "/home/nelson/src/github/elisp/tern/emacs"
   :diminish tern-mode
-  :init (add-hook 'js-mode-hook (lambda () (tern-mode t)))
+  :init (add-hook 'js-mode-hook 'tern-mode)
   :commands tern-mode)
 
 (use-package company-tern
@@ -1745,7 +1785,7 @@ and other goodies!).
     "Using visual-regexp functions and query-replace-regexp in
 the same session fails if there are invalid history characters in
 the history (visual-regexp uses PCRE regexes). This function
-clears the history"
+clears the history."
   (interactive)
   (setq query-replace-defaults nil)
   (setq query-replace-history nil))
@@ -2079,7 +2119,8 @@ A gradle function to generate Javadoc for the project.
                  ))
 
     ;; set this regex so that it knows about Play Framework SBT prompt
-    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*")
+    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+          sbt:scroll-to-bottom-on-output nil)
     ))
 
 (defun nl/scalatest-test-only ()
