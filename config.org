@@ -211,14 +211,6 @@ Make completion buffers disappear after 10 seconds.
                                   (lambda () (delete-windows-on "*Completions*")))))
 #+END_SRC
 
-Do not ask me to save files before compiling. Also scroll to the end
-of the compilation buffer when it is opened.
-
-#+BEGIN_SRC emacs-lisp
-(setq compilation-ask-about-save nil
-      compilation-scroll-output t)
-#+END_SRC
-
 Revert these files without asking.
 
 #+BEGIN_SRC emacs-lisp
@@ -263,14 +255,21 @@ Set environment variable for shells.
 (setenv "PAGER" "cat")
 #+END_SRC
 
+Do not ask me to save files before compiling. Also scroll to the end
+of the compilation buffer when it is opened.
+
+#+BEGIN_SRC emacs-lisp
+(setq compilation-ask-about-save nil
+      compilation-scroll-output t)
+#+END_SRC
+
 Enable ANSI colors for compilation buffers.
 
 #+BEGIN_SRC emacs-lisp
 ;;(require 'ansi-color)
 (defun colorize-compilation-buffer ()
-  (toggle-read-only)
-  (ansi-color-apply-on-region compilation-filter-start (point))
-  (toggle-read-only))
+  (let ((inhibit-read-only t))
+    (ansi-color-apply-on-region (point-min) (point-max))))
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 #+END_SRC
 
@@ -906,6 +905,25 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     ))
 #+END_SRC
 
+** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package ensime
+  :ensure t
+  :commands ensime ensime-mode))
+#+END_SRC
+
+** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package gradle-mode
+  :ensure t
+  :diminish gradle-mode
+  :init
+  (progn
+    (gradle-mode 1)))
+#+END_SRC
+
 ** [[https://github.com/magnars/expand-region.el][expand-region]]
 
 #+BEGIN_SRC emacs-lisp
@@ -956,6 +974,14 @@ Allow windmove to jump between frames.
     (setq flycheck-standard-error-navigation nil)))
 #+END_SRC
 
+** [[https://github.com/edvorg/flycheck-protobuf][flycheck-protobuf]]
+
+#+begin_src emacs-lisp
+(use-package flycheck-protobuf
+  :ensure t)
+(add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
+#+end_src
+
 ** [[https://github.com/leoliu/ggtags][ggtags]]
 
 Generate tags on command line with ~gtags~.
@@ -966,32 +992,6 @@ Updte tags on command line with ~global -u~.
   :ensure t
   :commands ggtags-mode)
 #+END_SRC
-** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package gradle-mode
-  :ensure t
-  :diminish gradle-mode
-  :init
-  (progn
-    (gradle-mode 1)))
-#+END_SRC
-
-** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package ensime
-  :ensure t
-  :commands ensime ensime-mode))
-#+END_SRC
-
-** [[https://github.com/edvorg/flycheck-protobuf][flycheck-protobuf]]
-
-#+begin_src emacs-lisp
-(use-package flycheck-protobuf
-  :ensure t)
-(add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
-#+end_src
 
 ** [[https://github.com/pidu/git-timemachine][git-timemachine]]
 
@@ -1023,6 +1023,7 @@ Required for gradle build files.
 (use-package groovy-mode
   :ensure t)
 #+END_SRC
+
 ** [[*][grunt]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1424,6 +1425,7 @@ Add filler lorem ipsum text to Emacs.
 (use-package lorem-ipsum
   :ensure t)
 #+END_SRC
+
 ** [[https://github.com/joddie/macrostep][macrostep]]
 
 Macrostep allows you to see what Elisp macros expand to. Learned about
@@ -1482,6 +1484,7 @@ No more juggling windows after commiting. It's magit bliss.
   :mode (("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'"       . markdown-mode)))
 #+END_SRC
+
 ** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
 
 TextMate like theme.
@@ -1611,6 +1614,7 @@ Using revive
 (use-package revive
   :ensure t)
 #+END_SRC
+
 ** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
 
 Highlight brackets according to their depth
@@ -1816,6 +1820,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 (use-package web-mode
   :ensure t)
 #+END_SRC
+
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
 
 #+BEGIN_SRC emacs-lisp

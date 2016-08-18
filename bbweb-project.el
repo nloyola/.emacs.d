@@ -49,7 +49,7 @@
   (if (get-buffer "*karma start*")
       (progn
         (switch-to-buffer "*karma start*")
-        (read-only-mode -1)
+        (read-only-mode -1)2
         (delete-matching-lines "\\bbweb\/(node_modules\\|target\\)" (point-min) (point-max))
         (read-only-mode 1))))
 
@@ -64,6 +64,18 @@
         (read-only-mode -1)
         (delete-matching-lines "\\bbweb\/(node_modules\\|target\\)" (point-min) (point-max))
         (read-only-mode 1))))
+
+
+(defun bbweb-helm-do-ag-js ()
+  "Performs helm-do-ag on the project's JavaScript files."
+  (interactive)
+  (helm-do-ag (concat (projectile-project-root) "app/assets/javascripts/")))
+
+
+(defun bbweb-helm-do-ag-scala ()
+  "Performs helm-do-ag on the project's JavaScript files."
+  (interactive)
+  (helm-do-ag (concat (projectile-project-root) "app/org/biobank/")))
 
 
 (provide 'bbweb-project)
