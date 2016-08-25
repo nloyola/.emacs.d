@@ -67,16 +67,60 @@
 
 
 (defun bbweb-helm-do-ag-js ()
-  "Performs helm-do-ag on the project's JavaScript files."
+  "Perform helm-do-ag on the project's JavaScript files."
   (interactive)
   (helm-do-ag (concat (projectile-project-root) "app/assets/javascripts/")))
 
 
 (defun bbweb-helm-do-ag-scala ()
-  "Performs helm-do-ag on the project's JavaScript files."
+  "Perform helm-do-ag on the project's JavaScript files."
   (interactive)
   (helm-do-ag (concat (projectile-project-root) "app/org/biobank/")))
 
+;; borrowed from js2-refactor
+(defun bbweb--current-quotes-char ()
+  "The char that is the current quote delimiter."
+  (nth 3 (syntax-ppss)))
+
+(defun bbweb-gettext-surround-string ()
+  "Surrounds string with a call to gettext.  Cursor must be at string's start."
+  (interactive)
+  (if (looking-at "'")
+      (save-excursion
+        (insert "gettext(")
+        (forward-char)
+        (while (bbweb--current-quotes-char)
+          (forward-char))
+        (insert ")"))
+    (message "not at the start of a string")))
+
+(defun bbweb-js-mode-keys ()
+  "Key definitions for 'js-mode' in bbweb project."
+  (interactive)
+  (local-set-key (kbd "C-c g") 'bbweb-gettext-surround-string))
+
+(add-hook 'js-mode-hook 'bbweb-js-mode-keys)
+
+(defun bbweb-gettext-surround-html-string ()
+  "Surrounds string with a call to gettext.  Cursor must be at string's start."
+  (interactive)
+  (if (looking-at "\"")
+      (save-excursion
+        (forward-char)
+        (insert "{{'")
+        (forward-char)
+        (while (bbweb--current-quotes-char)
+          (forward-char))
+        (backward-char)
+        (insert "'|translate}}"))
+    (message "not at the start of a string")))
+
+(defun bbweb-html-mode-keys ()
+  "Key definitions for 'sgml-mode' in bbweb project."
+  (interactive)
+  (local-set-key (kbd "C-c g") 'bbweb-gettext-surround-html-string))
+
+(add-hook 'html-mode-hook 'bbweb-html-mode-keys)
 
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here

@@ -243,12 +243,6 @@ the buffer which I haven't saved.
 (global-auto-revert-mode 1)
 #+END_SRC
 
-Turn this off for better perfomance since we are using Magit.
-
-#+BEGIN_SRC emacs-lisp
-(setq vc-handled-backends nil)
-#+END_SRC
-
 Set environment variable for shells.
 
 #+BEGIN_SRC emacs-lisp
@@ -362,7 +356,6 @@ each time.
 (global-set-key [(shift f2)]          '(lambda () (interactive) (revert-buffer t t)))
 (global-set-key [(shift f3)]          'helm-recentf)
 (global-set-key [(meta shift f3)]     'sbt-grep)
-(global-set-key [f4]                  'next-error)
 (global-set-key [f5]                  'compile)
 (global-set-key [(shift f5)]          'toggle-truncate-lines)
 (global-set-key [(shift f11)]         'eval-region)
@@ -775,6 +768,17 @@ A quick way to jump around text in buffers.
          ("M-g M-g" . avy-goto-line)))
 #+END_SRC
 
+** [[https://github.com/belak/base16-emacs][base16-emacs]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package base16-theme
+  :ensure t
+  :config
+  (progn
+    ;;(load-theme 'base16-solarized-dark t)
+    (load-theme 'base16-google-dark t)
+    ))
+#+END_SRC
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
 Never lose your cursor again
@@ -929,7 +933,8 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 #+BEGIN_SRC emacs-lisp
 (use-package expand-region
   :ensure t
-  :bind ("C-=" . er/expand-region))
+  :bind ("C-=" . er/expand-region)
+  :config (setq expand-region-smart-cursor t))
 #+END_SRC
 
 ** [[http://www.emacswiki.org/emacs/fic-mode.el][fic-mode]]
@@ -1232,7 +1237,6 @@ stop:
   :bind (("M-." . helm-gtags-find-tag)
          ("M-," . helm-gtags-find-rtag)))
 #+END_SRC
-
 ** [[https://github.com/bbatsov/projectile][helm-projectile]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1247,7 +1251,7 @@ stop:
 
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-swoop
   :ensure t
   :bind (("M-i" . helm-swoop))
@@ -1452,6 +1456,14 @@ command line. Use an easy keybinding to access magit.
      ))
 #+END_SRC
 
+*** Performance
+
+Turn this off for better perfomance since we are using Magit.
+
+#+BEGIN_SRC emacs-lisp
+(setq vc-handled-backends nil)
+#+END_SRC
+
 *** Fullscreen magit
 
 #+BEGIN_QUOTE
@@ -1489,7 +1501,7 @@ No more juggling windows after commiting. It's magit bliss.
 
 TextMate like theme.
 
-#+BEGIN_SRC emacs-lisp :tangle-no
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package monokai-theme
   :ensure t
   :config
@@ -1703,11 +1715,21 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 ** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package solarized-theme
+(use-package solarized-theme :tangle no
   :ensure t
   :config
   (progn
     (load-theme 'solarized-dark t)))
+#+END_SRC
+
+** [[https://github.com/abo-abo/swiper-helm][swiper-helm]]
+
+Allows me to switch to swiper search after starting isearch.
+
+#+BEGIN_SRC emacs-lisp
+(use-package swiper-helm
+  :ensure t
+  :config (define-key isearch-mode-map (kbd "M-i") 'swiper-helm-from-isearch))
 #+END_SRC
 
 ** [[https://github.com/ternjs/tern][tern]]
@@ -1761,7 +1783,7 @@ forward and backward to the next bookmark.
 (use-package bm
   :ensure t
   :bind ("C-<f4>" . bm-toggle)
-        ("<f4>" . bm-next)
+        ("A-<f4>" . bm-next)
         ("S-<f4>" . bm-previous))
 #+END_SRC
 
@@ -2014,7 +2036,7 @@ A gradle function to generate Javadoc for the project.
     ))
 #+END_SRC
 
-** Javascript
+** JavaScript
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'js-mode-hook 'js2-minor-mode)
