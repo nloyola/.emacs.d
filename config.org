@@ -1714,23 +1714,49 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 ** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
 
-#+BEGIN_SRC emacs-lisp
-(use-package solarized-theme :tangle no
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package solarized-theme
   :ensure t
   :config
   (progn
     (load-theme 'solarized-dark t)))
 #+END_SRC
 
-** [[https://github.com/abo-abo/swiper-helm][swiper-helm]]
+** [[https://github.com/abo-abo/swiper][swiper]]
 
-Allows me to switch to swiper search after starting isearch.
+This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Ivy 0.8.0 is out]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package swiper-helm
+(use-package swiper
   :ensure t
-  :config (define-key isearch-mode-map (kbd "M-i") 'swiper-helm-from-isearch))
+  :bind (("C-s" . swiper)
+         ("C-c C-r" . ivy-resume)
+         ("<f6>" . ivy-resume))
+  :config
+  (ivy-mode 1)
+  (setq ivy-initial-inputs-alist nil)
+  (setq ivy-use-virtual-buffers t)
+  (setq swiper-action-recenter t))
 #+END_SRC
+
+See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05/30/swiperrecenter/][Recentre the buffer when leaving Swiper]].
+
+Also, install counsel:
+
+#+BEGIN_SRC emacs-lisp
+(use-package counsel
+  :bind (("C-x C-f" . counsel-find-file)
+         ("C-h f" . counsel-describe-function)
+         ("C-h v" . counsel-describe-variable)
+         ("C-c s a" . counsel-ag)
+         ("M-y" . counsel-yank-pop)))
+#+END_SRC
+
+When using =counsel-ag=:
+- use ~C-c C-o~ (=ivy-occur) to save results to a buffer,
+- use ~C-x C-q~ (=ivy-wgrep-change-to-wgrep-mode=) to edit the buffer,
+- use ~C-x C-s~ to save the changes, or
+- use ~C-c C-k~ to abort all changes
 
 ** [[https://github.com/ternjs/tern][tern]]
 
