@@ -1878,6 +1878,15 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   :config (whole-line-or-region-mode t))
 #+END_SRC
 
+** [[https://github.com/yoshiki/yaml-mode][yaml-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package yaml-mode
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+#+END_SRC
+
 ** [[https://github.com/jinzhu/zeal-at-point][zeal-at-point]]
 
 Search the word at point with Zeal
