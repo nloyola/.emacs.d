@@ -116,7 +116,7 @@
     (message "not at the start of a string")))
 
 (defun bbweb-html-mode-keys ()
-  "Key definitions for 'sgml-mode' in bbweb project."
+  "Key definitions for 'html-mode' in bbweb project."
   (interactive)
   (local-set-key (kbd "C-c g") 'bbweb-gettext-surround-html-string))
 

@@ -519,7 +519,7 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
       org-log-into-drawer t)
 #+END_SRC
 
-** Org activation bindings
+*** Org activation bindings
 
 Set up some global key bindings that integrate with Org Mode features.
 
@@ -648,12 +648,10 @@ Prefer saving the history of opened files somewhere other than the default.
 #+BEGIN_SRC emacs-lisp
 (use-package recentf
   :init
-  (progn
-    (setq recentf-save-file "~/.emacs.d/etc/recentf"))
+    (setq recentf-save-file "~/.emacs.d/etc/recentf")
   :config
-  (progn
     (recentf-mode 1)
-    (setq recentf-max-saved-items 100)))
+    (setq recentf-max-saved-items 100))
 #+END_SRC
 
 ** =savehist=
@@ -675,10 +673,9 @@ Remember position in a file.
 #+BEGIN_SRC emacs-lisp
 (use-package saveplace
   :init
-  (progn
     (setq save-place-file "~/.emacs.d/etc/saveplace"
           save-place-forget-unreadable-files nil)
-    (setq-default save-place t)))
+    (setq-default save-place t))
 #+END_SRC
 
 ** =shell=
@@ -726,6 +723,16 @@ direction keys.
 
 These are the packages that are not built into Emacs.
 
+** [[https://github.com/Wilfred/ag.el][ag]]
+
+Use silver surfer to search.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ag
+  :commands ag
+  :ensure t)
+#+END_SRC
+
 ** [[https://github.com/abo-abo/ace-window][ace-window]]
 
 A package that uses the same idea from ace-jump-mode for
@@ -743,7 +750,6 @@ what I have them set to (with respect to Dvorak, of course).
 (use-package anzu
   :ensure t
   :config
-  (progn
     (global-anzu-mode +1)
     (set-face-attribute 'anzu-mode-line nil
                         :foreground "yellow" :weight 'bold)
@@ -754,7 +760,7 @@ what I have them set to (with respect to Dvorak, of course).
      '(anzu-replace-threshold 50)
      '(anzu-replace-to-string-separator " => "))
     (global-set-key [remap query-replace] 'anzu-query-replace)
-    (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp)))
+    (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/avy][avy]]
@@ -770,14 +776,17 @@ A quick way to jump around text in buffers.
 
 ** [[https://github.com/belak/base16-emacs][base16-emacs]]
 
+One tweak to the base16-google-dark theme; the face for the mode line
+buffer name is too hard to see,  set it to white instead.
+
 #+BEGIN_SRC emacs-lisp
 (use-package base16-theme
   :ensure t
   :config
-  (progn
     ;;(load-theme 'base16-solarized-dark t)
     (load-theme 'base16-google-dark t)
-    ))
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "white")
+    )
 #+END_SRC
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
@@ -787,9 +796,8 @@ Never lose your cursor again
 (use-package beacon
   :ensure t
   :init
-  (progn
     (setq beacon-push-mark 35)
-    (setq beacon-color "#666600"))
+    (setq beacon-color "#666600")
   :config (beacon-mode 1)
   )
 #+END_SRC
@@ -820,10 +828,9 @@ based on its name.
   :ensure t
   :diminish color-identifiers-mode
   :config
-  (progn
     (add-hook 'after-init-hook 'global-color-identifiers-mode)
     (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
-    (set-face-attribute 'font-lock-comment-face nil :slant 'italic)))
+    (set-face-attribute 'font-lock-comment-face nil :slant 'italic))
 #+END_SRC
 
 ** [[https://github.com/company-mode/company-mode][company-mode]]
@@ -835,11 +842,9 @@ Complete anything.
   :ensure t
   :diminish company-mode
   :config
-  (progn
     (add-hook 'after-init-hook 'global-company-mode)
     (global-set-key (kbd "M-/") 'company-complete-common)
-    (use-package company-tern)
-    ))
+    (use-package company-tern))
 #+END_SRC
 
 ** [[https://github.com/thamer/diredful][diredful]]
@@ -882,7 +887,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :commands eclim-mode
   :init (use-package cl)
   :config
-  (progn
     (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
       (if (file-accessible-directory-p eclipse-dir)
           (progn
@@ -905,8 +909,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     ;; keep consistent which other auto-complete backend.
     (custom-set-faces
      '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
-     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
-    ))
+     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
 #+END_SRC
 
 ** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
@@ -924,8 +927,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :ensure t
   :diminish gradle-mode
   :init
-  (progn
-    (gradle-mode 1)))
+    (gradle-mode 1))
 #+END_SRC
 
 ** [[https://github.com/magnars/expand-region.el][expand-region]]
@@ -947,13 +949,11 @@ strings.
   :ensure t
   :commands fic-mode
   :config
-  (progn
     (add-hook 'c++-mode-hook 'fic-mode)
     (add-hook 'c-mode-hook 'fic-mode)
     (add-hook 'java-mode-hook 'fic-mode)
     (add-hook 'vala-mode-hook 'fic-mode)
-    (add-hook 'python-mode-hook 'fic-mode)
-    ))
+    (add-hook 'python-mode-hook 'fic-mode))
 #+END_SRC
 
 ** [[http://www.emacswiki.org/emacs/framemove.el][framemove]]
@@ -963,8 +963,8 @@ Allow windmove to jump between frames.
 #+BEGIN_SRC emacs-lisp
 (use-package framemove
   :ensure t
-  :config (setq framemove-hook-into-windmove t)
-  )
+  :config
+  (setq framemove-hook-into-windmove t))
 #+END_SRC
 
 ** [[https://github.com/flycheck/flycheck][flycheck]]
@@ -974,9 +974,8 @@ Allow windmove to jump between frames.
   :ensure t
   :diminish flycheck-mode
   :config
-  (progn
     (add-hook 'after-init-hook #'global-flycheck-mode)
-    (setq flycheck-standard-error-navigation nil)))
+    (setq flycheck-standard-error-navigation nil))
 #+END_SRC
 
 ** [[https://github.com/edvorg/flycheck-protobuf][flycheck-protobuf]]
@@ -1009,15 +1008,12 @@ Updte tags on command line with ~global -u~.
 ** [[https://github.com/camdez/goto-last-change.el][goto-last-change]]
 
 #+BEGIN_SRC emacs-lisp
-      (use-package goto-last-change
-        :ensure t
-        :config
-        (progn
-          (autoload 'goto-last-change "goto-last-change"
-            "Set point to the position of the last change." t)
-
-          (global-set-key "\C-x\C-\\" 'goto-last-change)
-          ))
+(use-package goto-last-change
+  :ensure t
+  :config
+    (autoload 'goto-last-change "goto-last-change"
+      "Set point to the position of the last change." t)
+    (global-set-key "\C-x\C-\\" 'goto-last-change))
 #+END_SRC
 
 ** [[https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes][groovy-mode]]
@@ -1045,10 +1041,8 @@ Guide the following key bindings automatically and dynamically.
   :ensure t
   :diminish guide-key-mode
   :config
-  (progn
     (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h"))
-    (guide-key-mode 1)
-  ))
+    (guide-key-mode 1))
 #+END_SRC
 
 ** [[https://github.com/emacs-helm/helm][helm]]
@@ -1062,7 +1056,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
   :commands (helm-config helm-eshell helm-files helm-grep)
   :diminish helm-mode
   :init
-  (progn
     ;; must set before helm-config, otherwise helm uses the default
     ;; prefix "C-x c", which is inconvenient because you can
     ;; accidentially press "C-x C-c"
@@ -1106,7 +1099,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
     ;; Save current position to mark ring when jumping to a different place
     (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
     (helm-mode)
-    (helm-autoresize-mode 1))
+    (helm-autoresize-mode 1)
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
@@ -1205,7 +1198,6 @@ stop:
   :ensure t
   :commands helm-flx-mode
   :init
-  (progn
     (helm-flx-mode +1)
 
     ;; From: https://github.com/hatschipuh/helm-better-defaults
@@ -1224,8 +1216,7 @@ stop:
       (setq gc-cons-threshold 800000))
 
     (add-hook 'minibuffer-setup-hook #'my-minibuffer-setup-hook)
-    (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook)
-    ))
+    (add-hook 'minibuffer-exit-hook #'my-minibuffer-exit-hook))
 #+END_SRC
 
 ** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
@@ -1244,9 +1235,8 @@ stop:
   :ensure t
   ;;:bind (("C-c p h" . helm-projectile))
   :config
-  (progn
     (helm-projectile-on)
-    (setq compilation-read-command t))) ; do prompt for a compilation command
+    (setq compilation-read-command t)) ; do prompt for a compilation command
 #+END_SRC
 
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
@@ -1256,7 +1246,6 @@ stop:
   :ensure t
   :bind (("M-i" . helm-swoop))
   :config
-  (progn
     ;; When doing isearch, hand the word over to helm-swoop
     (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
     ;; From helm-swoop to helm-multi-swoop-all
@@ -1272,7 +1261,7 @@ stop:
           helm-swoop-split-with-multiple-windows nil
           ;; Optional face for line numbers
           ;; Face name is `helm-swoop-line-number-face`
-          helm-swoop-use-line-number-face t)))
+          helm-swoop-use-line-number-face t))
 #+END_SRC
 
 ** [[https://github.com/boyw165/hl-anything][hl-anything]]
@@ -1283,12 +1272,11 @@ Not used for now since it breaks ERC font lock.
 (use-package hl-anything
   :ensure t
   :config
-  (progn
     (hl-highlight-mode 1)
     ;; (hl-setup-default-advices nil)
     ;; (hl-setup-customizable-advices nil)
     ;; (remove-hook 'kill-emacs-hook 'hl-save-highlights)
-    ))
+    )
 #+END_SRC
 
 ** [[https://github.com/nflath/hungry-delete][hungry-delete]]
@@ -1296,12 +1284,10 @@ Not used for now since it breaks ERC font lock.
 So that hungry deletion can be used in all modes.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package hungry-delete
-               :ensure t
-               :config
-               (progn
-                 (global-hungry-delete-mode)
-                 ))
+(use-package hungry-delete
+  :ensure t
+  :config
+  (global-hungry-delete-mode))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/hydra][hydra]]
@@ -1313,7 +1299,6 @@ short bindings with a common prefix - a Hydra.
 (use-package hydra
   :ensure t
   :init
-  (progn
     (use-package cl-lib)
     (use-package lv)
     (use-package ace-window :ensure t)
@@ -1321,9 +1306,7 @@ short bindings with a common prefix - a Hydra.
     (use-package key-chord
       :ensure t
       :config (key-chord-mode 1))
-    )
   :config
-  (progn
     ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
     (defun hydra-universal-argument (arg)
@@ -1353,8 +1336,7 @@ short bindings with a common prefix - a Hydra.
     (defhydra hydra-zoom (global-map "C-c z")
       "zoom"
       ("g" text-scale-increase "in")
-      ("l" text-scale-decrease "out"))
-    ))
+      ("l" text-scale-decrease "out")))
 #+END_SRC
 
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
@@ -1378,7 +1360,6 @@ short bindings with a common prefix - a Hydra.
                              "fit"
                              "xit"))
   :config
-  (progn
     (custom-set-variables
      '(js2-basic-offset 2)
      '(js2-bounce-indent-p t)
@@ -1392,7 +1373,7 @@ short bindings with a common prefix - a Hydra.
 
     (setq-default js2-mode-show-parse-errors t)
     (setq-default js2-strict-missing-semi-warning t)
-    (setq-default js2-strict-trailing-comma-warning t)))
+    (setq-default js2-strict-trailing-comma-warning t))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
@@ -1446,14 +1427,12 @@ A great interface for git projects. It's much more pleasant to use than the git 
 command line. Use an easy keybinding to access magit.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :ensure t
-    :bind (("C-x g" . magit-status))
-    :config
-    (progn
-     (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
-     (setq magit-push-always-verify nil)
-     ))
+(use-package magit
+  :ensure t
+  :bind (("C-x g" . magit-status))
+  :config
+  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
+  (setq magit-push-always-verify nil))
 #+END_SRC
 
 *** Performance
@@ -1505,10 +1484,9 @@ TextMate like theme.
 (use-package monokai-theme
   :ensure t
   :config
-  (progn
     (load-theme 'monokai t)
     (setq frame-background-mode `dark)
-    (setq monokai-use-variable-pitch nil)))
+    (setq monokai-use-variable-pitch nil))
 #+END_SRC
 
 ** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
@@ -1553,24 +1531,19 @@ http://batsov.com/projectile/
   :diminish projectile-mode
   :commands projectile-mode
   :config
-  (progn
-    (setq projectile-indexing-method 'alien
-          projectile-remember-window-configs nil
-          projectile-switch-project-action 'projectile-dired
-          projectile-completion-system 'default
-          projectile-enable-caching nil
-          projectile-create-missing-test-files t)
+  (setq projectile-indexing-method 'alien
+        projectile-remember-window-configs nil
+        projectile-switch-project-action 'projectile-dired
+        projectile-completion-system 'default
+        projectile-enable-caching nil
+        projectile-create-missing-test-files t)
 
-    (projectile-global-mode)
-    (setq projectile-completion-system 'helm)
+  (projectile-global-mode)
+  (setq projectile-completion-system 'helm)
 
-    (def-projectile-commander-method ?d
-      "Open project root in dired."
-      (projectile-dired))
-
-    (use-package ag
-      :commands ag
-      :ensure t)))
+  (def-projectile-commander-method ?d
+    "Open project root in dired."
+    (projectile-dired)))
 #+END_SRC
 
 ** [[https://github.com/milkypostman/powerline][powerline]]
@@ -1579,7 +1552,6 @@ http://batsov.com/projectile/
 (use-package powerline
   :ensure t
   :config
-  (progn
     (setq powerline-arrow-shape 'arrow14)
     (setq powerline-default-separator-dir '(right . left))
 
@@ -1589,8 +1561,7 @@ http://batsov.com/projectile/
 
     (setq powerline-color1 "#49483E")
     (setq powerline-color2 "#333333")
-    (powerline-default-theme)
-    ))
+    (powerline-default-theme))
 #+END_SRC
 
 ** [[https://github.com/bmag/helm-purpose][purpose]]
@@ -1600,10 +1571,9 @@ http://batsov.com/projectile/
   :ensure t
   :commands purpose-mode
   :config
-  (progn
     (add-to-list 'purpose-user-mode-purposes '(scala-mode . scala))
     (add-to-list 'purpose-user-mode-purposes '(sbt-mode . scala))
-    (purpose-compile-user-configuration)))
+    (purpose-compile-user-configuration))
 #+END_SRC
 
 ** [[https://melpa.org/#/python-mode][python-mode]]
@@ -1657,7 +1627,6 @@ Declarative popup window rules.
 (use-package shackle
   :ensure t
   :config
-  (progn
     (setq shackle-rules
           '(("*Help*" :align t :ratio 0.4 :select t)
             ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
@@ -1667,8 +1636,7 @@ Declarative popup window rules.
             (("*shell*" "*eshell*") :popup t))
           shackle-default-rule '(:select t)
           shackle-inhibit-window-quit-on-same-windows t)
-    (shackle-mode)
-    ))
+    (shackle-mode))
 #+END_SRC
 
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
@@ -1677,8 +1645,9 @@ Declarative popup window rules.
 (use-package smartparens
   :ensure t
   :diminish smartparens-mode
-  :config (progn (require 'smartparens-config)
-                 (smartparens-global-mode t)))
+  :config
+  (require 'smartparens-config)
+  (smartparens-global-mode t))
 #+END_SRC
 
 
@@ -1718,8 +1687,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 (use-package solarized-theme
   :ensure t
   :config
-  (progn
-    (load-theme 'solarized-dark t)))
+    (load-theme 'solarized-dark t))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/swiper][swiper]]
@@ -1856,10 +1824,9 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   :ensure t
   :diminish yas-minor-mode
   :config
-  (progn
     ;;(setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
     (yas-reload-all)
-    (yas-global-mode)))
+    (yas-global-mode))
 #+END_SRC
 
 ** [[https://github.com/fxbois/web-mode][web-mode]]
@@ -1884,7 +1851,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 (use-package yaml-mode
   :ensure t
   :config
-  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+  (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode)))
 #+END_SRC
 
 ** [[https://github.com/jinzhu/zeal-at-point][zeal-at-point]]
@@ -2121,39 +2088,37 @@ A gradle function to generate Javadoc for the project.
   :interpreter
   ("scala" . scala-mode)
   :config
-  (progn
-    (setq
-     scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-     scala-indent:indent-value-expression t
-     scala-indent:align-parameters t
-     scala-indent:align-forms t
-     scala-indent:use-javadoc-style t)
+  (setq scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+        scala-indent:indent-value-expression t
+        scala-indent:align-parameters t
+        scala-indent:align-forms t
+        scala-indent:use-javadoc-style t)
 
-    (add-hook 'scala-mode-hook
-              '(lambda ()
-                 (yas-minor-mode)
-                 ;; sbt-find-definitions is a command that tries to find (with grep)
-                 ;; the definition of the thing at point.
-                 ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+  (add-hook 'scala-mode-hook
+            '(lambda ()
+               (yas-minor-mode)
+               ;; sbt-find-definitions is a command that tries to find (with grep)
+               ;; the definition of the thing at point.
+               ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
 
-                 ;; use sbt-run-previous-command to re-compile your code after changes
-                 (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-                 (local-set-key (kbd "RET") 'newline-and-indent)
+               ;; use sbt-run-previous-command to re-compile your code after changes
+               (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
+               (local-set-key (kbd "RET") 'newline-and-indent)
 
-                 ;; Bind the backtab (shift tab) to
-                 ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-                 ;; when using the 'eager' mode by default and you want to "outdent" a
-                 ;; code line as a new statement.
-                 (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+               ;; Bind the backtab (shift tab) to
+               ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+               ;; when using the 'eager' mode by default and you want to "outdent" a
+               ;; code line as a new statement.
+               (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
 
-                 (setq-default indent-tabs-mode nil)
+               (setq-default indent-tabs-mode nil)
 
-                 (setq compilation-ask-about-save nil)
+               (setq compilation-ask-about-save nil)
 
-                 (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map)
+               (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map)
 
-                 ))
-    (add-hook 'scala-mode-hook 'fic-mode)))
+               ))
+  (add-hook 'scala-mode-hook 'fic-mode))
 #+END_SRC
 
 #+BEGIN_SRC emacs-lisp
@@ -2161,7 +2126,6 @@ A gradle function to generate Javadoc for the project.
   :ensure t
   :commands sbt-start sbt-command
   :config
-  (progn
     (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
     (add-hook 'sbt-mode-hook
               '(lambda ()
@@ -2182,8 +2146,7 @@ A gradle function to generate Javadoc for the project.
 
     ;; set this regex so that it knows about Play Framework SBT prompt
     (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-          sbt:scroll-to-bottom-on-output nil)
-    ))
+          sbt:scroll-to-bottom-on-output nil))
 
 (defun nl/scalatest-test-only ()
   (interactive)
@@ -2508,7 +2471,6 @@ Views the same file side by side:
     (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
 #+END_SRC
 
-
 ** Narrow or widen
 
 From [[http://endlessparentheses.com/emacs-narrow-or-widen-dwim.html][Artur Malabarba]]'s blog:
@@ -2571,10 +2533,15 @@ From [[http://endlessparentheses.com/quickly-search-for-occurrences-of-the-symbo
 With a prefix argument P, isearch for the symbol at point."
   (interactive "P")
   (let ((current-prefix-arg nil))
-    (call-interactively
+   (call-interactively
      (if p #'isearch-forward-symbol-at-point
        #'isearch-forward))))
 
 (global-set-key [remap isearch-forward]
                 #'endless/isearch-symbol-with-prefix)
 #+END_SRC
+
+# Local Variables:
+# org-src-preserve-indentation: nil
+# org-edit-src-content-indentation: 0
+# End:
