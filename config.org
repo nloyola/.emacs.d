@@ -1713,11 +1713,11 @@ Also, install counsel:
 
 #+BEGIN_SRC emacs-lisp
 (use-package counsel
-  :bind (("C-x C-f" . counsel-find-file)
+  :bind (;;("C-x C-f" . counsel-find-file)
+         ;;("M-y" . counsel-yank-pop)
          ("C-h f" . counsel-describe-function)
          ("C-h v" . counsel-describe-variable)
-         ("C-c s a" . counsel-ag)
-         ("M-y" . counsel-yank-pop)))
+         ("C-c s a" . counsel-ag)))
 #+END_SRC
 
 When using =counsel-ag=:
@@ -2094,30 +2094,26 @@ A gradle function to generate Javadoc for the project.
         scala-indent:align-forms t
         scala-indent:use-javadoc-style t)
 
-  (add-hook 'scala-mode-hook
-            '(lambda ()
-               (yas-minor-mode)
-               ;; sbt-find-definitions is a command that tries to find (with grep)
-               ;; the definition of the thing at point.
-               ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+  (defun nl-scala-mode-hook ()
+    (yas-minor-mode)
+    ;; sbt-find-definitions is a command that tries to find (with grep)
+    ;; the definition of the thing at point.
+    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
 
-               ;; use sbt-run-previous-command to re-compile your code after changes
-               (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-               (local-set-key (kbd "RET") 'newline-and-indent)
+    ;; use sbt-run-previous-command to re-compile your code after changes
+    (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
+    (local-set-key (kbd "RET") 'newline-and-indent)
 
-               ;; Bind the backtab (shift tab) to
-               ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-               ;; when using the 'eager' mode by default and you want to "outdent" a
-               ;; code line as a new statement.
-               (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+    ;; Bind the backtab (shift tab) to
+    ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+    ;; when using the 'eager' mode by default and you want to "outdent" a
+    ;; code line as a new statement.
+    (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+    (setq-default indent-tabs-mode nil)
+    (setq compilation-ask-about-save nil)
+    (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
 
-               (setq-default indent-tabs-mode nil)
-
-               (setq compilation-ask-about-save nil)
-
-               (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map)
-
-               ))
+  (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
   (add-hook 'scala-mode-hook 'fic-mode))
 #+END_SRC
 
@@ -2126,32 +2122,36 @@ A gradle function to generate Javadoc for the project.
   :ensure t
   :commands sbt-start sbt-command
   :config
-    (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
-    (add-hook 'sbt-mode-hook
-              '(lambda ()
-                 ;; compilation-skip-threshold tells the compilation minor-mode
-                 ;; which type of compiler output can be skipped. 1 = skip info
-                 ;; 2 = skip info and warnings.
-                 (setq compilation-skip-threshold 1)
+  (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
 
-                 ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the
-                 ;; cursor to just after prompt.
-                 (local-set-key (kbd "C-a") 'comint-bol)
+  (defun nl-sbt-mode-hook ()
+    ;; compilation-skip-threshold tells the compilation minor-mode
+    ;; which type of compiler output can be skipped. 1 = skip info
+    ;; 2 = skip info and warnings.
+    (setq compilation-skip-threshold 1)
 
-                 ;; Bind M-RET to 'comint-accumulate. This will allow you to add
-                 ;; more than one line to scala console prompt before sending it
-                 ;; for interpretation. It will keep your command history cleaner.
-                 (local-set-key (kbd "M-RET") 'comint-accumulate)
-                 ))
+    ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the
+    ;; cursor to just after prompt.
+    (local-set-key (kbd "C-a") 'comint-bol)
 
-    ;; set this regex so that it knows about Play Framework SBT prompt
-    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-          sbt:scroll-to-bottom-on-output nil))
+    ;; Bind M-RET to 'comint-accumulate. This will allow you to add
+    ;; more than one line to scala console prompt before sending it
+    ;; for interpretation. It will keep your command history cleaner.
+    (local-set-key (kbd "M-RET") 'comint-accumulate))
 
+  (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
+
+  ;; set this regex so that it knows about Play Framework SBT prompt
+  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+        sbt:scroll-to-bottom-on-output nil))
+#+END_SRC
+
+I use these within a hydra to make testing scala code easier.
+
+#+BEGIN_SRC emacs-lisp
 (defun nl/scalatest-test-only ()
   (interactive)
-  (helm :sources '(helm-scala-project-test-spec))
-  )
+  (helm :sources '(helm-scala-project-test-spec)))
 
 (defun nl/scalatest-test-only-this-buffer ()
   "Run the scalatest tests for class in the SBT process. The class name must have the postfix 'Spec' for this function to work."
@@ -2169,19 +2169,7 @@ A gradle function to generate Javadoc for the project.
     ;;(message "%s" spec-name)
     ;; return to where cursor was
     (goto-char current-point)
-    (sbt-command (message "test-only *%s" spec-name))
-    ))
-
-(defun nl/scalatest-remove-tag()
-  "Removes a ScalaTest tag searching forward in the buffer"
-  (interactive)
-  (search-forward "taggedAs")
-  (skip-chars-backward "A-Za-z0-9")
-  (setq head-point (point))
-  (skip-chars-forward "A-Za-z0-9(\")")
-  (forward-char)
-  (setq tail-point (point))
-  (kill-region head-point tail-point))
+    (sbt-command (message "test-only *%s" spec-name))))
 
 (defun nl/scalatest-find-file ()
   "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
@@ -2204,8 +2192,27 @@ A gradle function to generate Javadoc for the project.
     (message "%s %s" file-with-proj-path line-num)
     (find-file-other-window (expand-file-name file-with-proj-path (projectile-project-root)))
     (goto-char (point-min))
-    (forward-line (- line-num 1))
-    ))
+    (forward-line (- line-num 1))))
+
+(defun nl/scalatest-remove-tag ()
+  "Removes a ScalaTest tag searching forward in the buffer"
+  (interactive)
+  (search-forward "taggedAs")
+  (skip-chars-backward "A-Za-z0-9")
+  (setq head-point (point))
+  (skip-chars-forward "A-Za-z0-9(\")")
+  (forward-char)
+  (setq tail-point (point))
+  (kill-region head-point tail-point))
+
+(defhydra hydra-nl-scalatest (:hint nil)
+  "Testing scala code with scalatest"
+  ("t" nl/scalatest-test-only-this-buffer "this file" :color blue)
+  ("s" nl/scalatest-test-only "select suite to run" :color blue)
+  ("f" nl/scalatest-find-file "find file from traceback" :color blue)
+  ("r" nl/scalatest-remove-tag "remove test tag" :color blue))
+
+(key-chord-define-global "tt" 'hydra-nl-scalatest/body)
 #+END_SRC
 
 ** SQL

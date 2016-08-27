@@ -34,6 +34,7 @@
   "bbweb project build commands"
   ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("s" sbt-command "sbt command" :color blue)
+  ("m" karma-mode "toggle karma-mode" :color blue)
   ("k" karma-start "karma unit test" :color blue)
   ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue))
 
@@ -82,6 +83,16 @@
   "The char that is the current quote delimiter."
   (nth 3 (syntax-ppss)))
 
+(defun bbweb-counsel-ag-scala ()
+  "Perform counsel-ag on the project's JavaScript files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "--scala"))
+
+(defun bbweb-counsel-ag-js ()
+  "Perform counsel-ag on the project's JavaScript files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "--js"))
+
 (defun bbweb-gettext-surround-string ()
   "Surrounds string with a call to gettext.  Cursor must be at string's start."
   (interactive)
@@ -94,9 +105,17 @@
         (insert ")"))
     (message "not at the start of a string")))
 
+(defun bbweb-scala-mode-keys ()
+  "Key definitions for 'js-mode' in bbweb project."
+  (interactive)
+  (local-set-key (kbd "C-c s s") 'bbweb-counsel-ag-scala))
+
+(add-hook 'scala-mode-hook 'bbweb-scala-mode-keys)
+
 (defun bbweb-js-mode-keys ()
   "Key definitions for 'js-mode' in bbweb project."
   (interactive)
+  (local-set-key (kbd "C-c s j") 'bbweb-counsel-ag-js)
   (local-set-key (kbd "C-c g") 'bbweb-gettext-surround-string))
 
 (add-hook 'js-mode-hook 'bbweb-js-mode-keys)
