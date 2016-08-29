@@ -880,11 +880,12 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd)
 (use-package company-emacs-eclim
+  :ensure t
   :commands company-emacs-eclim-setup)
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :diminish eclim-mode
-  :commands eclim-mode
+  :commands (global-eclim-mode)
   :init (use-package cl)
   :config
     (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
@@ -1328,15 +1329,7 @@ short bindings with a common prefix - a Hydra.
       ("s" (lambda nil (interactive) (ace-window 4)) "swap")
       ("d" (lambda nil (interactive) (ace-window 16)) "delete"))
 
-    (key-chord-define-global "yy" 'hydra-window/body)
-
-    ;;
-    ;; Taken from http://doc.rix.si/org/fsem.html
-    ;;
-    (defhydra hydra-zoom (global-map "C-c z")
-      "zoom"
-      ("g" text-scale-increase "in")
-      ("l" text-scale-decrease "out")))
+    (key-chord-define-global "yy" 'hydra-window/body))
 #+END_SRC
 
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
@@ -2041,10 +2034,7 @@ A gradle function to generate Javadoc for the project.
 ** JavaScript
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'js-mode-hook 'js2-minor-mode)
-(add-hook 'js-mode-hook 'fic-mode)
-
-(defun my-javascript-mode-hook ()
+(defun nl/javascript-mode-hook ()
   (nl/setup-indent 2) ; indent 2 spaces width
   (setq comment-multi-line t)
   (define-key js-mode-map [remap indent-new-comment-line]
@@ -2052,8 +2042,21 @@ A gradle function to generate Javadoc for the project.
   (setq indent-tabs-mode nil)
   (flycheck-mode t))
 
-(add-hook 'js-mode-hook 'my-javascript-mode-hook)
+(add-hook 'js-mode-hook 'js2-minor-mode)
+(add-hook 'js-mode-hook 'fic-mode)
+(add-hook 'js-mode-hook 'nl/javascript-mode-hook)
 (add-hook 'js-mode-hook 'my-common-prog-mode-settings)
+#+END_SRC
+
+Key bindings to allow us to use ~counsel-ag~ to seach scala code.
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/counsel-ag-js ()
+  "Perform counsel-ag on the project's JavaScript files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "--js"))
+
+(global-set-key (kbd "C-c s j") 'nl/counsel-ag-js))
 #+END_SRC
 
 ** Perl
@@ -2075,83 +2078,32 @@ A gradle function to generate Javadoc for the project.
 
 ** Scala
 
-#+BEGIN_SRC emacs-lisp
-(defun scala-mode-newline-comments ()
-  "Custom newline appropriate for `scala-mode'."
-  ;; shouldn't this be in a post-insert hook?
-  (interactive)
-  (newline-and-indent)
-  (scala-indent:insert-asterisk-on-multiline-comment))
-
-(use-package scala-mode
-  :ensure t
-  :interpreter
-  ("scala" . scala-mode)
-  :config
-  (setq scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-        scala-indent:indent-value-expression t
-        scala-indent:align-parameters t
-        scala-indent:align-forms t
-        scala-indent:use-javadoc-style t)
-
-  (defun nl-scala-mode-hook ()
-    (yas-minor-mode)
-    ;; sbt-find-definitions is a command that tries to find (with grep)
-    ;; the definition of the thing at point.
-    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
-
-    ;; use sbt-run-previous-command to re-compile your code after changes
-    (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-    (local-set-key (kbd "RET") 'newline-and-indent)
-
-    ;; Bind the backtab (shift tab) to
-    ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-    ;; when using the 'eager' mode by default and you want to "outdent" a
-    ;; code line as a new statement.
-    (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
-    (setq-default indent-tabs-mode nil)
-    (setq compilation-ask-about-save nil)
-    (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
-
-  (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
-  (add-hook 'scala-mode-hook 'fic-mode))
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(use-package sbt-mode
-  :ensure t
-  :commands sbt-start sbt-command
-  :config
-  (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
-
-  (defun nl-sbt-mode-hook ()
-    ;; compilation-skip-threshold tells the compilation minor-mode
-    ;; which type of compiler output can be skipped. 1 = skip info
-    ;; 2 = skip info and warnings.
-    (setq compilation-skip-threshold 1)
-
-    ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the
-    ;; cursor to just after prompt.
-    (local-set-key (kbd "C-a") 'comint-bol)
-
-    ;; Bind M-RET to 'comint-accumulate. This will allow you to add
-    ;; more than one line to scala console prompt before sending it
-    ;; for interpretation. It will keep your command history cleaner.
-    (local-set-key (kbd "M-RET") 'comint-accumulate))
-
-  (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
-
-  ;; set this regex so that it knows about Play Framework SBT prompt
-  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-        sbt:scroll-to-bottom-on-output nil))
-#+END_SRC
-
 I use these within a hydra to make testing scala code easier.
 
 #+BEGIN_SRC emacs-lisp
+;; created after reading this article:
+;;
+;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
+(setq nl/helm-scala-project-test-spec
+      '((name . "Select a ScalaTest specification to run:")
+        (candidates
+         . (lambda ()
+             (remove-if-not (lambda (filename)
+                              (string-match "Spec.scala$" filename))
+                            (projectile-current-project-files))
+             ))
+        (nomark . t)
+        (action
+         . (lambda (candidate)
+             ;;(message "file name is: %s" candidate)
+             ;;(message "test name is: %s" (file-name-nondirectory candidate))
+             (sbt-command (message "test-only *%s"
+                                   (file-name-sans-extension (file-name-nondirectory candidate))))
+             ))))
+
 (defun nl/scalatest-test-only ()
   (interactive)
-  (helm :sources '(helm-scala-project-test-spec)))
+  (helm :sources '(nl/helm-scala-project-test-spec)))
 
 (defun nl/scalatest-test-only-this-buffer ()
   "Run the scalatest tests for class in the SBT process. The class name must have the postfix 'Spec' for this function to work."
@@ -2211,8 +2163,95 @@ I use these within a hydra to make testing scala code easier.
   ("s" nl/scalatest-test-only "select suite to run" :color blue)
   ("f" nl/scalatest-find-file "find file from traceback" :color blue)
   ("r" nl/scalatest-remove-tag "remove test tag" :color blue))
+#+END_SRC
 
-(key-chord-define-global "tt" 'hydra-nl-scalatest/body)
+More functions that are used in scala-mode.
+
+#+BEGIN_SRC emacs-lisp
+(defun scala-mode-newline-comments ()
+  "Custom newline appropriate for `scala-mode'."
+  ;; shouldn't this be in a post-insert hook?
+  (interactive)
+  (newline-and-indent)
+  (scala-indent:insert-asterisk-on-multiline-comment))
+
+(defun nl/scala-mode-keys ()
+  "My extra key definitions for 'scala-mode'."
+  (interactive)
+  ;; use sbt-run-previous-command to re-compile your code after changes
+  (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
+  (local-set-key (kbd "RET") 'newline-and-indent)
+  ;; Bind the backtab (shift tab) to
+  ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+  ;; when using the 'eager' mode by default and you want to "outdent" a
+  ;; code line as a new statement.
+  (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+  (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
+
+  (defun nl-scala-mode-hook ()
+    (yas-minor-mode)
+    ;; sbt-find-definitions is a command that tries to find (with grep)
+    ;; the definition of the thing at point.
+    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+
+    (setq-default indent-tabs-mode nil)
+    (setq compilation-ask-about-save nil)
+    (nl/scala-mode-keys)
+    (key-chord-define scala-mode-map "tt" 'hydra-nl-scalatest/body))
+
+#+END_SRC
+
+Key bindings to allow us to use ~counsel-ag~ to seach scala code.
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/counsel-ag-scala ()
+  "Perform counsel-ag on the project's Scala files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "--scala"))
+(global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+#+END_SRC
+
+Use the package.
+
+#+BEGIN_SRC emacs-lisp
+(use-package scala-mode
+  :ensure t
+  :interpreter
+  ("scala" . scala-mode)
+  :config
+  (setq scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+        scala-indent:indent-value-expression t
+        scala-indent:align-parameters t
+        scala-indent:align-forms t
+        scala-indent:use-javadoc-style t)
+  (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
+  (add-hook 'scala-mode-hook 'fic-mode))
+#+END_SRC
+
+Also use the ~sbt-mode~ package.
+
+#+BEGIN_SRC emacs-lisp
+(defun nl-sbt-mode-hook ()
+  ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
+  ;; be skipped. 1 = skip info 2 = skip info and warnings.
+  (setq compilation-skip-threshold 1)
+
+  ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
+  (local-set-key (kbd "C-a") 'comint-bol)
+
+  ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
+  ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
+  (local-set-key (kbd "M-RET") 'comint-accumulate))
+
+(use-package sbt-mode
+  :ensure t
+  :commands sbt-start sbt-command
+  :config
+  (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
+  (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
+  ;; set this regex so that it knows about Play Framework SBT prompt
+  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+        sbt:scroll-to-bottom-on-output nil))
 #+END_SRC
 
 ** SQL
@@ -2326,11 +2365,23 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
 
 ** Font size
 
+Using this hydra instead of method below, which is tangled out.
+
+#+BEGIN_SRC emacs-lisp
+;;
+;; Taken from http://doc.rix.si/org/fsem.html
+;;
+(defhydra hydra-zoom (global-map "C-c z")
+  "zoom"
+  ("g" text-scale-increase "in")
+  ("l" text-scale-decrease "out"))
+#+END_SRC
+
 =C-c C-+= and =C-c C--= are pretty useful, but only resize the current
 buffer.  Here's a hack using ~set-frame-font~ and altering the font
 size only:
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (defun my-alter-frame-font-size (fn)
   (let* ((current-font-name (frame-parameter nil 'font))
          (decomposed-font-name (x-decompose-font-name current-font-name))
