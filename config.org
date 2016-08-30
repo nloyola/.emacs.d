@@ -2056,7 +2056,18 @@ Key bindings to allow us to use ~counsel-ag~ to seach scala code.
   (interactive)
   (counsel-ag "" (projectile-project-root) "--js"))
 
-(global-set-key (kbd "C-c s j") 'nl/counsel-ag-js))
+(global-set-key (kbd "C-c s j") 'nl/counsel-ag-js)
+#+END_SRC
+
+** Html
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/counsel-ag-html ()
+  "Perform counsel-ag on the project's HTML files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "--html"))
+
+(global-set-key (kbd "C-c s h") 'nl/counsel-ag-html)
 #+END_SRC
 
 ** Perl
