@@ -876,14 +876,14 @@ Provides Emacs with some Eclipse features for Java development. Eclim has to be 
 can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
-(use-package eclimd
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :commands start-eclimd)
 (use-package company-emacs-eclim
   :ensure t
   :commands company-emacs-eclim-setup)
+(use-package eclimd
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  :commands start-eclimd)
 (use-package eclim
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :diminish eclim-mode
   :commands (global-eclim-mode)
   :init (use-package cl)
@@ -992,7 +992,7 @@ Allow windmove to jump between frames.
 Generate tags on command line with ~gtags~.
 Updte tags on command line with ~global -u~.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package ggtags
   :ensure t
   :commands ggtags-mode)
@@ -1222,13 +1222,19 @@ stop:
 
 ** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-gtags
   :ensure t
-  :commands (helm-gtags-find-tag helm-gtags-find-rtag)
+  :commands (helm-gtags-mode)
   :bind (("M-." . helm-gtags-find-tag)
-         ("M-," . helm-gtags-find-rtag)))
+         ("M-," . helm-gtags-find-rtag))
+  :config
+  (custom-set-variables
+   '(helm-gtags-path-style 'relative)
+   '(helm-gtags-ignore-case t)
+   '(helm-gtags-auto-update t)))
 #+END_SRC
+
 ** [[https://github.com/bbatsov/projectile][helm-projectile]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1353,20 +1359,20 @@ short bindings with a common prefix - a Hydra.
                              "fit"
                              "xit"))
   :config
-    (custom-set-variables
-     '(js2-basic-offset 2)
-     '(js2-bounce-indent-p t)
-     '(js2-highlight-level 3))
+  (custom-set-variables
+   '(js2-basic-offset 2)
+   '(js2-bounce-indent-p t)
+   '(js2-highlight-level 3))
 
-    ;;(eval-after-load 'js2-mode
-    ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+  ;;(eval-after-load 'js2-mode
+  ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
 
-    ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
-    ;;(setq ac-js2-evaluate-calls t)
+  ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
+  ;;(setq ac-js2-evaluate-calls t)
 
-    (setq-default js2-mode-show-parse-errors t)
-    (setq-default js2-strict-missing-semi-warning t)
-    (setq-default js2-strict-trailing-comma-warning t))
+  (setq-default js2-mode-show-parse-errors t)
+  (setq-default js2-strict-missing-semi-warning t)
+  (setq-default js2-strict-trailing-comma-warning t))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
@@ -1681,6 +1687,22 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :config
     (load-theme 'solarized-dark t))
+#+END_SRC
+
+** [[https://github.com/bbatsov/super-save][super-save]]
+
+#+BEGIN_QUOTE
+super-save auto-saves your buffers, when certain events happen - e.g.
+you switch between buffers, an Emacs frame loses focus, etc. You can
+think of it as both something that augments and replaces the standard
+=auto-save-mode=.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package super-save
+  :ensure t
+  :diminish super-save-mode
+  :config (super-save-mode +1))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/swiper][swiper]]
@@ -2267,6 +2289,8 @@ Also use the ~sbt-mode~ package.
 
 ** SQL
 
+This configuration allows me to connect to predefined MySQL servers.
+
 Taken from:
 - http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
 
@@ -2275,7 +2299,7 @@ Taken from:
 (epa-file-enable)
 
 (setq sql-connection-alist
-      '((che.dev (sql-product 'mysql)
+      '((localhost.dev (sql-product 'mysql)
                  (sql-port 3306)
                  (sql-server "localhost")
                  (sql-user "root")
@@ -2304,16 +2328,16 @@ Taken from:
       (sql-connect connection connection)
     (sql-connect connection)))
 
-(defun nl/sql-che-dev ()
-  "Connects to the MySQL server running on machine 'che'."
-  (nl/sql-connect 'mysql 'che.dev))
+(defun nl/sql-localhost-dev ()
+  "Connects to the MySQL server running on machine 'localhost'."
+  (nl/sql-connect 'mysql 'localhost.dev))
 
 (defun nl/sql-obelix-dev ()
   "Connects to the MySQL server running on machine 'obelix'."
   (nl/sql-connect 'mysql 'obelix.dev))
 
 (defvar nl/sql-servers-list
-  '(("Che Dev" nl/sql-che-dev)
+  '(("localhost dev" nl/sql-localhost-dev)
     ("Obelix Dev" nl/sql-obelix-dev))
   "A list of server name and the function to connect.")
 
