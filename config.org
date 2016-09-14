@@ -749,18 +749,19 @@ what I have them set to (with respect to Dvorak, of course).
 #+BEGIN_SRC emacs-lisp
 (use-package anzu
   :ensure t
+  :bind
+  (([remap query-replace] . anzu-query-replace)
+   ([remap query-replace-regexp] . anzu-query-replace-regexp))
   :config
-    (global-anzu-mode +1)
-    (set-face-attribute 'anzu-mode-line nil
-                        :foreground "yellow" :weight 'bold)
-    (custom-set-variables
-     '(anzu-mode-lighter "")
-     '(anzu-deactivate-region t)
-     '(anzu-search-threshold 1000)
-     '(anzu-replace-threshold 50)
-     '(anzu-replace-to-string-separator " => "))
-    (global-set-key [remap query-replace] 'anzu-query-replace)
-    (global-set-key [remap query-replace-regexp] 'anzu-query-replace-regexp))
+  (global-anzu-mode +1)
+  (set-face-attribute 'anzu-mode-line nil
+                      :foreground "yellow" :weight 'bold)
+  (custom-set-variables
+   '(anzu-mode-lighter "")
+   '(anzu-deactivate-region t)
+   '(anzu-search-threshold 1000)
+   '(anzu-replace-threshold 50)
+   '(anzu-replace-to-string-separator " => ")))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/avy][avy]]
@@ -769,9 +770,10 @@ A quick way to jump around text in buffers.
 
 #+BEGIN_SRC emacs-lisp
 (use-package avy
-  :bind (("C-c SPC" . avy-goto-char)
-         ("C-'" . avy-goto-char-2)
-         ("M-g M-g" . avy-goto-line)))
+  :bind
+  (("C-c SPC" . avy-goto-char)
+   ("C-'" . avy-goto-char-2)
+   ("M-g M-g" . avy-goto-line)))
 #+END_SRC
 
 ** [[https://github.com/belak/base16-emacs][base16-emacs]]
@@ -841,10 +843,12 @@ Complete anything.
 (use-package company
   :ensure t
   :diminish company-mode
+  :bind
+  ("M-/" . company-complete-common)
   :config
-    (add-hook 'after-init-hook 'global-company-mode)
-    (global-set-key (kbd "M-/") 'company-complete-common)
-    (use-package company-tern))
+  (add-hook 'after-init-hook 'global-company-mode))
+
+(use-package company-tern)
 #+END_SRC
 
 ** [[https://github.com/thamer/diredful][diredful]]
@@ -1011,10 +1015,11 @@ Updte tags on command line with ~global -u~.
 #+BEGIN_SRC emacs-lisp
 (use-package goto-last-change
   :ensure t
+  :bind
+  ("C-x C-\\" . goto-last-change)
   :config
-    (autoload 'goto-last-change "goto-last-change"
-      "Set point to the position of the last change." t)
-    (global-set-key "\C-x\C-\\" 'goto-last-change))
+  (autoload 'goto-last-change "goto-last-change"
+    "Set point to the position of the last change." t))
 #+END_SRC
 
 ** [[https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes][groovy-mode]]
@@ -1189,7 +1194,7 @@ stop:
   :ensure t
   :commands helm-yas-complete
   ;;:init (use-package yasnippet)
-  :config (global-set-key (kbd "C-c y") 'helm-yas-complete))
+  :bind ("C-c y" . helm-yas-complete))
 #+END_SRC
 
 ** [[https://github.com/PythonNut/helm-flx][helm-flx]]
@@ -1336,6 +1341,30 @@ short bindings with a common prefix - a Hydra.
       ("d" (lambda nil (interactive) (ace-window 16)) "delete"))
 
     (key-chord-define-global "yy" 'hydra-window/body))
+#+END_SRC
+
+** [[https://github.com/abo-abo/swiper][ivy]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy :ensure t
+  :diminish (ivy-mode . "")
+  :bind
+  (:map ivy-mode-map
+   ("C-'" . ivy-avy))
+  :config
+  (ivy-mode 1)
+  ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
+  (setq ivy-use-virtual-buffers t)
+  ;; number of result lines to display
+  (setq ivy-height 10)
+  ;; does not count candidates
+  (setq ivy-count-format "")
+  ;; no regexp by default
+  (setq ivy-initial-inputs-alist nil)
+  ;; configure regexp engine.
+  (setq ivy-re-builders-alist
+	;; allow input not in order
+        '((t . ivy--regex-ignore-order))))
 #+END_SRC
 
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
