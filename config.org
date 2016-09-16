@@ -489,6 +489,82 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
   (add-hook 'after-init-hook 'edit-server-start t))
 #+END_SRC
 
+** =ispell=
+
+Find aspell and hunspell automatically.
+
+Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
+
+#+BEGIN_SRC emacs-lisp
+;; if (aspell installed) { use aspell}
+;; else if (hunspell installed) { use hunspell }
+;; whatever spell checker I use, I always use English dictionary
+;; I prefer use aspell because:
+;; 1. aspell is older
+;; 2. looks Kevin Atkinson still get some road map for aspell:
+;; @see http://lists.gnu.org/archive/html/aspell-announce/2011-09/msg00000.html
+(defun flyspell-detect-ispell-args (&optional run-together)
+  "if RUN-TOGETHER is true, spell check the CamelCase words."
+  (let (args)
+    (cond
+     ((string-match  "aspell$" ispell-program-name)
+      ;; Force the English dictionary for aspell
+      ;; Support Camel Case spelling check (tested with aspell 0.6)
+      (setq args (list "--sug-mode=ultra" "--lang=en_CA"))
+      (if run-together
+          (setq args (append args '("--run-together" "--run-together-limit=5" "--run-together-min=2")))))
+     ((string-match "hunspell$" ispell-program-name)
+      ;; Force the English dictionary for hunspell
+      (setq args "-d en_CA")))
+    args))
+
+(cond
+ ((executable-find "aspell")
+  ;; you may also need `ispell-extra-args'
+  (setq ispell-program-name "aspell"))
+ ((executable-find "hunspell")
+  (setq ispell-program-name "hunspell")
+
+  ;; Please note that `ispell-local-dictionary` itself will be passed to hunspell cli with "-d"
+  ;; it's also used as the key to lookup ispell-local-dictionary-alist
+  ;; if we use different dictionary
+  (setq ispell-local-dictionary "en_CA")
+  (setq ispell-local-dictionary-alist
+        '(("en_CA" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_CA") nil utf-8))))
+ (t (setq ispell-program-name nil)))
+
+;; ispell-cmd-args is useless, it's the list of *extra* arguments we will append to the ispell process when "ispell-word" is called.
+;; ispell-extra-args is the command arguments which will *always* be used when start ispell process
+;; Please note when you use hunspell, ispell-extra-args will NOT be used.
+;; Hack ispell-local-dictionary-alist instead.
+(setq-default ispell-extra-args (flyspell-detect-ispell-args t))
+;; (setq ispell-cmd-args (flyspell-detect-ispell-args))
+(defadvice ispell-word (around my-ispell-word activate)
+  (let ((old-ispell-extra-args ispell-extra-args))
+    (ispell-kill-ispell t)
+    (setq ispell-extra-args (flyspell-detect-ispell-args))
+    ad-do-it
+    (setq ispell-extra-args old-ispell-extra-args)
+    (ispell-kill-ispell t)
+    ))
+
+(defadvice flyspell-auto-correct-word (around my-flyspell-auto-correct-word activate)
+  (let ((old-ispell-extra-args ispell-extra-args))
+    (ispell-kill-ispell t)
+    ;; use emacs original arguments
+    (setq ispell-extra-args (flyspell-detect-ispell-args))
+    ad-do-it
+    ;; restore our own ispell arguments
+    (setq ispell-extra-args old-ispell-extra-args)
+    (ispell-kill-ispell t)
+    ))
+
+(defun text-mode-hook-setup ()
+  ;; Turn off RUN-TOGETHER option when spell check text-mode
+  (setq-local ispell-extra-args (flyspell-detect-ispell-args)))
+(add-hook 'text-mode-hook 'text-mode-hook-setup)
+#+END_SRC
+
 ** =ibuffer=
 
 ibuffer is the improved version of list-buffers.
@@ -1867,10 +1943,10 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 (use-package yasnippet
   :ensure t
   :diminish yas-minor-mode
+  :init
+  (yas-global-mode 1)
   :config
-    ;;(setq yas-snippet-dirs (concat user-emacs-directory "snippets"))
-    (yas-reload-all)
-    (yas-global-mode))
+    (add-to-list 'yas-snippet-dirs (locate-user-emacs-file "snippets")))
 #+END_SRC
 
 ** [[https://github.com/fxbois/web-mode][web-mode]]
@@ -2258,9 +2334,9 @@ More functions that are used in scala-mode.
 
     (setq-default indent-tabs-mode nil)
     (setq compilation-ask-about-save nil)
-    (nl/scala-mode-keys)
-    (key-chord-define scala-mode-map "tt" 'hydra-nl-scalatest/body))
+    (nl/scala-mode-keys))
 
+(key-chord-define-global "tt" 'hydra-nl-scalatest/body)
 #+END_SRC
 
 Key bindings to allow us to use ~counsel-ag~ to seach scala code.
@@ -2281,10 +2357,10 @@ Use the package.
   :interpreter
   ("scala" . scala-mode)
   :config
-  (setq scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-        scala-indent:indent-value-expression t
+  (setq scala-indent:indent-value-expression t
         scala-indent:align-parameters t
         scala-indent:align-forms t
+        scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
         scala-indent:use-javadoc-style t)
   (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
   (add-hook 'scala-mode-hook 'fic-mode))
