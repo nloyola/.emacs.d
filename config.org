@@ -896,6 +896,17 @@ Never lose your cursor again
                                          ))))
 #+END_SRC
 
+** [[https://github.com/bburns/clipmon][clipmon]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package clipmon
+  :ensure t
+  :commands clipmon-mode-start
+  :bind ("M-S-<f2>" . clipmon-autoinsert-toggle)
+  :config
+  (clipmon-mode-start))
+#+END_SRC
+
 ** [[https://github.com/ankurdave/color-identifiers-mode][color-identifiers]]
 
 Color Identifiers is a minor mode for Emacs that highlights each source code identifier uniquely
@@ -1102,7 +1113,7 @@ Updte tags on command line with ~global -u~.
 
 Required for gradle build files.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package groovy-mode
   :ensure t)
 #+END_SRC
@@ -1387,36 +1398,54 @@ short bindings with a common prefix - a Hydra.
 (use-package hydra
   :ensure t
   :init
-    (use-package cl-lib)
-    (use-package lv)
-    (use-package ace-window :ensure t)
-    (use-package avy :ensure t)
-    (use-package key-chord
-      :ensure t
-      :config (key-chord-mode 1))
+  (use-package cl-lib)
+  (use-package lv)
+  (use-package ace-window :ensure t)
+  (use-package avy :ensure t)
+  (use-package key-chord
+    :ensure t
+    :config (key-chord-mode 1))
   :config
-    ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
+  ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
-    (defun hydra-universal-argument (arg)
-      (interactive "P")
-      (setq prefix-arg (if (consp arg)
-                           (list (* 4 (car arg)))
-                         (if (eq arg '-)
-                             (list -4)
-                           '(4)))))
+  (defun hydra-universal-argument (arg)
+    (interactive "P")
+    (setq prefix-arg (if (consp arg)
+                         (list (* 4 (car arg)))
+                       (if (eq arg '-)
+                           (list -4)
+                         '(4)))))
 
-    (defhydra hydra-window (global-map "C-M-o")
-      "window"
-      ("h" windmove-left "left")
-      ("j" windmove-down "down")
-      ("k" windmove-up "up")
-      ("l" windmove-right "right")
-      ("a" ace-window "ace")
-      ("u" hydra-universal-argument "universal")
-      ("s" (lambda nil (interactive) (ace-window 4)) "swap")
-      ("d" (lambda nil (interactive) (ace-window 16)) "delete"))
+  (defhydra hydra-window (global-map "C-M-o")
+    "window"
+    ("h" windmove-left "left")
+    ("j" windmove-down "down")
+    ("k" windmove-up "up")
+    ("l" windmove-right "right")
+    ("a" ace-window "ace")
+    ("u" hydra-universal-argument "universal")
+    ("s" (lambda nil (interactive) (ace-window 4)) "swap")
+    ("d" (lambda nil (interactive) (ace-window 16)) "delete"))
 
-    (key-chord-define-global "yy" 'hydra-window/body))
+  (key-chord-define-global "yy" 'hydra-window/body)
+
+;; for better next-buffer and previous-buffer see http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html
+
+  (defhydra hydra-buffer (:color blue :columns 3)
+    "
+                Buffers :
+    "
+    ("n" next-buffer "next" :color red)
+    ("b" helm-mini "switch")
+    ("B" ibuffer "ibuffer")
+    ("p" previous-buffer "prev" :color red)
+    ("C-b" buffer-menu "buffer menu")
+    ("d" kill-this-buffer "delete" :color red)
+    ;; don't come back to previous buffer after delete
+    ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
+    ("s" save-buffer "save" :color red))
+
+  (key-chord-define-global "zz" 'hydra-buffer/body))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
@@ -2336,7 +2365,7 @@ More functions that are used in scala-mode.
     (setq compilation-ask-about-save nil)
     (nl/scala-mode-keys))
 
-(key-chord-define-global "tt" 'hydra-nl-scalatest/body)
+(key-chord-define-global "zt" 'hydra-nl-scalatest/body)
 #+END_SRC
 
 Key bindings to allow us to use ~counsel-ag~ to seach scala code.

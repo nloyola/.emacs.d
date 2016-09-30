@@ -39,7 +39,7 @@
   ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
-(key-chord-define-global "c." '(lambda () (interactive)
+(key-chord-define-global "zc" '(lambda () (interactive)
                                  (hydra-nl-bbweb-project/body)))
 
 ;;
