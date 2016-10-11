@@ -1,4 +1,4 @@
-#+TITLE: Emacs Configuration
++TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 
 This configuration uses the [[https://github.com/jwiegley/use-package][use-package]] package from John Wiegley,
@@ -1451,7 +1451,8 @@ short bindings with a common prefix - a Hydra.
 ** [[https://github.com/abo-abo/swiper][ivy]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package ivy :ensure t
+(use-package ivy
+  :ensure t
   :diminish (ivy-mode . "")
   :bind
   (:map ivy-mode-map
@@ -1468,9 +1469,48 @@ short bindings with a common prefix - a Hydra.
   (setq ivy-initial-inputs-alist nil)
   ;; configure regexp engine.
   (setq ivy-re-builders-alist
-	;; allow input not in order
+        ;; allow input not in order
         '((t . ivy--regex-ignore-order))))
+
+(use-package ivy-hydra
+  :ensure t)
 #+END_SRC
+
+*** [[https://github.com/abo-abo/swiper][swiper]]
+
+This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Ivy 0.8.0 is out]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package swiper
+  :ensure t
+  :bind (("C-s" . swiper)
+         ("C-c C-r" . ivy-resume)
+         ("<f6>" . ivy-resume))
+  :config
+  (ivy-mode 1)
+  (setq ivy-initial-inputs-alist nil)
+  (setq ivy-use-virtual-buffers t)
+  (setq swiper-action-recenter t))
+#+END_SRC
+
+See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05/30/swiperrecenter/][Recentre the buffer when leaving Swiper]].
+
+Also, install counsel:
+
+#+BEGIN_SRC emacs-lisp
+(use-package counsel
+  :bind (;;("C-x C-f" . counsel-find-file)
+         ;;("M-y" . counsel-yank-pop)
+         ("C-h f" . counsel-describe-function)
+         ("C-h v" . counsel-describe-variable)
+         ("C-c s a" . counsel-ag)))
+#+END_SRC
+
+When using =counsel-ag=:
+- use ~C-c C-o~ (=ivy-occur) to save results to a buffer,
+- use ~C-x C-q~ (=ivy-wgrep-change-to-wgrep-mode=) to edit the buffer,
+- use ~C-x C-s~ to save the changes, or
+- use ~C-c C-k~ to abort all changes
 
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
 
@@ -1739,6 +1779,21 @@ Highlight brackets according to their depth
   :ensure t)
 #+END_SRC
 
+** [[https://github.com/fgallina/region-bindings-mode][region-bindings-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package region-bindings-mode
+  :ensure t
+  :config
+  (region-bindings-mode-enable)
+  (define-key region-bindings-mode-map "a" 'mc/mark-all-like-this)
+  (define-key region-bindings-mode-map "p" 'mc/mark-previous-like-this)
+  (define-key region-bindings-mode-map "n" 'mc/mark-next-like-this)
+  (define-key region-bindings-mode-map "m" 'mc/mark-more-like-this-extended)
+  (define-key region-bindings-mode-map "q" 'anzu-query-replace-regexp)
+  (define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save))
+#+END_SRC
+
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
@@ -1838,42 +1893,6 @@ think of it as both something that augments and replaces the standard
   :diminish super-save-mode
   :config (super-save-mode +1))
 #+END_SRC
-
-** [[https://github.com/abo-abo/swiper][swiper]]
-
-This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Ivy 0.8.0 is out]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package swiper
-  :ensure t
-  :bind (("C-s" . swiper)
-         ("C-c C-r" . ivy-resume)
-         ("<f6>" . ivy-resume))
-  :config
-  (ivy-mode 1)
-  (setq ivy-initial-inputs-alist nil)
-  (setq ivy-use-virtual-buffers t)
-  (setq swiper-action-recenter t))
-#+END_SRC
-
-See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05/30/swiperrecenter/][Recentre the buffer when leaving Swiper]].
-
-Also, install counsel:
-
-#+BEGIN_SRC emacs-lisp
-(use-package counsel
-  :bind (;;("C-x C-f" . counsel-find-file)
-         ;;("M-y" . counsel-yank-pop)
-         ("C-h f" . counsel-describe-function)
-         ("C-h v" . counsel-describe-variable)
-         ("C-c s a" . counsel-ag)))
-#+END_SRC
-
-When using =counsel-ag=:
-- use ~C-c C-o~ (=ivy-occur) to save results to a buffer,
-- use ~C-x C-q~ (=ivy-wgrep-change-to-wgrep-mode=) to edit the buffer,
-- use ~C-x C-s~ to save the changes, or
-- use ~C-c C-k~ to abort all changes
 
 ** [[https://github.com/ternjs/tern][tern]]
 
@@ -2273,22 +2292,21 @@ I use these within a hydra to make testing scala code easier.
   (helm :sources '(nl/helm-scala-project-test-spec)))
 
 (defun nl/scalatest-test-only-this-buffer ()
-  "Run the scalatest tests for class in the SBT process. The class name must have the postfix 'Spec' for this function to work."
+  "For the class in the current buffer, run the scalatest test suite.
+The class name must have the postfix 'Spec' for this function to work."
   (interactive)
-  (let ((current-point (point))
-        p1 p2 line spec-name)
+  (save-excursion
+    (let (p1 p2 line spec-name)
     (goto-char (point-min))
     (re-search-forward "class.*Spec")
     (setq p1 (line-beginning-position) )
     (setq p2 (line-end-position) )
     (setq line (buffer-substring-no-properties p1 p2))
     (save-match-data ; is usually a good idea
-      (and (string-match "class \\(\\w+\\).* extends" line)
-           (setq spec-name (match-string 1 line))))
+      (and (string-match "class \\(\\w+\\).*Spec" line)
+           (setq spec-name (concat (match-string 1 line) "Spec"))))
     ;;(message "%s" spec-name)
-    ;; return to where cursor was
-    (goto-char current-point)
-    (sbt-command (message "test-only *%s" spec-name))))
+    (sbt-command (message "testOnly *%s" spec-name)))))
 
 (defun nl/scalatest-find-file ()
   "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
@@ -2365,7 +2383,7 @@ More functions that are used in scala-mode.
     (setq compilation-ask-about-save nil)
     (nl/scala-mode-keys))
 
-(key-chord-define-global "zt" 'hydra-nl-scalatest/body)
+(key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 #+END_SRC
 
 Key bindings to allow us to use ~counsel-ag~ to seach scala code.
@@ -2412,13 +2430,48 @@ Also use the ~sbt-mode~ package.
 
 (use-package sbt-mode
   :ensure t
-  :commands sbt-start sbt-command
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-sbt-mode"
+  :commands (sbt-start sbt-command)
   :config
   (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
   (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
   ;; set this regex so that it knows about Play Framework SBT prompt
   (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
         sbt:scroll-to-bottom-on-output nil))
+#+END_SRC
+
+Ivy and =sbt-command= do not behave well together right now, define
+our own wrapper function.
+
+#+BEGIN_SRC emacs-lisp
+(defun nl-sbt-command ()
+  (interactive)
+  (setq completing-read-function 'completing-read-default)
+  (call-interactively 'sbt-command)
+  (setq completing-read-function 'ivy-completing-read))
+
+;;;; testing
+(defun sbt-command-ivy ()
+  "Send a command to the sbt process of the current buffer's sbt project.
+Prompts for the command to send when in interactive mode. You can
+use tab completion.
+
+This command does the following:
+  - displays the buffer moving focus to it if focus is t
+  - erases the buffer
+  - forgets about compilation errors
+
+The command is most usefull for running a compilation command
+that outputs errors."
+  (interactive)
+  (setq sbt:command-history-temp
+        (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
+  (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
+            #'sbt:get-sbt-completions-for-command
+            :action #'sbt:command
+            :history 'sbt:command-history-temp
+            :preselect (sbt:get-previous-command)
+            :dynamic-collection t))
 #+END_SRC
 
 ** SQL
