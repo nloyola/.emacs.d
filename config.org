@@ -267,6 +267,13 @@ Enable ANSI colors for compilation buffers.
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 #+END_SRC
 
+Configure =next-buffer= and =previous-buffer= to only visit file
+buffers (has to be called for each frame):
+
+#+BEGIN_SRC emacs-lisp
+(set-frame-parameter (selected-frame) 'buffer-predicate #'buffer-file-name)
+#+END_SRC
+
 ** Disabled features
 
 Turn off auto-save.
@@ -468,7 +475,8 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 #+BEGIN_SRC emacs-lisp
 (setq dired-listing-switches "-aBhl  --group-directories-first"
       global-auto-revert-non-file-buffers t
-      auto-revert-verbose nil)
+      auto-revert-verbose nil
+      dired-dwim-target t)
 (add-hook 'dired-mode-hook 'auto-revert-mode)
 #+END_SRC
 
@@ -1493,12 +1501,13 @@ This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Iv
   (setq swiper-action-recenter t))
 #+END_SRC
 
-See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05/30/swiperrecenter/][Recentre the buffer when leaving Swiper]].
-
 Also, install counsel:
+
+See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05/30/swiperrecenter/][Recentre the buffer when leaving Swiper]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package counsel
+  :ensure t
   :bind (;;("C-x C-f" . counsel-find-file)
          ;;("M-y" . counsel-yank-pop)
          ("C-h f" . counsel-describe-function)
@@ -2209,12 +2218,40 @@ A gradle function to generate Javadoc for the project.
 ** JavaScript
 
 #+BEGIN_SRC emacs-lisp
+(setq javascript-common-imenu-regex-list
+      '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+        ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+        ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+        ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+        ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+        ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+        ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+        ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+        ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+        ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+        ))
+
+;; js-mode imenu enhancement
+;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+(defun nl-js-imenu-make-index ()
+  (save-excursion
+    (imenu--generic-function javascript-common-imenu-regex-list)))
+
 (defun nl/javascript-mode-hook ()
   (nl/setup-indent 2) ; indent 2 spaces width
   (setq comment-multi-line t)
   (define-key js-mode-map [remap indent-new-comment-line]
     'c-indent-new-comment-line)
   (setq indent-tabs-mode nil)
+  (setq imenu-create-index-function 'nl-js-imenu-make-index)
   (flycheck-mode t))
 
 (add-hook 'js-mode-hook 'js2-minor-mode)

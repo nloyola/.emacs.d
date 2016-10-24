@@ -1,0 +1,16 @@
+# -*- mode: snippet -*-
+# name: jsmixin
+# key: jsmixin
+# --
+function SuiteMixinFactory(TestSuiteMixin) {
+
+  function SuiteMixin() {
+    TestSuiteMixin.call(this);
+  }
+
+  SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
+  SuiteMixin.prototype.constructor = SuiteMixin;
+
+  $0
+  return SuiteMixin;
+}
