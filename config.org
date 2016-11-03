@@ -1078,14 +1078,6 @@ Allow windmove to jump between frames.
     (setq flycheck-standard-error-navigation nil))
 #+END_SRC
 
-** [[https://github.com/edvorg/flycheck-protobuf][flycheck-protobuf]]
-
-#+begin_src emacs-lisp
-(use-package flycheck-protobuf
-  :ensure t)
-(add-to-list 'flycheck-checkers 'protobuf-protoc-reporter t)
-#+end_src
-
 ** [[https://github.com/leoliu/ggtags][ggtags]]
 
 Generate tags on command line with ~gtags~.
