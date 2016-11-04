@@ -107,7 +107,7 @@ not what we want. Also, use =text-mode= for the scratch buffer.
       initial-major-mode 'text-mode)
 #+END_SRC
 
-Don't scroll to middle of page. Also, scroll line by line, without
+Don't scroll to middle of the page. Also, scroll line by line, without
 scrolloff and try to keep point at the same visual place when
 scrolling by page.
 
@@ -288,10 +288,11 @@ Don't make any backup files.
 (setq make-backup-files nil)
 #+END_SRC
 
-Get rid of the menu bar.
+Get rid of the menu bar. Tool bar and scroll bars are disabled in
+~init.el~..
 
 #+BEGIN_SRC emacs-lisp
-(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 #+END_SRC
 
 Turn off the blinking cursor.
@@ -457,6 +458,25 @@ Do not show thees modes in the mode line.
          (turn-on-auto-fill)            ; Enable automatic line wrapping.
          (setq-default indent-tabs-mode nil)))    ; Use real tabs.
 #+END_SRC
+
+** Prefer Newer Versions
+
+To reduce the risk of loading outdated byte code files, we set
+load-prefer-newer and enable auto-compile-on-load-mode as early as
+possible.
+
+#+BEGIN_SRC emacs-lisp
+(setq load-prefer-newer t)
+#+END_SRC
+
+** Set default browser
+
+#+BEGIN_SRC emacs-lisp
+(when (equal system-type 'gnu/linux)
+    (setq browse-url-browser-function 'browse-url-generic
+          browse-url-generic-program "google-chrome-stable"))
+#+END_SRC
+
 * Packages bundled with Emacs
 
 ** =bookmark=
@@ -1012,6 +1032,16 @@ can be downloaded from [[http://eclim.org/install.html][here]].
      '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
 #+END_SRC
 
+** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package emr
+  :ensure t
+  :bind (:map prog-mode-map
+              ("M-RET" . emr-show-refactor-menu))
+  :config (emr-initialize))
+#+END_SRC
+
 ** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -1233,22 +1263,22 @@ something, but so far hasn't shown any obvious side-effects
 
 *** Helm Window config
 
-So that helm windows shows at the bottom.
+(NOT WORKING) So that helm windows shows at the bottom.
 
 - from http://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
 - see also http://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
 
-#+BEGIN_SRC emacs-lisp
-;; (with-eval-after-load 'helm
-;;   (cond (window-system
-;;          (add-to-list 'display-buffer-alist
-;;                       `("^\\*[Hh]elm"
-;;                         (display-buffer-in-side-window)
-;;                         (inhibit-same-window . nil)
-;;                         (reusable-frames . visible)
-;;                         (side            . bottom)
-;;                         (window-height   . 0.15)))
-;;          )))
+#+BEGIN_SRC emacs-lisp :tangle no
+(with-eval-after-load 'helm
+  (cond (window-system
+         (add-to-list 'display-buffer-alist
+                      `("^\\*[Hh]elm"
+                        (display-buffer-in-side-window)
+                        (inhibit-same-window . nil)
+                        (reusable-frames . visible)
+                        (side            . bottom)
+                        (window-height   . 0.15)))
+         )))
 #+END_SRC
 
 *** Helm Other
@@ -1519,6 +1549,7 @@ When using =counsel-ag=:
 (use-package js2-mode
   :ensure t
   :commands (js2-mode)
+  :mode "\\.js\\'"
   :init
   (setq js2-global-externs '("define"
                              "jasmine"
@@ -1534,10 +1565,9 @@ When using =counsel-ag=:
                              "fit"
                              "xit"))
   :config
-  (custom-set-variables
-   '(js2-basic-offset 2)
-   '(js2-bounce-indent-p t)
-   '(js2-highlight-level 3))
+  (custom-set-variables '(js2-basic-offset 2)
+                        '(js2-bounce-indent-p nil)
+                        '(js2-highlight-level 3))
 
   ;;(eval-after-load 'js2-mode
   ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
@@ -1554,10 +1584,12 @@ When using =counsel-ag=:
 
 #+BEGIN_SRC emacs-lisp
 (use-package js2-refactor
-    :ensure t
-    :diminish js2-refactor-mode
-    :init (add-hook 'js-mode-hook #'js2-refactor-mode)
-    :config (js2r-add-keybindings-with-prefix "C-c C-m"))
+  :ensure t
+  :after js2-mode
+  :diminish js2-refactor-mode
+  :config
+  (add-hook 'js-mode-hook #'js2-refactor-mode)
+  (js2r-add-keybindings-with-prefix "C-c C-m"))
 #+END_SRC
 
 ** [[https://github.com/tonini/karma.el][karma]]
@@ -1777,7 +1809,10 @@ Highlight brackets according to their depth
 
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
-  :ensure t)
+  :ensure t
+  :commands rainbow-delimiters-mode
+  :init
+    (add-hook 'prog-mode-hook (lambda () (rainbow-delimiters-mode t))))
 #+END_SRC
 
 ** [[https://github.com/fgallina/region-bindings-mode][region-bindings-mode]]
@@ -1900,10 +1935,10 @@ think of it as both something that augments and replaces the standard
 #+BEGIN_SRC emacs-lisp
 (use-package tern
   :ensure t
+  :commands tern-mode
   :load-path "/home/nelson/src/github/elisp/tern/emacs"
   :diminish tern-mode
-  :init (add-hook 'js-mode-hook 'tern-mode)
-  :commands tern-mode)
+  :init (add-hook 'js2-mode-hook 'tern-mode))
 
 (use-package company-tern
   :ensure t
@@ -2037,6 +2072,17 @@ Zeal is a simple offline API documentation browser inspired by Dash
   :commands zeal-at-point)
 #+END_SRC
 
+** [[https://github.com/thierryvolpiatto/zop-to-char][zop-to-char]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package zop-to-char
+  :ensure t
+  :bind ("M-z" . zop-up-to-char)
+  :init
+  (progn
+    (setq zop-to-char-kill-keys '(?\C-k))
+    (setq zop-to-char-quit-at-point-keys '(?\r))))
+#+END_SRC
 * Computer-specific settings
 
 Load some computer-specific settings, such as the name and and email address. The way the settings
@@ -2116,7 +2162,6 @@ A way to set up indentation for all programming modes. Taken from
   ;; to column 50.
   ;;
   (setq comment-column 0)
-  (rainbow-delimiters-mode) ;; See unbalanced parens
   (push '(">=" . ?≥) prettify-symbols-alist)
   (push '("<=" . ?≤) prettify-symbols-alist)
   (push '("->" . ?→) prettify-symbols-alist)
@@ -2246,10 +2291,11 @@ A gradle function to generate Javadoc for the project.
   (setq imenu-create-index-function 'nl-js-imenu-make-index)
   (flycheck-mode t))
 
-(add-hook 'js-mode-hook 'js2-minor-mode)
-(add-hook 'js-mode-hook 'fic-mode)
-(add-hook 'js-mode-hook 'nl/javascript-mode-hook)
-(add-hook 'js-mode-hook 'my-common-prog-mode-settings)
+;;(add-hook 'js-mode-hook 'js2-minor-mode)
+(add-hook 'js2-mode-hook 'fic-mode)
+(add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
+(add-hook 'js2-mode-hook 'my-common-prog-mode-settings)
+;;(add-hook 'js2-mode-hook 'js2-imenu-extras-mode)
 #+END_SRC
 
 Key bindings to allow us to use ~counsel-ag~ to seach scala code.
@@ -2568,7 +2614,7 @@ Taken from:
 
 Is some cases we need to know what type of OS Emacs is running under.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (defconst ostype-linux
   (if (integer-or-marker-p
        (string-match "linux" system-configuration)) t nil))
@@ -2775,7 +2821,7 @@ Views the same file side by side:
 
 *** Font
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (when ostype-windows
     (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
 #+END_SRC
