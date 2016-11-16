@@ -352,7 +352,7 @@ each time.
 ** Key bindings
 
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "M-g g")         'goto-line)
+(global-set-key (kbd "M-g M-g")       'goto-line)
 (global-set-key (kbd "M-%")           'query-replace-regexp)
 ;;(global-set-key "\C-x\C-e"          'compile)
 (global-set-key (kbd "C-x C-n")       'next-error)
@@ -1223,6 +1223,8 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
     (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
     (helm-mode)
     (helm-autoresize-mode 1)
+    (custom-set-variables
+     '(helm-ag-use-temp-buffer t))
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
@@ -1817,7 +1819,10 @@ Highlight brackets according to their depth
 
 ** [[https://github.com/fgallina/region-bindings-mode][region-bindings-mode]]
 
-#+BEGIN_SRC emacs-lisp
+Disable for now since causing issues when I use region expand and want
+to overwrite.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package region-bindings-mode
   :ensure t
   :config
@@ -2037,7 +2042,19 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package web-mode
-  :ensure t)
+  :ensure t
+  :config
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (setq web-mode-enable-auto-closing t
+        web-mode-enable-auto-quoting t
+        web-mode-ac-sources-alist
+        '(("css" . (ac-source-css-property))
+          ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
+
+  (defun my-web-mode-hook ()
+    "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2))
+  (add-hook 'web-mode-hook  'my-web-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
