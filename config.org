@@ -450,6 +450,14 @@ Do not show thees modes in the mode line.
 
 (add-hook 'term-exec-hook 'my-term-hook)
 #+END_SRC
+
+Use the whole window when opening up a shell (default behaviour is to
+split the window).
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'display-buffer-alist '("*shell*" display-buffer-same-window))
+#+END_SRC
+
 ** Text mode
 
 #+BEGIN_SRC emacs-lisp
@@ -1223,8 +1231,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
     (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
     (helm-mode)
     (helm-autoresize-mode 1)
-    (custom-set-variables
-     '(helm-ag-use-temp-buffer t))
+    (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
@@ -2040,12 +2047,15 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 
 ** [[https://github.com/fxbois/web-mode][web-mode]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package web-mode
   :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
-  (setq web-mode-enable-auto-closing t
+  (setq web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-code-indent-offset 2
+        web-mode-enable-auto-closing t
         web-mode-enable-auto-quoting t
         web-mode-ac-sources-alist
         '(("css" . (ac-source-css-property))
@@ -2410,7 +2420,7 @@ The class name must have the postfix 'Spec' for this function to work."
     (setq err-line (buffer-substring-no-properties p1 p2))
     (save-match-data ; is usually a good idea
       (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
-           (setq filename (match-string 1 err-line)
+           (setq filename (concat "/" (match-string 1 err-line)) ; add leading slash as a delimiter
                  line-num (string-to-number (match-string 2 err-line))
                  )))
     (setq file-with-proj-path
@@ -2493,6 +2503,7 @@ Use the package.
 #+BEGIN_SRC emacs-lisp
 (use-package scala-mode
   :ensure t
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-scala-mode"
   :interpreter
   ("scala" . scala-mode)
   :config
