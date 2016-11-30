@@ -629,6 +629,14 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
       org-link-frame-setup '((file . find-file))
       org-export-backends '(ascii html icalendar latex md)
       org-log-into-drawer t)
+
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/Dropbox/todo.org" "Tasks")
+             "* TODO %?\n  %i\n  %a")
+        ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
+             "* %? %^L %^g \n%T" :prepend t)
+        ("j" "Journal" entry (file+datetree "~/Dropbox/journal.org")
+             "* %?\nEntered on %U\n  %i\n  %a")))
 #+END_SRC
 
 *** Org activation bindings
@@ -637,7 +645,6 @@ Set up some global key bindings that integrate with Org Mode features.
 
 #+BEGIN_SRC emacs-lisp
 (bind-key "C-c l" 'org-store-link)
-(bind-key "C-c c" 'org-capture)
 (bind-key "C-c a" 'org-agenda)
 #+END_SRC
 
@@ -1798,6 +1805,19 @@ Integrates with IPython.
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package python-mode
     :ensure t)
+#+END_SRC
+
+** [[https://github.com/sabof/org-bullets][org-bullets]]
+
+#+BEGIN_QUOTE
+Show org-mode bullets as UTF-8 characters.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :ensure t
+  :config
+  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
 ** [[https://github.com/emacsmirror/revive][revive]]
