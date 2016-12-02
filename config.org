@@ -635,7 +635,7 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
              "* TODO %?\n  %i\n  %a")
         ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
              "* %? %^L %^g \n%T" :prepend t)
-        ("j" "Journal" entry (file+datetree "~/Dropbox/journal.org")
+        ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/journal.org")
              "* %?\nEntered on %U\n  %i\n  %a")))
 #+END_SRC
 
@@ -1768,6 +1768,19 @@ http://batsov.com/projectile/
     (projectile-dired)))
 #+END_SRC
 
+** [[https://github.com/google/protobuf][protobuf]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package protobuf-mode
+  :ensure t
+  :config
+  (defconst my-protobuf-style
+    '((c-basic-offset . 2)
+      (indent-tabs-mode . nil)))
+  (add-hook 'protobuf-mode-hook
+            (lambda () (c-add-style "my-style" my-protobuf-style t))))
+#+END_SRC
+
 ** [[https://github.com/milkypostman/powerline][powerline]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2063,6 +2076,25 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   (yas-global-mode 1)
   :config
     (add-to-list 'yas-snippet-dirs (locate-user-emacs-file "snippets")))
+#+END_SRC
+
+** [[https://github.com/cmpitg/wand][wand]]
+
+#+BEGIN_QUOTE
+Wand is an extension that allows users to select a piece of text and perform actions based on predefined patterns.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package wand
+  :ensure t
+  :bind (("<C-return>" . wand:execute))
+  :config
+  (wand:add-rule-by-pattern :match "\\$ "
+                            :capture :after
+                            :action popup-shell-command)
+  (wand:add-rule-by-pattern :match "https?://"
+                            :capture :whole
+                            :action browse-url))
 #+END_SRC
 
 ** [[https://github.com/fxbois/web-mode][web-mode]]
