@@ -1,4 +1,4 @@
-+TITLE: Emacs Configuration
+#+TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 
 This configuration uses the [[https://github.com/jwiegley/use-package][use-package]] package from John Wiegley,
@@ -112,8 +112,11 @@ scrolloff and try to keep point at the same visual place when
 scrolling by page.
 
 #+BEGIN_SRC emacs-lisp
-(setq scroll-step 1
-      scroll-conservatively 10000
+(setq-default scroll-up-aggressively 0.01 scroll-down-aggressively 0.01)
+(setq redisplay-dont-pause t
+      scroll-step 1
+      scroll-margin 3
+      scroll-conservatively 10
       scroll-preserve-screen-position t)
 #+END_SRC
 
@@ -357,6 +360,7 @@ each time.
 ;;(global-set-key "\C-x\C-e"          'compile)
 (global-set-key (kbd "C-x C-n")       'next-error)
 (global-set-key (kbd "C-x C-i")       'c-indent-exp)
+(global-set-key (kbd "C-x k")         'kill-this-buffer)
 
 (global-set-key (kbd "<f1>")          'indent-for-tab-command)
 (global-set-key [(shift f1)]          'indent-region)
@@ -372,7 +376,7 @@ each time.
 
 ** Line numbers.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (dolist (mode-hook '(text-mode-hook prog-mode-hook))
   (add-hook mode-hook
             (lambda ()
@@ -483,6 +487,7 @@ possible.
 (when (equal system-type 'gnu/linux)
     (setq browse-url-browser-function 'browse-url-generic
           browse-url-generic-program "google-chrome-stable"))
+(setenv "BROWSER" "google-chrome-stable")
 #+END_SRC
 
 * Packages bundled with Emacs
@@ -1014,10 +1019,10 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :ensure t
   :commands company-emacs-eclim-setup)
 (use-package eclimd
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd)
 (use-package eclim
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :diminish eclim-mode
   :commands (global-eclim-mode)
   :init (use-package cl)
@@ -1409,6 +1414,20 @@ stop:
           helm-swoop-use-line-number-face t))
 #+END_SRC
 
+** [[https://github.com/DarthFennec/highlight-indent-guides][highlight-indent-guides]]
+
+#+BEGIN_QUOTE
+This minor mode highlights indentation levels via =font-lock=.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package highlight-indent-guides
+  :ensure t
+  :config
+  (setq highlight-indent-guides-method 'character)
+  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+#+END_SRC
+
 ** [[https://github.com/boyw165/hl-anything][hl-anything]]
 
 Not used for now since it breaks ERC font lock.
@@ -1695,7 +1714,10 @@ No more juggling windows after commiting. It's magit bliss.
 (use-package markdown-mode
   :ensure t
   :mode (("\\.markdown\\'" . markdown-mode)
-         ("\\.md\\'"       . markdown-mode)))
+         ("\\.md\\'"       . markdown-mode))
+  :config
+  (add-hook 'markdown-mode-hook
+            (lambda () (auto-fill-mode -1))))
 #+END_SRC
 
 ** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
@@ -1778,12 +1800,14 @@ http://batsov.com/projectile/
     '((c-basic-offset . 2)
       (indent-tabs-mode . nil)))
   (add-hook 'protobuf-mode-hook
-            (lambda () (c-add-style "my-style" my-protobuf-style t))))
+            (lambda ()
+              (c-add-style "my-style" my-protobuf-style t)
+              (subword-mode 1))))
 #+END_SRC
 
 ** [[https://github.com/milkypostman/powerline][powerline]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package powerline
   :ensure t
   :config
@@ -1875,6 +1899,20 @@ to overwrite.
   (define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save))
 #+END_SRC
 
+** [[https://github.com/slime/slime][slime]]
+
+#+BEGIN_QUOTE
+SLIME is the Superior Lisp Interaction Mode for Emacs.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package slime
+  :ensure t
+  :config
+  (setq inferior-lisp-program "/home/nelson/apps/clozureCL/ccl/lx86cl64")
+  (setq slime-contribs '(slime-fancy)))
+#+END_SRC
+
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
@@ -1957,6 +1995,20 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :config
     (load-theme 'solarized-dark t))
+#+END_SRC
+
+** [[https://github.com/TheBB/spaceline][spaceline]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package spaceline :ensure t)
+(use-package spaceline-config
+  :ensure nil
+  :after spaceline
+  :config
+  (setq-default powerline-default-separator 'wave
+                powerline-height 18
+                spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+  (spaceline-emacs-theme))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
@@ -2309,7 +2361,7 @@ Utillity function to restart the Eclim server.
 
 #+BEGIN_SRC emacs-lisp
 (defun nl/restart-eclim (workspace-dir)
-  "Restarts eclim.  If it is currently active then it is stopped first."
+  "Restarts the eclim server.  If it is currently active, the server is stopped first."
   (interactive (list (read-directory-name "Workspace directory: "
                                           eclimd-default-workspace nil t)))
   (if (get-buffer "*eclimd*") (stop-eclimd))
@@ -2411,9 +2463,10 @@ Key bindings to allow us to use ~counsel-ag~ to seach scala code.
 
 ** PHP
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package php-mode
-  :ensure t)
+  :ensure t
+  :mode "\\.php[345]?\\'")
 #+END_SRC
 
 ** Scala
