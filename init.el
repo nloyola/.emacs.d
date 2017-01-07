@@ -10,11 +10,37 @@
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
 
+;; A secure Emacs environment
+;;
+;; see https://glyph.twistedmatrix.com/2015/11/editor-malware.html
+(require 'cl)
+(setq tls-checktrust t)
+
+(setq python (executable-find "python"))
+
+(let ((trustfile
+       (replace-regexp-in-string
+        "\\\\" "/"
+        (replace-regexp-in-string
+         "\n" ""
+         (shell-command-to-string (concat python " -m certifi"))))))
+  (setq tls-program
+        (list
+         (format "gnutls-cli%s --x509cafile %s -p %%p %%h"
+                 (if (eq window-system 'w32) ".exe" "") trustfile)))
+  (setq gnutls-verify-error t)
+  (setq gnutls-trustfiles (list trustfile)))
+
 ;;; Set up package
 (require 'package)
-(add-to-list 'package-archives
-             ;;'("melpa-stable" . "http://stable.melpa.org/packages/") t)
-             '("melpa" . "http://melpa.org/packages/") t)
+
+(defvar gnu '("gnu" . "https://elpa.gnu.org/packages/"))
+(defvar melpa '("melpa" . "https://melpa.org/packages/"))
+
+(setq package-archives nil)
+(add-to-list 'package-archives melpa t)
+(add-to-list 'package-archives gnu t)
+
 (package-initialize)
 
 ;;; Bootstrap use-package

@@ -1020,7 +1020,10 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :commands company-emacs-eclim-setup)
 (use-package eclimd
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :commands start-eclimd)
+  :commands start-eclimd
+  :config
+  (custom-set-variables
+    '(eclimd-autostart nil)))
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :diminish eclim-mode
@@ -1124,8 +1127,45 @@ Allow windmove to jump between frames.
   :ensure t
   :diminish flycheck-mode
   :config
-    (add-hook 'after-init-hook #'global-flycheck-mode)
-    (setq flycheck-standard-error-navigation nil))
+  (add-hook 'after-init-hook #'global-flycheck-mode)
+  (setq flycheck-standard-error-navigation nil)
+
+  (setq-default flycheck-disabled-checkers
+                (append flycheck-disabled-checkers
+                        '(javascript-jshint)))
+
+  (setq flycheck-checkers '(javascript-eslint))
+  ;; use eslint with web-mode for jsx files
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+  (flycheck-add-mode 'javascript-eslint 'js2-mode)
+  (flycheck-add-mode 'javascript-eslint 'js-mode))
+#+END_SRC
+
+** [[https://github.com/lbolla/emacs-flycheck-flow][emacs-flycheck-flow]]
+
+This package adds support for flow to flycheck.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package flycheck-flow
+  :ensure t
+  :config
+  (add-hook 'js2-mode-hook 'flycheck-mode))
+#+END_SRC
+
+
+** [[https://github.com/mola-T/flymd][flymd]]
+
+On the fly markdown preview.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(defun my-flymd-browser-function (url)
+  (let ((browse-url-browser-function 'browse-url-firefox))
+    (browse-url url)))
+
+(use-package flymd
+  :ensure t
+  :config
+  (setq flymd-browser-open-function 'my-flymd-browser-function))
 #+END_SRC
 
 ** [[https://github.com/leoliu/ggtags][ggtags]]
@@ -1337,7 +1377,7 @@ stop:
 
 ** [[https://github.com/PythonNut/helm-flx][helm-flx]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-flx
   :ensure t
   :commands helm-flx-mode
@@ -1425,6 +1465,7 @@ This minor mode highlights indentation levels via =font-lock=.
   :ensure t
   :config
   (setq highlight-indent-guides-method 'character)
+  (set-face-foreground 'highlight-indent-guides-character-face "gray18")
   (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
 #+END_SRC
 
@@ -1713,11 +1754,15 @@ No more juggling windows after commiting. It's magit bliss.
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
   :ensure t
-  :mode (("\\.markdown\\'" . markdown-mode)
+  :commands (markdown-mode gfm-mode)
+  :mode (("README\\.md\\'" . gfm-mode)
+         ("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'"       . markdown-mode))
   :config
   (add-hook 'markdown-mode-hook
-            (lambda () (auto-fill-mode -1))))
+            (lambda () (auto-fill-mode -1)))
+  :init
+  (setq markdown-command "marked"))
 #+END_SRC
 
 ** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
@@ -2008,6 +2053,9 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   (setq-default powerline-default-separator 'wave
                 powerline-height 18
                 spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+  (spaceline-toggle-persp-name-off)
+  (spaceline-toggle-workspace-number-off)
+  (spaceline-toggle-version-control-on)
   (spaceline-emacs-theme))
 #+END_SRC
 
@@ -2366,8 +2414,7 @@ Utillity function to restart the Eclim server.
                                           eclimd-default-workspace nil t)))
   (if (get-buffer "*eclimd*") (stop-eclimd))
   (start-eclimd workspace-dir)
-  (switch-to-buffer "*eclimd*")
-  )
+  (switch-to-buffer "*eclimd*"))
 #+END_SRC
 
 A gradle function to generate Javadoc for the project.
@@ -2379,8 +2426,7 @@ A gradle function to generate Javadoc for the project.
   (let* ((current-directory default-directory))
     (setq default-directory (locate-dominating-file default-directory "build.gradle"))
     (compile "gradle -q --console=plain javadoc")
-    (setq default-directory current-directory)
-    ))
+    (setq default-directory current-directory)))
 #+END_SRC
 
 ** JavaScript
