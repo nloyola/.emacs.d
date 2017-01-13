@@ -43,6 +43,9 @@
 
 (package-initialize)
 
+;; Using HTTPS for downloading packages, make sure HTTPS is not going through a proxy.
+(setenv "https_proxy" "")
+
 ;;; Bootstrap use-package
 ;; Install use-package if it's not already installed.
 ;; use-package is used to configure the rest of the packages.

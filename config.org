@@ -957,10 +957,14 @@ Never lose your cursor again
 
 ** [[https://github.com/ankurdave/color-identifiers-mode][color-identifiers]]
 
+#+BEGIN_QUOTE
 Color Identifiers is a minor mode for Emacs that highlights each source code identifier uniquely
 based on its name.
+#+END_QUOTE
 
-#+BEGIN_SRC emacs-lisp
+Disable for now since it is slow when editing Scala code.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package color-identifiers-mode
   :ensure t
   :diminish color-identifiers-mode
@@ -1197,6 +1201,21 @@ Updte tags on command line with ~global -u~.
   :config
   (autoload 'goto-last-change "goto-last-change"
     "Set point to the position of the last change." t))
+#+END_SRC
+
+** [[https://github.com/roman/golden-ratio.el][golden-ratio]]
+
+#+BEGIN_QUOTE
+When working with many windows at the same time, each window has a size that is not convenient for editing.
+#+END_QUOTE
+
+Disable for now, not working the way I prefer.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package golden-ratio
+  :ensure t
+  :config
+  (golden-ratio-mode 1))
 #+END_SRC
 
 ** [[https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes][groovy-mode]]
