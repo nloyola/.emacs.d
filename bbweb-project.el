@@ -30,8 +30,41 @@
                (make-directory test-dir :create-parents))
              (concat test-dir test-file)))))
 
+;; functions for finding files in project
+(defun scala-filename-p (filename)
+  (string-match "\.scala$" filename))
+
+(defun js-filename-p (filename)
+  (string-match "\.js$" filename))
+
+(defun html-filename-p (filename)
+  (string-match "\.html$" filename))
+
+(defun bbweb-find-with-filetypes (predicate)
+  (let ((files (remove-if-not predicate (projectile-current-project-files))))
+    (helm-comp-read "Find file: " files)))
+
+(defun bbweb-find-scala-file ()
+  (interactive)
+  (bbweb-find-with-filetypes 'scala-filename-p))
+
+(defun bbweb-find-js-file ()
+  (interactive)
+  (bbweb-find-with-filetypes 'js-filename-p))
+
+(defun bbweb-find-html-file ()
+  (interactive)
+  (bbweb-find-with-filetypes 'html-filename-p))
+
+(defhydra hydra-nl-bbweb-find-file (:color blue)
+  "bbweb-find-file"
+  ("s" bbweb-find-scala-file "Scala file")
+  ("j" bbweb-find-js-file "JS file")
+  ("h" bbweb-find-html-file "HTML file"))
+
 (defhydra hydra-nl-bbweb-project (:hint nil)
-  "bbweb project build commands"
+  "bbweb project commands"
+  ("f" hydra-nl-bbweb-find-file/body "Find file" :exit t)
   ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("s" sbt-command "sbt command" :color blue)
   ("m" karma-mode "toggle karma-mode" :color blue)
