@@ -69,7 +69,8 @@
   ("s" sbt-command "sbt command" :color blue)
   ("m" karma-mode "toggle karma-mode" :color blue)
   ("k" karma-start "karma unit test" :color blue)
-  ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue))
+  ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue)
+  ("x" xref-find-definitions "find definition" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
 (key-chord-define-global "jc" '(lambda () (interactive)

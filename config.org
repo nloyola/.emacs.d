@@ -2691,7 +2691,6 @@ Also use the ~sbt-mode~ package.
   ;;:load-path "/home/nelson/src/github/elisp/emacs-sbt-mode"
   :commands (sbt-start sbt-command)
   :config
-  (add-hook 'sbt-mode-hook 'ansi-color-for-comint-mode-on)
   (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
   ;; set this regex so that it knows about Play Framework SBT prompt
   (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"

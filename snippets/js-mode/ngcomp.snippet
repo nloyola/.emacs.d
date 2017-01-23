@@ -19,8 +19,8 @@ define(function () {
 
   ${1:$(yas-text)}.$inject = [];
 
-  /**
-   * $0
+  /*
+   * Controller for this component. $0
    */
   function ${1:`(upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))`}() {
 
