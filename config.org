@@ -376,11 +376,9 @@ each time.
 
 ** Line numbers.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (dolist (mode-hook '(text-mode-hook prog-mode-hook))
-  (add-hook mode-hook
-            (lambda ()
-              (linum-mode t))))
+  (add-hook mode-hook 'linum-mode))
 #+END_SRC
 
 ** Mode line
@@ -1404,9 +1402,6 @@ stop:
     (helm-flx-mode +1))
 #+END_SRC
 
-#+RESULTS:
-| my-minibuffer-exit-hook | pl/minibuffer-exit |
-
 ** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -1427,10 +1422,9 @@ stop:
 #+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
   :ensure t
-  ;;:bind (("C-c p h" . helm-projectile))
   :config
-    (helm-projectile-on)
-    (setq compilation-read-command t)) ; do prompt for a compilation command
+  (helm-projectile-on)
+  (setq compilation-read-command t)) ; do prompt for a compilation command
 #+END_SRC
 
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
@@ -1822,7 +1816,7 @@ http://batsov.com/projectile/
 (use-package projectile
   :ensure t
   :diminish projectile-mode
-  :commands projectile-mode
+  :commands projectile-global-mode
   :config
   (setq projectile-indexing-method 'alien
         projectile-remember-window-configs nil
