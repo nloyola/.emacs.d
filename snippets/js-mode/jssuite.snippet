@@ -6,14 +6,16 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
+
+  var angular         = require('angular'),
+      mocks           = require('angularMocks'),
+      _               = require('lodash');
 
   describe('`(replace-regexp-in-string "Spec$" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`', function() {
 
