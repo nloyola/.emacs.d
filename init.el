@@ -45,6 +45,7 @@
 
 ;; Using HTTPS for downloading packages, make sure HTTPS is not going through a proxy.
 (setenv "https_proxy" "")
+(setenv "http_proxy" "")
 
 ;;; Bootstrap use-package
 ;; Install use-package if it's not already installed.

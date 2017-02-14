@@ -1108,7 +1108,8 @@ strings.
     (add-hook 'c-mode-hook 'fic-mode)
     (add-hook 'java-mode-hook 'fic-mode)
     (add-hook 'vala-mode-hook 'fic-mode)
-    (add-hook 'python-mode-hook 'fic-mode))
+    (add-hook 'python-mode-hook 'fic-mode)
+    (add-hook 'php-mode-hook 'fic-mode))
 #+END_SRC
 
 ** [[http://www.emacswiki.org/emacs/framemove.el][framemove]]
@@ -1128,6 +1129,7 @@ Allow windmove to jump between frames.
 (use-package flycheck
   :ensure t
   :diminish flycheck-mode
+  :commands flycheck-define-checker
   :config
   (add-hook 'after-init-hook #'global-flycheck-mode)
   (setq flycheck-standard-error-navigation nil)
@@ -1154,6 +1156,21 @@ This package adds support for flow to flycheck.
   (add-hook 'js2-mode-hook 'flycheck-mode))
 #+END_SRC
 
+** [[https://melpa.org/#/etags-select][etags-select]]
+
+#+BEGIN_QUOTE
+Open a buffer with file/lines of exact-match tags shown. Select one by
+going to a line and pressing return. pop-tag-mark still works with
+this code.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package etags-select
+  :ensure t
+  :config
+  (global-set-key "\M-?" 'etags-select-find-tag-at-point)
+  (global-set-key "\M-." 'etags-select-find-tag))
+#+END_SRC
 
 ** [[https://github.com/mola-T/flymd][flymd]]
 
@@ -2260,6 +2277,18 @@ Zeal is a simple offline API documentation browser inspired by Dash
     (setq zop-to-char-kill-keys '(?\C-k))
     (setq zop-to-char-quit-at-point-keys '(?\r))))
 #+END_SRC
+** [[https://github.com/fourier/ztree][ztree]]
+
+#+BEGIN_QUOTE
+Ztree is a project dedicated to implementation of several text-tree applications inside GNU Emacs.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package ztree
+  :ensure t
+  :commands (ztree-diff ztree-dir))
+#+END_SRC
+
 * Computer-specific settings
 
 Load some computer-specific settings, such as the name and and email address. The way the settings
@@ -2510,7 +2539,57 @@ Key bindings to allow us to use ~counsel-ag~ to seach scala code.
 #+BEGIN_SRC emacs-lisp
 (use-package php-mode
   :ensure t
-  :mode "\\.php[345]?\\'")
+  :mode "\\.php[345]?\\'"
+  :config
+  (add-hook 'php-mode-hook 'php-enable-symfony2-coding-style))
+
+(defun my-php-mode-hook ()
+  "My PHP mode configuration."
+  ;; indent 2 spaces width
+  (nl/setup-indent 2))
+
+(add-hook 'php-mode-hook 'my-php-mode-hook)
+#+END_SRC
+
+The following taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~my-php~
+checker is loaded.
+
+#+BEGIN_SRC emacs-lisp
+(flycheck-define-checker my-php
+  "A PHP syntax checker using the PHP command line interpreter.
+
+See URL http://php.net/manual/en/features.commandline.php."
+  :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+            "-d" "log_errors=0" source)
+  :error-patterns
+  ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+          (message) " in " (file-name) " on line " line line-end))
+  :modes (php-mode php+-mode web-mode))
+
+(eval-after-load 'flycheck
+  '(add-to-list 'flycheck-checkers 'my-php))
+#+END_SRC
+
+Web-mode for PHP not working that well right now. After pasting code
+all the text turns white.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(defun my-setup-php ()
+  ;; enable web mode
+  (web-mode)
+
+  ;; make these variables local
+  (make-local-variable 'web-mode-code-indent-offset)
+  (make-local-variable 'web-mode-markup-indent-offset)
+  (make-local-variable 'web-mode-css-indent-offset)
+
+  ;; set indentation, can set different indentation level for different code type
+  (setq web-mode-code-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-markup-indent-offset 2)
+  (flycheck-mode t))
+
+(add-to-list 'auto-mode-alist '("\\.php$" . my-setup-php))
 #+END_SRC
 
 ** Scala
@@ -2785,6 +2864,25 @@ Taken from:
    (helm-comp-read "Select server: " nl/sql-servers-list))
   (funcall func))
 #+END_SRC
+
+Save command history between sessions (taken from EmacsWiki).
+
+#+BEGIN_SRC emacs-lisp
+(defun my-sql-save-history-hook ()
+  (let ((lval 'sql-input-ring-file-name)
+        (rval 'sql-product))
+    (if (symbol-value rval)
+        (let ((filename
+               (concat "~/.emacs.d/sql/"
+                       (symbol-name (symbol-value rval))
+                       "-history.sql")))
+          (set (make-local-variable lval) filename))
+      (error
+       (format "SQL history will not be saved because %s is nil"
+               (symbol-name rval))))))
+
+(add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook)
+#+END_SRC
 * Misc
 ** Constants
 
@@ -2975,6 +3073,8 @@ Views the same file side by side:
   "Set the size and position of the Emacs window."
   (interactive)
   (let ((frame (selected-frame)))
+    (windmove-right)
+    (delete-window)
     (set-frame-size frame (/ (frame-width) 2) (frame-height))
     ))
 
@@ -2993,6 +3093,28 @@ Views the same file side by side:
   (windmove-right))
 
 (global-set-key [S-f9] 'nl/split-view-same-file)
+
+(defun my--set-transparency (inc)
+  "Increase or decrease the selected frame transparency"
+  (let* ((alpha (frame-parameter (selected-frame) 'alpha))
+         (next-alpha (cond ((not alpha) 100)
+                           ((> (- alpha inc) 100) 100)
+                           ((< (- alpha inc) 0) 0)
+                           (t (- alpha inc)))))
+    (set-frame-parameter (selected-frame) 'alpha next-alpha)))
+
+(defhydra hydra-transparency (:columns 2)
+  "
+ALPHA : [ %(frame-parameter nil 'alpha) ]
+"
+  ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
+  ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
+  ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
+  ("K" (lambda () (interactive) (my--set-transparency -10)) "-- less")
+  ("=" (lambda (value) (interactive "nTransparency Value 0 - 100 opaque:")
+         (set-frame-parameter (selected-frame) 'alpha value)) "Set to ?" :color blue))
+
+(global-set-key (kbd "C-c t") 'hydra-transparency/body)
 #+END_SRC
 
 *** Font
