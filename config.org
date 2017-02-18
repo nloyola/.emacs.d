@@ -239,13 +239,6 @@ Save clipboard data of other programs in the kill ring when possible.
 (setq save-interprogram-paste-before-kill t)
 #+END_SRC
 
-Revert file buffers updated outside of emacs, unless I've made changes to
-the buffer which I haven't saved.
-
-#+BEGIN_SRC emacs-lisp
-(global-auto-revert-mode 1)
-#+END_SRC
-
 Set environment variable for shells.
 
 #+BEGIN_SRC emacs-lisp
@@ -490,6 +483,21 @@ possible.
 
 * Packages bundled with Emacs
 
+** =auto-revert=
+
+Revert file buffers updated outside of emacs, unless I've made changes to
+the buffer which I haven't saved.
+
+#+BEGIN_SRC emacs-lisp
+(use-package auto-revert
+  :diminish auto-revert-mode
+  :config
+  (global-auto-revert-mode 1)
+  (add-hook 'dired-mode-hook 'auto-revert-mode)
+  (setq global-auto-revert-non-file-buffers t
+      auto-revert-verbose nil))
+#+END_SRC
+
 ** =bookmark=
 
 Prefer saving this file somewhere other than the default.
@@ -505,10 +513,7 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 #+BEGIN_SRC emacs-lisp
 (setq dired-listing-switches "-aBhl  --group-directories-first"
-      global-auto-revert-non-file-buffers t
-      auto-revert-verbose nil
       dired-dwim-target t)
-(add-hook 'dired-mode-hook 'auto-revert-mode)
 #+END_SRC
 
 ** =ediff=
@@ -526,6 +531,20 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
   :init
   (add-hook 'after-init-hook 'server-start t)
   (add-hook 'after-init-hook 'edit-server-start t))
+#+END_SRC
+
+** =flyspell=
+
+#+BEGIN_SRC emacs-lisp
+(use-package flyspell
+  :ensure t
+  :diminish flyspell-mode
+  :init
+  (add-hook 'prog-mode-hook 'flyspell-prog-mode)
+  (add-hook 'text-mode-hook 'flyspell-mode)
+  :config
+  ;; Sets flyspell correction to use two-finger mouse click
+  (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word))
 #+END_SRC
 
 ** =ispell=
@@ -807,6 +826,15 @@ Remember position in a file.
 (bind-key "C-x M" 'ansi-term)
 #+END_SRC
 
+** =subword-mode=
+
+#+BEGIN_SRC emacs-lisp
+(use-package subword
+  :diminish subword-mode
+  :config
+  (add-hook 'prog-mode-hook 'subword-mode))
+#+END_SRC
+
 ** =tramp=
 
 #+BEGIN_SRC emacs-lisp
@@ -919,11 +947,12 @@ Never lose your cursor again
 #+BEGIN_SRC emacs-lisp
 (use-package beacon
   :ensure t
+  :diminish beacon-mode
   :init
-    (setq beacon-push-mark 35)
-    (setq beacon-color "#666600")
-  :config (beacon-mode 1)
-  )
+  (setq beacon-push-mark 35)
+  (setq beacon-color "#666600")
+  :config
+  (beacon-mode 1))
 #+END_SRC
 
 ** [[https://github.com/jorgenschaefer/circe][circe]]
@@ -1506,6 +1535,7 @@ So that hungry deletion can be used in all modes.
 #+BEGIN_SRC emacs-lisp
 (use-package hungry-delete
   :ensure t
+  :diminish hungry-delete-mode
   :config
   (global-hungry-delete-mode))
 #+END_SRC
@@ -2071,7 +2101,11 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   (spaceline-toggle-persp-name-off)
   (spaceline-toggle-workspace-number-off)
   (spaceline-toggle-version-control-on)
-  (spaceline-emacs-theme))
+  (spaceline-emacs-theme)
+  (spaceline-define-segment version-control
+    "Version control information."
+    (powerline-raw (s-trim vc-mode))
+    :when vc-mode))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
@@ -2344,9 +2378,6 @@ A way to set up indentation for all programming modes. Taken from
 ** Programming mode hook.
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'prog-mode-hook 'subword-mode)
-(add-hook 'prog-mode-hook 'flyspell-prog-mode)
-
 (defun my-common-prog-mode-settings ()
   "Enables settings common between programming language modes."
   (nl/setup-indent 3) ; indent 2 spaces width
