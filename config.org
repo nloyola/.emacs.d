@@ -52,8 +52,9 @@ customize settings in [[file:init.el][init.el]].
 #+END_SRC
 
 * Font
+** Linux
 
-** Installation
+*** Installation
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
 
@@ -63,7 +64,7 @@ cd ~/.fonts
 unzip Input-Font.zip
 #+END_SRC
 
-** Emacs config
+*** Emacs config
 
 And here's how to tell Emacs to use this font. Copy the following line to your
 =~/.Xresources= file.
@@ -76,6 +77,14 @@ And then merge the setting to your X server resource database.
 
 #+BEGIN_SRC sh :tangle no
 xrdb -merge ~/.Xresources
+#+END_SRC
+
+** OSX
+
+#+BEGIN_SRC emacs-lisp
+(when (featurep 'ns-win)
+  (custom-set-faces
+   '(default ((t (:height 150 :width normal :family "Monaco"))))))
 #+END_SRC
 
 * Sane defaults
@@ -931,7 +940,7 @@ A quick way to jump around text in buffers.
 One tweak to the base16-google-dark theme; the face for the mode line
 buffer name is too hard to see,  set it to white instead.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package base16-theme
   :ensure t
   :config
@@ -1015,6 +1024,15 @@ Complete anything.
   (add-hook 'after-init-hook 'global-company-mode))
 
 (use-package company-tern)
+#+END_SRC
+
+** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package cyberpunk-theme
+  :ensure t
+  :config
+  (load-theme 'cyberpunk t))
 #+END_SRC
 
 ** [[https://github.com/thamer/diredful][diredful]]
@@ -1289,6 +1307,15 @@ Guide the following key bindings automatically and dynamically.
   :config
     (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h"))
     (guide-key-mode 1))
+#+END_SRC
+
+** [[https://github.com/jonathanchu/heroku-theme][heroku-theme]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package heroku-theme
+  :ensure t
+  :config
+  (load-theme 'heroku t))
 #+END_SRC
 
 ** [[https://github.com/emacs-helm/helm][helm]]
