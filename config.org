@@ -344,6 +344,12 @@ Add =\n= to end of file if required.
 (setq require-final-newline t)
 #+END_SRC
 
+** Eshell
+
+#+BEGIN_SRC emacs-lisp
+(setq eshell-history-size 100000)
+#+END_SRC
+
 ** Hi Lock
 
 Automatically cycle through the highlighting faces listed in
@@ -378,7 +384,9 @@ each time.
 
 ** Line numbers.
 
-#+BEGIN_SRC emacs-lisp
+Recently, line numbering has been really slow. Disabling for now.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (dolist (mode-hook '(text-mode-hook prog-mode-hook))
   (add-hook mode-hook 'linum-mode))
 #+END_SRC
@@ -1068,14 +1076,14 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :ensure t
   :commands company-emacs-eclim-setup)
 (use-package eclimd
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd
   :config
   (custom-set-variables
     '(eclimd-autostart nil)))
 (use-package eclim
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :diminish eclim-mode
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  ;;:diminish eclim-mode
   :commands (global-eclim-mode)
   :init (use-package cl)
   :config
@@ -1326,7 +1334,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
-  :commands (helm-config helm-eshell helm-files helm-grep)
+  :commands (helm-config helm-files helm-grep)
   :diminish helm-mode
   :init
     ;; must set before helm-config, otherwise helm uses the default
@@ -1661,8 +1669,8 @@ This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Iv
 #+BEGIN_SRC emacs-lisp
 (use-package swiper
   :ensure t
-  :bind (("C-s" . swiper)
-         ("C-c C-r" . ivy-resume)
+  :bind (("C-c C-r" . ivy-resume)
+         ;;("C-s" . swiper)
          ("<f6>" . ivy-resume))
   :config
   (ivy-mode 1)
@@ -2117,10 +2125,10 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 ** [[https://github.com/TheBB/spaceline][spaceline]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package spaceline :ensure t)
-(use-package spaceline-config
-  :ensure nil
-  :after spaceline
+(use-package spaceline
+  :ensure t
+  :init
+  (require 'spaceline-config)
   :config
   (setq-default powerline-default-separator 'wave
                 powerline-height 18
@@ -2128,11 +2136,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   (spaceline-toggle-persp-name-off)
   (spaceline-toggle-workspace-number-off)
   (spaceline-toggle-version-control-on)
-  (spaceline-emacs-theme)
-  (spaceline-define-segment version-control
-    "Version control information."
-    (powerline-raw (s-trim vc-mode))
-    :when vc-mode))
+  (spaceline-emacs-theme))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]

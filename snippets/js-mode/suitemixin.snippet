@@ -11,6 +11,12 @@ function SuiteMixinFactory(TestSuiteMixin) {
   SuiteMixin.prototype.constructor = SuiteMixin;
 
   SuiteMixin.prototype.createScope = function () {
+      this.element = angular.element();
+      this.scope = this.$rootScope.$new();
+      this.scope.vm = {};
+      this.$compile(this.element)(this.scope);
+      this.scope.$digest();
+      this.controller = this.element.controller();
   };
 
   return SuiteMixin;
