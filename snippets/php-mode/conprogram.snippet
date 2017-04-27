@@ -1,0 +1,30 @@
+# -*- mode: snippet -*-
+# name: conprogram
+# key: conprogram
+# --
+private function addProgram$0() {
+    $organization = $this->addOrganization('',
+                                          [
+                                            'name'        => '',
+                                            'street'      => '',
+                                            'city'        => '',
+                                            'province'    => '',
+                                            'postal_code' => '',
+                                            'latitude'    => ,
+                                            'longitude'   =>
+                                          ]);
+
+    $customFields = [
+      $this->createCustomField($this->customFieldTypes[0], ''),
+      $this->createCustomField($this->customFieldTypes[1], '')
+    ];
+
+    $program = $this->addProgram($this->programType,
+                                 $organization,
+                                 '',
+                                 $this->slugify->slugify(''),
+                                 '',
+                                 '',
+                                 '',
+                                 []);
+  }

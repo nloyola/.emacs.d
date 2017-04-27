@@ -1076,13 +1076,13 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :ensure t
   :commands company-emacs-eclim-setup)
 (use-package eclimd
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd
   :config
   (custom-set-variables
     '(eclimd-autostart nil)))
 (use-package eclim
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-eclim"
+  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   ;;:diminish eclim-mode
   :commands (global-eclim-mode)
   :init (use-package cl)
@@ -1219,7 +1219,7 @@ going to a line and pressing return. pop-tag-mark still works with
 this code.
 #+END_QUOTE
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package etags-select
   :ensure t
   :config
@@ -1533,6 +1533,17 @@ stop:
           helm-swoop-use-line-number-face t))
 #+END_SRC
 
+** [[https://github.com/brotzeitmacher/helm-xref][helm-xref]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-xref
+  :ensure t
+  :init
+  (require 'helm-xref)
+  :config
+  (setq xref-show-xrefs-function 'helm-xref-show-xrefs))
+#+END_SRC
+
 ** [[https://github.com/DarthFennec/highlight-indent-guides][highlight-indent-guides]]
 
 #+BEGIN_QUOTE
@@ -1670,7 +1681,7 @@ This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Iv
 (use-package swiper
   :ensure t
   :bind (("C-c C-r" . ivy-resume)
-         ;;("C-s" . swiper)
+         ("C-s" . swiper)
          ("<f6>" . ivy-resume))
   :config
   (ivy-mode 1)
@@ -2253,9 +2264,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   :ensure t
   :diminish yas-minor-mode
   :init
-  (yas-global-mode 1)
-  :config
-    (add-to-list 'yas-snippet-dirs (locate-user-emacs-file "snippets")))
+  (yas-global-mode 1))
 #+END_SRC
 
 ** [[https://github.com/cmpitg/wand][wand]]
@@ -2500,9 +2509,10 @@ Utillity function to restart the Eclim server.
 (defun nl/restart-eclim (workspace-dir)
   "Restarts the eclim server.  If it is currently active, the server is stopped first."
   (interactive (list (read-directory-name "Workspace directory: "
-                                          eclimd-default-workspace nil t)))
+                                          eclimd-default-workspace nil t eclimd-default-workspace)))
   (if (get-buffer "*eclimd*") (stop-eclimd))
   (start-eclimd workspace-dir)
+  (message "workspace dir: %s" workspace-dir)
   (switch-to-buffer "*eclimd*"))
 #+END_SRC
 
