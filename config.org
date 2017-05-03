@@ -153,7 +153,7 @@ the current directory for crash detection, they begin and end with
 
 #+BEGIN_SRC emacs-lisp
 (setq auto-save-list-file-prefix "~/.emacs.d/autosave/")
-(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/autosave/" t)))
+(setq auto-save-file-name-transforms `((".*" "~/.emacs.d/autosave/" t)))
 #+END_SRC
 
 Set line wrap at column 100.
@@ -405,7 +405,7 @@ Use the directory name to make buffer names unique.
 (setq uniquify-buffer-name-style 'forward)
 #+END_SRC
 
-Do not show thees modes in the mode line.
+Do not show these modes in the mode line.
 
 #+BEGIN_SRC emacs-lisp
 (diminish 'visual-line-mode)
@@ -1062,8 +1062,13 @@ indexes (TAGS) or persistent background processes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dumb-jump
-  :ensure t)
-
+  :ensure t
+  :bind (("M-g o" . dumb-jump-go-other-window)
+         ("M-g j" . dumb-jump-go)
+         ("M-g x" . dumb-jump-go-prefer-external)
+         ("M-g z" . dumb-jump-go-prefer-external-other-window))
+  :config (setq dumb-jump-selector 'helm
+                dumb-jump-prefer-searcher 'ag))
 #+END_SRC
 
 ** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
@@ -1079,14 +1084,14 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd
   :config
-  (custom-set-variables
-    '(eclimd-autostart nil)))
+  (setq eclimd-autostart nil)
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   ;;:diminish eclim-mode
   :commands (global-eclim-mode)
   :init (use-package cl)
   :config
+    ;;(setq eclim-print-debug-messages t)
     (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
       (if (file-accessible-directory-p eclipse-dir)
           (progn
@@ -1867,6 +1872,15 @@ TextMate like theme.
     (load-theme 'monokai t)
     (setq frame-background-mode `dark)
     (setq monokai-use-variable-pitch nil))
+#+END_SRC
+
+** [[https://github.com/emacsfodder/move-text][move-text]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package move-text
+  :ensure t
+  :bind (("C-S-<up>" . move-text-up)
+         ("C-S-<down>" . move-text-down)))
 #+END_SRC
 
 ** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
