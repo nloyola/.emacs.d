@@ -498,6 +498,74 @@ possible.
 (setenv "BROWSER" "google-chrome-stable")
 #+END_SRC
 
+* Languages
+
+** Identation config
+
+Use spaces instead of ~\t~ character.
+
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+#+END_SRC
+
+A way to set up indentation for all programming modes. Taken from
+[[http://blog.binchen.org/posts/easy-indentation-setup-in-emacs-for-web-development.html][here]].
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/setup-indent (n)
+  ;; java/c/c++
+  (setq c-basic-offset n)
+  ;; web development
+  (setq coffee-tab-width n) ; coffeescript
+  (setq javascript-indent-level n) ; javascript-mode
+  (setq js-indent-level n) ; js-mode
+  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+  (setq css-indent-offset n) ; css-mode
+  )
+#+END_SRC
+
+** Programming mode hook.
+
+#+BEGIN_SRC emacs-lisp
+(defun my-common-prog-mode-settings ()
+  "Enables settings common between programming language modes."
+  (nl/setup-indent 3) ; indent 2 spaces width
+  ;;
+  ;; Set tab and CR/LF keys to call their corresponding more-general
+  ;; functions.  This needs to be here to override the settings of some modes
+  ;; (e.g. c++-mode changes the tab key to do a re-indent).
+  ;;
+  (local-set-key "\t" 'tab-to-tab-stop)
+  (local-set-key "\n" 'newline-and-indent)
+  (local-set-key "\r" 'newline-and-indent)
+  ;;
+  ;; Set paragraph/comment auto-formatting to wrap at column 100.
+  ;;
+  (set-fill-column 100)
+  ;;
+  ;; Set the comment column to zero so that lisp comment lines will act like
+  ;; C++ comments (i.e. line up with the code), and not automatically indent
+  ;; to column 50.
+  ;;
+  (setq comment-column 0)
+  (push '(">=" . ?≥) prettify-symbols-alist)
+  (push '("<=" . ?≤) prettify-symbols-alist)
+  (push '("->" . ?→) prettify-symbols-alist)
+  )
+
+(setq makefile-mode-hook 'my-common-prog-mode-settings)
+(setq sh-mode-hook       'my-common-prog-mode-settings)
+#+END_SRC
+
+** Emacs lisp
+
+#+BEGIN_SRC emacs-lisp
+(setq emacs-lisp-mode-hook 'my-common-prog-mode-settings)
+#+END_SRC
+
 * Packages bundled with Emacs
 
 ** =auto-revert=
@@ -521,6 +589,86 @@ Prefer saving this file somewhere other than the default.
 
 #+BEGIN_SRC emacs-lisp
 (setq bookmark-default-file "~/.emacs.d/etc/bookmarks")
+#+END_SRC
+
+** =compile=
+
+#+BEGIN_SRC emacs-lisp
+(use-package compile
+  ;;:bind (("C-c c" . compile)
+  ;;       ("M-O"   . show-compilation))
+  :preface
+  (defun show-compilation ()
+    (interactive)
+    (let ((compile-buf
+           (catch 'found
+             (dolist (buf (buffer-list))
+               (if (string-match "\\*compilation\\*" (buffer-name buf))
+                   (throw 'found buf))))))
+      (if compile-buf
+          (switch-to-buffer-other-window compile-buf)
+        (call-interactively 'compile))))
+
+  (defun compilation-ansi-color-process-output ()
+    (ansi-color-process-output nil)
+    (set (make-local-variable 'comint-last-output-start)
+         (point-marker)))
+
+  :config
+  (add-hook 'compilation-filter-hook #'compilation-ansi-color-process-output))
+#+END_SRC
+
+** =cc-mode=
+
+#+BEGIN_SRC emacs-lisp
+(use-package cc-mode
+  :load-path "override/cc-mode"
+  :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
+         ("\\.m\\'"                   . c-mode)
+         ("\\.mm\\'"                  . c++-mode))
+  :preface(defconst nelson-c-style
+            '((c-tab-always-indent . t)
+              (c-set-style "K&R")
+              (c-offsets-alist . ((statement-block-intro . +)
+                                  (substatement-open     . 0)
+                                  (label                 . 0)
+                                  (case-label            . +)
+                                  (statement-cont        . +)
+                                  (innamespace           . 0))))
+            "Nelson programming style.")
+
+  ;; Customizations for all of c-mode, c++-mode, and objc-mode
+  (defun my-c-mode-common-hook ()
+    ;; add my personal style and set it for the current buffer
+    (c-add-style "NELSON-c-mode" nelson-c-style t)
+    ;; offset customizations not in nelson-c-style
+    (c-set-offset 'member-init-intro '++)
+    ;; other customizations
+;(c-toggle-auto-state 1) ;; Turn on auto newline
+    (my-common-prog-mode-settings)
+; makes the underscore part of a word in C and C++ modes
+    (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
+    (modify-syntax-entry ?_ "w" c-mode-syntax-table)
+    (lambda ()
+      (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+        (ggtags-mode 1)))
+    )
+
+  :config
+  (add-hook 'c-mode-common-hook 'my-c-mode-common-hook))
+#+END_SRC
+
+** =cperl-mode=
+
+#+BEGIN_SRC emacs-lisp
+(use-package cperl-mode
+  :preface
+  (defun my-cperl-setup ()
+    (cperl-set-style "C++")
+    (my-common-prog-mode-settings))
+
+  :config
+  (add-hook 'cperl-mode-hook 'my-cperl-setup))
 #+END_SRC
 
 ** =dired=
@@ -843,6 +991,87 @@ Remember position in a file.
 (bind-key "C-x M" 'ansi-term)
 #+END_SRC
 
+** =sql=
+
+This configuration allows me to connect to predefined MySQL servers.
+
+Taken from:
+- http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
+
+Save command history between sessions (taken from EmacsWiki).
+
+#+BEGIN_SRC emacs-lisp
+(use-package sql
+  :preface
+  (require 'epa-file)
+  (epa-file-enable)
+
+  (setq sql-connection-alist
+        '((localhost.dev (sql-product 'mysql)
+                         (sql-port 3306)
+                         (sql-server "localhost")
+                         (sql-user "root")
+                         (sql-database "mysql"))
+          (obelix.dev (sql-product 'mysql)
+                      (sql-port 3306)
+                      (sql-server "localhost")
+                      (sql-user "root")
+                      (sql-database "mysql"))))
+
+  (defun nl/sql-connect (product connection)
+    "Connects to a database server of type PRODUCT using the CONNECTION type."
+    (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
+
+    ;; update the password to the sql-connection-alist
+    (let ((connection-info (assoc connection sql-connection-alist))
+          (sql-password (car (last (assoc connection nl-sql-passwords)))))
+      (delete sql-password connection-info)
+      (nconc connection-info `((sql-password ,sql-password)))
+      (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
+      (add-to-list 'sql-connection-alist connection-info))
+
+    ;; connect to database
+    (setq sql-product product)
+    (if current-prefix-arg
+        (sql-connect connection connection)
+      (sql-connect connection)))
+
+  (defun nl/sql-localhost-dev ()
+    "Connects to the MySQL server running on machine 'localhost'."
+    (nl/sql-connect 'mysql 'localhost.dev))
+
+  (defun nl/sql-obelix-dev ()
+    "Connects to the MySQL server running on machine 'obelix'."
+    (nl/sql-connect 'mysql 'obelix.dev))
+
+  (defvar nl/sql-servers-list
+    '(("localhost dev" nl/sql-localhost-dev)
+      ("Obelix Dev" nl/sql-obelix-dev))
+    "A list of server name and the function to connect.")
+
+  (defun nl/sql-connect-server (func)
+    "Connect to the input server using nl/sql-servers-list and FUNC."
+    (interactive
+     (helm-comp-read "Select server: " nl/sql-servers-list))
+    (funcall func))
+
+  (defun my-sql-save-history-hook ()
+    (let ((lval 'sql-input-ring-file-name)
+          (rval 'sql-product))
+      (if (symbol-value rval)
+          (let ((filename
+                 (concat "~/.emacs.d/sql/"
+                         (symbol-name (symbol-value rval))
+                         "-history.sql")))
+            (set (make-local-variable lval) filename))
+        (error
+         (format "SQL history will not be saved because %s is nil"
+                 (symbol-name rval))))))
+
+  :config
+  (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
+#+END_SRC
+
 ** =subword-mode=
 
 #+BEGIN_SRC emacs-lisp
@@ -1080,41 +1309,69 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 (use-package company-emacs-eclim
   :ensure t
   :commands company-emacs-eclim-setup)
+
 (use-package eclimd
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :commands start-eclimd
   :config
-  (setq eclimd-autostart nil)
+  (setq eclimd-autostart nil))
+
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   ;;:diminish eclim-mode
   :commands (global-eclim-mode)
   :init (use-package cl)
+  :preface
+  (defun nl/restart-eclim (workspace-dir)
+    "Restarts the eclim server.  If it is currently active, the server is stopped first."
+    (interactive (list (read-directory-name "Workspace directory: "
+                                            eclimd-default-workspace nil t eclimd-default-workspace)))
+    (if (get-buffer "*eclimd*") (stop-eclimd))
+    (start-eclimd workspace-dir)
+    (message "workspace dir: %s" workspace-dir)
+    (switch-to-buffer "*eclimd*"))
+
+  (defun nl/gradle-javadoc ()
+    "Uses gradle to build the Javadoc for the project."
+    (interactive)
+    (let* ((current-directory default-directory))
+      (setq default-directory (locate-dominating-file default-directory "build.gradle"))
+      (compile "gradle -q --console=plain javadoc")
+      (setq default-directory current-directory)))
+
+  (defun my-java-mode-hook ()
+    (setq indent-tabs-mode nil
+          zeal-at-point-docset "java")
+    (eclim-mode t))
+
   :config
-    ;;(setq eclim-print-debug-messages t)
-    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
-      (if (file-accessible-directory-p eclipse-dir)
-          (progn
-            (add-to-list 'eclim-eclipse-dirs eclipse-dir)
-            (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
-                  eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
-                  ))))
-    (company-emacs-eclim-setup)
-    (global-company-mode t)
-    (setq eclim-auto-save t
-          eclimd-wait-for-process nil
-          eclimd-default-workspace "~/workspace/"
-          help-at-pt-display-when-idle t
-          help-at-pt-timer-delay 0.1
+  ;;(setq eclim-print-debug-messages t)
+  (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
+    (if (file-accessible-directory-p eclipse-dir)
+        (progn
+          (add-to-list 'eclim-eclipse-dirs eclipse-dir)
+          (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
+                eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
+                ))))
+  (company-emacs-eclim-setup)
+  (global-company-mode t)
+  (setq eclim-auto-save t
+        eclimd-wait-for-process nil
+        eclimd-default-workspace "~/workspace/"
+        help-at-pt-display-when-idle t
+        help-at-pt-timer-delay 0.1
 
-          )
-    ;; Call the help framework with the settings above & activate eclim-mode
-    (help-at-pt-set-timer)
+        )
+  ;; Call the help framework with the settings above & activate eclim-mode
+  (help-at-pt-set-timer)
 
-    ;; keep consistent which other auto-complete backend.
-    (custom-set-faces
-     '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
-     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
+  ;; keep consistent which other auto-complete backend.
+  (custom-set-faces
+   '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
+   '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
+
+  (add-hook 'java-mode-hook 'my-java-mode-hook)
+  (add-hook 'java-mode-hook 'semantic-mode))
 #+END_SRC
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -1720,8 +1977,13 @@ When using =counsel-ag=:
 #+BEGIN_SRC emacs-lisp
 (use-package js2-mode
   :ensure t
-  :commands (js2-mode)
   :mode "\\.js\\'"
+  :bind ("C-c s j" . nl/councel-ag-js)
+  :preface
+  (defun nl/counsel-ag-js ()
+    "Perform counsel-ag on the project's JavaScript files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "--js"))
   :init
   (setq js2-global-externs '("define"
                              "jasmine"
@@ -1737,6 +1999,42 @@ When using =counsel-ag=:
                              "fit"
                              "xit"))
   :config
+  (setq javascript-common-imenu-regex-list
+        '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+          ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+          ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+          ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+          ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+          ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+          ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+          ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+          ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+          ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ))
+
+  ;; js-mode imenu enhancement
+  ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+  (defun nl-js-imenu-make-index ()
+    (save-excursion
+      (imenu--generic-function javascript-common-imenu-regex-list)))
+
+  (defun nl/javascript-mode-hook ()
+    (nl/setup-indent 2) ; indent 2 spaces width
+    (setq comment-multi-line t)
+    (define-key js-mode-map [remap indent-new-comment-line]
+      'c-indent-new-comment-line)
+    (setq indent-tabs-mode nil)
+    (setq imenu-create-index-function 'nl-js-imenu-make-index)
+    (flycheck-mode t))
+
   (custom-set-variables '(js2-basic-offset 2)
                         '(js2-bounce-indent-p nil)
                         '(js2-highlight-level 3))
@@ -1749,7 +2047,11 @@ When using =counsel-ag=:
 
   (setq-default js2-mode-show-parse-errors t)
   (setq-default js2-strict-missing-semi-warning t)
-  (setq-default js2-strict-trailing-comma-warning t))
+  (setq-default js2-strict-trailing-comma-warning t)
+
+  (add-hook 'js2-mode-hook 'fic-mode)
+  (add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
+  (add-hook 'js2-mode-hook 'my-common-prog-mode-settings))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
@@ -1911,6 +2213,54 @@ This package provides tagged workspaces.
   :config (persp-mode))
 #+END_SRC
 
+** [[https://github.com/ejmr/php-mode][php-mode]]
+
+Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~my-php~
+checker is loaded.
+
+#+BEGIN_SRC emacs-lisp
+(use-package php-mode
+  :ensure t
+  :mode "\\.php[345]?\\'"
+  :preface
+  (defun my-php-mode-hook ()
+    "My PHP mode configuration."
+    ;; indent 2 spaces width
+    (nl/setup-indent 2))
+
+    ;; enable web mode
+    (web-mode)
+
+    ;; make these variables local
+    (make-local-variable 'web-mode-code-indent-offset)
+    (make-local-variable 'web-mode-markup-indent-offset)
+    (make-local-variable 'web-mode-css-indent-offset)
+
+    ;; set indentation, can set different indentation level for different code type
+    (setq web-mode-code-indent-offset 2)
+    (setq web-mode-css-indent-offset 2)
+    (setq web-mode-markup-indent-offset 2)
+    (flycheck-mode t)
+
+  :init
+  (flycheck-define-checker my-php
+    "A PHP syntax checker using the PHP command line interpreter.
+    See URL http://php.net/manual/en/features.commandline.php."
+    :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+              "-d" "log_errors=0" source)
+    :error-patterns
+    ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+            (message) " in " (file-name) " on line " line line-end))
+    :modes (php-mode php+-mode web-mode))
+
+  (eval-after-load 'flycheck
+    '(add-to-list 'flycheck-checkers 'my-php))
+
+  :config
+  (add-hook 'php-mode-hook 'php-enable-symfony2-coding-style)
+  (add-hook 'php-mode-hook 'my-php-mode-hook))
+#+END_SRC
+
 ** [[https://github.com/bbatsov/projectile][projectile]]
 
 #+BEGIN_QUOTE
@@ -2049,20 +2399,206 @@ to overwrite.
   (define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save))
 #+END_SRC
 
-** [[https://github.com/slime/slime][slime]]
-
-#+BEGIN_QUOTE
-SLIME is the Superior Lisp Interaction Mode for Emacs.
-#+END_QUOTE
+** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package slime
+(use-package sbt-mode
   :ensure t
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-sbt-mode"
+  :commands (sbt-start sbt-command)
+  :preface
+  (defun nl-sbt-mode-hook ()
+    ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
+    ;; be skipped. 1 = skip info 2 = skip info and warnings.
+    (setq compilation-skip-threshold 1)
+
+    ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
+    (local-set-key (kbd "C-a") 'comint-bol)
+
+    ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
+    ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
+    (local-set-key (kbd "M-RET") 'comint-accumulate))
+
+
+  (defun nl-sbt-command ()
+    (interactive)
+    (setq completing-read-function 'completing-read-default)
+    (call-interactively 'sbt-command)
+    (setq completing-read-function 'ivy-completing-read))
+
+  ;; Ivy and =sbt-command= do not behave well together right now, define
+  ;; our own wrapper function.
+  ;; --testing--
+  (defun sbt-command-ivy ()
+    "Send a command to the sbt process of the current buffer's sbt project.
+Prompts for the command to send when in interactive mode. You can
+use tab completion.
+
+This command does the following:
+  - displays the buffer moving focus to it if focus is t
+  - erases the buffer
+  - forgets about compilation errors
+
+The command is most usefull for running a compilation command
+that outputs errors."
+    (interactive)
+    (setq sbt:command-history-temp
+          (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
+    (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
+              #'sbt:get-sbt-completions-for-command
+              :action #'sbt:command
+              :history 'sbt:command-history-temp
+              :preselect (sbt:get-previous-command)
+              :dynamic-collection t))
+
   :config
-  (setq inferior-lisp-program "/home/nelson/apps/clozureCL/ccl/lx86cl64")
-  (setq slime-contribs '(slime-fancy)))
+  (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
+
+  ;; set this regex so that it knows about Play Framework SBT prompt
+  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+        sbt:scroll-to-bottom-on-output nil))
 #+END_SRC
 
+** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package scala-mode
+  :ensure t
+  ;;:load-path "/home/nelson/src/github/elisp/emacs-scala-mode"
+  :mode "\\.scala\\'"
+  :interpreter ("scala" . scala-mode)
+  :preface
+
+  ;; created after reading this article:
+  ;;
+  ;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
+  (setq nl/helm-scala-project-test-spec
+        '((name . "Select a ScalaTest specification to run:")
+          (candidates
+           . (lambda ()
+               (remove-if-not (lambda (filename)
+                                (string-match "Spec.scala$" filename))
+                              (projectile-current-project-files))
+               ))
+          (nomark . t)
+          (action
+           . (lambda (candidate)
+               ;;(message "file name is: %s" candidate)
+               ;;(message "test name is: %s" (file-name-nondirectory candidate))
+               (sbt-command (message "test-only *%s"
+                                     (file-name-sans-extension (file-name-nondirectory candidate))))
+               ))))
+
+  (defun nl/scalatest-test-only ()
+    (interactive)
+    (helm :sources '(nl/helm-scala-project-test-spec)))
+
+  (defun nl/scalatest-test-only-this-buffer ()
+    "For the class in the current buffer, run the scalatest test suite.
+The class name must have the postfix 'Spec' for this function to work."
+    (interactive)
+    (save-excursion
+      (let (p1 p2 line spec-name)
+        (goto-char (point-min))
+        (re-search-forward "class.*Spec")
+        (setq p1 (line-beginning-position) )
+        (setq p2 (line-end-position) )
+        (setq line (buffer-substring-no-properties p1 p2))
+        (save-match-data ; is usually a good idea
+          (and (string-match "class \\(\\w+\\).*Spec" line)
+               (setq spec-name (concat (match-string 1 line) "Spec"))))
+        ;;(message "%s" spec-name)
+        (sbt-command (message "testOnly *%s" spec-name)))))
+
+  (defun nl/scalatest-find-file ()
+    "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
+    (interactive)
+    (let (p1 p2 err-line filename line-num file-with-proj-path)
+      (save-some-buffers t)
+      (setq p1 (line-beginning-position) )
+      (setq p2 (line-end-position) )
+      (setq err-line (buffer-substring-no-properties p1 p2))
+      (save-match-data ; is usually a good idea
+        (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
+             (setq filename (concat "/" (match-string 1 err-line)) ; add leading slash as a delimiter
+                   line-num (string-to-number (match-string 2 err-line))
+                   )))
+      (setq file-with-proj-path
+            (car (remove-if-not
+                  (lambda (projfile)
+                    (string-match filename projfile))
+                  (projectile-current-project-files))))
+      (message "%s %s" file-with-proj-path line-num)
+      (find-file-other-window (expand-file-name file-with-proj-path (projectile-project-root)))
+      (goto-char (point-min))
+      (forward-line (- line-num 1))))
+
+  (defun nl/scalatest-remove-tag ()
+    "Removes a ScalaTest tag searching forward in the buffer"
+    (interactive)
+    (search-forward "taggedAs")
+    (skip-chars-backward "A-Za-z0-9")
+    (setq head-point (point))
+    (skip-chars-forward "A-Za-z0-9(\")")
+    (forward-char)
+    (setq tail-point (point))
+    (kill-region head-point tail-point))
+
+  (defhydra hydra-nl-scalatest (:hint nil)
+    "Testing scala code with scalatest"
+    ("t" nl/scalatest-test-only-this-buffer "this file" :color blue)
+    ("s" nl/scalatest-test-only "select suite to run" :color blue)
+    ("f" nl/scalatest-find-file "find file from traceback" :color blue)
+    ("r" nl/scalatest-remove-tag "remove test tag" :color blue))
+
+  (defun scala-mode-newline-comments ()
+    "Custom newline appropriate for `scala-mode'."
+    ;; shouldn't this be in a post-insert hook?
+    (interactive)
+    (newline-and-indent)
+    (scala-indent:insert-asterisk-on-multiline-comment))
+
+  (defun nl/scala-mode-keys ()
+    "My extra key definitions for 'scala-mode'."
+    (interactive)
+    ;; use sbt-run-previous-command to re-compile your code after changes
+    (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
+    (local-set-key (kbd "RET") 'newline-and-indent)
+    ;; Bind the backtab (shift tab) to
+    ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+    ;; when using the 'eager' mode by default and you want to "outdent" a
+    ;; code line as a new statement.
+    (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+    (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
+
+  (defun nl-scala-mode-hook ()
+    (yas-minor-mode)
+    ;; sbt-find-definitions is a command that tries to find (with grep)
+    ;; the definition of the thing at point.
+    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+
+    (setq-default indent-tabs-mode nil)
+    (setq compilation-ask-about-save nil)
+    (nl/scala-mode-keys))
+
+  (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
+
+
+  (defun nl/counsel-ag-scala ()
+    "Perform counsel-ag on the project's Scala files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "--scala"))
+  (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+
+  :config
+  (setq scala-indent:indent-value-expression t
+        scala-indent:align-parameters t
+        scala-indent:align-forms t
+        scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+        scala-indent:use-javadoc-style t)
+  (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
+  (add-hook 'scala-mode-hook 'fic-mode))
+#+END_SRC
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
@@ -2094,6 +2630,20 @@ Declarative popup window rules.
           shackle-default-rule '(:select t)
           shackle-inhibit-window-quit-on-same-windows t)
     (shackle-mode))
+#+END_SRC
+
+** [[https://github.com/slime/slime][slime]]
+
+#+BEGIN_QUOTE
+SLIME is the Superior Lisp Interaction Mode for Emacs.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package slime
+  :ensure t
+  :config
+  (setq inferior-lisp-program "/home/nelson/apps/clozureCL/ccl/lx86cl64")
+  (setq slime-contribs '(slime-fancy)))
 #+END_SRC
 
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
@@ -2305,8 +2855,19 @@ Wand is an extension that allows users to select a piece of text and perform act
 #+BEGIN_SRC emacs-lisp
 (use-package web-mode
   :ensure t
+  :mode "\\.html?\\'"
+  :bind ("C-c s h" . nl/counsel-ag-html)
+  :preface
+  (defun nl/counsel-ag-html ()
+    "Perform counsel-ag on the project's HTML files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "--html"))
+
+  (defun nl/web-mode-hook ()
+    "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2))
+
   :config
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
   (setq web-mode-markup-indent-offset 2
         web-mode-css-indent-offset 2
         web-mode-code-indent-offset 2
@@ -2316,10 +2877,7 @@ Wand is an extension that allows users to select a piece of text and perform act
         '(("css" . (ac-source-css-property))
           ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
 
-  (defun my-web-mode-hook ()
-    "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2))
-  (add-hook 'web-mode-hook  'my-web-mode-hook))
+  (add-hook 'web-mode-hook  'nl/web-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
@@ -2400,575 +2958,6 @@ are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's
   (mapc 'load (directory-files nl/user-settings-dir nil "^[^#].*el$")))
 #+END_SRC
 
-* Languages
-
-** Identation config
-
-Use spaces instead of ~\t~ character.
-
-#+BEGIN_SRC emacs-lisp
-(setq-default indent-tabs-mode nil)
-#+END_SRC
-
-A way to set up indentation for all programming modes. Taken from
-[[http://blog.binchen.org/posts/easy-indentation-setup-in-emacs-for-web-development.html][here]].
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/setup-indent (n)
-  ;; java/c/c++
-  (setq c-basic-offset n)
-  ;; web development
-  (setq coffee-tab-width n) ; coffeescript
-  (setq javascript-indent-level n) ; javascript-mode
-  (setq js-indent-level n) ; js-mode
-  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
-  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
-  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
-  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
-  (setq css-indent-offset n) ; css-mode
-  )
-#+END_SRC
-
-** Programming mode hook.
-
-#+BEGIN_SRC emacs-lisp
-(defun my-common-prog-mode-settings ()
-  "Enables settings common between programming language modes."
-  (nl/setup-indent 3) ; indent 2 spaces width
-  ;;
-  ;; Set tab and CR/LF keys to call their corresponding more-general
-  ;; functions.  This needs to be here to override the settings of some modes
-  ;; (e.g. c++-mode changes the tab key to do a re-indent).
-  ;;
-  (local-set-key "\t" 'tab-to-tab-stop)
-  (local-set-key "\n" 'newline-and-indent)
-  (local-set-key "\r" 'newline-and-indent)
-  ;;
-  ;; Set paragraph/comment auto-formatting to wrap at column 100.
-  ;;
-  (set-fill-column 100)
-  ;;
-  ;; Set the comment column to zero so that lisp comment lines will act like
-  ;; C++ comments (i.e. line up with the code), and not automatically indent
-  ;; to column 50.
-  ;;
-  (setq comment-column 0)
-  (push '(">=" . ?≥) prettify-symbols-alist)
-  (push '("<=" . ?≤) prettify-symbols-alist)
-  (push '("->" . ?→) prettify-symbols-alist)
-  )
-
-(setq makefile-mode-hook 'my-common-prog-mode-settings)
-(setq sh-mode-hook       'my-common-prog-mode-settings)
-#+END_SRC
-
-** C / C++
-
-#+BEGIN_SRC emacs-lisp
-(defconst nelson-c-style
-  '((c-tab-always-indent . t)
-    (c-set-style "K&R")
-    (c-offsets-alist . ((statement-block-intro . +)
-                        (substatement-open     . 0)
-                        (label                 . 0)
-                        (case-label            . +)
-                        (statement-cont        . +)
-                        (innamespace           . 0))))
-  "Nelson programming style.")
-
-;; Customizations for all of c-mode, c++-mode, and objc-mode
-(defun my-c-mode-common-hook ()
-  ;; add my personal style and set it for the current buffer
-  (c-add-style "NELSON-c-mode" nelson-c-style t)
-  ;; offset customizations not in nelson-c-style
-  (c-set-offset 'member-init-intro '++)
-  ;; other customizations
-  ;(c-toggle-auto-state 1) ;; Turn on auto newline
-  (my-common-prog-mode-settings)
-  ; makes the underscore part of a word in C and C++ modes
-  (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
-  (modify-syntax-entry ?_ "w" c-mode-syntax-table)
-  (lambda ()
-    (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-      (ggtags-mode 1)))
-  )
-
-(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-(add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-#+END_SRC
-
-** Emacs lisp
-
-#+BEGIN_SRC emacs-lisp
-(setq emacs-lisp-mode-hook 'my-common-prog-mode-settings)
-#+END_SRC
-
-** Java
-
-#+BEGIN_SRC emacs-lisp
-(defun my-java-mode-hook ()
-  (setq indent-tabs-mode nil
-        zeal-at-point-docset "java"))
-
-(add-hook 'java-mode-hook (lambda() (eclim-mode t)))
-(add-hook 'java-mode-hook 'my-java-mode-hook)
-(add-hook 'java-mode-hook 'semantic-mode)
-#+END_SRC
-
-*** =emacs-eclim=
-
-Utillity function to restart the Eclim server.
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/restart-eclim (workspace-dir)
-  "Restarts the eclim server.  If it is currently active, the server is stopped first."
-  (interactive (list (read-directory-name "Workspace directory: "
-                                          eclimd-default-workspace nil t eclimd-default-workspace)))
-  (if (get-buffer "*eclimd*") (stop-eclimd))
-  (start-eclimd workspace-dir)
-  (message "workspace dir: %s" workspace-dir)
-  (switch-to-buffer "*eclimd*"))
-#+END_SRC
-
-A gradle function to generate Javadoc for the project.
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/gradle-javadoc ()
-  "Uses gradle to build the Javadoc for the project."
-  (interactive)
-  (let* ((current-directory default-directory))
-    (setq default-directory (locate-dominating-file default-directory "build.gradle"))
-    (compile "gradle -q --console=plain javadoc")
-    (setq default-directory current-directory)))
-#+END_SRC
-
-** JavaScript
-
-#+BEGIN_SRC emacs-lisp
-(setq javascript-common-imenu-regex-list
-      '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
-        ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
-        ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
-        ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
-        ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
-        ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
-        ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
-        ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
-        ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
-        ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ))
-
-;; js-mode imenu enhancement
-;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
-(defun nl-js-imenu-make-index ()
-  (save-excursion
-    (imenu--generic-function javascript-common-imenu-regex-list)))
-
-(defun nl/javascript-mode-hook ()
-  (nl/setup-indent 2) ; indent 2 spaces width
-  (setq comment-multi-line t)
-  (define-key js-mode-map [remap indent-new-comment-line]
-    'c-indent-new-comment-line)
-  (setq indent-tabs-mode nil)
-  (setq imenu-create-index-function 'nl-js-imenu-make-index)
-  (flycheck-mode t))
-
-;;(add-hook 'js-mode-hook 'js2-minor-mode)
-(add-hook 'js2-mode-hook 'fic-mode)
-(add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
-(add-hook 'js2-mode-hook 'my-common-prog-mode-settings)
-;;(add-hook 'js2-mode-hook 'js2-imenu-extras-mode)
-#+END_SRC
-
-Key bindings to allow us to use ~counsel-ag~ to seach scala code.
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/counsel-ag-js ()
-  "Perform counsel-ag on the project's JavaScript files."
-  (interactive)
-  (counsel-ag "" (projectile-project-root) "--js"))
-
-(global-set-key (kbd "C-c s j") 'nl/counsel-ag-js)
-#+END_SRC
-
-** Html
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/counsel-ag-html ()
-  "Perform counsel-ag on the project's HTML files."
-  (interactive)
-  (counsel-ag "" (projectile-project-root) "--html"))
-
-(global-set-key (kbd "C-c s h") 'nl/counsel-ag-html)
-#+END_SRC
-
-** Perl
-
-#+BEGIN_SRC emacs-lisp
-(defun my-cperl-setup ()
-  (cperl-set-style "C++")
-  (my-common-prog-mode-settings))
-
-(add-hook 'cperl-mode-hook 'my-cperl-setup)
-#+END_SRC
-
-** PHP
-
-#+BEGIN_SRC emacs-lisp
-(use-package php-mode
-  :ensure t
-  :mode "\\.php[345]?\\'"
-  :config
-  (add-hook 'php-mode-hook 'php-enable-symfony2-coding-style))
-
-(defun my-php-mode-hook ()
-  "My PHP mode configuration."
-  ;; indent 2 spaces width
-  (nl/setup-indent 2))
-
-(add-hook 'php-mode-hook 'my-php-mode-hook)
-#+END_SRC
-
-The following taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~my-php~
-checker is loaded.
-
-#+BEGIN_SRC emacs-lisp
-(flycheck-define-checker my-php
-  "A PHP syntax checker using the PHP command line interpreter.
-
-See URL http://php.net/manual/en/features.commandline.php."
-  :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-            "-d" "log_errors=0" source)
-  :error-patterns
-  ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-          (message) " in " (file-name) " on line " line line-end))
-  :modes (php-mode php+-mode web-mode))
-
-(eval-after-load 'flycheck
-  '(add-to-list 'flycheck-checkers 'my-php))
-#+END_SRC
-
-Web-mode for PHP not working that well right now. After pasting code
-all the text turns white.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(defun my-setup-php ()
-  ;; enable web mode
-  (web-mode)
-
-  ;; make these variables local
-  (make-local-variable 'web-mode-code-indent-offset)
-  (make-local-variable 'web-mode-markup-indent-offset)
-  (make-local-variable 'web-mode-css-indent-offset)
-
-  ;; set indentation, can set different indentation level for different code type
-  (setq web-mode-code-indent-offset 2)
-  (setq web-mode-css-indent-offset 2)
-  (setq web-mode-markup-indent-offset 2)
-  (flycheck-mode t))
-
-(add-to-list 'auto-mode-alist '("\\.php$" . my-setup-php))
-#+END_SRC
-
-** Scala
-
-I use these within a hydra to make testing scala code easier.
-
-#+BEGIN_SRC emacs-lisp
-;; created after reading this article:
-;;
-;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
-(setq nl/helm-scala-project-test-spec
-      '((name . "Select a ScalaTest specification to run:")
-        (candidates
-         . (lambda ()
-             (remove-if-not (lambda (filename)
-                              (string-match "Spec.scala$" filename))
-                            (projectile-current-project-files))
-             ))
-        (nomark . t)
-        (action
-         . (lambda (candidate)
-             ;;(message "file name is: %s" candidate)
-             ;;(message "test name is: %s" (file-name-nondirectory candidate))
-             (sbt-command (message "test-only *%s"
-                                   (file-name-sans-extension (file-name-nondirectory candidate))))
-             ))))
-
-(defun nl/scalatest-test-only ()
-  (interactive)
-  (helm :sources '(nl/helm-scala-project-test-spec)))
-
-(defun nl/scalatest-test-only-this-buffer ()
-  "For the class in the current buffer, run the scalatest test suite.
-The class name must have the postfix 'Spec' for this function to work."
-  (interactive)
-  (save-excursion
-    (let (p1 p2 line spec-name)
-    (goto-char (point-min))
-    (re-search-forward "class.*Spec")
-    (setq p1 (line-beginning-position) )
-    (setq p2 (line-end-position) )
-    (setq line (buffer-substring-no-properties p1 p2))
-    (save-match-data ; is usually a good idea
-      (and (string-match "class \\(\\w+\\).*Spec" line)
-           (setq spec-name (concat (match-string 1 line) "Spec"))))
-    ;;(message "%s" spec-name)
-    (sbt-command (message "testOnly *%s" spec-name)))))
-
-(defun nl/scalatest-find-file ()
-  "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
-  (interactive)
-  (let (p1 p2 err-line filename line-num file-with-proj-path)
-    (save-some-buffers t)
-    (setq p1 (line-beginning-position) )
-    (setq p2 (line-end-position) )
-    (setq err-line (buffer-substring-no-properties p1 p2))
-    (save-match-data ; is usually a good idea
-      (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
-           (setq filename (concat "/" (match-string 1 err-line)) ; add leading slash as a delimiter
-                 line-num (string-to-number (match-string 2 err-line))
-                 )))
-    (setq file-with-proj-path
-          (car (remove-if-not
-                (lambda (projfile)
-                  (string-match filename projfile))
-                (projectile-current-project-files))))
-    (message "%s %s" file-with-proj-path line-num)
-    (find-file-other-window (expand-file-name file-with-proj-path (projectile-project-root)))
-    (goto-char (point-min))
-    (forward-line (- line-num 1))))
-
-(defun nl/scalatest-remove-tag ()
-  "Removes a ScalaTest tag searching forward in the buffer"
-  (interactive)
-  (search-forward "taggedAs")
-  (skip-chars-backward "A-Za-z0-9")
-  (setq head-point (point))
-  (skip-chars-forward "A-Za-z0-9(\")")
-  (forward-char)
-  (setq tail-point (point))
-  (kill-region head-point tail-point))
-
-(defhydra hydra-nl-scalatest (:hint nil)
-  "Testing scala code with scalatest"
-  ("t" nl/scalatest-test-only-this-buffer "this file" :color blue)
-  ("s" nl/scalatest-test-only "select suite to run" :color blue)
-  ("f" nl/scalatest-find-file "find file from traceback" :color blue)
-  ("r" nl/scalatest-remove-tag "remove test tag" :color blue))
-#+END_SRC
-
-More functions that are used in scala-mode.
-
-#+BEGIN_SRC emacs-lisp
-(defun scala-mode-newline-comments ()
-  "Custom newline appropriate for `scala-mode'."
-  ;; shouldn't this be in a post-insert hook?
-  (interactive)
-  (newline-and-indent)
-  (scala-indent:insert-asterisk-on-multiline-comment))
-
-(defun nl/scala-mode-keys ()
-  "My extra key definitions for 'scala-mode'."
-  (interactive)
-  ;; use sbt-run-previous-command to re-compile your code after changes
-  (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-  (local-set-key (kbd "RET") 'newline-and-indent)
-  ;; Bind the backtab (shift tab) to
-  ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-  ;; when using the 'eager' mode by default and you want to "outdent" a
-  ;; code line as a new statement.
-  (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
-  (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
-
-  (defun nl-scala-mode-hook ()
-    (yas-minor-mode)
-    ;; sbt-find-definitions is a command that tries to find (with grep)
-    ;; the definition of the thing at point.
-    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
-
-    (setq-default indent-tabs-mode nil)
-    (setq compilation-ask-about-save nil)
-    (nl/scala-mode-keys))
-
-(key-chord-define-global "jt" 'hydra-nl-scalatest/body)
-#+END_SRC
-
-Key bindings to allow us to use ~counsel-ag~ to seach scala code.
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/counsel-ag-scala ()
-  "Perform counsel-ag on the project's Scala files."
-  (interactive)
-  (counsel-ag "" (projectile-project-root) "--scala"))
-(global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
-#+END_SRC
-
-Use the package.
-
-#+BEGIN_SRC emacs-lisp
-(use-package scala-mode
-  :ensure t
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-scala-mode"
-  :interpreter
-  ("scala" . scala-mode)
-  :config
-  (setq scala-indent:indent-value-expression t
-        scala-indent:align-parameters t
-        scala-indent:align-forms t
-        scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-        scala-indent:use-javadoc-style t)
-  (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
-  (add-hook 'scala-mode-hook 'fic-mode))
-#+END_SRC
-
-Also use the ~sbt-mode~ package.
-
-#+BEGIN_SRC emacs-lisp
-(defun nl-sbt-mode-hook ()
-  ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
-  ;; be skipped. 1 = skip info 2 = skip info and warnings.
-  (setq compilation-skip-threshold 1)
-
-  ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
-  (local-set-key (kbd "C-a") 'comint-bol)
-
-  ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
-  ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
-  (local-set-key (kbd "M-RET") 'comint-accumulate))
-
-(use-package sbt-mode
-  :ensure t
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-sbt-mode"
-  :commands (sbt-start sbt-command)
-  :config
-  (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
-  ;; set this regex so that it knows about Play Framework SBT prompt
-  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-        sbt:scroll-to-bottom-on-output nil))
-#+END_SRC
-
-Ivy and =sbt-command= do not behave well together right now, define
-our own wrapper function.
-
-#+BEGIN_SRC emacs-lisp
-(defun nl-sbt-command ()
-  (interactive)
-  (setq completing-read-function 'completing-read-default)
-  (call-interactively 'sbt-command)
-  (setq completing-read-function 'ivy-completing-read))
-
-;;;; testing
-(defun sbt-command-ivy ()
-  "Send a command to the sbt process of the current buffer's sbt project.
-Prompts for the command to send when in interactive mode. You can
-use tab completion.
-
-This command does the following:
-  - displays the buffer moving focus to it if focus is t
-  - erases the buffer
-  - forgets about compilation errors
-
-The command is most usefull for running a compilation command
-that outputs errors."
-  (interactive)
-  (setq sbt:command-history-temp
-        (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
-  (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
-            #'sbt:get-sbt-completions-for-command
-            :action #'sbt:command
-            :history 'sbt:command-history-temp
-            :preselect (sbt:get-previous-command)
-            :dynamic-collection t))
-#+END_SRC
-
-** SQL
-
-This configuration allows me to connect to predefined MySQL servers.
-
-Taken from:
-- http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
-
-#+BEGIN_SRC emacs-lisp
-(require 'epa-file)
-(epa-file-enable)
-
-(setq sql-connection-alist
-      '((localhost.dev (sql-product 'mysql)
-                 (sql-port 3306)
-                 (sql-server "localhost")
-                 (sql-user "root")
-                 (sql-database "mysql"))
-        (obelix.dev (sql-product 'mysql)
-                    (sql-port 3306)
-                    (sql-server "localhost")
-                    (sql-user "root")
-                    (sql-database "mysql"))))
-
-(defun nl/sql-connect (product connection)
-  "Connects to a database server of type PRODUCT using the CONNECTION type."
-  (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
-
-  ;; update the password to the sql-connection-alist
-  (let ((connection-info (assoc connection sql-connection-alist))
-        (sql-password (car (last (assoc connection nl-sql-passwords)))))
-    (delete sql-password connection-info)
-    (nconc connection-info `((sql-password ,sql-password)))
-    (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
-    (add-to-list 'sql-connection-alist connection-info))
-
-  ;; connect to database
-  (setq sql-product product)
-  (if current-prefix-arg
-      (sql-connect connection connection)
-    (sql-connect connection)))
-
-(defun nl/sql-localhost-dev ()
-  "Connects to the MySQL server running on machine 'localhost'."
-  (nl/sql-connect 'mysql 'localhost.dev))
-
-(defun nl/sql-obelix-dev ()
-  "Connects to the MySQL server running on machine 'obelix'."
-  (nl/sql-connect 'mysql 'obelix.dev))
-
-(defvar nl/sql-servers-list
-  '(("localhost dev" nl/sql-localhost-dev)
-    ("Obelix Dev" nl/sql-obelix-dev))
-  "A list of server name and the function to connect.")
-
-(defun nl/sql-connect-server (func)
-  "Connect to the input server using nl/sql-servers-list and FUNC."
-  (interactive
-   (helm-comp-read "Select server: " nl/sql-servers-list))
-  (funcall func))
-#+END_SRC
-
-Save command history between sessions (taken from EmacsWiki).
-
-#+BEGIN_SRC emacs-lisp
-(defun my-sql-save-history-hook ()
-  (let ((lval 'sql-input-ring-file-name)
-        (rval 'sql-product))
-    (if (symbol-value rval)
-        (let ((filename
-               (concat "~/.emacs.d/sql/"
-                       (symbol-name (symbol-value rval))
-                       "-history.sql")))
-          (set (make-local-variable lval) filename))
-      (error
-       (format "SQL history will not be saved because %s is nil"
-               (symbol-name rval))))))
-
-(add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook)
-#+END_SRC
 * Misc
 ** Constants
 
