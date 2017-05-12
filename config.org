@@ -530,34 +530,6 @@ A way to set up indentation for all programming modes. Taken from
 ** Programming mode hook.
 
 #+BEGIN_SRC emacs-lisp
-(defun my-common-prog-mode-settings ()
-  "Enables settings common between programming language modes."
-  (nl/setup-indent 3) ; indent 2 spaces width
-  ;;
-  ;; Set tab and CR/LF keys to call their corresponding more-general
-  ;; functions.  This needs to be here to override the settings of some modes
-  ;; (e.g. c++-mode changes the tab key to do a re-indent).
-  ;;
-  (local-set-key "\t" 'tab-to-tab-stop)
-  (local-set-key "\n" 'newline-and-indent)
-  (local-set-key "\r" 'newline-and-indent)
-  ;;
-  ;; Set paragraph/comment auto-formatting to wrap at column 100.
-  ;;
-  (set-fill-column 100)
-  ;;
-  ;; Set the comment column to zero so that lisp comment lines will act like
-  ;; C++ comments (i.e. line up with the code), and not automatically indent
-  ;; to column 50.
-  ;;
-  (setq comment-column 0)
-  (push '(">=" . ?≥) prettify-symbols-alist)
-  (push '("<=" . ?≤) prettify-symbols-alist)
-  (push '("->" . ?→) prettify-symbols-alist)
-  )
-
-(setq makefile-mode-hook 'my-common-prog-mode-settings)
-(setq sh-mode-hook       'my-common-prog-mode-settings)
 #+END_SRC
 
 ** Emacs lisp
@@ -796,6 +768,21 @@ ibuffer is the improved version of list-buffers.
 (defalias 'list-buffers 'ibuffer)
 #+END_SRC
 
+** =java-mode=
+
+#+BEGIN_SRC emacs-lisp
+(use-package java-mode
+  :preface
+  (defun my-java-mode-hook ()
+    (setq indent-tabs-mode nil
+          zeal-at-point-docset "java")
+    (eclim-mode t))
+  :mode "\\.java\\'"
+  :init
+  (add-hook 'java-mode-hook 'my-java-mode-hook)
+  (add-hook 'java-mode-hook 'semantic-mode))
+#+END_SRC
+
 ** =org-mode=
 
 First some UI and editing tweaks.
@@ -922,6 +909,42 @@ comments.
 (setq org-src-window-setup 'current-window
       org-src-strip-leading-and-trailing-blank-lines t
       org-src-tab-acts-natively t)
+#+END_SRC
+
+** =prog-mode=
+
+#+BEGIN_SRC emacs-lisp
+(use-package prog-mode
+  :preface
+  (defun my-common-prog-mode-settings ()
+    "Enables settings common between programming language modes."
+    (nl/setup-indent 3) ; indent 2 spaces width
+    ;;
+    ;; Set tab and CR/LF keys to call their corresponding more-general
+    ;; functions.  This needs to be here to override the settings of some modes
+    ;; (e.g. c++-mode changes the tab key to do a re-indent).
+    ;;
+    (local-set-key "\t" 'tab-to-tab-stop)
+    (local-set-key "\n" 'newline-and-indent)
+    (local-set-key "\r" 'newline-and-indent)
+    ;;
+    ;; Set paragraph/comment auto-formatting to wrap at column 100.
+    ;;
+    (set-fill-column 100)
+    ;;
+    ;; Set the comment column to zero so that lisp comment lines will act like
+    ;; C++ comments (i.e. line up with the code), and not automatically indent
+    ;; to column 50.
+    ;;
+    (setq comment-column 0)
+    (push '(">=" . ?≥) prettify-symbols-alist)
+    (push '("<=" . ?≤) prettify-symbols-alist)
+    (push '("->" . ?→) prettify-symbols-alist)
+    )
+  :config
+  (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
+  (add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
+  (add-hook 'prog-mode-hook     'my-common-prog-mode-settings))
 #+END_SRC
 
 ** =re-builder=
@@ -1263,6 +1286,17 @@ Complete anything.
 (use-package company-tern)
 #+END_SRC
 
+** [[https://melpa.org/#/cursor-chg][cursor-chg]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package cursor-chg
+  :ensure t
+  :commands change-cursor-mode
+  :config
+  (change-cursor-mode 1)
+  (toggle-cursor-type-when-idle 1))
+#+END_SRC
+
 ** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1320,15 +1354,14 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   ;;:diminish eclim-mode
   :commands (global-eclim-mode)
-  :init (use-package cl)
   :preface
   (defun nl/restart-eclim (workspace-dir)
     "Restarts the eclim server.  If it is currently active, the server is stopped first."
     (interactive (list (read-directory-name "Workspace directory: "
                                             eclimd-default-workspace nil t eclimd-default-workspace)))
     (if (get-buffer "*eclimd*") (stop-eclimd))
-    (start-eclimd workspace-dir)
     (message "workspace dir: %s" workspace-dir)
+    (start-eclimd workspace-dir)
     (switch-to-buffer "*eclimd*"))
 
   (defun nl/gradle-javadoc ()
@@ -1343,7 +1376,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     (setq indent-tabs-mode nil
           zeal-at-point-docset "java")
     (eclim-mode t))
-
+  :init (use-package cl)
   :config
   ;;(setq eclim-print-debug-messages t)
   (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
@@ -1357,7 +1390,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   (global-company-mode t)
   (setq eclim-auto-save t
         eclimd-wait-for-process nil
-        eclimd-default-workspace "~/workspace/"
+        ;;eclimd-default-workspace "~/workspace/"
         help-at-pt-display-when-idle t
         help-at-pt-timer-delay 0.1
 
@@ -1368,10 +1401,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   ;; keep consistent which other auto-complete backend.
   (custom-set-faces
    '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
-   '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
-
-  (add-hook 'java-mode-hook 'my-java-mode-hook)
-  (add-hook 'java-mode-hook 'semantic-mode))
+   '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
 #+END_SRC
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -1803,7 +1833,8 @@ stop:
   :init
   (require 'helm-xref)
   :config
-  (setq xref-show-xrefs-function 'helm-xref-show-xrefs))
+  ;;(setq xref-show-xrefs-function 'helm-xref-show-xrefs)
+)
 #+END_SRC
 
 ** [[https://github.com/DarthFennec/highlight-indent-guides][highlight-indent-guides]]
@@ -2493,10 +2524,8 @@ that outputs errors."
     (interactive)
     (helm :sources '(nl/helm-scala-project-test-spec)))
 
-  (defun nl/scalatest-test-only-this-buffer ()
-    "For the class in the current buffer, run the scalatest test suite.
-The class name must have the postfix 'Spec' for this function to work."
-    (interactive)
+  (defun nl/scalstest-find-suite-name ()
+    "Determines the name of the ScalaTest suite name."
     (save-excursion
       (let (p1 p2 line spec-name)
         (goto-char (point-min))
@@ -2505,10 +2534,22 @@ The class name must have the postfix 'Spec' for this function to work."
         (setq p2 (line-end-position) )
         (setq line (buffer-substring-no-properties p1 p2))
         (save-match-data ; is usually a good idea
-          (and (string-match "class \\(\\w+\\).*Spec" line)
+          (and (string-match "class \\(\\w+\\)Spec" line)
                (setq spec-name (concat (match-string 1 line) "Spec"))))
-        ;;(message "%s" spec-name)
-        (sbt-command (message "testOnly *%s" spec-name)))))
+        ;;(message "---------> %s" spec-name)
+        spec-name)))
+
+  (defun nl/scalatest-test-only-this-buffer ()
+    "For the class in the current buffer, run the scalatest test suite.
+The class name must have the postfix 'Spec' for this function to work."
+    (interactive)
+    (sbt-command (format "testOnly *%s" (nl/scalstest-find-suite-name))))
+
+  (defun nl/scalatest-test-only-this-buffer-with-substring-tag ()
+    "For the class in the current buffer, run the scalatest test suite.
+The class name must have the postfix 'Spec' for this function to work."
+    (interactive)
+    (sbt-command (format "testOnly *%s -- -z 111" (nl/scalstest-find-suite-name))))
 
   (defun nl/scalatest-find-file ()
     "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
@@ -2547,6 +2588,7 @@ The class name must have the postfix 'Spec' for this function to work."
   (defhydra hydra-nl-scalatest (:hint nil)
     "Testing scala code with scalatest"
     ("t" nl/scalatest-test-only-this-buffer "this file" :color blue)
+    ("z" nl/scalatest-test-only-this-buffer-with-substring-tag "this file with test tag" :color blue)
     ("s" nl/scalatest-test-only "select suite to run" :color blue)
     ("f" nl/scalatest-find-file "find file from traceback" :color blue)
     ("r" nl/scalatest-remove-tag "remove test tag" :color blue))
@@ -2608,6 +2650,27 @@ initial =*scratch*= buffer.
 #+BEGIN_SRC emacs-lisp
 (use-package scratch
   :ensure t)
+#+END_SRC
+
+** [[https://github.com/Kungsgeten/selected.el][selected]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package selected
+  :ensure t
+  :defer 5
+  :diminish selected-minor-mode
+  :commands selected-minor-mode
+  :bind (:map selected-keymap
+              ("M-%" . query-replace-regexp)
+              ("C-[" . align-entire)
+              ("C-f" . fill-region)
+              ("C-U" . unfill-region)
+              ("C-d" . downcase-region)
+              ("C-r" . reverse-region)
+              ("C-s" . sort-lines)
+              ("C-u" . upcase-region))
+  :config
+  (selected-global-mode 1))
 #+END_SRC
 
 ** [[https://github.com/wasamasa/shackle][shackle]]
@@ -2914,7 +2977,7 @@ Zeal is a simple offline API documentation browser inspired by Dash
 
 ** [[https://github.com/thierryvolpiatto/zop-to-char][zop-to-char]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package zop-to-char
   :ensure t
   :bind ("M-z" . zop-up-to-char)
@@ -2933,6 +2996,14 @@ Ztree is a project dedicated to implementation of several text-tree applications
 (use-package ztree
   :ensure t
   :commands (ztree-diff ztree-dir))
+#+END_SRC
+
+** [[https://github.com/mrkkrp/zzz-to-char][zzz-to-char]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package zzz-to-char
+  :ensure t
+  :bind ("M-z" . zzz-up-to-char))
 #+END_SRC
 
 * Computer-specific settings
