@@ -2524,6 +2524,12 @@ that outputs errors."
     (interactive)
     (helm :sources '(nl/helm-scala-project-test-spec)))
 
+(defun sbt-hydra:run-sbt-command (command)
+  (sbt-switch-to-active-sbt-buffer)
+  (sbt-hydra:add-to-history command)
+  (sbt-hydra:run-previous-sbt-command))
+
+
   (defun nl/scalstest-find-suite-name ()
     "Determines the name of the ScalaTest suite name."
     (save-excursion
@@ -3212,17 +3218,18 @@ Views the same file side by side:
   "Set the size and position of the Emacs window."
   (interactive)
   (let ((frame (selected-frame)))
-    (set-frame-size frame (* 2 (frame-width)) (frame-height))
-    ))
+    (set-frame-size frame (* 2 (frame-width)) (frame-height)))
+  (split-window-right))
 
 (defun nl/frame-shrink-horizontally ()
   "Set the size and position of the Emacs window."
   (interactive)
   (let ((frame (selected-frame)))
-    (windmove-right)
-    (delete-window)
-    (set-frame-size frame (/ (frame-width) 2) (frame-height))
-    ))
+    (when (> (length (window-list)) 1)
+      (when (windmove-find-other-window 'right)
+        (windmove-right))
+      (delete-window))
+    (set-frame-size frame (/ (frame-width) 2) (frame-height))))
 
 (defhydra hydra-nl-frame-resize (:hint nil)
   "Frame resize"
