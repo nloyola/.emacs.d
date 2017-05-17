@@ -65,8 +65,10 @@
 (defhydra hydra-nl-bbweb-project (:hint nil)
   "bbweb project commands"
   ("f" hydra-nl-bbweb-find-file/body "Find file" :exit t)
-  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
+  ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload" :color blue)
+  ("r" (lambda () (interactive) (sbt-command "run")) "run" :color blue)
   ("s" sbt-command "sbt command" :color blue)
+  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("m" karma-mode "toggle karma-mode" :color blue)
   ("k" karma-start "karma unit test" :color blue)
   ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue)
