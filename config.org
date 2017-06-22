@@ -1346,14 +1346,13 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 (use-package eclimd
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :commands start-eclimd
   :config
   (setq eclimd-autostart nil))
 
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  ;;:diminish eclim-mode
-  :commands (global-eclim-mode)
+  :diminish eclim-mode
+  :mode "\\.java\\'"
   :preface
   (defun nl/restart-eclim (workspace-dir)
     "Restarts the eclim server.  If it is currently active, the server is stopped first."
@@ -1376,9 +1375,12 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     (setq indent-tabs-mode nil
           zeal-at-point-docset "java")
     (eclim-mode t))
+
   :init (use-package cl)
   :config
-  ;;(setq eclim-print-debug-messages t)
+  (setq eclim-print-debug-messages t
+        eclim-eclimrc "~/.eclimrc"
+        eclim-nailgun-port 9092)
   (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
     (if (file-accessible-directory-p eclipse-dir)
         (progn
@@ -2516,7 +2518,7 @@ that outputs errors."
            . (lambda (candidate)
                ;;(message "file name is: %s" candidate)
                ;;(message "test name is: %s" (file-name-nondirectory candidate))
-               (sbt-command (message "test-only *%s"
+               (sbt-command (message "testOnly *.%s"
                                      (file-name-sans-extension (file-name-nondirectory candidate))))
                ))))
 
@@ -2524,10 +2526,10 @@ that outputs errors."
     (interactive)
     (helm :sources '(nl/helm-scala-project-test-spec)))
 
-(defun sbt-hydra:run-sbt-command (command)
-  (sbt-switch-to-active-sbt-buffer)
-  (sbt-hydra:add-to-history command)
-  (sbt-hydra:run-previous-sbt-command))
+  (defun sbt-hydra:run-sbt-command (command)
+    (sbt-switch-to-active-sbt-buffer)
+    (sbt-hydra:add-to-history command)
+    (sbt-hydra:run-previous-sbt-command))
 
 
   (defun nl/scalstest-find-suite-name ()
@@ -2549,13 +2551,13 @@ that outputs errors."
     "For the class in the current buffer, run the scalatest test suite.
 The class name must have the postfix 'Spec' for this function to work."
     (interactive)
-    (sbt-command (format "testOnly *%s" (nl/scalstest-find-suite-name))))
+    (sbt-command (format "testOnly *.%s" (nl/scalstest-find-suite-name))))
 
   (defun nl/scalatest-test-only-this-buffer-with-substring-tag ()
     "For the class in the current buffer, run the scalatest test suite.
 The class name must have the postfix 'Spec' for this function to work."
     (interactive)
-    (sbt-command (format "testOnly *%s -- -z 111" (nl/scalstest-find-suite-name))))
+    (sbt-command (format "testOnly *.%s -- -z 111" (nl/scalstest-find-suite-name))))
 
   (defun nl/scalatest-find-file ()
     "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
@@ -3345,6 +3347,27 @@ With a prefix argument P, isearch for the symbol at point."
 
 (global-set-key [remap isearch-forward]
                 #'endless/isearch-symbol-with-prefix)
+#+END_SRC
+
+** Query replace
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/query-replace-regexp-at-point ()
+  "Runs query-replace-regexp on the word at point"
+  (interactive)
+  (let (bounds pos1 pos2 word-at-point replace-with (current-subword-mode-setting subword-mode))
+    (subword-mode 0)
+    (setq bounds (bounds-of-thing-at-point 'word)
+          pos1 (car bounds)
+          pos2 (cdr bounds)
+          word-at-point (downcase (buffer-substring-no-properties pos1 pos2)))
+    (subword-mode current-subword-mode-setting) ;; restore subword-mode to original value
+    ;;(message "%s" word-at-point)
+    (setq replace-with (read-from-minibuffer (format "Replace \"%s\" with: " word-at-point)))
+    ;; (message "subword-mode-setting: %s, word-at-point: %s, replace-with: %s"
+    ;;          subword-mode-setting word-at-point replace-with)
+    (back-to-indentation) ;; goto beginning of line
+    (query-replace-regexp word-at-point replace-with)))
 #+END_SRC
 
 # Local Variables:
