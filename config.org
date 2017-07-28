@@ -268,7 +268,7 @@ Enable ANSI colors for compilation buffers.
 ;;(require 'ansi-color)
 (defun colorize-compilation-buffer ()
   (let ((inhibit-read-only t))
-    (ansi-color-apply-on-region (point-min) (point-max))))
+    (ansi-color-apply-on-region compilation-filter-start (point))))
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 #+END_SRC
 
@@ -360,6 +360,11 @@ each time.
 (setq hi-lock-auto-select-face t)
 #+END_SRC
 
+** Desktop
+
+#+BEGIN_SRC emacs-lisp
+;;(desktop-save-mode 1)
+#+END_SRC
 ** Key bindings
 
 #+BEGIN_SRC emacs-lisp
@@ -2259,7 +2264,7 @@ checker is loaded.
   (defun my-php-mode-hook ()
     "My PHP mode configuration."
     ;; indent 2 spaces width
-    (nl/setup-indent 2))
+    (nl/setup-indent 2)
 
     ;; enable web mode
     (web-mode)
@@ -2273,7 +2278,7 @@ checker is loaded.
     (setq web-mode-code-indent-offset 2)
     (setq web-mode-css-indent-offset 2)
     (setq web-mode-markup-indent-offset 2)
-    (flycheck-mode t)
+    (flycheck-mode t))
 
   :init
   (flycheck-define-checker my-php
@@ -2489,7 +2494,9 @@ that outputs errors."
 
   ;; set this regex so that it knows about Play Framework SBT prompt
   (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-        sbt:scroll-to-bottom-on-output nil))
+        sbt:ansi-support t
+        sbt:scroll-to-bottom-on-output nil)
+  (setenv "EMACS" "true"))
 #+END_SRC
 
 ** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]

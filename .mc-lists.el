@@ -4,6 +4,8 @@
 (setq mc/cmds-to-run-for-all
       '(
         hungry-delete-backward
+        hungry-delete-forward
+        whole-line-or-region-yank
         ))
 
 (setq mc/cmds-to-run-once
