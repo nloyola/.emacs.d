@@ -268,7 +268,7 @@ Enable ANSI colors for compilation buffers.
 ;;(require 'ansi-color)
 (defun colorize-compilation-buffer ()
   (let ((inhibit-read-only t))
-    (ansi-color-apply-on-region compilation-filter-start (point))))
+    (ansi-color-apply-on-region (point-min) (point-max))))
 (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
 #+END_SRC
 
@@ -1205,12 +1205,13 @@ A quick way to jump around text in buffers.
 One tweak to the base16-google-dark theme; the face for the mode line
 buffer name is too hard to see,  set it to white instead.
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package base16-theme
   :ensure t
   :config
     ;;(load-theme 'base16-solarized-dark t)
-    (load-theme 'base16-google-dark t)
+    (load-theme 'base16-oceanicnext t)
+    ;;(load-theme 'base16-google-dark t)
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white")
     )
 #+END_SRC
@@ -1304,7 +1305,7 @@ Complete anything.
 
 ** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package cyberpunk-theme
   :ensure t
   :config
@@ -1482,6 +1483,7 @@ Allow windmove to jump between frames.
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
   :ensure t
+  :commands global-flycheck-mode
   :diminish flycheck-mode
   :commands flycheck-define-checker
   :config
@@ -1700,8 +1702,8 @@ recursing variant for both types of searches, this might break
 something, but so far hasn't shown any obvious side-effects
 
 #+BEGIN_SRC emacs-lisp
-(setq helm-grep-default-command "ag --vimgrep -z %p %f"
-      helm-grep-default-recurse-command "ag --vimgrep -z %p %f")
+(setq helm-grep-default-command "rg -i -M 120 --no-heading --line-number '%p' %f"
+      helm-grep-default-recurse-command "rg -i -M 120 --no-heading --line-number '%p' %f")
 #+END_SRC
 
 *** Helm Key bindings
@@ -1957,16 +1959,16 @@ short bindings with a common prefix - a Hydra.
   :config
   (ivy-mode 1)
   ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
-  (setq ivy-use-virtual-buffers t)
-  ;; number of result lines to display
-  (setq ivy-height 10)
-  ;; does not count candidates
-  (setq ivy-count-format "")
-  ;; no regexp by default
-  (setq ivy-initial-inputs-alist nil)
-  ;; configure regexp engine.
-  (setq ivy-re-builders-alist
-        ;; allow input not in order
+  (setq ivy-use-virtual-buffers t
+        ivy-wrap t
+        ;; number of result lines to display
+        ivy-height 10
+        ;; does not count candidates
+        ivy-count-format ""
+        ;; no regexp by default
+        ivy-initial-inputs-alist nil)
+   ;; configure regexp engine.
+  (setq ivy-re-builders-alist ;; allow input not in order
         '((t . ivy--regex-ignore-order))))
 
 (use-package ivy-hydra
@@ -2001,7 +2003,10 @@ See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05
          ;;("M-y" . counsel-yank-pop)
          ("C-h f" . counsel-describe-function)
          ("C-h v" . counsel-describe-variable)
-         ("C-c s a" . counsel-ag)))
+         ("C-c s a" . counsel-ag))
+  :config
+  (setq counsel-grep-base-command
+        "rg -i -M 120 --no-heading --line-number --color never '%s' %s"))
 #+END_SRC
 
 When using =counsel-ag=:
@@ -2964,7 +2969,8 @@ Wand is an extension that allows users to select a piece of text and perform act
 (use-package whole-line-or-region
   :ensure t
   :diminish whole-line-or-region-mode
-  :config (whole-line-or-region-mode t))
+  :config
+  (custom-set-variables '(whole-line-or-region-global-mode t)))
 #+END_SRC
 
 ** [[https://github.com/yoshiki/yaml-mode][yaml-mode]]
