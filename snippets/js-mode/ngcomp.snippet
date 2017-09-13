@@ -9,7 +9,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '',
+    templateUrl: '${2:`(replace-regexp-in-string "Component\.js" ".html" (replace-regexp-in-string (concat (projectile-project-root) "app") "" buffer-file-name))`}',
     controller: ${1:$(yas-text)},
     controllerAs: 'vm',
     bindings: {
@@ -22,7 +22,13 @@ define(function () {
    * Controller for this component. $0
    */
   function ${1:`(upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))`}() {
+    var vm = this;
+    vm.$onInit = onInit;
 
+    //--
+
+    function onInit() {
+    }
   }
 
   return component;

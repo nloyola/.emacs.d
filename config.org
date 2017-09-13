@@ -2400,14 +2400,17 @@ Show org-mode bullets as UTF-8 characters.
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
-** [[https://github.com/emacsmirror/revive][revive]]
+** [[https://github.com/emacsmirror/revive][revive]] (not used)
 
 Using revive
 
 - use ~M-x save-current-configuration~ to save window configuration.
 - use ~M-x resume~ to load window configuration.
 
-#+BEGIN_SRC emacs-lisp
+This package was removed from Melpa on 2017-07-31 due to the author not wanting to
+specify a lincence.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package revive
   :ensure t)
 #+END_SRC
@@ -2961,6 +2964,13 @@ Wand is an extension that allows users to select a piece of text and perform act
           ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
 
   (add-hook 'web-mode-hook  'nl/web-mode-hook))
+#+END_SRC
+
+** [[https://github.com/tlh/workgroups.el][workgroups]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package workgroups
+  :ensure t)
 #+END_SRC
 
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
