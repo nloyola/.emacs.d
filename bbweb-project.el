@@ -148,5 +148,13 @@
 
 (add-hook 'html-mode-hook 'bbweb-html-mode-keys)
 
+(defun ngcomp-snippet-get-controller-name ()
+  (upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))))
+
+(defun ngcomp-snippet-get-template-url ()
+  "Returns the name of the templateUrl for a component."
+  (let ((path-in-assets (replace-regexp-in-string (concat (projectile-project-root) "app") "" buffer-file-name)))
+    (replace-regexp-in-string "Component$" ".html" (file-name-sans-extension path-in-assets) t)))
+
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here
