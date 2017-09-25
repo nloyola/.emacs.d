@@ -367,13 +367,20 @@ each time.
 #+END_SRC
 ** Key bindings
 
+http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
+
 #+BEGIN_SRC emacs-lisp
+(defun nl/kill-this-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (kill-buffer (current-buffer)))
+
 (global-set-key (kbd "M-g M-g")       'goto-line)
 (global-set-key (kbd "M-%")           'query-replace-regexp)
 ;;(global-set-key "\C-x\C-e"          'compile)
 (global-set-key (kbd "C-x C-n")       'next-error)
 (global-set-key (kbd "C-x C-i")       'c-indent-exp)
-(global-set-key (kbd "C-x k")         'kill-this-buffer)
+(global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
 
 (global-set-key (kbd "<f1>")          'indent-for-tab-command)
 (global-set-key [(shift f1)]          'indent-region)
@@ -602,8 +609,10 @@ Prefer saving this file somewhere other than the default.
   :load-path "override/cc-mode"
   :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
          ("\\.m\\'"                   . c-mode)
-         ("\\.mm\\'"                  . c++-mode))
-  :preface(defconst nelson-c-style
+         ("\\.mm\\'"                  . c++-mode)
+         ("\\.java\\'"                . java-mode))
+  :preface
+  (defconst nelson-c-style
             '((c-tab-always-indent . t)
               (c-set-style "K&R")
               (c-offsets-alist . ((statement-block-intro . +)
@@ -614,16 +623,16 @@ Prefer saving this file somewhere other than the default.
                                   (innamespace           . 0))))
             "Nelson programming style.")
 
-  ;; Customizations for all of c-mode, c++-mode, and objc-mode
+;; Customizations for all of c-mode, c++-mode, and objc-mode
   (defun my-c-mode-common-hook ()
     ;; add my personal style and set it for the current buffer
     (c-add-style "NELSON-c-mode" nelson-c-style t)
     ;; offset customizations not in nelson-c-style
     (c-set-offset 'member-init-intro '++)
     ;; other customizations
-;(c-toggle-auto-state 1) ;; Turn on auto newline
+;;(c-toggle-auto-state 1) ;; Turn on auto newline
     (my-common-prog-mode-settings)
-; makes the underscore part of a word in C and C++ modes
+;; makes the underscore part of a word in C and C++ modes
     (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
     (modify-syntax-entry ?_ "w" c-mode-syntax-table)
     (lambda ()
@@ -631,8 +640,16 @@ Prefer saving this file somewhere other than the default.
         (ggtags-mode 1)))
     )
 
+  (defun my-java-mode-hook ()
+    (message "---------------> my-java-mode-hook")
+    (setq indent-tabs-mode nil
+          zeal-at-point-docset "java")
+    (eclim-mode t))
+
   :config
-  (add-hook 'c-mode-common-hook 'my-c-mode-common-hook))
+  (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
+  (add-hook 'java-mode-hook 'my-java-mode-hook)
+  (add-hook 'java-mode-hook 'semantic-mode))
 #+END_SRC
 
 ** =cperl-mode=
@@ -773,21 +790,6 @@ ibuffer is the improved version of list-buffers.
 (defalias 'list-buffers 'ibuffer)
 #+END_SRC
 
-** =java-mode=
-
-#+BEGIN_SRC emacs-lisp
-(use-package java-mode
-  :preface
-  (defun my-java-mode-hook ()
-    (setq indent-tabs-mode nil
-          zeal-at-point-docset "java")
-    (eclim-mode t))
-  :mode "\\.java\\'"
-  :init
-  (add-hook 'java-mode-hook 'my-java-mode-hook)
-  (add-hook 'java-mode-hook 'semantic-mode))
-#+END_SRC
-
 ** =org-mode=
 
 First some UI and editing tweaks.
@@ -923,7 +925,7 @@ comments.
   :preface
   (defun my-common-prog-mode-settings ()
     "Enables settings common between programming language modes."
-    (nl/setup-indent 3) ; indent 2 spaces width
+    (nl/setup-indent 2) ; indent 2 spaces width
     ;;
     ;; Set tab and CR/LF keys to call their corresponding more-general
     ;; functions.  This needs to be here to override the settings of some modes
@@ -1358,7 +1360,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 (use-package eclim
   :load-path "/home/nelson/src/github/elisp/emacs-eclim"
   :diminish eclim-mode
-  :mode "\\.java\\'"
   :preface
   (defun nl/restart-eclim (workspace-dir)
     "Restarts the eclim server.  If it is currently active, the server is stopped first."
@@ -1366,6 +1367,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
                                             eclimd-default-workspace nil t eclimd-default-workspace)))
     (if (get-buffer "*eclimd*") (stop-eclimd))
     (message "workspace dir: %s" workspace-dir)
+    (cd-absolute workspace-dir)
     (start-eclimd workspace-dir)
     (switch-to-buffer "*eclimd*"))
 
@@ -1377,17 +1379,12 @@ can be downloaded from [[http://eclim.org/install.html][here]].
       (compile "gradle -q --console=plain javadoc")
       (setq default-directory current-directory)))
 
-  (defun my-java-mode-hook ()
-    (setq indent-tabs-mode nil
-          zeal-at-point-docset "java")
-    (eclim-mode t))
-
   :init (use-package cl)
   :config
-  (setq eclim-print-debug-messages t
-        eclim-eclimrc "~/.eclimrc"
-        eclim-nailgun-port 9092)
-  (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/neon/eclipse")))
+  (setq eclim-print-debug-messages t)
+        ;;eclim-nailgun-port 9092
+        ;;eclim-eclimrc "~/.eclimrc"
+  (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
     (if (file-accessible-directory-p eclipse-dir)
         (progn
           (add-to-list 'eclim-eclipse-dirs eclipse-dir)
@@ -2021,7 +2018,7 @@ When using =counsel-ag=:
 (use-package js2-mode
   :ensure t
   :mode "\\.js\\'"
-  :bind ("C-c s j" . nl/councel-ag-js)
+  :bind ("C-c s j" . nl/counsel-ag-js)
   :preface
   (defun nl/counsel-ag-js ()
     "Perform counsel-ag on the project's JavaScript files."

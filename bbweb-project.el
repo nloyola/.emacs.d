@@ -66,7 +66,7 @@
   "bbweb project commands"
   ("f" hydra-nl-bbweb-find-file/body "Find file" :exit t)
   ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload" :color blue)
-  ("r" (lambda () (interactive) (sbt-command "run")) "run" :color blue)
+  ("r" (lambda () (interactive) (sbt-command "run")) "sbt run" :color blue)
   ("s" sbt-command "sbt command" :color blue)
   ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("m" karma-mode "toggle karma-mode" :color blue)
