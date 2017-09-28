@@ -62,16 +62,43 @@
   ("j" bbweb-find-js-file "JS file")
   ("h" bbweb-find-html-file "HTML file"))
 
+;; JavaScript hydras
+
+(defhydra hydra-nl-bbweb-js-test (:color blue)
+  "bbweb js test"
+  ("t" (lambda ()
+         (interactive)
+         (compile (concat "cd " (projectile-project-root) " && npm run test-watch"))) "test-watch")
+  ("w" nl/webpack-find-file "webpack error find file"))
+
+(defhydra hydra-nl-bbweb-js-build (:color blue)
+  "bbweb js build"
+  ("d" (lambda ()
+         (interactive)
+         (compile (concat "cd " (projectile-project-root) " && npm run dev-build"))) "deb-build"))
+
+(defhydra hydra-nl-bbweb-js (:color blue)
+  "bbweb js test"
+  ("b" hydra-nl-bbweb-js-build/body "Build" :exit t)
+  ("t" hydra-nl-bbweb-js-test/body "Test" :exit t))
+
+;; Scala hydras
+
+(defhydra hydra-nl-bbweb-scala-build (:color blue)
+  "bbweb scala build"
+  ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload")
+  ("r" (lambda () (interactive) (sbt-command "run")) "sbt run")
+  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile"))
+
+(defhydra hydra-nl-bbweb-scala (:color blue)
+  "bbweb scala test"
+  ("b" hydra-nl-bbweb-scala-build/body "Build" :exit t)
+  ("t" hydra-nl-scalatest/body "Test" :exit t))
+
 (defhydra hydra-nl-bbweb-project (:hint nil)
   "bbweb project commands"
-  ("f" hydra-nl-bbweb-find-file/body "Find file" :exit t)
-  ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload" :color blue)
-  ("r" (lambda () (interactive) (sbt-command "run")) "sbt run" :color blue)
-  ("s" sbt-command "sbt command" :color blue)
-  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
-  ("m" karma-mode "toggle karma-mode" :color blue)
-  ("k" karma-start "karma unit test" :color blue)
-  ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue)
+  ("j" hydra-nl-bbweb-js/body "javascript" :color blue)
+  ("s" hydra-nl-bbweb-scala/body "scala" :color blue)
   ("x" xref-find-definitions "find definition" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
@@ -153,8 +180,7 @@
 
 (defun ngcomp-snippet-get-template-url ()
   "Returns the name of the templateUrl for a component."
-  (let ((path-in-assets (replace-regexp-in-string (concat (projectile-project-root) "app") "" buffer-file-name)))
-    (replace-regexp-in-string "Component$" ".html" (file-name-sans-extension path-in-assets) t)))
+  (concat "./" (replace-regexp-in-string "Component$" ".html" (file-name-base buffer-file-name) t)))
 
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here
