@@ -923,6 +923,11 @@ comments.
 #+BEGIN_SRC emacs-lisp
 (use-package prog-mode
   :preface
+  (defun nl/indent-whole-buffer ()
+    (interactive)
+    (save-excursion
+      (indent-region (point-min) (point-max))))
+
   (defun my-common-prog-mode-settings ()
     "Enables settings common between programming language modes."
     (nl/setup-indent 2) ; indent 2 spaces width
@@ -2034,9 +2039,9 @@ When using =counsel-ag=:
       (setq p2 (line-end-position) )
       (setq err-line (buffer-substring-no-properties p1 p2))
       (save-match-data ; is usually a good idea
-        (and (string-match "^ERROR in \\.\\/\\([^$]+\\)" err-line)
-             (setq filename (match-string 1 err-line))))
-      ;;(message "filename: %s" (expand-file-name filename (projectile-project-root)))
+        (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
+             (setq filename (match-string 2 err-line))))
+      (message "filename: %s" (expand-file-name filename (projectile-project-root)))
       (ace-select-window)
       (find-file (expand-file-name filename (projectile-project-root)))
       (goto-char (point-min))))

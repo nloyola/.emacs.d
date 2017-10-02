@@ -24,7 +24,13 @@
 (defun projectile-create-test-file-for (impl-file-path)
   "Create a test file for the file given by IMPL-FILE-PATH."
   (let* ((test-file (projectile--test-name-for-impl-name impl-file-path))
-         (test-dir (replace-regexp-in-string "app/" "test/" (file-name-directory impl-file-path))))
+         (test-file-extension (file-name-extension impl-file-path))
+         (test-dir))
+    (cond
+     ((eq test-file-extension 'js)
+      (setq test-dir (replace-regexp-in-string "app/" "test/" (file-name-directory impl-file-path))))
+     ((eq test-file-extension 'scala)
+      (setq test-dir (file-name-directory impl-file-path))))
     (unless (file-exists-p (expand-file-name test-file test-dir))
       (progn (unless (file-exists-p test-dir)
                (make-directory test-dir :create-parents))
