@@ -70,18 +70,18 @@
 
 ;; JavaScript hydras
 
-(defhydra hydra-nl-bbweb-js-test (:color blue)
+(defhydra hydra-nl-bbweb-js-test (:color red)
   "bbweb js test"
   ("t" (lambda ()
          (interactive)
          (compile (concat "cd " (projectile-project-root) " && npm run test-watch"))) "test-watch")
   ("w" nl/webpack-find-file "webpack error find file"))
 
-(defhydra hydra-nl-bbweb-js-build (:color blue)
+(defhydra hydra-nl-bbweb-js-build (:color red)
   "bbweb js build"
   ("d" (lambda ()
          (interactive)
-         (compile (concat "cd " (projectile-project-root) " && npm run dev-build"))) "deb-build"))
+         (compile (concat "cd " (projectile-project-root) " && npm run dev-build"))) "dev-build"))
 
 (defhydra hydra-nl-bbweb-js (:color blue)
   "bbweb js test"
@@ -90,7 +90,7 @@
 
 ;; Scala hydras
 
-(defhydra hydra-nl-bbweb-scala-build (:color blue)
+(defhydra hydra-nl-bbweb-scala-build (:color red)
   "bbweb scala build"
   ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload")
   ("r" (lambda () (interactive) (sbt-command "run")) "sbt run")
@@ -101,9 +101,22 @@
   ("b" hydra-nl-bbweb-scala-build/body "Build" :exit t)
   ("t" hydra-nl-scalatest/body "Test" :exit t))
 
+;; npm hydras
+
+(defhydra hydra-nl-bbweb-npm (:color blue)
+  "bbweb npm"
+  ("d" (lambda () (interactive)
+         (compile (concat "cd " (projectile-project-root) " && npm run dev")))
+   "dev" :exit t)
+  ("s" (lambda () (interactive)
+         (setq async-shell-command-buffer 'confirm-kill-process)
+         (async-shell-command (concat "cd " (projectile-project-root) " && npm run dev-server") "*bbweb server*"))
+   "dev-server" :exit t))
+
 (defhydra hydra-nl-bbweb-project (:hint nil)
   "bbweb project commands"
   ("j" hydra-nl-bbweb-js/body "javascript" :color blue)
+  ("n" hydra-nl-bbweb-npm/body "npm" :color blue)
   ("s" hydra-nl-bbweb-scala/body "scala" :color blue)
   ("x" xref-find-definitions "find definition" :color blue))
 
