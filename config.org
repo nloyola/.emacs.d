@@ -375,7 +375,6 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
   (interactive)
   (kill-buffer (current-buffer)))
 
-(global-set-key (kbd "M-g M-g")       'goto-line)
 (global-set-key (kbd "M-%")           'query-replace-regexp)
 ;;(global-set-key "\C-x\C-e"          'compile)
 (global-set-key (kbd "C-x C-n")       'next-error)
@@ -1203,8 +1202,7 @@ A quick way to jump around text in buffers.
 (use-package avy
   :bind
   (("C-c SPC" . avy-goto-char)
-   ("C-'" . avy-goto-char-2)
-   ("M-g M-g" . avy-goto-line)))
+   ("C-'" . avy-goto-char-2)))
 #+END_SRC
 
 ** [[https://github.com/belak/base16-emacs][base16-emacs]]
@@ -1917,20 +1915,51 @@ short bindings with a common prefix - a Hydra.
                            (list -4)
                          '(4)))))
 
-  (defhydra hydra-window (global-map "C-M-o")
-    "window"
-    ("h" windmove-left "left")
-    ("j" windmove-down "down")
-    ("k" windmove-up "up")
-    ("l" windmove-right "right")
-    ("a" ace-window "ace")
-    ("u" hydra-universal-argument "universal")
-    ("s" (lambda nil (interactive) (ace-window 4)) "swap")
-    ("d" (lambda nil (interactive) (ace-window 16)) "delete"))
+  (defhydra hydra-window (:color red :hint nil)
+    "
+ Split: _v_ert _x_:horz
+Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
+  Move: _s_wap
+Frames: _f_rame new  _df_ delete
+  Misc: _m_ark _a_ce  _u_ndo  _r_edo"
+    ("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right)
+    ("H" hydra-move-splitter-left)
+    ("J" hydra-move-splitter-down)
+    ("K" hydra-move-splitter-up)
+    ("L" hydra-move-splitter-right)
+    ("|" (lambda ()
+           (interactive)
+           (split-window-right)
+           (windmove-right)))
+    ("_" (lambda ()
+           (interactive)
+           (split-window-below)
+           (windmove-down)))
+    ("v" split-window-right)
+    ("x" split-window-below)
+    ;;("t" transpose-frame "'")
+    ;; winner-mode must be enabled
+    ("u" winner-undo)
+    ("r" winner-redo) ;;Fixme, not working?
+    ("o" delete-other-windows :exit t)
+    ("a" ace-window :exit t)
+    ("f" new-frame :exit t)
+    ("s" ace-swap-window)
+    ("da" ace-delete-window)
+    ("dw" delete-window)
+    ("db" kill-this-buffer)
+    ("df" delete-frame :exit t)
+    ("q" nil)
+    ;;("i" ace-maximize-window "ace-one" :color blue)
+    ;;("b" ido-switch-buffer "buf")
+    ("m" headlong-bookmark-jump))
 
   (key-chord-define-global "yy" 'hydra-window/body)
 
-;; for better next-buffer and previous-buffer see http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html
+  ;; for better next-buffer and previous-buffer see http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html
 
   (defhydra hydra-buffer (:color blue :columns 3)
     "
@@ -1946,7 +1975,17 @@ short bindings with a common prefix - a Hydra.
     ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
     ("s" save-buffer "save" :color red))
 
-  (key-chord-define-global "zz" 'hydra-buffer/body))
+  (key-chord-define-global "zz" 'hydra-buffer/body)
+
+  (defhydra hydra-goto-line (goto-map ""
+                                      :pre (linum-mode 1)
+                                      :post (linum-mode -1))
+    "goto-line"
+    ("g" goto-line "go")
+    ("m" set-mark-command "mark" :bind nil)
+    ("q" nil "quit"))
+
+  (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
