@@ -54,7 +54,7 @@ customize settings in [[file:init.el][init.el]].
 * Font
 ** Linux
 
-*** Installation
+*** Input font Installation
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
 
@@ -64,7 +64,8 @@ cd ~/.fonts
 unzip Input-Font.zip
 #+END_SRC
 
-*** Emacs config
+
+**** Emacs config
 
 And here's how to tell Emacs to use this font. Copy the following line to your
 =~/.Xresources= file.
@@ -79,6 +80,20 @@ And then merge the setting to your X server resource database.
 xrdb -merge ~/.Xresources
 #+END_SRC
 
+*** Symbola
+
+download from here: [[https://fonts2u.com/symbola.font][Symbola font]]
+
+#+BEGIN_SRC sh :tangle no
+mv symbola.zip ~/.fonts
+cd ~/.fonts
+unzip symbola.zip
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(set-fontset-font "fontset-default" nil
+                  (font-spec :size 20 :name "Symbola"))
+#+END_SRC
 ** OSX
 
 #+BEGIN_SRC emacs-lisp
@@ -2329,7 +2344,7 @@ checker is loaded.
     (nl/setup-indent 2)
 
     ;; enable web mode
-    (web-mode)
+    ;;(web-mode)
 
     ;; make these variables local
     (make-local-variable 'web-mode-code-indent-offset)
