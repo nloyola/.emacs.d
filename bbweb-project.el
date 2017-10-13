@@ -74,14 +74,14 @@
   "bbweb js test"
   ("t" (lambda ()
          (interactive)
-         (compile (concat "cd " (projectile-project-root) " && npm run test-watch"))) "test-watch")
-  ("w" nl/webpack-find-file "webpack error find file"))
+         (compile (concat "cd " (projectile-project-root) " && npm run test-watch"))) "test-watch"))
 
 (defhydra hydra-nl-bbweb-js-build (:color red)
   "bbweb js build"
   ("d" (lambda ()
          (interactive)
-         (compile (concat "cd " (projectile-project-root) " && npm run dev-build"))) "dev-build"))
+         (compile (concat "cd " (projectile-project-root) " && npm run dev-build"))) "dev-build")
+  ("w" nl/webpack-find-next-error "webpack find next error and find file"))
 
 (defhydra hydra-nl-bbweb-js (:color blue)
   "bbweb js test"

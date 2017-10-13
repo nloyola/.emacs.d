@@ -2099,74 +2099,85 @@ When using =counsel-ag=:
       (ace-select-window)
       (find-file (expand-file-name filename (projectile-project-root)))
       (goto-char (point-min))))
-:init
-(setq js2-global-externs '("define"
-                           "jasmine"
-                           "describe"
-                           "fdescribe"
-                           "fail"
-                           "beforeEach"
-                           "afterEach"
-                           "inject"
-                           "expect"
-                           "spyOn"
-                           "it"
-                           "fit"
-                           "xit"))
-:config
-(setq javascript-common-imenu-regex-list
-      '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
-        ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
-        ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
-        ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
-        ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
-        ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
-        ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
-        ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
-        ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
-        ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
-        ))
 
-;; js-mode imenu enhancement
-;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
-(defun nl-js-imenu-make-index ()
-  (save-excursion
-    (imenu--generic-function javascript-common-imenu-regex-list)))
+  (defun nl/webpack-find-next-error ()
+    "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
+    (interactive)
+    (next-line)
+    (while (re-search-forward "^ERROR" nil t)
+      (goto-char (match-beginning 0))
+      (recenter 0)
+      (nl/webpack-find-file)))
 
-(defun nl/javascript-mode-hook ()
-  (nl/setup-indent 2) ; indent 2 spaces width
-  (setq comment-multi-line t)
-  (define-key js-mode-map [remap indent-new-comment-line]
-    'c-indent-new-comment-line)
-  (setq indent-tabs-mode nil)
-  (setq imenu-create-index-function 'nl-js-imenu-make-index)
-  (flycheck-mode t))
+  :init
+  (setq js2-global-externs '("define"
+                             "jasmine"
+                             "describe"
+                             "fdescribe"
+                             "fail"
+                             "beforeEach"
+                             "afterEach"
+                             "inject"
+                             "expect"
+                             "spyOn"
+                             "it"
+                             "fit"
+                             "xdescribe"
+                             "xit"))
+  :config
+  (setq javascript-common-imenu-regex-list
+        '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+          ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+          ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+          ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+          ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+          ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+          ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+          ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+          ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+          ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ))
 
-(custom-set-variables '(js2-basic-offset 2)
-                      '(js2-bounce-indent-p nil)
-                      '(js2-highlight-level 3))
+  ;; js-mode imenu enhancement
+  ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+  (defun nl-js-imenu-make-index ()
+    (save-excursion
+      (imenu--generic-function javascript-common-imenu-regex-list)))
 
-;;(eval-after-load 'js2-mode
-;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+  (defun nl/javascript-mode-hook ()
+    (nl/setup-indent 2) ; indent 2 spaces width
+    (setq comment-multi-line t)
+    (define-key js-mode-map [remap indent-new-comment-line]
+      'c-indent-new-comment-line)
+    (setq indent-tabs-mode nil)
+    (setq imenu-create-index-function 'nl-js-imenu-make-index)
+    (flycheck-mode t))
 
-;;(add-hook 'js2-mode-hook 'ac-js2-mode)
-;;(setq ac-js2-evaluate-calls t)
+  (custom-set-variables '(js2-basic-offset 2)
+                        '(js2-bounce-indent-p nil)
+                        '(js2-highlight-level 3))
 
-(setq-default js2-mode-show-parse-errors t)
-(setq-default js2-strict-missing-semi-warning t)
-(setq-default js2-strict-trailing-comma-warning t)
+  ;;(eval-after-load 'js2-mode
+  ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
 
-(add-hook 'js2-mode-hook 'fic-mode)
-(add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
-(add-hook 'js2-mode-hook 'my-common-prog-mode-settings))
+  ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
+  ;;(setq ac-js2-evaluate-calls t)
+
+  (setq-default js2-mode-show-parse-errors t)
+  (setq-default js2-strict-missing-semi-warning t)
+  (setq-default js2-strict-trailing-comma-warning t)
+
+  (add-hook 'js2-mode-hook 'fic-mode)
+  (add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
+  (add-hook 'js2-mode-hook 'my-common-prog-mode-settings))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
