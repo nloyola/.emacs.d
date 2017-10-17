@@ -546,6 +546,7 @@ A way to set up indentation for all programming modes. Taken from
   (setq javascript-indent-level n) ; javascript-mode
   (setq js-indent-level n) ; js-mode
   (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+  (setq js2-strict-missing-semi-warning nil)
   (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
   (setq web-mode-css-indent-offset n) ; web-mode, css in html file
   (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
@@ -1332,6 +1333,24 @@ Complete anything.
   (load-theme 'cyberpunk t))
 #+END_SRC
 
+** [[https://github.com/dgutov/diff-hl][diff-hl]]
+
+Could not get this package to display changes (2017-10-15).
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package diff-hl
+  :ensure t
+  :init
+  (add-hook 'prog-mode-hook #'diff-hl-mode)
+  (add-hook 'org-mode-hook #'diff-hl-mode)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  :config
+  (setq diff-hl-fringe-bmp-function 'diff-hl-fringe-bmp-from-type)
+  (setq diff-hl-margin-side 'left)
+  (diff-hl-mode t))
+#+END_SRC
+
 ** [[https://github.com/thamer/diredful][diredful]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1425,6 +1444,16 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   (custom-set-faces
    '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
    '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
+#+END_SRC
+
+** [[https://github.com/syohex/emacs-git-gutter][emacs-git-gutter]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package git-gutter
+  :ensure t
+  :diminish git-gutter-mode
+  :init
+  (add-hook 'prog-mode-hook 'git-gutter-mode))
 #+END_SRC
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -2872,14 +2901,27 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :init
   (require 'spaceline-config)
+  (setq-default
+   powerline-default-separator 'wave
+   powerline-height 18
+   spaceline-highlight-face-func 'spaceline-highlight-face-modified)
   :config
-  (setq-default powerline-default-separator 'wave
-                powerline-height 18
-                spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+  (defun nl/spaceline-theme (&rest additional-segments)
+    "Custom mode line."
+    (apply 'spaceline--theme
+           '((projectile-root
+              buffer-modified)
+             :face highlight-face
+             :priority 0)
+           '((remote-host buffer-id)
+             :priority 5)
+           additional-segments))
+
+  (spaceline-helm-mode 1)
   (spaceline-toggle-persp-name-off)
   (spaceline-toggle-workspace-number-off)
   (spaceline-toggle-version-control-on)
-  (spaceline-emacs-theme))
+  (nl/spaceline-theme))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]

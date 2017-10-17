@@ -11,6 +11,8 @@
 class `(ngcomp-snippet-get-controller-name)` {
 
   constructor() {
+    'ngInject';
+    Object.assign(this, {});
   }
 
   $onInit() {
@@ -18,12 +20,10 @@ class `(ngcomp-snippet-get-controller-name)` {
 
 }
 
-`(ngcomp-snippet-get-controller-name)`.$inject = [];
-
 /**
  * $0
  */
-var component = {
+var COMPONENT = {
   template: require('`(ngcomp-snippet-get-template-url)`'),
   controller: `(ngcomp-snippet-get-controller-name)`,
   controllerAs: 'vm',
@@ -31,4 +31,4 @@ var component = {
   }
 };
 
-export default component;
+export default COMPONENT;
