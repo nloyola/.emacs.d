@@ -6,20 +6,23 @@
  * Jasmine test suite
  *
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash'
 
-  describe('`(replace-regexp-in-string "Spec$" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`', function() {
+describe('`(replace-regexp-in-string "Spec$" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test')
+    angular.mock.inject(function(TestSuiteMixin) {
+      Object.assign(this, TestSuiteMixin)
 
-    beforeEach(inject(function() {
-      $0
-    }));
+      this.injectDependencies('')
+    })
+  })
 
-  });
+  it('$0', function() {
 
-});
+  })
+
+})

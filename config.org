@@ -2106,12 +2106,17 @@ When using =counsel-ag=:
 (use-package js2-mode
   :ensure t
   :mode "\\.js\\'"
-  :bind ("C-c s j" . nl/counsel-ag-js)
+  :bind (("C-c s j" . nl/counsel-ag-js))
   :preface
   (defun nl/counsel-ag-js ()
     "Perform counsel-ag on the project's JavaScript files."
     (interactive)
     (counsel-ag "" (projectile-project-root) "--js"))
+
+  (defun nl/counsel-ag-js-spec ()
+    "Perform counsel-ag on the project's JavaScript files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
 
   (defun nl/webpack-find-file ()
     "From a webpack failure backtrace, opens the file under the cursor at the line specified."
