@@ -1538,7 +1538,8 @@ Allow windmove to jump between frames.
                 (append flycheck-disabled-checkers
                         '(javascript-jshint)))
 
-  (setq flycheck-checkers '(javascript-eslint))
+  (setq flycheck-checkers (append flycheck-checkers
+                                 '(javascript-eslint)))
   ;; use eslint with web-mode for jsx files
   (flycheck-add-mode 'javascript-eslint 'web-mode)
   (flycheck-add-mode 'javascript-eslint 'js2-mode)

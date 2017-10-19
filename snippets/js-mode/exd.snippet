@@ -1,0 +1,6 @@
+# -*- mode: snippet; eval: (setq require-final-newline nil) -*-
+# name: exd
+# key: exd
+# --
+export default ngModule => ngModule.${1:$$(yas-choose-value
+       '("component" "service" "directive" "controller" "factory" "filter" "constant" "config" "run"))}('$2', $3)
