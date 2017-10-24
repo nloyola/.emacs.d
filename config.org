@@ -657,8 +657,8 @@ Prefer saving this file somewhere other than the default.
 
   (defun my-java-mode-hook ()
     (message "---------------> my-java-mode-hook")
-    (setq indent-tabs-mode nil
-          zeal-at-point-docset "java")
+    (setq indent-tabs-mode nil)
+    ;;(setq zeal-at-point-docset "java")
     (eclim-mode t))
 
   :config
@@ -1310,7 +1310,6 @@ Complete anything.
   :config
   (add-hook 'after-init-hook 'global-company-mode))
 
-(use-package company-tern)
 #+END_SRC
 
 ** [[https://melpa.org/#/cursor-chg][cursor-chg]]
@@ -1331,6 +1330,13 @@ Complete anything.
   :ensure t
   :config
   (load-theme 'cyberpunk t))
+#+END_SRC
+
+** [[https://github.com/skeeto/devdocs-lookup][devdocs-lookup]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package devdocs
+  :ensure t)
 #+END_SRC
 
 ** [[https://github.com/dgutov/diff-hl][diff-hl]]
@@ -1663,13 +1669,11 @@ Guide the following key bindings automatically and dynamically.
     (guide-key-mode 1))
 #+END_SRC
 
-** [[https://github.com/jonathanchu/heroku-theme][heroku-theme]]
+** [[https://github.com/abo-abo/headlong][headlong]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package heroku-theme
-  :ensure t
-  :config
-  (load-theme 'heroku t))
+#+BEGIN_SRC emacs-lisp
+(use-package headlong
+  :ensure t)
 #+END_SRC
 
 ** [[https://github.com/emacs-helm/helm][helm]]
@@ -2189,7 +2193,8 @@ When using =counsel-ag=:
 
   (defun nl/javascript-mode-hook ()
     (nl/setup-indent 2) ; indent 2 spaces width
-    (setq comment-multi-line t)
+    (setq comment-multi-line t
+          mode-name "JS2")
     (define-key js-mode-map [remap indent-new-comment-line]
       'c-indent-new-comment-line)
     (setq indent-tabs-mode nil)
@@ -3071,7 +3076,8 @@ Wand is an extension that allows users to select a piece of text and perform act
 #+BEGIN_SRC emacs-lisp
 (use-package web-mode
   :ensure t
-  :mode "\\.html?\\'"
+  :mode (("\\.html?\\'" . web-mode)
+         ("\\.json\\'" . web-mode))
   :bind ("C-c s h" . nl/counsel-ag-html)
   :preface
   (defun nl/counsel-ag-html ()
@@ -3129,7 +3135,9 @@ Search the word at point with Zeal
 Zeal is a simple offline API documentation browser inspired by Dash
 (OS X app), available for Linux and Windows.
 
-#+BEGIN_SRC emacs-lisp
+Using DevDocs.io now - 2017-10-19
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package zeal-at-point
   :ensure t
   ;;:diminish
