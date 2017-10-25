@@ -105,6 +105,11 @@
 
 (defhydra hydra-nl-bbweb-npm (:color blue)
   "bbweb npm"
+  ("c" (lambda () (interactive)
+         (async-shell-command
+          (concat "cd " (projectile-project-root) " && npm run test-coverage")
+          "*bbweb test coverage*"))
+   "test coverage" :exit t)
   ("d" (lambda () (interactive)
          (compile (concat "cd " (projectile-project-root) " && npm run dev")))
    "dev" :exit t)
