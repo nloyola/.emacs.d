@@ -656,7 +656,6 @@ Prefer saving this file somewhere other than the default.
     )
 
   (defun my-java-mode-hook ()
-    (message "---------------> my-java-mode-hook")
     (setq indent-tabs-mode nil)
     ;;(setq zeal-at-point-docset "java")
     (eclim-mode t))
@@ -1226,7 +1225,9 @@ A quick way to jump around text in buffers.
 One tweak to the base16-google-dark theme; the face for the mode line
 buffer name is too hard to see,  set it to white instead.
 
-#+BEGIN_SRC emacs-lisp
+Trying out Kaolin Theme 2017-10-25
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package base16-theme
   :ensure t
   :config
@@ -1236,6 +1237,7 @@ buffer name is too hard to see,  set it to white instead.
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white")
     )
 #+END_SRC
+
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
 Never lose your cursor again
@@ -2230,6 +2232,18 @@ When using =counsel-ag=:
   :config
   (add-hook 'js-mode-hook #'js2-refactor-mode)
   (js2r-add-keybindings-with-prefix "C-c C-m"))
+#+END_SRC
+
+** [[https://github.com/ogdenwebb/emacs-kaolin-themes][kaolin-themes]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package kaolin-themes
+  :ensure t
+  :config
+  ;;(load-theme 'base16-solarized-dark t)
+  (setq kaolin-wave t
+        kaolin-hl-line-colored t)
+  (load-theme 'kaolin-dark))
 #+END_SRC
 
 ** [[https://github.com/tonini/karma.el][karma]]
