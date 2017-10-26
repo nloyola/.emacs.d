@@ -1958,7 +1958,12 @@ short bindings with a common prefix - a Hydra.
   :config
   ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
-
+  (defun nl/pull-window ()
+    "Pull a window to the window the point is at"
+    (interactive)
+    (aw--push-window (selected-window))
+    (ace-swap-window)
+    (aw-flip-window))
 
   (defun hydra-universal-argument (arg)
     (interactive "P")
@@ -2000,6 +2005,7 @@ Frames: _f_rame new  _df_ delete
     ("o" delete-other-windows :exit t)
     ("a" ace-window :exit t)
     ("f" new-frame :exit t)
+    ("p" nl/pull-window)
     ("s" ace-swap-window)
     ("da" ace-delete-window)
     ("dw" delete-window)
