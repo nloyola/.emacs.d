@@ -2942,14 +2942,6 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
                 spaceline-highlight-face-func 'spaceline-highlight-face-modified
                 spaceline-separator-dir-left '(left . left)
                 spaceline-separator-dir-right '(right . right))
-  (defface nl/spaceline-highlight-face
-    `((t (:background "DarkGoldenrod2"
-                      :foreground "#3E3D31"
-                      :inherit 'mode-line)))
-    "Default highlight face for spaceline."
-    :group 'spaceline)
-
-  (face-remap-add-relative 'spaceline-highlight-face 'nl/spaceline-highlight-face)
 
   (spaceline-helm-mode 1)
   ;;(spaceline-toggle-persp-name-off)
@@ -2957,12 +2949,12 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   (spaceline-toggle-version-control-on)
 
   (spaceline-install `nl-spaceline-theme
-    `(((projectile-root buffer-modified) :face highlight-face)
+    `(((projectile-root buffer-modified) :face avy-lead-face-0)
       (remote-host buffer-id)
       ((line column) :separator ":" :face avy-lead-face-2))
     `((selection-info)
       ((flycheck-error flycheck-warning flycheck-info) :when active)
-      (major-mode :face highlight-face)
+      (major-mode :face avy-lead-face-0)
       (minor-modes :when active :face avy-lead-face-1)
       (global :face highlight-face)))
 
