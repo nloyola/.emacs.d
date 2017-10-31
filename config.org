@@ -945,6 +945,7 @@ comments.
   (defun my-common-prog-mode-settings ()
     "Enables settings common between programming language modes."
     (nl/setup-indent 2) ; indent 2 spaces width
+    (local-set-key (kbd "<home>") 'back-to-indentation)
     ;;
     ;; Set tab and CR/LF keys to call their corresponding more-general
     ;; functions.  This needs to be here to override the settings of some modes
