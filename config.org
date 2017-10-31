@@ -2936,27 +2936,37 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   :ensure t
   :init
   (require 'spaceline-config)
-  (setq-default
-   powerline-default-separator 'wave
-   powerline-height 18
-   spaceline-highlight-face-func 'spaceline-highlight-face-modified)
   :config
-  (defun nl/spaceline-theme (&rest additional-segments)
-    "Custom mode line."
-    (apply 'spaceline--theme
-           '((projectile-root
-              buffer-modified)
-             :face highlight-face
-             :priority 0)
-           '((remote-host buffer-id)
-             :priority 5)
-           additional-segments))
+  (setq-default powerline-default-separator 'wave
+                powerline-height 18
+                spaceline-highlight-face-func 'spaceline-highlight-face-modified
+                spaceline-separator-dir-left '(left . left)
+                spaceline-separator-dir-right '(right . right))
+  (defface nl/spaceline-highlight-face
+    `((t (:background "DarkGoldenrod2"
+                      :foreground "#3E3D31"
+                      :inherit 'mode-line)))
+    "Default highlight face for spaceline."
+    :group 'spaceline)
+
+  (face-remap-add-relative 'spaceline-highlight-face 'nl/spaceline-highlight-face)
 
   (spaceline-helm-mode 1)
-  (spaceline-toggle-persp-name-off)
-  (spaceline-toggle-workspace-number-off)
+  ;;(spaceline-toggle-persp-name-off)
+  ;;(spaceline-toggle-workspace-number-off)
   (spaceline-toggle-version-control-on)
-  (nl/spaceline-theme))
+
+  (spaceline-install `nl-spaceline-theme
+    `(((projectile-root buffer-modified) :face highlight-face)
+      (remote-host buffer-id)
+      ((line column) :separator ":" :face avy-lead-face-2))
+    `((selection-info)
+      ((flycheck-error flycheck-warning flycheck-info) :when active)
+      (major-mode :face highlight-face)
+      (minor-modes :when active :face avy-lead-face-1)
+      (global :face highlight-face)))
+
+  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-nl-spaceline-theme)))))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
