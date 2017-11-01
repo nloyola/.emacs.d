@@ -573,13 +573,12 @@ Revert file buffers updated outside of emacs, unless I've made changes to
 the buffer which I haven't saved.
 
 #+BEGIN_SRC emacs-lisp
-(use-package auto-revert
-  :diminish auto-revert-mode
-  :config
-  (global-auto-revert-mode 1)
-  (add-hook 'dired-mode-hook 'auto-revert-mode)
-  (setq global-auto-revert-non-file-buffers t
-      auto-revert-verbose nil))
+(eval-after-load 'auto-revert-mode
+  '(diminish 'auto-revert-mode))
+(global-auto-revert-mode 1)
+(add-hook 'dired-mode-hook 'auto-revert-mode)
+(setq global-auto-revert-non-file-buffers t
+      auto-revert-verbose nil)
 #+END_SRC
 
 ** =bookmark=
@@ -2945,21 +2944,25 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
                 spaceline-separator-dir-right '(right . right))
 
   (spaceline-helm-mode 1)
-  ;;(spaceline-toggle-persp-name-off)
-  ;;(spaceline-toggle-workspace-number-off)
   (spaceline-toggle-version-control-on)
 
-  (spaceline-install `nl-spaceline-theme
-    `(((projectile-root buffer-modified) :face avy-lead-face-0)
-      (remote-host buffer-id)
-      ((line column) :separator ":" :face avy-lead-face-2))
-    `((selection-info)
-      ((flycheck-error flycheck-warning flycheck-info) :when active)
-      (major-mode :face avy-lead-face-0)
-      (minor-modes :when active :face avy-lead-face-1)
-      (global :face highlight-face)))
+  ;; theme stops displaying after using Emacs for a while, made this into a function so that
+  ;; it can be called again to restore the theme
+  (defun nl/spaceline-theme ()
+    (interactive)
+    (spaceline-install `nl-spaceline-theme
+      `(((projectile-root buffer-modified) :face avy-lead-face-0)
+        (remote-host buffer-id)
+        ((line column) :separator ":" :face avy-lead-face-2))
+      `((selection-info)
+        ((flycheck-error flycheck-warning flycheck-info) :when active)
+        (major-mode :face avy-lead-face-0)
+        (minor-modes :when active :face avy-lead-face-1)
+        (global :face highlight-face)))
 
-  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-nl-spaceline-theme)))))
+    (setq-default mode-line-format '("%e" (:eval (spaceline-ml-nl-spaceline-theme)))))
+
+  (nl/spaceline-theme))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
@@ -3141,7 +3144,7 @@ Wand is an extension that allows users to select a piece of text and perform act
 #+BEGIN_SRC emacs-lisp
 (use-package whole-line-or-region
   :ensure t
-  :diminish whole-line-or-region-mode
+  :diminish (whole-line-or-region-local-mode)
   :config
   (custom-set-variables '(whole-line-or-region-global-mode t)))
 #+END_SRC
