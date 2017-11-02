@@ -581,6 +581,17 @@ the buffer which I haven't saved.
       auto-revert-verbose nil)
 #+END_SRC
 
+** =ansi-color=
+
+#+BEGIN_SRC emacs-lisp
+(use-package ansi-color
+  :config
+  (defun ansi-colorize-current-buffer ()
+    "Colorize ansi escape sequences in the current buffer."
+    (interactive)
+    (ansi-color-apply-on-region (point-min) (point-max))))
+#+END_SRC
+
 ** =bookmark=
 
 Prefer saving this file somewhere other than the default.
@@ -941,10 +952,17 @@ comments.
     (save-excursion
       (indent-region (point-min) (point-max))))
 
+  (defun nl/beginning-of-line-or-indentation ()
+    "move to beginning of line, or indentation"
+    (interactive)
+    (if (bolp)
+        (back-to-indentation)
+      (beginning-of-line)))
+
   (defun my-common-prog-mode-settings ()
     "Enables settings common between programming language modes."
     (nl/setup-indent 2) ; indent 2 spaces width
-    (local-set-key (kbd "<home>") 'back-to-indentation)
+    (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
     ;;
     ;; Set tab and CR/LF keys to call their corresponding more-general
     ;; functions.  This needs to be here to override the settings of some modes
