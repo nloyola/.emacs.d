@@ -5,31 +5,18 @@
 /**
  *
  */
-define(function () {
-  'use strict';
+function ${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}() {
+  var directive = {
+    restrict: 'E',
+    scope: {},
+    bindToController: {
+    },
+    template: require('`(ngcomp-snippet-get-template-url)`'),
+    controller: ${1:$(s-upper-camel-case (replace-regexp-in-string "Directive" "Ctrl" yas-text))},
+    controllerAs: 'vm'
+  };
 
-  /**
-   *
-   */
-  function ${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-      },
-      templateUrl : '',
-      controller: ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))},
-      controllerAs: 'vm'
-    };
+  return directive;
+}
 
-    return directive;
-  }
-
-  ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))}.$inject = [];
-
-  function ${1:$(upcase-initials (replace-regexp-in-string "Directive" "Ctrl" yas-text))}() {
-
-  }
-
-  return $1;
-});
+export default ngModule => ngModule.directive('${1:$(replace-regexp-in-string "Directive" "" yas-text)}', $1)

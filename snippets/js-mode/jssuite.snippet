@@ -8,12 +8,12 @@
  */
 /* global angular */
 
-import _ from 'lodash'
+import ngModule from ''
 
 describe('`(replace-regexp-in-string "Spec$" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test')
+    angular.mock.module(ngModule, 'biobank.test')
     angular.mock.inject(function(TestSuiteMixin) {
       Object.assign(this, TestSuiteMixin)
 

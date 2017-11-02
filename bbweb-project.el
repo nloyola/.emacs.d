@@ -204,7 +204,7 @@
 
 (defun ngcomp-snippet-get-template-url ()
   "Returns the name of the templateUrl for a component."
-  (concat "./" (replace-regexp-in-string "Component$" ".html" (file-name-base buffer-file-name) t)))
+  (concat "./" (replace-regexp-in-string "\\(Component\\|Directive\\)$" ".html" (file-name-base buffer-file-name) t)))
 
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here
