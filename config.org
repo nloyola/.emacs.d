@@ -539,19 +539,17 @@ A way to set up indentation for all programming modes. Taken from
 
 #+BEGIN_SRC emacs-lisp
 (defun nl/setup-indent (n)
-  ;; java/c/c++
-  (setq c-basic-offset n)
-  ;; web development
-  (setq coffee-tab-width n) ; coffeescript
-  (setq javascript-indent-level n) ; javascript-mode
-  (setq js-indent-level n) ; js-mode
-  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
-  (setq js2-strict-missing-semi-warning nil)
-  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
-  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
-  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
-  (setq css-indent-offset n) ; css-mode
-  )
+  ;; java / c / c++ / php
+  (setq-default c-basic-offset n
+                javascript-indent-level n            ; javascript-mode
+                js-indent-level n                    ; js-mode
+                js2-basic-offset n                   ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+                js2-strict-missing-semi-warning nil  ;
+                indent-tabs-mode nil
+                web-mode-markup-indent-offset n      ; web-mode, html tag in html file
+                web-mode-css-indent-offset n         ; web-mode, css in html file
+                web-mode-code-indent-offset n        ; web-mode, js code in html file
+                css-indent-offset n))                ; css-mode
 #+END_SRC
 
 ** Programming mode hook.
@@ -2328,7 +2326,7 @@ command line. Use an easy keybinding to access magit.
 Turn this off for better perfomance since we are using Magit.
 
 #+BEGIN_SRC emacs-lisp
-(setq vc-handled-backends nil)
+(setq vc-handled-backends 'Git')
 #+END_SRC
 
 *** Fullscreen magit
@@ -2431,26 +2429,14 @@ checker is loaded.
   :ensure t
   :mode "\\.php[345]?\\'"
   :preface
-  (defun my-php-mode-hook ()
+
+  :init
+  (defun nl/php-mode-hook ()
     "My PHP mode configuration."
     ;; indent 2 spaces width
     (nl/setup-indent 2)
-
-    ;; enable web mode
-    ;;(web-mode)
-
-    ;; make these variables local
-    (make-local-variable 'web-mode-code-indent-offset)
-    (make-local-variable 'web-mode-markup-indent-offset)
-    (make-local-variable 'web-mode-css-indent-offset)
-
-    ;; set indentation, can set different indentation level for different code type
-    (setq web-mode-code-indent-offset 2)
-    (setq web-mode-css-indent-offset 2)
-    (setq web-mode-markup-indent-offset 2)
     (flycheck-mode t))
 
-  :init
   (flycheck-define-checker my-php
     "A PHP syntax checker using the PHP command line interpreter.
     See URL http://php.net/manual/en/features.commandline.php."
@@ -2466,7 +2452,7 @@ checker is loaded.
 
   :config
   (add-hook 'php-mode-hook 'php-enable-symfony2-coding-style)
-  (add-hook 'php-mode-hook 'my-php-mode-hook))
+  (add-hook 'php-mode-hook 'nl/php-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/projectile][projectile]]
@@ -2964,6 +2950,11 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
   (spaceline-helm-mode 1)
   (spaceline-toggle-version-control-on)
 
+(spaceline-define-segment version-control
+  "Version control information."
+  (powerline-raw (s-trim vc-mode))
+  :when vc-mode)
+
   ;; theme stops displaying after using Emacs for a while, made this into a function so that
   ;; it can be called again to restore the theme
   (defun nl/spaceline-theme ()
@@ -2973,6 +2964,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
         (remote-host buffer-id)
         ((line column) :separator ":" :face avy-lead-face-2))
       `((selection-info)
+        ((version-control :wehn acative) :face avy-lead-face-1)
         ((flycheck-error flycheck-warning flycheck-info) :when active)
         (major-mode :face avy-lead-face-0)
         (minor-modes :when active :face avy-lead-face-1)
