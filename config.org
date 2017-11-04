@@ -2421,23 +2421,35 @@ This package provides tagged workspaces.
 
 ** [[https://github.com/ejmr/php-mode][php-mode]]
 
-Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~my-php~
+Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~nl/php-checker~
 checker is loaded.
 
 #+BEGIN_SRC emacs-lisp
 (use-package php-mode
   :ensure t
   :mode "\\.php[345]?\\'"
-  :preface
-
   :init
+  ;; this style is based on the symfony2 style
+  (c-add-style
+   "nl/php"
+   '("php"
+     (c-basic-offset . 2)
+     (indent-tabs-mode . nil)
+     (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+     (c-indent-comments-syntactically-p . t)
+     (fill-column . 78)
+     (require-final-newline . t)))
+
+  (defun nl/php-enable-coding-style ()
+    "Makes php-mode use coding styles that are preferable for working with Symfony2."
+    (interactive)
+    (php-set-style "nl/php"))
+
   (defun nl/php-mode-hook ()
     "My PHP mode configuration."
-    ;; indent 2 spaces width
-    (nl/setup-indent 2)
     (flycheck-mode t))
 
-  (flycheck-define-checker my-php
+  (flycheck-define-checker nl/php-checker
     "A PHP syntax checker using the PHP command line interpreter.
     See URL http://php.net/manual/en/features.commandline.php."
     :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
@@ -2445,13 +2457,13 @@ checker is loaded.
     :error-patterns
     ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
             (message) " in " (file-name) " on line " line line-end))
-    :modes (php-mode php+-mode web-mode))
+    :modes (php-mode web-mode))
 
   (eval-after-load 'flycheck
-    '(add-to-list 'flycheck-checkers 'my-php))
+    '(add-to-list 'flycheck-checkers 'nl/php-checker))
 
   :config
-  (add-hook 'php-mode-hook 'php-enable-symfony2-coding-style)
+  (add-hook 'php-mode-hook 'nl/php-enable-coding-style)
   (add-hook 'php-mode-hook 'nl/php-mode-hook))
 #+END_SRC
 
