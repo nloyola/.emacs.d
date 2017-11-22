@@ -294,6 +294,10 @@ buffers (has to be called for each frame):
 (set-frame-parameter (selected-frame) 'buffer-predicate #'buffer-file-name)
 #+END_SRC
 
+#+BEGIN_SRC emacs-lisp
+(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+#+END_SRC
+
 ** Disabled features
 
 Turn off auto-save.
@@ -2318,15 +2322,8 @@ command line. Use an easy keybinding to access magit.
   :bind (("C-x g" . magit-status))
   :config
   (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
+  (setq-default vc-handled-backends '(Git))
   (setq magit-push-always-verify nil))
-#+END_SRC
-
-*** Performance
-
-Turn this off for better perfomance since we are using Magit.
-
-#+BEGIN_SRC emacs-lisp
-(setq vc-handled-backends 'Git')
 #+END_SRC
 
 *** Fullscreen magit

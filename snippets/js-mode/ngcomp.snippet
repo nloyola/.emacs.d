@@ -8,11 +8,11 @@
 #
 # --
 
-class `(ngcomp-snippet-get-controller-name)` {
+class Controller {
 
   constructor() {
-    'ngInject';
-    Object.assign(this, {});
+    'ngInject'
+    Object.assign(this, {})
   }
 
   $onInit() {
@@ -21,14 +21,14 @@ class `(ngcomp-snippet-get-controller-name)` {
 }
 
 /**
- * $0
+ * $1
  */
 var COMPONENT = {
   template: require('`(ngcomp-snippet-get-template-url)`'),
-  controller: `(ngcomp-snippet-get-controller-name)`,
+  controller: Controller,
   controllerAs: 'vm',
   bindings: {
   }
-};
+}
 
-export default COMPONENT;
+export default ngModule => ngModule.component('$0', COMPONENT)
