@@ -2768,12 +2768,20 @@ The class name must have the postfix 'Spec' for this function to work."
     (setq tail-point (point))
     (kill-region head-point tail-point))
 
+(defun nl/scalatest-find-next-failure ()
+  "Finds the next failed test in an SBT buffer that just ran scalatests."
+  (interactive)
+  (search-forward "*** FAILED ***")
+  (move-end-of-line nil)
+  (recenter))
+
   (defhydra hydra-nl-scalatest (:hint nil)
     "Testing scala code with scalatest"
     ("t" nl/scalatest-test-only-this-buffer "this file" :color blue)
     ("z" nl/scalatest-test-only-this-buffer-with-substring-tag "this file with test tag" :color blue)
     ("s" nl/scalatest-test-only "select suite to run" :color blue)
     ("f" nl/scalatest-find-file "find file from traceback" :color blue)
+    ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
     ("r" nl/scalatest-remove-tag "remove test tag" :color blue))
 
   (defun scala-mode-newline-comments ()
