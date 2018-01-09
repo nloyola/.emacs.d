@@ -421,6 +421,14 @@ Recently, line numbering has been really slow. Disabling for now.
   (add-hook mode-hook 'linum-mode))
 #+END_SRC
 
+Emacs 26 added ~global-display-line-numbers-mode~:
+
+#+BEGIN_SRC emacs-lisp
+  (dolist (mode-hook '(text-mode-hook prog-mode-hook))
+    (when (version<= "26.0.50" emacs-version)
+      (add-hook mode-hook 'display-line-numbers-mode)))
+#+END_SRC
+
 ** Mode line
 
 Display the column number in the mode line.
@@ -912,7 +920,7 @@ good column number to do that.
    (java . t)
    (ruby . t)
    (scheme . t)
-   (sh . t)
+   ;;(sh . t)
    (sqlite . t)
    (js . t)))
 
@@ -1188,6 +1196,17 @@ direction keys.
 
 These are the packages that are not built into Emacs.
 
+** [[https://github.com/abo-abo/ace-window][ace-window]]
+
+A package that uses the same idea from ace-jump-mode for
+buffer navigation, but applies it to windows. The default keys are
+1-9, but it's faster to access the keys on the home row, so that's
+what I have them set to (with respect to Dvorak, of course).
+
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window)
+#+END_SRC
+
 ** [[https://github.com/Wilfred/ag.el][ag]]
 
 Use silver surfer to search.
@@ -1198,15 +1217,13 @@ Use silver surfer to search.
   :ensure t)
 #+END_SRC
 
-** [[https://github.com/abo-abo/ace-window][ace-window]]
-
-A package that uses the same idea from ace-jump-mode for
-buffer navigation, but applies it to windows. The default keys are
-1-9, but it's faster to access the keys on the home row, so that's
-what I have them set to (with respect to Dvorak, of course).
+** [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons-dired]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package ace-window)
+(use-package all-the-icons-dired
+    ;; M-x all-the-icons-install-fonts
+    :ensure t
+    :commands (all-the-icons-dired-mode))
 #+END_SRC
 
 ** [[https://github.com/syohex/emacs-anzu][anzu]]
@@ -1385,6 +1402,27 @@ Could not get this package to display changes (2017-10-15).
 (use-package diredful
   :ensure t
   :config (diredful-mode 1))
+#+END_SRC
+
+** [[https://github.com/jojojames/dired-sidebar][dired-sidebar]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package dired-sidebar
+  :bind (("C-c C-n" . dired-sidebar-toggle-sidebar))
+  :ensure t
+  :commands (dired-sidebar-toggle-sidebar)
+  :config
+  (when (eq system-type 'windows-nt)
+    (setq dired-sidebar-use-all-the-icons nil))
+
+  (setq dired-sidebar-use-term-integration t)
+  (setq dired-sidebar-use-custom-font nil)
+  (setq dired-sidebar-face
+        (cond
+         ((eq system-type 'darwin)
+          '(:family "Helvetica" :height 100))
+         (:default
+          '(:family "Arial" :height 90)))))
 #+END_SRC
 
 ** [[https://github.com/jacktasia/dumb-jump/blob/master/README.md][dumb-jump]]
@@ -2067,6 +2105,16 @@ Frames: _f_rame new  _df_ delete
   (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
 #+END_SRC
 
+** [[https://github.com/mkcms/interactive-align][ialign]]
+
+Emacs package that provides visual version of align-regexp command.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ialign
+  :ensure t
+  :bind ("C-x l" . ialign))
+#+END_SRC
+
 ** [[https://github.com/abo-abo/swiper][ivy]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2390,11 +2438,13 @@ TextMate like theme.
 
 ** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
 
-We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/magnars/multiple-cursors.el/issues/105][an autoload issue]].
+Sometimes you end up with cursors outside of your view. You can scroll
+the screen to center on each cursor with ~C-v~ and ~M-v~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package multiple-cursors
   :ensure t
+  :after selected
   :init (require 'multiple-cursors)
   :bind (("C-S-c C-S-c" . mc/edit-lines)
          ("C->"         . mc/mark-next-like-this)
@@ -2403,7 +2453,20 @@ We'll also need to ~(require 'multiple-cusors)~ because of [[https://github.com/
          ("C-M-<"       . mc/unmark-previous-like-this)
          ("C-c C-<"     . mc/mark-all-like-this)
          ("C-!"         . mc/mark-next-symbol-like-this)
-         ("C-x C-m"     . mc/mark-all-dwim)))
+         ("C-x C-m"     . mc/mark-all-dwim))
+  :bind (:map selected-keymap
+              ("C-'" . mc/edit-lines)
+              ("c"   . mc/edit-lines)
+              ("."   . mc/mark-next-like-this)
+              ("<"   . mc/unmark-next-like-this)
+              ("C->" . mc/skip-to-next-like-this)
+              (","   . mc/mark-previous-like-this)
+              (">"   . mc/unmark-previous-like-this)
+              ("C-<" . mc/skip-to-previous-like-this)
+              ("y"   . mc/mark-next-symbol-like-this)
+              ("Y"   . mc/mark-previous-symbol-like-this)
+              ("w"   . mc/mark-next-word-like-this)
+              ("W"   . mc/mark-previous-word-like-this)))
 #+END_SRC
 
 ** [[https://github.com/nex3/perspective-el][perspective]]
@@ -2571,8 +2634,7 @@ This package was removed from Melpa on 2017-07-31 due to the author not wanting 
 specify a lincence.
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package revive
-  :ensure t)
+(use-package revive)
 #+END_SRC
 
 ** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
@@ -2844,21 +2906,21 @@ initial =*scratch*= buffer.
 
 ** [[https://github.com/Kungsgeten/selected.el][selected]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package selected
   :ensure t
   :defer 5
   :diminish selected-minor-mode
   :commands selected-minor-mode
-  :bind (:map selected-keymap
-              ("M-%" . query-replace-regexp)
-              ("C-[" . align-entire)
-              ("C-f" . fill-region)
-              ("C-U" . unfill-region)
-              ("C-d" . downcase-region)
-              ("C-r" . reverse-region)
-              ("C-s" . sort-lines)
-              ("C-u" . upcase-region))
+  ;;:bind (:map selected-keymap
+  ;;            ("M-%" . query-replace-regexp)
+  ;;            ("C-[" . align-entire)
+  ;;            ("C-f" . fill-region)
+  ;;            ("C-U" . unfill-region)
+  ;;            ("C-d" . downcase-region)
+  ;;            ("C-r" . reverse-region)
+  ;;            ("C-s" . sort-lines)
+  ;;            ("C-u" . upcase-region))
   :config
   (selected-global-mode 1))
 #+END_SRC
