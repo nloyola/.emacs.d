@@ -36,10 +36,12 @@
 
 (defvar gnu '("gnu" . "https://elpa.gnu.org/packages/"))
 (defvar melpa '("melpa" . "https://melpa.org/packages/"))
+(defvar org '("org" . "https://orgmode.org/elpa/"))
 
 (setq package-archives nil)
 (add-to-list 'package-archives melpa t)
 (add-to-list 'package-archives gnu t)
+(add-to-list 'package-archives org t)
 
 (package-initialize)
 

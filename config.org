@@ -678,7 +678,8 @@ Prefer saving this file somewhere other than the default.
   (defun my-java-mode-hook ()
     (setq indent-tabs-mode nil)
     ;;(setq zeal-at-point-docset "java")
-    (eclim-mode t))
+    ;;(eclim-mode t)
+    )
 
   :config
   (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
@@ -1445,7 +1446,7 @@ indexes (TAGS) or persistent background processes.
                 dumb-jump-prefer-searcher 'ag))
 #+END_SRC
 
-** [[https://github.com/senny/emacs-eclim][emacs-eclim]]
+** [[https://github.com/emacs-eclim/emacs-eclim][emacs-eclim]]
 
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
 can be downloaded from [[http://eclim.org/install.html][here]].
@@ -2969,6 +2970,8 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
   :diminish smartparens-mode
   :config
   (require 'smartparens-config)
+  ;; https://github.com/Fuco1/smartparens/issues/783
+  (setq sp-escape-quotes-after-insert nil)
   (smartparens-global-mode t))
 #+END_SRC
 
@@ -3496,60 +3499,62 @@ Coverts camel case words to uppercase with underscore as delimiters.
 Views the same file side by side:
 
 #+BEGIN_SRC emacs-lisp
-(defun nl/frame-grow-horizontally ()
-  "Set the size and position of the Emacs window."
-  (interactive)
-  (let ((frame (selected-frame)))
-    (set-frame-size frame (* 2 (frame-width)) (frame-height)))
-  (split-window-right))
+  (defun nl/frame-grow-horizontally ()
+    "Set the size and position of the Emacs window."
+    (interactive)
+    (let ((frame (selected-frame)))
+      (set-frame-size frame (* 2 (frame-width)) (frame-height)))
+    (split-window-right))
 
-(defun nl/frame-shrink-horizontally ()
-  "Set the size and position of the Emacs window."
-  (interactive)
-  (let ((frame (selected-frame)))
-    (when (> (length (window-list)) 1)
-      (when (windmove-find-other-window 'right)
-        (windmove-right))
-      (delete-window))
-    (set-frame-size frame (/ (frame-width) 2) (frame-height))))
+  (defun nl/frame-shrink-horizontally ()
+    "Set the size and position of the Emacs window."
+    (interactive)
+    (let ((frame (selected-frame)))
+      (when (> (length (window-list)) 1)
+        (when (windmove-find-other-window 'right)
+          (windmove-right))
+        (delete-window))
+      (set-frame-size frame (/ (frame-width) 2) (frame-height))))
 
-(defhydra hydra-nl-frame-resize (:hint nil)
-  "Frame resize"
-  ("g" nl/frame-grow-horizontally "grow" :color blue)
-  ("s" nl/frame-shrink-horizontally "shrink" :color blue))
+  (defun nl-frame-resize ()
+    "Resizes the frame based on its current width."
+    (interactive)
+    (if (<= (frame-width) 120)
+        (nl/frame-grow-horizontally)
+      (nl/frame-shrink-horizontally)))
 
-(global-set-key [f9] 'hydra-nl-frame-resize/body)
+  (global-set-key [f9] 'nl-frame-resize)
 
-(defun nl/split-view-same-file ()
-  (interactive)
-  (windmove-right)
-  (delete-window)
-  (split-window-right)
-  (windmove-right))
+  (defun nl/split-view-same-file ()
+    (interactive)
+    (windmove-right)
+    (delete-window)
+    (split-window-right)
+    (windmove-right))
 
-(global-set-key [S-f9] 'nl/split-view-same-file)
+  (global-set-key [S-f9] 'nl/split-view-same-file)
 
-(defun my--set-transparency (inc)
-  "Increase or decrease the selected frame transparency"
-  (let* ((alpha (frame-parameter (selected-frame) 'alpha))
-         (next-alpha (cond ((not alpha) 100)
-                           ((> (- alpha inc) 100) 100)
-                           ((< (- alpha inc) 0) 0)
-                           (t (- alpha inc)))))
-    (set-frame-parameter (selected-frame) 'alpha next-alpha)))
+  (defun my--set-transparency (inc)
+    "Increase or decrease the selected frame transparency"
+    (let* ((alpha (frame-parameter (selected-frame) 'alpha))
+           (next-alpha (cond ((not alpha) 100)
+                             ((> (- alpha inc) 100) 100)
+                             ((< (- alpha inc) 0) 0)
+                             (t (- alpha inc)))))
+      (set-frame-parameter (selected-frame) 'alpha next-alpha)))
 
-(defhydra hydra-transparency (:columns 2)
+  (defhydra hydra-transparency (:columns 2)
+    "
+  ALPHA : [ %(frame-parameter nil 'alpha) ]
   "
-ALPHA : [ %(frame-parameter nil 'alpha) ]
-"
-  ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
-  ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
-  ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
-  ("K" (lambda () (interactive) (my--set-transparency -10)) "-- less")
-  ("=" (lambda (value) (interactive "nTransparency Value 0 - 100 opaque:")
-         (set-frame-parameter (selected-frame) 'alpha value)) "Set to ?" :color blue))
+    ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
+    ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
+    ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
+    ("K" (lambda () (interactive) (my--set-transparency -10)) "-- less")
+    ("=" (lambda (value) (interactive "nTransparency Value 0 - 100 opaque:")
+           (set-frame-parameter (selected-frame) 'alpha value)) "Set to ?" :color blue))
 
-(global-set-key (kbd "C-c t") 'hydra-transparency/body)
+  (global-set-key (kbd "C-c t") 'hydra-transparency/body)
 #+END_SRC
 
 *** Font
