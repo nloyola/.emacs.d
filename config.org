@@ -3224,6 +3224,15 @@ Wand is an extension that allows users to select a piece of text and perform act
   (add-hook 'web-mode-hook  'nl/web-mode-hook))
 #+END_SRC
 
+** [[https://github.com/mhayashi1120/Emacs-wgrep][wgrep]]
+
+Required by ivy-occur.
+
+#+BEGIN_SRC emacs-lisp
+(use-package wgrep
+  :ensure t)
+#+END_SRC
+
 ** [[https://github.com/tlh/workgroups.el][workgroups]]
 
 #+BEGIN_SRC emacs-lisp
