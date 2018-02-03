@@ -1745,6 +1745,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
+  ;;:load-path "/home/nelson/src/github/elisp/helm"
   :commands (helm-config helm-files helm-grep)
   :diminish helm-mode
   :init
@@ -2528,7 +2529,7 @@ checker is loaded.
   (add-hook 'php-mode-hook 'nl/php-mode-hook))
 #+END_SRC
 
-** [[https://github.com/bbatsov/projectile][projectile]]
+        ** [[https://github.com/bbatsov/projectile][projectile]]
 
 #+BEGIN_QUOTE
 Project navigation and management library for Emacs.
@@ -2555,6 +2556,19 @@ http://batsov.com/projectile/
   (def-projectile-commander-method ?d
     "Open project root in dired."
     (projectile-dired)))
+#+END_SRC
+
+
+** [[https://github.com/nlamirault/phpunit.el][php-unit]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package phpunit
+     :ensure t
+     :bind (("C-c , t" . phpunit-current-test)
+            ("C-c , c" . phpunit-current-class)
+            ("C-c , p" . phpunit-current-project))
+     :config
+     (custom-set-variables '(phpunit-arg "--stderr")))
 #+END_SRC
 
 ** [[https://github.com/google/protobuf][protobuf]]
@@ -3174,6 +3188,13 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
   (yas-global-mode 1))
 #+END_SRC
 
+** [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet-snippets
+  :ensure t)
+#+END_SRC
+
 ** [[https://github.com/cmpitg/wand][wand]]
 
 #+BEGIN_QUOTE
@@ -3668,3 +3689,26 @@ With a prefix argument P, isearch for the symbol at point."
 # org-src-preserve-indentation: nil
 # org-edit-src-content-indentation: 0
 # End:
+** Strip HML
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/strip-html ()
+  "Remove HTML tags from the current buffer,
+   (this will affect the whole buffer regardless of the restrictions in effect)."
+  (interactive "*")
+  (save-excursion
+    (save-restriction
+      (widen)
+      (goto-char (point-min))
+      (while (re-search-forward "<[^<]*>" (point-max) t)
+    (replace-match "\\1"))
+      (goto-char (point-min))
+      (replace-string "&copy;" "(c)")
+      (goto-char (point-min))
+      (replace-string "&amp;" "&")
+      (goto-char (point-min))
+      (replace-string "&lt;" "<")
+      (goto-char (point-min))
+      (replace-string "&gt;" ">")
+      (goto-char (point-min)))))
+#+END_SRC
