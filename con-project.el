@@ -71,7 +71,7 @@
   "Surrounds string with a call to gettext.  Cursor must be at string's start."
   (interactive)
   (if (looking-at "\"")
-      (save-excursion
+      (save-excursiong
         (forward-char)
         (insert "{{'")
         (forward-char)
@@ -87,6 +87,21 @@
   (local-set-key (kbd "C-c g") 'con-gettext-surround-html-string))
 
 (add-hook 'html-mode-hook 'con-html-mode-keys)
+
+;; Before running phpunit, remove the logs/test.log file
+(defun nl/con-project-remove-test-log(orig-function args)
+  (let ((old-command (funcall orig-function args)))
+    ;;(message "---------> %s" old-command)
+    (concat "rm -rf logs/test.log && " (funcall orig-function args))))
+
+(defun nl/con-project-php-mode-hook ()
+  (message "-----------------> here")
+  ;;(advice-remove 'phpunit-get-compile-command 'nl/con-project-remove-test-log)
+  (advice-add 'phpunit-get-compile-command :around #'nl/con-project-remove-test-log))
+
+;; Before running phpunit, remove the logs/test.log file
+(add-hook 'php-mode-hook 'nl/con-project-php-mode-hook)
+
 
 (provide 'con-project)
 ;;; con-project.el ends here
