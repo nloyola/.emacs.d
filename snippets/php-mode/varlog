@@ -1,0 +1,5 @@
+# -*- mode: snippet; eval: (setq require-final-newline nil) -*-
+# name: varlog
+# key: varlog
+# --
+$this->varLog(\Monolog\Logger::INFO, "$1", \$$0);
