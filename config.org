@@ -1342,14 +1342,35 @@ Disable for now since it is slow when editing Scala code.
 Complete anything.
 
 #+BEGIN_SRC emacs-lisp
-(use-package company
-  :ensure t
-  :diminish company-mode
-  :bind
-  ("M-/" . company-complete-common)
-  :config
-  (add-hook 'after-init-hook 'global-company-mode))
+  (use-package company
+    :ensure t
+    :diminish company-mode
+    :bind (:map company-active-map
+                ("M-j" . company-select-next)
+                ("M-k" . company-select-previous))
+    ("M-/" . company-complete-common)
+    :preface
+    ;; enable yasnippet everywhere
+    (defvar company-mode/enable-yas t
+      "Enable yasnippet for all backends.")
+    (defun company-mode/backend-with-yas (backend)
+      (if (or
+           (not company-mode/enable-yas)
+           (and (listp backend) (member 'company-yasnippet backend)))
+          backend
+        (append (if (consp backend) backend (list backend))
+                '(:with company-yasnippet))))
+    :init (global-company-mode t)
+    :config
+    ;; no delay no autocomplete
+    (setq
+     company-idle-delay 0
+     company-minimum-prefix-length 2
+     company-tooltip-limit 20)
 
+    (setq company-backends
+          (mapcar #'company-mode/backend-with-yas company-backends))
+    (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
 
 ** [[https://melpa.org/#/cursor-chg][cursor-chg]]
@@ -1531,6 +1552,34 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :bind (:map prog-mode-map
               ("M-RET" . emr-show-refactor-menu))
   :config (emr-initialize))
+#+END_SRC
+
+** [[https://github.com/abingham/emacs-ycmd][emacs-ycmd]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ycmd
+    :ensure t
+    :init
+    (add-hook 'js2-mode-hook 'ycmd-mode)
+    :preface
+    (defun ycmd-setup-completion-at-point-function ()
+      "Setup `completion-at-point-functions' for `ycmd-mode'."
+      (add-hook 'completion-at-point-functions
+                #'ycmd-complete-at-point nil :local))
+
+    (add-hook 'ycmd-mode-hook #'ycmd-setup-completion-at-point-function)
+    :config
+    (set-variable 'ycmd-server-command `("python2" ,(file-truename "~/src/github/devtools/ycmd/ycmd")))
+    ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
+
+    (use-package company-ycmd
+      :ensure t
+      :config
+      (company-ycmd-setup))
+    (use-package flycheck-ycmd
+      :ensure t
+      :config
+      (flycheck-ycmd-setup)))
 #+END_SRC
 
 ** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
@@ -2529,7 +2578,7 @@ checker is loaded.
   (add-hook 'php-mode-hook 'nl/php-mode-hook))
 #+END_SRC
 
-        ** [[https://github.com/bbatsov/projectile][projectile]]
+** [[https://github.com/bbatsov/projectile][projectile]]
 
 #+BEGIN_QUOTE
 Project navigation and management library for Emacs.
@@ -2557,8 +2606,6 @@ http://batsov.com/projectile/
     "Open project root in dired."
     (projectile-dired)))
 #+END_SRC
-
-
 ** [[https://github.com/nlamirault/phpunit.el][php-unit]]
 
 #+BEGIN_SRC emacs-lisp
@@ -3089,7 +3136,7 @@ think of it as both something that augments and replaces the standard
 
 ** [[https://github.com/ternjs/tern][tern]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package tern
   :ensure t
   :commands tern-mode
@@ -3279,7 +3326,6 @@ Required by ivy-occur.
   :config
   (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode)))
 #+END_SRC
-
 ** [[https://github.com/jinzhu/zeal-at-point][zeal-at-point]]
 
 Search the word at point with Zeal
