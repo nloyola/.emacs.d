@@ -1079,75 +1079,72 @@ Taken from:
 Save command history between sessions (taken from EmacsWiki).
 
 #+BEGIN_SRC emacs-lisp
-(use-package sql
-  :preface
-  (require 'epa-file)
-  (epa-file-enable)
+  (use-package sql
+    :preface
+    (use-package epa-file
+      :config
+      (epa-file-enable))
 
-  (setq sql-connection-alist
-        '((localhost.dev (sql-product 'mysql)
-                         (sql-port 3306)
-                         (sql-server "localhost")
-                         (sql-user "root")
-                         (sql-database "mysql"))
-          (obelix.dev (sql-product 'mysql)
-                      (sql-port 3306)
-                      (sql-server "localhost")
-                      (sql-user "root")
-                      (sql-database "mysql"))))
+    (setq sql-connection-alist
+          '((localhost.dev (sql-product 'mysql)
+                           (sql-port 3306)
+                           (sql-server "localhost")
+                           (sql-user "root")
+                           (sql-database "mysql"))))
 
-  (defun nl/sql-connect (product connection)
-    "Connects to a database server of type PRODUCT using the CONNECTION type."
-    (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
+    (defun nl/sql-connect (product connection)
+      "Connects to a database server of type PRODUCT using the CONNECTION type."
+      (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
 
-    ;; update the password to the sql-connection-alist
-    (let ((connection-info (assoc connection sql-connection-alist))
-          (sql-password (car (last (assoc connection nl-sql-passwords)))))
-      (delete sql-password connection-info)
-      (nconc connection-info `((sql-password ,sql-password)))
-      (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
-      (add-to-list 'sql-connection-alist connection-info))
+      ;; update the password to the sql-connection-alist
+      (let ((connection-info (assoc connection sql-connection-alist))
+            (sql-password (car (last (assoc connection nl-sql-passwords)))))
+        (delete sql-password connection-info)
+        (nconc connection-info `((sql-password ,sql-password)))
+        (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
+        (add-to-list 'sql-connection-alist connection-info))
 
-    ;; connect to database
-    (setq sql-product product)
-    (if current-prefix-arg
-        (sql-connect connection connection)
-      (sql-connect connection)))
+      ;; connect to database
+      (setq sql-product product)
+      (if current-prefix-arg
+          (sql-connect connection connection)
+        (sql-connect connection)))
 
-  (defun nl/sql-localhost-dev ()
-    "Connects to the MySQL server running on machine 'localhost'."
-    (nl/sql-connect 'mysql 'localhost.dev))
+    (defun nl/sql-localhost-dev ()
+      "Connects to the MySQL server running on machine 'localhost'."
+      (nl/sql-connect 'mysql 'localhost.dev))
 
-  (defun nl/sql-obelix-dev ()
-    "Connects to the MySQL server running on machine 'obelix'."
-    (nl/sql-connect 'mysql 'obelix.dev))
+    (defun nl/sql-obelix-dev ()
+      "Connects to the MySQL server running on machine 'obelix'."
+      (nl/sql-connect 'mysql 'obelix.dev))
 
-  (defvar nl/sql-servers-list
-    '(("localhost dev" nl/sql-localhost-dev)
-      ("Obelix Dev" nl/sql-obelix-dev))
-    "A list of server name and the function to connect.")
+    (defvar nl/sql-servers-list
+      '(("localhost dev" nl/sql-localhost-dev)
+        ;;("Obelix Dev" nl/sql-obelix-dev)
+        )
+      "A list of server name and the function to connect.")
 
-  (defun nl/sql-connect-server (func)
-    "Connect to the input server using nl/sql-servers-list and FUNC."
-    (interactive
-     (helm-comp-read "Select server: " nl/sql-servers-list))
-    (funcall func))
+    (defun nl/sql-connect-server (func)
+      "Connect to the input server using nl/sql-servers-list and FUNC."
+      (interactive
+       (helm-comp-read "Select server: " nl/sql-servers-list))
+      (funcall func))
 
-  (defun my-sql-save-history-hook ()
-    (let ((lval 'sql-input-ring-file-name)
-          (rval 'sql-product))
-      (if (symbol-value rval)
-          (let ((filename
-                 (concat "~/.emacs.d/sql/"
-                         (symbol-name (symbol-value rval))
-                         "-history.sql")))
-            (set (make-local-variable lval) filename))
-        (error
-         (format "SQL history will not be saved because %s is nil"
-                 (symbol-name rval))))))
+    (defun my-sql-save-history-hook ()
+      (let ((lval 'sql-input-ring-file-name)
+            (rval 'sql-product))
+        (if (symbol-value rval)
+            (let ((filename
+                   (concat "~/.emacs.d/sql/"
+                           (symbol-name (symbol-value rval))
+                           "-history.sql")))
+              (set (make-local-variable lval) filename))
+          (error
+           (format "SQL history will not be saved because %s is nil"
+                   (symbol-name rval))))))
 
-  :config
-  (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
+    :config
+    (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
 #+END_SRC
 
 ** =subword-mode=
@@ -1848,6 +1845,19 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
          ("C-x b" . helm-mini)
          ("C-x C-f" . helm-find-files)
          ("C-`" . helm-resume)))
+
+(defun nl/eval-expression ()
+  (interactive)
+  (let ((selected-expression
+         (helm-comp-read "Select an eval expression:" read-expression-history :buffer "Helm eval expressions")))
+    ;;(message "selected: %s" selected-expression)
+    (eval-expression (car (read-from-string selected-expression)))))
+
+(defun nl/async-shell-command ()
+  (interactive)
+  (let ((selected-command
+         (helm-comp-read "Select a shell command:" shell-command-history :buffer "Helm shell commands")))
+    (async-shell-command selected-command)))
 #+END_SRC
 
 *** Helm Search
