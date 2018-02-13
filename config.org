@@ -822,7 +822,43 @@ Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-u
 ibuffer is the improved version of list-buffers.
 
 #+BEGIN_SRC emacs-lisp
-(defalias 'list-buffers 'ibuffer)
+  (use-package ibuffer
+    :preface
+    (setq ibuffer-show-empty-filter-groups nil
+          ibuffer-saved-filter-groups
+          '(("home"
+             ("emacs-config" (filename . ".emacs.d"))
+             ("org" (or (mode . org-mode)
+                        (filename . "OrgMode")))
+             ("dired" (mode . dired-mode))
+             ("scala" (mode . scala-mode))
+             ("JS" (mode . js2-mode))
+             ("html" (mode . web-mode))
+             ("php" (mode . php-mode))
+             ("code" (filename . "src"))
+             ("Magit" (name . "\*magit"))
+             ("Helm" (name . "\*helm"))
+             ("Help" (or (name . "\*Help\*")
+                         (name . "\*Apropos\*")
+                         (name . "\*info\*"))))))
+    :config
+    (use-package ibuffer-projectile
+      :ensure t
+      :config
+      (defun nl/ibuffer-customization ()
+        "My customization for `ibuffer'."
+        ;; ibuffer-projectile setup
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+          (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
+          (ibuffer-do-sort-by-major-mode)))) ; then do major-mode sort
+
+    (add-hook 'ibuffer-mode-hook
+              '(lambda ()
+                 (nl/ibuffer-customization)
+                 (ibuffer-switch-to-saved-filter-groups "home")))
+
+    (defalias 'list-buffers 'ibuffer))
 #+END_SRC
 
 ** =org-mode=
@@ -1470,65 +1506,65 @@ Provides Emacs with some Eclipse features for Java development. Eclim has to be 
 can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
-(use-package company-emacs-eclim
-  :ensure t
-  :commands company-emacs-eclim-setup)
+  (use-package eclim
+    :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+    :diminish eclim-mode
+    :preface
+    (defun nl/restart-eclim (workspace-dir)
+      "Restarts the eclim server.  If it is currently active, the server is stopped first."
+      (interactive (list (read-directory-name "Workspace directory: "
+                                              eclimd-default-workspace nil t eclimd-default-workspace)))
+      (if (get-buffer "*eclimd*") (stop-eclimd))
+      (message "workspace dir: %s" workspace-dir)
+      (cd-absolute workspace-dir)
+      (start-eclimd workspace-dir)
+      (switch-to-buffer "*eclimd*"))
 
-(use-package eclimd
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :config
-  (setq eclimd-autostart nil))
+    (defun nl/gradle-javadoc ()
+      "Uses gradle to build the Javadoc for the project."
+      (interactive)
+      (let* ((current-directory default-directory))
+        (setq default-directory (locate-dominating-file default-directory "build.gradle"))
+        (compile "gradle -q --console=plain javadoc")
+        (setq default-directory current-directory)))
 
-(use-package eclim
-  :load-path "/home/nelson/src/github/elisp/emacs-eclim"
-  :diminish eclim-mode
-  :preface
-  (defun nl/restart-eclim (workspace-dir)
-    "Restarts the eclim server.  If it is currently active, the server is stopped first."
-    (interactive (list (read-directory-name "Workspace directory: "
-                                            eclimd-default-workspace nil t eclimd-default-workspace)))
-    (if (get-buffer "*eclimd*") (stop-eclimd))
-    (message "workspace dir: %s" workspace-dir)
-    (cd-absolute workspace-dir)
-    (start-eclimd workspace-dir)
-    (switch-to-buffer "*eclimd*"))
+    :init (use-package cl)
+    :config
+    (use-package company-emacs-eclim
+      :ensure t
+      :commands company-emacs-eclim-setup)
 
-  (defun nl/gradle-javadoc ()
-    "Uses gradle to build the Javadoc for the project."
-    (interactive)
-    (let* ((current-directory default-directory))
-      (setq default-directory (locate-dominating-file default-directory "build.gradle"))
-      (compile "gradle -q --console=plain javadoc")
-      (setq default-directory current-directory)))
+    (use-package eclimd
+      :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+      :preface
+      (setq eclimd-autostart t))
 
-  :init (use-package cl)
-  :config
-  (setq eclim-print-debug-messages t)
-        ;;eclim-nailgun-port 9092
-        ;;eclim-eclimrc "~/.eclimrc"
-  (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
-    (if (file-accessible-directory-p eclipse-dir)
-        (progn
-          (add-to-list 'eclim-eclipse-dirs eclipse-dir)
-          (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
-                eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
-                ))))
-  (company-emacs-eclim-setup)
-  (global-company-mode t)
-  (setq eclim-auto-save t
-        eclimd-wait-for-process nil
-        ;;eclimd-default-workspace "~/workspace/"
-        help-at-pt-display-when-idle t
-        help-at-pt-timer-delay 0.1
+    (setq eclim-print-debug-messages t)
+    ;;eclim-nailgun-port 9092
+    ;;eclim-eclimrc "~/.eclimrc"
+    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
+      (if (file-accessible-directory-p eclipse-dir)
+          (progn
+            (add-to-list 'eclim-eclipse-dirs eclipse-dir)
+            (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
+                  eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
+                  ))))
+    (company-emacs-eclim-setup)
+    (global-company-mode t)
+    (setq eclim-auto-save t
+          eclimd-wait-for-process nil
+          ;;eclimd-default-workspace "~/workspace/"
+          help-at-pt-display-when-idle t
+          help-at-pt-timer-delay 0.1
 
-        )
-  ;; Call the help framework with the settings above & activate eclim-mode
-  (help-at-pt-set-timer)
+          )
+    ;; Call the help framework with the settings above & activate eclim-mode
+    (help-at-pt-set-timer)
 
-  ;; keep consistent which other auto-complete backend.
-  (custom-set-faces
-   '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
-   '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
+    ;; keep consistent which other auto-complete backend.
+    (custom-set-faces
+     '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
+     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
 #+END_SRC
 
 ** [[https://github.com/syohex/emacs-git-gutter][emacs-git-gutter]]
@@ -1849,14 +1885,14 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 (defun nl/eval-expression ()
   (interactive)
   (let ((selected-expression
-         (helm-comp-read "Select an eval expression:" read-expression-history :buffer "Helm eval expressions")))
+         (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
     ;;(message "selected: %s" selected-expression)
     (eval-expression (car (read-from-string selected-expression)))))
 
 (defun nl/async-shell-command ()
   (interactive)
   (let ((selected-command
-         (helm-comp-read "Select a shell command:" shell-command-history :buffer "Helm shell commands")))
+         (helm "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
     (async-shell-command selected-command)))
 #+END_SRC
 
@@ -2619,13 +2655,14 @@ http://batsov.com/projectile/
 ** [[https://github.com/nlamirault/phpunit.el][php-unit]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package phpunit
-     :ensure t
-     :bind (("C-c , t" . phpunit-current-test)
-            ("C-c , c" . phpunit-current-class)
-            ("C-c , p" . phpunit-current-project))
-     :config
-     (custom-set-variables '(phpunit-arg "--stderr")))
+    (use-package phpunit
+       :ensure t
+       :bind (:map php-mode-map
+                   ("C-c , t" . phpunit-current-test)
+                   ("C-c , c" . phpunit-current-class)
+                   ("C-c , p" . phpunit-current-project))
+       :config
+       (custom-set-variables '(phpunit-arg "--stderr")))
 #+END_SRC
 
 ** [[https://github.com/google/protobuf][protobuf]]
@@ -2887,7 +2924,8 @@ The class name must have the postfix 'Spec' for this function to work."
                     (string-match filename projfile))
                   (projectile-current-project-files))))
       (message "%s %s" file-with-proj-path line-num)
-      (find-file-other-window (expand-file-name file-with-proj-path (projectile-project-root)))
+      (ace-select-window)
+      (find-file (expand-file-name file-with-proj-path (projectile-project-root)))
       (goto-char (point-min))
       (forward-line (- line-num 1))))
 
