@@ -2891,7 +2891,8 @@ that outputs errors."
         (rx line-start
             (one-or-more (syntax whitespace))
             "it" (syntax open-parenthesis) (syntax string-quote)
-            (group (+ (or (syntax word) (syntax symbol) (syntax whitespace))))
+            ;;(group (+ (or (syntax word) (syntax punctuation) (syntax whitespace))))
+            (group (+ (not (syntax string-quote))))
             (syntax string-quote) (syntax close-parenthesis)))
         "Regular expression for a scalatest FunSepc behaviour.")
 
