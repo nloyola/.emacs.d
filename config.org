@@ -2657,6 +2657,7 @@ http://batsov.com/projectile/
 #+BEGIN_SRC emacs-lisp
     (use-package phpunit
        :ensure t
+       :after (php-mode)
        :bind (:map php-mode-map
                    ("C-c , t" . phpunit-current-test)
                    ("C-c , c" . phpunit-current-class)
