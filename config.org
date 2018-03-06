@@ -298,6 +298,12 @@ buffers (has to be called for each frame):
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 #+END_SRC
 
+** Cursor Movement
+
+#+BEGIN_SRC emacs-lisp
+(setq auto-window-vscroll nil)
+#+END_SRC
+
 ** Disabled features
 
 Turn off auto-save.
@@ -2566,6 +2572,12 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
               ("W"   . mc/mark-previous-word-like-this)))
 #+END_SRC
 
+** [[https://github.com/politza/pdf-tools][pdf-tools]]
+
+#+BEGIN_SRC emacs-lisp
+(pdf-tools-install)
+#+END_SRC
+
 ** [[https://github.com/nex3/perspective-el][perspective]]
 
 This package provides tagged workspaces.
@@ -3046,13 +3058,12 @@ Declarative popup window rules.
 #+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp
-(use-package shackle
-  :ensure t
-  :config
+  (use-package shackle
+    :ensure t
+    :config
     (setq shackle-rules
           '(("*Help*" :align t :ratio 0.4 :select t)
             ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
-            ;;("\\*sbt\\*.*" :regexp t :other t)
             ("\\*sbt\\*.*" :regexp t :other t)
             ;;(compilation-mode :popup t)
             (("*shell*" "*eshell*") :popup t))
@@ -3627,6 +3638,25 @@ Coverts camel case words to uppercase with underscore as delimiters.
 Views the same file side by side:
 
 #+BEGIN_SRC emacs-lisp
+  (defun toggle-window-dedicated ()
+    "Control whether or not Emacs is allowed to display another
+  buffer in current window."
+    (interactive)
+    (message
+     (if (let (window (get-buffer-window (current-buffer)))
+           (set-window-dedicated-p window (not (window-dedicated-p window))))
+         "%s: Can't touch this!"
+       "%s is up for grabs.")
+     (current-buffer)))
+
+  (global-set-key (kbd "C-c d") 'toggle-window-dedicated)
+
+  ;; see https://www.reddit.com/r/emacs/comments/80pd2q/anyone_could_help_me_with_window_management/
+  (setq display-buffer-alist
+       '(("\*.*Completions\*" . (display-buffer-pop-up-window))
+         ("\*Help\*" . (display-buffer-reuse-window))
+         (".*" . (display-buffer-same-window))))
+
   (defun nl/frame-grow-horizontally ()
     "Set the size and position of the Emacs window."
     (interactive)
