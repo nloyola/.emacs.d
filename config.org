@@ -1543,7 +1543,8 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     (use-package eclimd
       :load-path "/home/nelson/src/github/elisp/emacs-eclim"
       :preface
-      (setq eclimd-autostart t))
+      ;;(setq eclimd-autostart t)
+      )
 
     (setq eclim-print-debug-messages t)
     ;;eclim-nailgun-port 9092
@@ -1596,29 +1597,33 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 ** [[https://github.com/abingham/emacs-ycmd][emacs-ycmd]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package ycmd
-    :ensure t
-    :init
-    (add-hook 'js2-mode-hook 'ycmd-mode)
-    :preface
-    (defun ycmd-setup-completion-at-point-function ()
-      "Setup `completion-at-point-functions' for `ycmd-mode'."
-      (add-hook 'completion-at-point-functions
-                #'ycmd-complete-at-point nil :local))
-
-    (add-hook 'ycmd-mode-hook #'ycmd-setup-completion-at-point-function)
-    :config
-    (set-variable 'ycmd-server-command `("python2" ,(file-truename "~/src/github/devtools/ycmd/ycmd")))
-    ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
-
-    (use-package company-ycmd
+    (use-package ycmd
       :ensure t
+      :init
+      (add-hook 'js2-mode-hook 'ycmd-mode)
+      :preface
+      (setq ycmd-startup-timeout 10)
+      (defun ycmd-setup-completion-at-point-function ()
+        "Setup `completion-at-point-functions' for `ycmd-mode'."
+        (add-hook 'completion-at-point-functions
+                  #'ycmd-complete-at-point nil :local))
+
+      (add-hook 'ycmd-mode-hook #'ycmd-setup-completion-at-point-function)
       :config
-      (company-ycmd-setup))
-    (use-package flycheck-ycmd
-      :ensure t
-      :config
-      (flycheck-ycmd-setup)))
+      (set-variable 'ycmd-server-command `("python2" ,(file-truename "~/src/github/devtools/ycmd/ycmd")))
+      ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
+
+      (use-package company-ycmd
+        :ensure t
+        :config
+        (company-ycmd-setup))
+      (use-package flycheck-ycmd
+        :ensure t
+        :config
+        (flycheck-ycmd-setup))
+      (use-package ycmd-eldoc
+        :config
+        (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)))
 #+END_SRC
 
 ** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
@@ -2594,46 +2599,44 @@ Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-dev
 checker is loaded.
 
 #+BEGIN_SRC emacs-lisp
-(use-package php-mode
-  :ensure t
-  :mode "\\.php[345]?\\'"
-  :init
-  ;; this style is based on the symfony2 style
-  (c-add-style
-   "nl/php"
-   '("php"
-     (c-basic-offset . 2)
-     (indent-tabs-mode . nil)
-     (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-     (c-indent-comments-syntactically-p . t)
-     (fill-column . 78)
-     (require-final-newline . t)))
+  (use-package php-mode
+    :ensure t
+    :mode "\\.php[345]?\\'"
+    :preface
+    ;; this style is based on the symfony2 style
+    (c-add-style
+     "nl/php"
+     '("php"
+       (c-basic-offset . 2)
+       (indent-tabs-mode . nil)
+       (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+       (c-indent-comments-syntactically-p . t)
+       (fill-column . 78)
+       (require-final-newline . t)))
 
-  (defun nl/php-enable-coding-style ()
-    "Makes php-mode use coding styles that are preferable for working with Symfony2."
-    (interactive)
-    (php-set-style "nl/php"))
+    (defun nl/php-mode-hook ()
+      "My PHP mode configuration."
+      (message "-------------------------> here")
+      (flycheck-mode t)
+      (php-set-style "nl/php"))
 
-  (defun nl/php-mode-hook ()
-    "My PHP mode configuration."
-    (flycheck-mode t))
+    (flycheck-define-checker nl/php-checker
+      "A PHP syntax checker using the PHP command line interpreter.
+      See URL http://php.net/manual/en/features.commandline.php."
+      :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+                "-d" "log_errors=0" source)
+      :error-patterns
+      ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+              (message) " in " (file-name) " on line " line line-end))
+      :modes (php-mode web-mode))
 
-  (flycheck-define-checker nl/php-checker
-    "A PHP syntax checker using the PHP command line interpreter.
-    See URL http://php.net/manual/en/features.commandline.php."
-    :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-              "-d" "log_errors=0" source)
-    :error-patterns
-    ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-            (message) " in " (file-name) " on line " line line-end))
-    :modes (php-mode web-mode))
+    :init
+    (eval-after-load 'flycheck
+      '(add-to-list 'flycheck-checkers 'nl/php-checker))
 
-  (eval-after-load 'flycheck
-    '(add-to-list 'flycheck-checkers 'nl/php-checker))
-
-  :config
-  (add-hook 'php-mode-hook 'nl/php-enable-coding-style)
-  (add-hook 'php-mode-hook 'nl/php-mode-hook))
+    :config
+    (custom-set-variables '(php-mode-coding-style (quote nl/php)))
+    (add-hook 'php-mode-hook 'nl/php-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/projectile][projectile]]
@@ -3652,10 +3655,9 @@ Views the same file side by side:
   (global-set-key (kbd "C-c d") 'toggle-window-dedicated)
 
   ;; see https://www.reddit.com/r/emacs/comments/80pd2q/anyone_could_help_me_with_window_management/
+  ;; possible values are: display-buffer-same-window, display-buffer-pop-up-window, display-buffer-reuse-window
   (setq display-buffer-alist
-       '(("\*.*Completions\*" . (display-buffer-pop-up-window))
-         ("\*Help\*" . (display-buffer-reuse-window))
-         (".*" . (display-buffer-same-window))))
+       '(("\*xref\*" . (display-buffer-same-window))))
 
   (defun nl/frame-grow-horizontally ()
     "Set the size and position of the Emacs window."
@@ -3714,6 +3716,9 @@ Views the same file side by side:
 
   (global-set-key (kbd "C-c t") 'hydra-transparency/body)
 #+END_SRC
+
+#+RESULTS:
+: hydra-transparency/body
 
 *** Font
 

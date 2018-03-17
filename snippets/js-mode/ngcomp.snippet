@@ -1,14 +1,9 @@
 # -*- mode: snippet -*-
 # name: AngularJS Component
 # key: ngcomp
-#
-# Functions ngcomp-snippet-get-controller-name and
-# ngcomp-snippet-get-template-url should be defined on a project
-# basis.
-#
 # --
 
-class Controller {
+class `(ngcomp-snippet-get-controller-name)` {
 
   constructor() {
     'ngInject'
@@ -21,14 +16,16 @@ class Controller {
 }
 
 /**
- * $1
+ * An AngularJS component that $0
+ *
+ * @memberOf $3
  */
-var COMPONENT = {
+const ${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`} = {
   template: require('`(ngcomp-snippet-get-template-url)`'),
-  controller: Controller,
+  controller: `(ngcomp-snippet-get-controller-name)`,
   controllerAs: 'vm',
   bindings: {
   }
-}
+};
 
-export default ngModule => ngModule.component('$0', COMPONENT)
+export default ngModule => ngModule.component('`(replace-regexp-in-string "Component$" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`', $1)
