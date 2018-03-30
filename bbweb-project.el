@@ -202,6 +202,9 @@
 (defun ngcomp-snippet-get-controller-name ()
   (upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))))
 
+(defun ngcomp-snippet-get-service-name-no-suffix ()
+  (replace-regexp-in-string "Service" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))
+
 (defun ngcomp-snippet-get-template-url ()
   "Returns the name of the templateUrl for a component."
   (concat "./" (replace-regexp-in-string "\\(Component\\|Directive\\)$" ".html" (file-name-base buffer-file-name) t)))

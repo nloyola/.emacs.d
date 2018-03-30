@@ -2,11 +2,17 @@
 # name: AngularJS Service
 # key: ngs
 # --
+/*
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
+ */
+
 /**
  *
+ * @memberOf
  */
 class ${2:`(s-upper-camel-case (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`} {
 
 }
 
-export default ngModule => ngModule.service('${1:`(file-name-nondirectory (file-name-sans-extension (buffer-file-name)))`}', $2)
+export default ngModule => ngModule.service('`(ngcomp-snippet-get-service-name-no-suffix)`}', $2)

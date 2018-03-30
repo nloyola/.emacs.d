@@ -1975,10 +1975,24 @@ stop:
 
 ** [[https://github.com/syohex/emacs-helm-ag][helm-ag]]
 
+Define my own function for ~C-o~ key mapping. Uses ~ace-select-window~
+instead of ~find-file-other-window~.
+
 #+BEGIN_SRC emacs-lisp
-(use-package helm-ag
-  :ensure t
-  :commands helm-ag)
+  (use-package helm-ag
+    :ensure t
+    :bind (:map helm-ag-mode-map
+                ("C-o" . nl/jump-other-window))
+    :preface
+    (defun nl/ace-find-file (filename)
+      (setq helm-ag--last-default-directory default-directory)
+      (ace-select-window)
+      (find-file (concat helm-ag--last-default-directory filename)))
+    (defun nl/jump-other-window ()
+      (interactive)
+      (let ((line (helm-current-line-contents)))
+        (helm-ag--find-file-action line 'nl/ace-find-file helm-ag--search-this-file-p)))
+    :commands helm-ag)
 #+END_SRC
 
 ** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
@@ -2550,31 +2564,31 @@ Sometimes you end up with cursors outside of your view. You can scroll
 the screen to center on each cursor with ~C-v~ and ~M-v~.
 
 #+BEGIN_SRC emacs-lisp
-(use-package multiple-cursors
-  :ensure t
-  :after selected
-  :init (require 'multiple-cursors)
-  :bind (("C-S-c C-S-c" . mc/edit-lines)
-         ("C->"         . mc/mark-next-like-this)
-         ("C-<"         . mc/mark-previous-like-this)
-         ("C-M->"       . mc/unmark-next-like-this)
-         ("C-M-<"       . mc/unmark-previous-like-this)
-         ("C-c C-<"     . mc/mark-all-like-this)
-         ("C-!"         . mc/mark-next-symbol-like-this)
-         ("C-x C-m"     . mc/mark-all-dwim))
-  :bind (:map selected-keymap
-              ("C-'" . mc/edit-lines)
-              ("c"   . mc/edit-lines)
-              ("."   . mc/mark-next-like-this)
-              ("<"   . mc/unmark-next-like-this)
-              ("C->" . mc/skip-to-next-like-this)
-              (","   . mc/mark-previous-like-this)
-              (">"   . mc/unmark-previous-like-this)
-              ("C-<" . mc/skip-to-previous-like-this)
-              ("y"   . mc/mark-next-symbol-like-this)
-              ("Y"   . mc/mark-previous-symbol-like-this)
-              ("w"   . mc/mark-next-word-like-this)
-              ("W"   . mc/mark-previous-word-like-this)))
+  (use-package multiple-cursors
+    :ensure t
+    :after selected
+    :init (require 'multiple-cursors)
+    :bind (("C-S-c C-S-c" . mc/edit-lines)
+           ("C->"         . mc/mark-next-like-this)
+           ("C-<"         . mc/mark-previous-like-this)
+           ("C-M->"       . mc/unmark-next-like-this)
+           ("C-M-<"       . mc/unmark-previous-like-this)
+           ("C-c C-<"     . mc/mark-all-like-this)
+           ("C-!"         . mc/mark-next-symbol-like-this)
+           ("C-x C-m"     . mc/mark-all-dwim))
+    :bind (:map selected-keymap
+                ("C-'" . mc/edit-lines)
+                ("c"   . mc/edit-lines)
+                ("."   . mc/mark-next-like-this)
+                ("<"   . mc/unmark-next-like-this)
+                ("C->" . mc/skip-to-next-like-this)
+                (","   . mc/mark-previous-like-this)
+                (">"   . mc/unmark-previous-like-this)
+                ("C-<" . mc/skip-to-previous-like-this)
+                ("y"   . mc/mark-next-symbol-like-this)
+                ("Y"   . mc/mark-previous-symbol-like-this)
+                ("w"   . mc/mark-next-word-like-this)
+                ("W"   . mc/mark-previous-word-like-this)))
 #+END_SRC
 
 ** [[https://github.com/politza/pdf-tools][pdf-tools]]
@@ -2616,7 +2630,6 @@ checker is loaded.
 
     (defun nl/php-mode-hook ()
       "My PHP mode configuration."
-      (message "-------------------------> here")
       (flycheck-mode t)
       (php-set-style "nl/php"))
 
@@ -3716,9 +3729,6 @@ Views the same file side by side:
 
   (global-set-key (kbd "C-c t") 'hydra-transparency/body)
 #+END_SRC
-
-#+RESULTS:
-: hydra-transparency/body
 
 *** Font
 
