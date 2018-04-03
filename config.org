@@ -2308,118 +2308,121 @@ When using =counsel-ag=:
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package js2-mode
-  :ensure t
-  :mode "\\.js\\'"
-  :bind (("C-c s j" . nl/counsel-ag-js))
-  :preface
-  (defun nl/counsel-ag-js ()
-    "Perform counsel-ag on the project's JavaScript files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "--js"))
+  (use-package js2-mode
+    :ensure t
+    :mode "\\.js\\'"
+    :bind (("C-c s j" . nl/counsel-ag-js))
+    :preface
+    (defun js-filename-p (filename)
+      (string-match "\.js$" filename))
 
-  (defun nl/counsel-ag-js-spec ()
-    "Perform counsel-ag on the project's JavaScript files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
+    (defun nl/counsel-ag-js ()
+      "Perform counsel-ag on the project's JavaScript files."
+      (interactive)
+      (counsel-ag "" (projectile-project-root) "--js"))
 
-  (defun nl/webpack-find-file ()
-    "From a webpack failure backtrace, opens the file under the cursor at the line specified."
-    (interactive)
-    (let (p1 p2 err-line filename file-with-proj-path)
-      (save-some-buffers t)
-      (setq p1 (line-beginning-position) )
-      (setq p2 (line-end-position) )
-      (setq err-line (buffer-substring-no-properties p1 p2))
-      (save-match-data ; is usually a good idea
-        (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
-             (setq filename (match-string 2 err-line))))
-      (message "filename: %s" (expand-file-name filename (projectile-project-root)))
-      (ace-select-window)
-      (find-file (expand-file-name filename (projectile-project-root)))
-      (goto-char (point-min))))
+    (defun nl/counsel-ag-js-spec ()
+      "Perform counsel-ag on the project's JavaScript files."
+      (interactive)
+      (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
 
-  (defun nl/webpack-find-next-error ()
-    "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
-    (interactive)
-    (next-line)
-    (while (re-search-forward "^ERROR" nil t)
-      (goto-char (match-beginning 0))
-      (recenter 0)
-      (nl/webpack-find-file)))
+    (defun nl/webpack-find-file ()
+      "From a webpack failure backtrace, opens the file under the cursor at the line specified."
+      (interactive)
+      (let (p1 p2 err-line filename file-with-proj-path)
+        (save-some-buffers t)
+        (setq p1 (line-beginning-position) )
+        (setq p2 (line-end-position) )
+        (setq err-line (buffer-substring-no-properties p1 p2))
+        (save-match-data ; is usually a good idea
+          (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
+               (setq filename (match-string 2 err-line))))
+        (message "filename: %s" (expand-file-name filename (projectile-project-root)))
+        (ace-select-window)
+        (find-file (expand-file-name filename (projectile-project-root)))
+        (goto-char (point-min))))
 
-  :init
-  (setq js2-global-externs '("define"
-                             "jasmine"
-                             "describe"
-                             "fdescribe"
-                             "fail"
-                             "beforeEach"
-                             "afterEach"
-                             "inject"
-                             "expect"
-                             "spyOn"
-                             "it"
-                             "fit"
-                             "xdescribe"
-                             "xit"))
-  :config
-  (setq javascript-common-imenu-regex-list
-        '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
-          ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
-          ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
-          ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
-          ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
-          ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
-          ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
-          ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
-          ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
-          ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
-          ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
-          ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
-          ))
+    (defun nl/webpack-find-next-error ()
+      "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
+      (interactive)
+      (next-line)
+      (while (re-search-forward "^ERROR" nil t)
+        (goto-char (match-beginning 0))
+        (recenter 0)
+        (nl/webpack-find-file)))
 
-  ;; js-mode imenu enhancement
-  ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
-  (defun nl-js-imenu-make-index ()
-    (save-excursion
-      (imenu--generic-function javascript-common-imenu-regex-list)))
+    :init
+    (setq js2-global-externs '("define"
+                               "jasmine"
+                               "describe"
+                               "fdescribe"
+                               "fail"
+                               "beforeEach"
+                               "afterEach"
+                               "inject"
+                               "expect"
+                               "spyOn"
+                               "it"
+                               "fit"
+                               "xdescribe"
+                               "xit"))
+    :config
+    (setq javascript-common-imenu-regex-list
+          '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+            ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+            ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+            ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+            ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+            ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+            ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+            ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+            ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+            ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
+            ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+            ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
+            ))
 
-  (defun nl/javascript-mode-hook ()
-    (nl/setup-indent 2) ; indent 2 spaces width
-    (setq comment-multi-line t
-          mode-name "JS2")
-    (define-key js-mode-map [remap indent-new-comment-line]
-      'c-indent-new-comment-line)
-    (setq indent-tabs-mode nil)
-    (setq imenu-create-index-function 'nl-js-imenu-make-index)
-    (flycheck-mode t))
+    ;; js-mode imenu enhancement
+    ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+    (defun nl-js-imenu-make-index ()
+      (save-excursion
+        (imenu--generic-function javascript-common-imenu-regex-list)))
 
-  (custom-set-variables '(js2-basic-offset 2)
-                        '(js2-bounce-indent-p nil)
-                        '(js2-highlight-level 3))
+    (defun nl/javascript-mode-hook ()
+      (nl/setup-indent 2) ; indent 2 spaces width
+      (setq comment-multi-line t
+            mode-name "JS2")
+      (define-key js-mode-map [remap indent-new-comment-line]
+        'c-indent-new-comment-line)
+      (setq indent-tabs-mode nil)
+      (setq imenu-create-index-function 'nl-js-imenu-make-index)
+      (flycheck-mode t))
 
-  ;;(eval-after-load 'js2-mode
-  ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+    (custom-set-variables '(js2-basic-offset 2)
+                          '(js2-bounce-indent-p nil)
+                          '(js2-highlight-level 3))
 
-  ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
-  ;;(setq ac-js2-evaluate-calls t)
+    ;;(eval-after-load 'js2-mode
+    ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
 
-  (setq-default js2-mode-show-parse-errors t)
-  (setq-default js2-strict-missing-semi-warning t)
-  (setq-default js2-strict-trailing-comma-warning t)
+    ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
+    ;;(setq ac-js2-evaluate-calls t)
 
-  (add-hook 'js2-mode-hook 'fic-mode)
-  (add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
-  (add-hook 'js2-mode-hook 'my-common-prog-mode-settings))
+    (setq-default js2-mode-show-parse-errors t)
+    (setq-default js2-strict-missing-semi-warning t)
+    (setq-default js2-strict-trailing-comma-warning t)
+
+    (add-hook 'js2-mode-hook 'fic-mode)
+    (add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
+    (add-hook 'js2-mode-hook 'my-common-prog-mode-settings))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
@@ -2870,170 +2873,173 @@ that outputs errors."
 ** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package scala-mode
-    :ensure t
-    ;;:load-path "/home/nelson/src/github/elisp/emacs-scala-mode"
-    :mode "\\.scala\\'"
-    :interpreter ("scala" . scala-mode)
-    :preface
+    (use-package scala-mode
+      :ensure t
+      ;;:load-path "/home/nelson/src/github/elisp/emacs-scala-mode"
+      :mode "\\.scala\\'"
+      :interpreter ("scala" . scala-mode)
+      :preface
+      (defun scala-filename-p (filename)
+        (string-match "\.scala$" filename))
 
-    ;; created after reading this article:
-    ;;
-    ;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
-    (setq nl/helm-scala-project-test-spec
-          '((name . "Select a ScalaTest specification to run:")
-            (candidates
-             . (lambda ()
-                 (remove-if-not (lambda (filename)
-                                  (string-match "Spec.scala$" filename))
-                                (projectile-current-project-files))
-                 ))
-            (nomark . t)
-            (action
-             . (lambda (candidate)
-                 ;;(message "file name is: %s" candidate)
-                 ;;(message "test name is: %s" (file-name-nondirectory candidate))
-                 (sbt-command (message "testOnly *.%s"
-                                       (file-name-sans-extension (file-name-nondirectory candidate))))
-                 ))))
 
-    (defun nl/scalatest-test-only ()
-      (interactive)
-      (helm :sources '(nl/helm-scala-project-test-spec)))
+      ;; created after reading this article:
+      ;;
+      ;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
+      (setq nl/helm-scala-project-test-spec
+            '((name . "Select a ScalaTest specification to run:")
+              (candidates
+               . (lambda ()
+                   (remove-if-not (lambda (filename)
+                                    (string-match "Spec.scala$" filename))
+                                  (projectile-current-project-files))
+                   ))
+              (nomark . t)
+              (action
+               . (lambda (candidate)
+                   ;;(message "file name is: %s" candidate)
+                   ;;(message "test name is: %s" (file-name-nondirectory candidate))
+                   (sbt-command (message "testOnly *.%s"
+                                         (file-name-sans-extension (file-name-nondirectory candidate))))
+                   ))))
 
-    (defun sbt-hydra:run-sbt-command (command)
-      (sbt-switch-to-active-sbt-buffer)
-      (sbt-hydra:add-to-history command)
-      (sbt-hydra:run-previous-sbt-command))
+      (defun nl/scalatest-test-only ()
+        (interactive)
+        (helm :sources '(nl/helm-scala-project-test-spec)))
 
-    (defconst scalatest-beginning-of-class
-      (rx line-start
-          (* (syntax whitespace))
-          "class"
-          (+ (syntax whitespace))
-          (group (+ (or (syntax word) (syntax symbol))))
-          (* (syntax whitespace)))
-      "Regular expression for a scalatest suite.")
+      (defun sbt-hydra:run-sbt-command (command)
+        (sbt-switch-to-active-sbt-buffer)
+        (sbt-hydra:add-to-history command)
+        (sbt-hydra:run-previous-sbt-command))
 
-    (defconst scalatest-beginning-of-behaviour-regexp
-      (eval-when-compile
+      (defconst scalatest-beginning-of-class
         (rx line-start
-            (one-or-more (syntax whitespace))
-            "it" (syntax open-parenthesis) (syntax string-quote)
-            (group (+ (not (syntax string-quote))))
-            (syntax string-quote) (syntax close-parenthesis)))
-        "Regular expression for a scalatest FunSepc behaviour.")
+            (* (syntax whitespace))
+            "class"
+            (+ (syntax whitespace))
+            (group (+ (or (syntax word) (syntax symbol))))
+            (* (syntax whitespace)))
+        "Regular expression for a scalatest suite.")
 
-    (defun nl/scalstest-find-suite-name ()
-      "Determines the name of the ScalaTest suite name."
-      (save-excursion
-        (goto-char (point-min))
-        (when (re-search-forward scalatest-beginning-of-class nil t)
-          (match-string-no-properties 1))))
+      (defconst scalatest-beginning-of-behaviour-regexp
+        (eval-when-compile
+          (rx line-start
+              (one-or-more (syntax whitespace))
+              "it" (syntax open-parenthesis) (syntax string-quote)
+              (group (+ (not (syntax string-quote))))
+              (syntax string-quote) (syntax close-parenthesis)))
+          "Regular expression for a scalatest FunSepc behaviour.")
 
-    (defun nl/scalstest-find-scalatest-behaviour ()
-      "Determines the name of the ScalaTest suite name."
-      (save-excursion
-        (when (re-search-backward scalatest-beginning-of-behaviour-regexp nil t)
-          (match-string-no-properties 1))))
+      (defun nl/scalstest-find-suite-name ()
+        "Determines the name of the ScalaTest suite name."
+        (save-excursion
+          (goto-char (point-min))
+          (when (re-search-forward scalatest-beginning-of-class nil t)
+            (match-string-no-properties 1))))
 
-    (defun nl/scalatest-test-only-this-buffer ()
-      "For the class in the current buffer, run the scalatest test suite.
-  The class name must have the postfix 'Spec' for this function to work."
+      (defun nl/scalstest-find-scalatest-behaviour ()
+        "Determines the name of the ScalaTest suite name."
+        (save-excursion
+          (when (re-search-backward scalatest-beginning-of-behaviour-regexp nil t)
+            (match-string-no-properties 1))))
+
+      (defun nl/scalatest-test-only-this-buffer ()
+        "For the class in the current buffer, run the scalatest test suite.
+    The class name must have the postfix 'Spec' for this function to work."
+        (interactive)
+        (sbt-command (format "testOnly *.%s" (nl/scalstest-find-suite-name))))
+
+      (defun nl/scalatest-test-only-this-buffer-with-substring-tag ()
+        "For the class in the current buffer, run the scalatest test suite.
+    The class name must have the postfix 'Spec' for this function to work."
+        (interactive)
+        (sbt-command (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour))))
+
+      (defun nl/scalatest-find-file ()
+        "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
+        (interactive)
+        (let (p1 p2 err-line filename line-num file-with-proj-path)
+          (save-some-buffers t)
+          (setq p1 (line-beginning-position) )
+          (setq p2 (line-end-position) )
+          (setq err-line (buffer-substring-no-properties p1 p2))
+          (save-match-data ; is usually a good idea
+            (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
+                 (setq filename (concat "/" (match-string 1 err-line)) ; add leading slash as a delimiter
+                       line-num (string-to-number (match-string 2 err-line))
+                       )))
+          (setq file-with-proj-path
+                (car (remove-if-not
+                      (lambda (projfile)
+                        (string-match filename projfile))
+                      (projectile-current-project-files))))
+          (message "%s %s" file-with-proj-path line-num)
+          (ace-select-window)
+          (find-file (expand-file-name file-with-proj-path (projectile-project-root)))
+          (goto-char (point-min))
+          (forward-line (- line-num 1))))
+
+    (defun nl/scalatest-find-next-failure ()
+      "Finds the next failed test in an SBT buffer that just ran scalatests."
       (interactive)
-      (sbt-command (format "testOnly *.%s" (nl/scalstest-find-suite-name))))
+      (search-forward "*** FAILED ***")
+      (move-end-of-line nil)
+      (recenter))
 
-    (defun nl/scalatest-test-only-this-buffer-with-substring-tag ()
-      "For the class in the current buffer, run the scalatest test suite.
-  The class name must have the postfix 'Spec' for this function to work."
-      (interactive)
-      (sbt-command (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour))))
+      (defhydra hydra-nl-scalatest (:hint nil)
+        "Testing scala code with scalatest"
+        ("f" nl/scalatest-find-file "find file from traceback" :color blue)
+        ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
+        ("s" nl/scalatest-test-only "select suite to run" :color blue))
 
-    (defun nl/scalatest-find-file ()
-      "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
-      (interactive)
-      (let (p1 p2 err-line filename line-num file-with-proj-path)
-        (save-some-buffers t)
-        (setq p1 (line-beginning-position) )
-        (setq p2 (line-end-position) )
-        (setq err-line (buffer-substring-no-properties p1 p2))
-        (save-match-data ; is usually a good idea
-          (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
-               (setq filename (concat "/" (match-string 1 err-line)) ; add leading slash as a delimiter
-                     line-num (string-to-number (match-string 2 err-line))
-                     )))
-        (setq file-with-proj-path
-              (car (remove-if-not
-                    (lambda (projfile)
-                      (string-match filename projfile))
-                    (projectile-current-project-files))))
-        (message "%s %s" file-with-proj-path line-num)
-        (ace-select-window)
-        (find-file (expand-file-name file-with-proj-path (projectile-project-root)))
-        (goto-char (point-min))
-        (forward-line (- line-num 1))))
+      (defun scala-mode-newline-comments ()
+        "Custom newline appropriate for `scala-mode'."
+        ;; shouldn't this be in a post-insert hook?
+        (interactive)
+        (newline-and-indent)
+        (scala-indent:insert-asterisk-on-multiline-comment))
 
-  (defun nl/scalatest-find-next-failure ()
-    "Finds the next failed test in an SBT buffer that just ran scalatests."
-    (interactive)
-    (search-forward "*** FAILED ***")
-    (move-end-of-line nil)
-    (recenter))
+      (defun nl/scala-mode-keys ()
+        "My extra key definitions for 'scala-mode'."
+        (interactive)
+        ;; use sbt-run-previous-command to re-compile your code after changes
+        (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
+        (local-set-key (kbd "C-c , c") 'nl/scalatest-test-only-this-buffer)
+        (local-set-key (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
+        (local-set-key (kbd "RET") 'newline-and-indent)
+        ;; Bind the backtab (shift tab) to
+        ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+        ;; when using the 'eager' mode by default and you want to "outdent" a
+        ;; code line as a new statement.
+        (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+        (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
 
-    (defhydra hydra-nl-scalatest (:hint nil)
-      "Testing scala code with scalatest"
-      ("f" nl/scalatest-find-file "find file from traceback" :color blue)
-      ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
-      ("s" nl/scalatest-test-only "select suite to run" :color blue))
+      (defun nl-scala-mode-hook ()
+        (yas-minor-mode)
+        ;; sbt-find-definitions is a command that tries to find (with grep)
+        ;; the definition of the thing at point.
+        ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
 
-    (defun scala-mode-newline-comments ()
-      "Custom newline appropriate for `scala-mode'."
-      ;; shouldn't this be in a post-insert hook?
-      (interactive)
-      (newline-and-indent)
-      (scala-indent:insert-asterisk-on-multiline-comment))
+        (setq-default indent-tabs-mode nil)
+        (setq compilation-ask-about-save nil)
+        (nl/scala-mode-keys))
 
-    (defun nl/scala-mode-keys ()
-      "My extra key definitions for 'scala-mode'."
-      (interactive)
-      ;; use sbt-run-previous-command to re-compile your code after changes
-      (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-      (local-set-key (kbd "C-c , c") 'nl/scalatest-test-only-this-buffer)
-      (local-set-key (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
-      (local-set-key (kbd "RET") 'newline-and-indent)
-      ;; Bind the backtab (shift tab) to
-      ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-      ;; when using the 'eager' mode by default and you want to "outdent" a
-      ;; code line as a new statement.
-      (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
-      (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
+      (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 
-    (defun nl-scala-mode-hook ()
-      (yas-minor-mode)
-      ;; sbt-find-definitions is a command that tries to find (with grep)
-      ;; the definition of the thing at point.
-      ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+      (defun nl/counsel-ag-scala ()
+        "Perform counsel-ag on the project's Scala files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "--scala"))
+      (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
 
-      (setq-default indent-tabs-mode nil)
-      (setq compilation-ask-about-save nil)
-      (nl/scala-mode-keys))
-
-    (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
-
-    (defun nl/counsel-ag-scala ()
-      "Perform counsel-ag on the project's Scala files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "--scala"))
-    (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
-
-    :config
-    (setq scala-indent:indent-value-expression t
-          scala-indent:align-parameters t
-          scala-indent:align-forms t
-          scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-          scala-indent:use-javadoc-style t)
-    (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
-    (add-hook 'scala-mode-hook 'fic-mode))
+      :config
+      (setq scala-indent:indent-value-expression t
+            scala-indent:align-parameters t
+            scala-indent:align-forms t
+            scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+            scala-indent:use-javadoc-style t)
+      (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
+      (add-hook 'scala-mode-hook 'fic-mode))
 #+END_SRC
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
@@ -3349,6 +3355,9 @@ Wand is an extension that allows users to select a piece of text and perform act
          ("\\.json\\'" . web-mode))
   :bind ("C-c s h" . nl/counsel-ag-html)
   :preface
+  (defun html-filename-p (filename)
+    (string-match "\.html$" filename))
+
   (defun nl/counsel-ag-html ()
     "Perform counsel-ag on the project's HTML files."
     (interactive)
@@ -3451,7 +3460,6 @@ Ztree is a project dedicated to implementation of several text-tree applications
   :ensure t
   :bind ("M-z" . zzz-up-to-char))
 #+END_SRC
-
 * Computer-specific settings
 
 Load some computer-specific settings, such as the name and and email address. The way the settings

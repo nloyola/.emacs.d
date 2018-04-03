@@ -37,15 +37,6 @@
              (concat test-dir test-file)))))
 
 ;; functions for finding files in project
-(defun scala-filename-p (filename)
-  (string-match "\.scala$" filename))
-
-(defun js-filename-p (filename)
-  (string-match "\.js$" filename))
-
-(defun html-filename-p (filename)
-  (string-match "\.html$" filename))
-
 (defun bbweb-find-with-filetypes (predicate)
   (let ((files (remove-if-not predicate (projectile-current-project-files))))
     (helm-comp-read "Find file: " files)))
@@ -153,61 +144,6 @@
         (delete-matching-lines "\\bbweb\/(node_modules\\|target\\)" (point-min) (point-max))
         (read-only-mode 1))))
 
-
-;; borrowed from js2-refactor
-(defun bbweb--current-quotes-char ()
-  "The char that is the current quote delimiter."
-  (nth 3 (syntax-ppss)))
-
-(defun bbweb-gettext-surround-string ()
-  "Surrounds string with a call to gettext.  Cursor must be at string's start."
-  (interactive)
-  (if (looking-at "'")
-      (save-excursion
-        (insert "gettext(")
-        (forward-char)
-        (while (bbweb--current-quotes-char)
-          (forward-char))
-        (insert ")"))
-    (message "not at the start of a string")))
-
-(defun bbweb-js-mode-keys ()
-  "Key definitions for 'js-mode' in bbweb project."
-  (interactive)
-  (local-set-key (kbd "C-c g") 'bbweb-gettext-surround-string))
-
-(add-hook 'js-mode-hook 'bbweb-js-mode-keys)
-
-(defun bbweb-gettext-surround-html-string ()
-  "Surrounds string with a call to gettext.  Cursor must be at string's start."
-  (interactive)
-  (if (looking-at "\"")
-      (save-excursion
-        (forward-char)
-        (insert "{{'")
-        (forward-char)
-        (while (bbweb--current-quotes-char)
-          (forward-char))
-        (backward-char)
-        (insert "'|translate}}"))
-    (message "not at the start of a string")))
-
-(defun bbweb-html-mode-keys ()
-  "Key definitions for 'html-mode' in bbweb project."
-  (interactive)
-  (local-set-key (kbd "C-c g") 'bbweb-gettext-surround-html-string))
-
-(add-hook 'html-mode-hook 'bbweb-html-mode-keys)
-
-(defun ngcomp-snippet-get-controller-name ()
-  (upcase-initials (replace-regexp-in-string "Component" "Controller" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))))
-
-(defun ngcomp-snippet-get-service-name-no-suffix ()
-  (replace-regexp-in-string "Service" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name)))))
-
-(defun ngcomp-snippet-get-template-url ()
-  "Returns the name of the templateUrl for a component."
-  (concat "./" (replace-regexp-in-string "\\(Component\\|Directive\\)$" ".html" (file-name-base buffer-file-name) t)))
 
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here
