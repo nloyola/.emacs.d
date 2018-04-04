@@ -400,6 +400,13 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
   (interactive)
   (kill-buffer (current-buffer)))
 
+(defun nl/helm-compile ()
+  "Use Helm to choose a compile command."
+  (interactive)
+  (let ((selected-command
+         (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
+    (compile selected-command)))
+
 (global-set-key (kbd "M-%")           'query-replace-regexp)
 ;;(global-set-key "\C-x\C-e"          'compile)
 (global-set-key (kbd "C-x C-n")       'next-error)
@@ -412,7 +419,7 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 (global-set-key [(shift f2)]          '(lambda () (interactive) (revert-buffer t t)))
 (global-set-key [(shift f3)]          'helm-recentf)
 (global-set-key [(meta shift f3)]     'sbt-grep)
-(global-set-key [f5]                  'compile)
+(global-set-key [f5]                  'nl/helm-compile)
 (global-set-key [(shift f5)]          'toggle-truncate-lines)
 (global-set-key [(shift f11)]         'eval-region)
 (global-set-key [(control shift f11)] 'align-regexp)
@@ -1893,17 +1900,17 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
          ("C-x C-f" . helm-find-files)
          ("C-`" . helm-resume)))
 
-(defun nl/eval-expression ()
+(defun nl/helm-eval-expression ()
   (interactive)
   (let ((selected-expression
          (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
     ;;(message "selected: %s" selected-expression)
     (eval-expression (car (read-from-string selected-expression)))))
 
-(defun nl/async-shell-command ()
+(defun nl/helm-async-shell-command ()
   (interactive)
   (let ((selected-command
-         (helm "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
+         (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
     (async-shell-command selected-command)))
 #+END_SRC
 
