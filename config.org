@@ -405,6 +405,8 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
   (interactive)
   (let ((selected-command
          (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
+    (add-to-list 'compile-history selected-command)
+    (remove-duplicates compile-history :test 'string=)
     (compile selected-command)))
 
 (global-set-key (kbd "M-%")           'query-replace-regexp)
