@@ -395,36 +395,36 @@ each time.
 http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 
 #+BEGIN_SRC emacs-lisp
-(defun nl/kill-this-buffer ()
-  "Kill the current buffer."
-  (interactive)
-  (kill-buffer (current-buffer)))
+  (defun nl/kill-this-buffer ()
+    "Kill the current buffer."
+    (interactive)
+    (kill-buffer (current-buffer)))
 
-(defun nl/helm-compile ()
-  "Use Helm to choose a compile command."
-  (interactive)
-  (let ((selected-command
-         (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
-    (add-to-list 'compile-history selected-command)
-    (remove-duplicates compile-history :test 'string=)
-    (compile selected-command)))
+  (defun nl/helm-compile ()
+    "Use Helm to choose a compile command."
+    (interactive)
+    (let ((selected-command
+           (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
+      (if (not (member selected-command compile-history))
+          (add-to-list 'compile-history selected-command))
+      (compile selected-command)))
 
-(global-set-key (kbd "M-%")           'query-replace-regexp)
-;;(global-set-key "\C-x\C-e"          'compile)
-(global-set-key (kbd "C-x C-n")       'next-error)
-(global-set-key (kbd "C-x C-i")       'c-indent-exp)
-(global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
+  (global-set-key (kbd "M-%")           'query-replace-regexp)
+  ;;(global-set-key "\C-x\C-e"          'compile)
+  (global-set-key (kbd "C-x C-n")       'next-error)
+  (global-set-key (kbd "C-x C-i")       'c-indent-exp)
+  (global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
 
-(global-set-key (kbd "<f1>")          'indent-for-tab-command)
-(global-set-key [(shift f1)]          'indent-region)
-(global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))
-(global-set-key [(shift f2)]          '(lambda () (interactive) (revert-buffer t t)))
-(global-set-key [(shift f3)]          'helm-recentf)
-(global-set-key [(meta shift f3)]     'sbt-grep)
-(global-set-key [f5]                  'nl/helm-compile)
-(global-set-key [(shift f5)]          'toggle-truncate-lines)
-(global-set-key [(shift f11)]         'eval-region)
-(global-set-key [(control shift f11)] 'align-regexp)
+  (global-set-key (kbd "<f1>")          'indent-for-tab-command)
+  (global-set-key [(shift f1)]          'indent-region)
+  (global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))
+  (global-set-key [(shift f2)]          '(lambda () (interactive) (revert-buffer t t)))
+  (global-set-key [(shift f3)]          'helm-recentf)
+  (global-set-key [(meta shift f3)]     'sbt-grep)
+  (global-set-key [f5]                  'nl/helm-compile)
+  (global-set-key [(shift f5)]          'toggle-truncate-lines)
+  (global-set-key [(shift f11)]         'eval-region)
+  (global-set-key [(control shift f11)] 'align-regexp)
 #+END_SRC
 
 ** Line numbers.
