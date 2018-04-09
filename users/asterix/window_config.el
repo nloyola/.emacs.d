@@ -24,5 +24,4 @@
 (add-hook 'window-setup-hook (lambda ()
                                (nl/main-frame-set-size-and-position)
                                (resume)
-                               (make-frame-command)
-                               ))
+                               (make-frame-command)))
