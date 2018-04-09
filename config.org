@@ -1312,15 +1312,16 @@ buffer name is too hard to see,  set it to white instead.
 
 Trying out Kaolin Theme 2017-10-25
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package base16-theme
   :ensure t
   :config
     ;;(load-theme 'base16-solarized-dark t)
-    (load-theme 'base16-oceanicnext t)
+    ;;(load-theme 'base16-oceanicnext t)
     ;;(load-theme 'base16-google-dark t)
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "white")
-    )
+    ;;(load-theme 'base16-woodland t)
+    (load-theme 'base16-nord t)
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
 
 ** [[https://github.com/Malabarba/beacon][beacon]]
@@ -2449,7 +2450,7 @@ When using =counsel-ag=:
 
 ** [[https://github.com/ogdenwebb/emacs-kaolin-themes][kaolin-themes]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package kaolin-themes
   :ensure t
   :config
