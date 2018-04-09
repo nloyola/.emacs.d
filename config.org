@@ -656,7 +656,6 @@ Prefer saving this file somewhere other than the default.
 
 #+BEGIN_SRC emacs-lisp
 (use-package cc-mode
-  :load-path "override/cc-mode"
   :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
          ("\\.m\\'"                   . c-mode)
          ("\\.mm\\'"                  . c++-mode)
@@ -1421,16 +1420,18 @@ Complete anything.
     (add-hook 'after-init-hook 'global-company-mode))
 #+END_SRC
 
-** [[https://melpa.org/#/cursor-chg][cursor-chg]]
+** [[https://github.com/emacsmirror/emacswiki.org/blob/master/cursor-chg.el][cursor-chg]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package cursor-chg
-  :ensure t
+  :load-path "lisp"
   :commands change-cursor-mode
   :config
   (change-cursor-mode 1)
   (toggle-cursor-type-when-idle 1))
 #+END_SRC
+
+This package was removed from MELPA since it was only found on Emacs Wiki.
 
 ** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
 
@@ -1522,7 +1523,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
   (use-package eclim
-    :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+    :load-path "~/src/github/elisp/emacs-eclim"
     :diminish eclim-mode
     :preface
     (defun nl/restart-eclim (workspace-dir)
@@ -1550,7 +1551,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
       :commands company-emacs-eclim-setup)
 
     (use-package eclimd
-      :load-path "/home/nelson/src/github/elisp/emacs-eclim"
+      :load-path "~/src/github/elisp/emacs-eclim"
       :preface
       ;;(setq eclimd-autostart t)
       )
@@ -1680,13 +1681,13 @@ strings.
     (add-hook 'php-mode-hook 'fic-mode))
 #+END_SRC
 
-** [[http://www.emacswiki.org/emacs/framemove.el][framemove]]
+** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
 
 Allow windmove to jump between frames.
 
 #+BEGIN_SRC emacs-lisp
 (use-package framemove
-  :ensure t
+  :load-path "lisp"
   :config
   (setq framemove-hook-into-windmove t))
 #+END_SRC
@@ -1847,7 +1848,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   :ensure t
-  ;;:load-path "/home/nelson/src/github/elisp/helm"
+  ;;:load-path "~/src/github/elisp/helm"
   :commands (helm-config helm-files helm-grep)
   :diminish helm-mode
   :init
@@ -2605,7 +2606,7 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
 
 ** [[https://github.com/politza/pdf-tools][pdf-tools]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (pdf-tools-install)
 #+END_SRC
 
@@ -2773,7 +2774,7 @@ Show org-mode bullets as UTF-8 characters.
   (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
-** [[https://github.com/emacsmirror/revive][revive]] (not used)
+** [[https://github.com/emacsmirror/revive][revive]]
 
 Using revive
 
@@ -2784,7 +2785,8 @@ This package was removed from Melpa on 2017-07-31 due to the author not wanting 
 specify a lincence.
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package revive)
+(use-package revive
+  :load-path "lisp")
 #+END_SRC
 
 ** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
@@ -2822,7 +2824,7 @@ to overwrite.
 #+BEGIN_SRC emacs-lisp
 (use-package sbt-mode
   :ensure t
-  ;;:load-path "/home/nelson/src/github/elisp/emacs-sbt-mode"
+  ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
   :commands (sbt-start sbt-command)
   :preface
   (defun nl-sbt-mode-hook ()
@@ -2884,7 +2886,7 @@ that outputs errors."
 #+BEGIN_SRC emacs-lisp
     (use-package scala-mode
       :ensure t
-      ;;:load-path "/home/nelson/src/github/elisp/emacs-scala-mode"
+      ;;:load-path "~/src/github/elisp/emacs-scala-mode"
       :mode "\\.scala\\'"
       :interpreter ("scala" . scala-mode)
       :preface
@@ -3234,7 +3236,7 @@ think of it as both something that augments and replaces the standard
 (use-package tern
   :ensure t
   :commands tern-mode
-  :load-path "/home/nelson/src/github/elisp/tern/emacs"
+  :load-path "~/src/github/elisp/tern/emacs"
   :diminish tern-mode
   :init (add-hook 'js2-mode-hook 'tern-mode))
 
