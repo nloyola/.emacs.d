@@ -405,8 +405,9 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
     (interactive)
     (let ((selected-command
            (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
-      (if (not (member selected-command compile-history))
-          (add-to-list 'compile-history selected-command))
+      ;; move this command to the front of the history
+      (setq compile-history (remove selected-command compile-history))
+      (add-to-list 'compile-history selected-command)
       (compile selected-command)))
 
   (global-set-key (kbd "M-%")           'query-replace-regexp)
@@ -577,11 +578,6 @@ A way to set up indentation for all programming modes. Taken from
                 web-mode-css-indent-offset n         ; web-mode, css in html file
                 web-mode-code-indent-offset n        ; web-mode, js code in html file
                 css-indent-offset n))                ; css-mode
-#+END_SRC
-
-** Programming mode hook.
-
-#+BEGIN_SRC emacs-lisp
 #+END_SRC
 
 ** Emacs lisp
@@ -1045,7 +1041,7 @@ comments.
     (push '(">=" . ?≥) prettify-symbols-alist)
     (push '("<=" . ?≤) prettify-symbols-alist)
     (push '("->" . ?→) prettify-symbols-alist)
-    )
+    (yas-minor-mode))
   :config
   (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
   (add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
@@ -1394,8 +1390,8 @@ Complete anything.
     :ensure t
     :diminish company-mode
     :bind (:map company-active-map
-                ("M-j" . company-select-next)
-                ("M-k" . company-select-previous))
+                ("C-n" . company-select-next)
+                ("C-p" . company-select-previous))
     ("M-/" . company-complete-common)
     :preface
     ;; enable yasnippet everywhere
@@ -1413,7 +1409,7 @@ Complete anything.
     ;; no delay no autocomplete
     (setq
      company-idle-delay 0
-     company-minimum-prefix-length 2
+     company-minimum-prefix-length 4
      company-tooltip-limit 20)
 
     (setq company-backends
@@ -3038,7 +3034,8 @@ that outputs errors."
 
         (setq-default indent-tabs-mode nil)
         (setq compilation-ask-about-save nil)
-        (nl/scala-mode-keys))
+        (nl/scala-mode-keys)
+        (yas-minor-mode))
 
       (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 
@@ -3329,19 +3326,18 @@ idle time.
 Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]].
 
 #+BEGIN_SRC emacs-lisp
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :init
-  (yas-global-mode 1))
+  (use-package yasnippet
+    :ensure t
+    :diminish yas-minor-mode
+    ;;:init
+    ;;(yas-global-mode 1)
+    :config
+    (use-package yasnippet-snippets
+      :ensure t)
+    yas-reload-all)
 #+END_SRC
 
-** [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package yasnippet-snippets
-  :ensure t)
-#+END_SRC
+*** [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]]
 
 ** [[https://github.com/cmpitg/wand][wand]]
 
@@ -3381,7 +3377,8 @@ Wand is an extension that allows users to select a piece of text and perform act
 
   (defun nl/web-mode-hook ()
     "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2))
+    (setq web-mode-markup-indent-offset 2)
+    (yas-minor-mode))
 
   :config
   (setq web-mode-markup-indent-offset 2
