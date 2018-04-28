@@ -2939,7 +2939,7 @@ that outputs errors."
           (eval-when-compile
             (rx line-start
                 (one-or-more (syntax whitespace))
-                "it" (syntax open-parenthesis) (syntax string-quote)
+                (| "it" "describe") (syntax open-parenthesis) (syntax string-quote)
                 (group (+ (not (syntax string-quote))))
                 (syntax string-quote)
                 ;; account for optional tag

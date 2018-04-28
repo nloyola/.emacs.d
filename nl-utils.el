@@ -156,3 +156,48 @@
    "app/assets/javascripts/admin/modules/studies/controllers/processingTypesPanel/processingTypesPanelDirectiveSpec.js"
    "app/assets/javascripts/admin/modules/studies/controllers/spcLinkTypesPanel/spcLinkTypesPanelDirectiveSpec.js"
    "app/assets/javascripts/shipmentSpecimens/components/specimenTableAction/specimenTableActionComponentSpec.js"))
+
+
+(defun nl/scalatest-timestamp-fix ()
+  (interactive)
+  (goto-char (point-min))
+  (while (re-search-forward "(beEntityWithTimeAddedWithinSeconds" nil t)
+    (beginning-of-line-text)
+    (replace-string "(beEntityWithTimeAddedWithinSeconds" "beEntityWithTimeStamps" nil (line-beginning-position) (line-end-position))
+    (replace-regexp ",.*and" ", " nil (line-beginning-position) (line-end-position))
+    (hungry-delete-forward 1)
+    (beginning-of-line-text)
+    (replace-string "beEntityWithTimeModifiedWithinSeconds(" "" nil (line-beginning-position) (line-end-position))
+    (move-end-of-line nil)
+    (hungry-delete-backward 1)))
+
+(defun nl/files-scalatest-timestamp-fix (fix-func files)
+  (interactive)
+  (loop for file in files do
+        (progn
+          (setq default-directory "/home/nelson/src/cbsr/scala/bbweb")
+          (find-file file)
+          (funcall fix-func)
+          (save-buffer))))
+
+(nl/files-scalatest-timestamp-fix
+ 'nl/scalatest-timestamp-fix
+ '("test/org/biobank/domain/users/UserSpec.scala"
+   "test/org/biobank/domain/JsonHelper.scala"
+   "test/org/biobank/domain/participants/CollectionEventSpec.scala"
+   "test/org/biobank/domain/participants/SpecimenSpec.scala"
+   "test/org/biobank/domain/containers/ContainerSchemaSpec.scala"
+   "test/org/biobank/domain/studies/StudySpec.scala"
+   "test/org/biobank/domain/studies/ProcessingTypeSpec.scala"
+   "test/org/biobank/domain/studies/CollectionEventTypeSpec.scala"
+   "test/org/biobank/controllers/centres/CentresControllerSpec.scala"
+   "test/org/biobank/controllers/centres/ShipmentSpecimensControllerSpec.scala"
+   "test/org/biobank/controllers/centres/ShipmentsControllerSpec.scala"
+   "test/org/biobank/controllers/users/UsersControllerSpec.scala"
+   "test/org/biobank/controllers/participants/ParticipantsControllerSpec.scala"
+   "test/org/biobank/controllers/participants/SpecimensControllerSpec.scala"
+   "test/org/biobank/controllers/participants/CollectionEventsControllerSpec.scala"
+   "test/org/biobank/controllers/access/AccessControllerMembershipSpec.scala"
+   "test/org/biobank/controllers/access/AccessControllerSpec.scala"
+   "test/org/biobank/controllers/studies/CeventTypesControllerSpec.scala"
+   "test/org/biobank/controllers/studies/StudiesControllerSpec.scala"))
