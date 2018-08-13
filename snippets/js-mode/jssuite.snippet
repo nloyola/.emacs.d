@@ -8,21 +8,22 @@
  */
 /* global angular */
 
-import ngModule from ''
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
+import ngModule from '';
 
 describe('`(replace-regexp-in-string "Spec$" "" (file-name-nondirectory (file-name-sans-extension (buffer-file-name))))`', function() {
 
   beforeEach(() => {
-    angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(TestSuiteMixin) {
-      Object.assign(this, TestSuiteMixin)
+    angular.mock.module(ngModule, 'biobank.test');
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
 
-      this.injectDependencies('')
-    })
-  })
+      this.injectDependencies('');
+    });
+  });
 
   it('$0', function() {
 
-  })
+  });
 
-})
+});
