@@ -201,3 +201,154 @@
    "test/org/biobank/controllers/access/AccessControllerSpec.scala"
    "test/org/biobank/controllers/studies/CeventTypesControllerSpec.scala"
    "test/org/biobank/controllers/studies/StudiesControllerSpec.scala"))
+
+
+(defun nl/jssuite-create-controller-fix ()
+  (interactive)
+  (goto-char (point-min))
+  ;;(while (re-search-forward "ComponentTestSuiteMixin.createController.call" nil t)
+  (re-search-forward "TestSuiteMixin.createController.call" nil t)
+  (beginning-of-line-text)
+  ;; (replace-regexp "\\w+ComponentTestSuiteMixin\\.createController\\.call(\n\\s-+this,\n"
+  ;;                 "this.createControllerInternal(\n"
+  ;;                 nil
+  ;;                 (line-beginning-position)
+  ;;                 (line-end-position 3))
+
+  ;; (replace-regexp "DirectiveTestSuiteMixin\\.createController\\.call(\n\\s-+this,\s-+\n"
+  ;;                 "this.createControllerInternal("
+  ;;                 nil
+  ;;                 (line-beginning-position)
+  ;;                 (line-end-position 3)))
+
+  (replace-regexp "DirectiveTestSuiteMixin\\.createController\\.call(\n\\s-+this,\n"
+                  "this.createControllerInternal(\n"
+                  nil
+                  (line-beginning-position)
+                  (line-end-position 3)))
+
+(defun nl/files-jssuite-create-controller-fix (fix-func files)
+  (interactive)
+  (loop for file in files do
+        (progn
+          (setq default-directory "/home/nelson/src/cbsr/scala/bbweb")
+          (find-file file)
+          (funcall fix-func)
+          (save-buffer))))
+
+(nl/files-jssuite-create-controller-fix
+ 'nl/jssuite-create-controller-fix
+ '("app/assets/javascripts/centres/components/shipmentViewLost/shipmentViewLostComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentSpecimensAdd/shipmentSpecimensAddComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentAddItems/shipmentAddItemsComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentViewReceived/shipmentViewReceivedComponentSpec.js"
+   "app/assets/javascripts/centres/components/unpackedShipmentUnpack/unpackedShipmentUnpackComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentsOutgoing/shipmentsOutgoingComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentViewPacked/shipmentViewPackedComponentSpec.js"
+   "app/assets/javascripts/centres/components/selectCentre/selectCentreComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentViewSent/shipmentViewSentComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentViewCompleted/shipmentViewCompletedComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentsIncoming/shipmentsIncomingComponentSpec.js"
+   "app/assets/javascripts/centres/components/unpackedShipmentView/unpackedShipmentViewComponentSpec.js"
+   "app/assets/javascripts/centres/components/centreShipments/centreShipmentsComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentsTable/shipmentsTableComponentSpec.js"
+   "app/assets/javascripts/centres/components/unpackedShipmentInfo/unpackedShipmentInfoComponentSpec.js"
+   "app/assets/javascripts/centres/components/unpackedShipmentItems/unpackedShipmentItemsComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentAdd/shipmentAddComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentsCompleted/shipmentsCompletedComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentView/shipmentViewComponentSpec.js"
+   "app/assets/javascripts/centres/components/shippingInfoView/shippingInfoViewComponentSpec.js"
+   "app/assets/javascripts/centres/components/unpackedShipmentExtra/unpackedShipmentExtraComponentSpec.js"
+   "app/assets/javascripts/centres/components/shipmentSpecimensView/shipmentSpecimensViewComponentSpec.js"
+   "app/assets/javascripts/centres/components/specimenTableAction/specimenTableActionComponentSpec.js"
+   "app/assets/javascripts/common/components/tagsList/tagsListComponentSpec.js"
+   "app/assets/javascripts/common/components/dateTimePicker/dateTimePickerComponentSpec.js"
+   "app/assets/javascripts/common/components/collapsiblePanel/collapsiblePanelComponentSpec.js"
+   "app/assets/javascripts/common/components/debouncedTextInput/debouncedTextInputComponentSpec.js"
+   "app/assets/javascripts/common/components/statusLine/statusLineComponentSpec.js"
+   "app/assets/javascripts/common/components/tagsInput/tagsInputComponentSpec.js"
+   "app/assets/javascripts/common/components/breadcrumbs/breadcrumbsComponentSpec.js"
+   "app/assets/javascripts/common/components/progressTracker/progressTrackerComponentSpec.js"
+   "app/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFiltersComponentSpec.js"
+   "app/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFiltersComponentSpec.js"
+   "app/assets/javascripts/common/components/nameFilter/nameFilterComponentSpec.js"
+   "app/assets/javascripts/users/components/passwordSent/passwordSentComponentSpec.js"
+   "app/assets/javascripts/users/components/login/loginComponentSpec.js"
+   "app/assets/javascripts/users/components/forgotPassword/forgotPasswordComponentSpec.js"
+   "app/assets/javascripts/collection/components/specimenView/specimenViewComponentSpec.js"
+   "app/assets/javascripts/collection/components/ceventsAddAndSelect/ceventsAddAndSelectComponentSpec.js"
+   "app/assets/javascripts/collection/components/ceventsList/ceventsListComponentSpec.js"
+   "app/assets/javascripts/collection/components/ceventGetType/ceventGetTypeComponentSpec.js"
+   "app/assets/javascripts/collection/components/selectStudy/selectStudyComponentSpec.js"
+   "app/assets/javascripts/collection/components/ceventAdd/ceventAddComponentSpec.js"
+   "app/assets/javascripts/collection/components/participantView/participantViewComponentSpec.js"
+   "app/assets/javascripts/collection/components/participantSummary/participantSummaryComponentSpec.js"
+   "app/assets/javascripts/collection/components/participantGet/participantGetComponentSpec.js"
+   "app/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensViewComponentSpec.js"
+   "app/assets/javascripts/collection/components/participantAdd/participantAddComponentSpec.js"
+   "app/assets/javascripts/collection/components/ceventView/ceventViewComponentSpec.js"
+   "app/assets/javascripts/test/mixins/DirectiveTestSuiteMixin.js"
+   "app/assets/javascripts/home/components/contact/contactComponentSpec.js"
+   "app/assets/javascripts/home/components/about/aboutComponentSpec.js"
+   "app/assets/javascripts/home/components/biobankFooter/biobankFooterComponentSpec.js"
+   "app/assets/javascripts/home/components/biobankHeader/biobankHeaderComponentSpec.js"
+   "app/assets/javascripts/home/components/home/homeComponentSpec.js"
+   "app/assets/javascripts/home/components/resourceNotFound/resourceNotFoundComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/locationsPanel/locationsPanelComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centreSummary/centreSummaryComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centreLocationView/centreLocationViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centresAdmin/centresAdminComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centreStudiesPanel/centreStudiesPanelComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centresPagedList/centresPagedListComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centreView/centreViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centreLocationAdd/centreLocationAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/centres/components/centreAdd/centreAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/common/components/annotationTypeSummary/annotationTypeSummaryComponentSpec.js"
+   "app/assets/javascripts/admin/modules/common/components/annotationTypeView/annotationTypeViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/common/components/annotationTypeAdd/annotationTypeAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/common/components/locationAdd/locationAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/common/components/biobankAdmin/biobankAdminComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/userProfile/userProfileComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/membershipView/membershipViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/userAdmin/userAdminComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/membershipAdd/membershipAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/membershipAdmin/membershipAdminComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/usersPagedList/usersPagedListComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/membershipsPagedList/membershipsPagedListComponentSpec.js"
+   "app/assets/javascripts/admin/modules/users/components/manageUsers/manageUsersComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/collectionEventAnnotationTypeView/collectionEventAnnotationTypeViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/studyParticipantsTab/studyParticipantsTabComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/collectionSpecimenDefinitionView/collectionSpecimenDefinitionViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/inputSpecimenProcessingSummary/inputSpecimenProcessingSummaryComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeAdd/processingTypeInputComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeAdd/processingTypeInformationComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/studiesPagedList/studiesPagedListComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeAdd/processingTypeAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/participantAnnotationTypeAdd/participantAnnotationTypeAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeInputForm/processingTypeInputFormComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeAnnotationTypeView/processingTypeAnnotationTypeViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeOutputForm/processingTypeOutputFormComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeAnnotationTypeAdd/processingTypeAnnotationTypeAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/collectionSpecimenDefinitionAdd/collectionSpecimenDefinitionAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/outputSpecimenProcessingSummary/outputSpecimenProcessingSummaryComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/participantAnnotationTypeView/participantAnnotationTypeViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/studyView/studyViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/ceventTypeView/ceventTypeViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/ceventTypeAdd/ceventTypeAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeAddAndSelect/processingTypesAddAndSelectComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/collectionSpecimenDefinitionSummary/collectionSpecimenDefinitionSummaryComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/studyAdd/studyAddComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/processingTypeView/processingTypeViewComponentSpec.js"
+   "app/assets/javascripts/admin/modules/studies/components/studySummary/studySummaryComponentSpec.js"
+   "app/assets/javascripts/common/components/truncateToggle/truncateToggleComponentSpec.js"
+   "app/assets/javascripts/common/components/panelButtons/panelButtonsComponentSpec.js"
+   "app/assets/javascripts/common/directives/updateRemoveButtons/updateRemoveButtonsDirectiveSpec.js"
+   "app/assets/javascripts/common/directives/positiveFloat/positiveFloatDirectiveSpec.js"
+   "app/assets/javascripts/common/directives/infoUpdateRemoveButtons/infoUpdateRemoveButtonsDirectiveSpec.js"
+   "app/assets/javascripts/common/directives/smartFloat/smartFloatDirectiveSpec.js"
+   "app/assets/javascripts/common/directives/naturalNumber/naturalNumberDirectiveSpec.js"
+   "app/assets/javascripts/common/directives/integer/integerDirectiveSpec.js"
+   "app/assets/javascripts/common/directives/str2integer/str2integerDirectiveSpec.js"
+   "app/assets/javascripts/users/directives/passwordCheck/passwordCheckDirectiveSpec.js"))
