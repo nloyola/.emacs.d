@@ -2558,7 +2558,7 @@ No more juggling windows after commiting. It's magit bliss.
   (add-hook 'markdown-mode-hook
             (lambda () (auto-fill-mode -1)))
   :init
-  (setq markdown-command "marked"))
+  (setq markdown-command "pandoc"))
 #+END_SRC
 
 ** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
@@ -2737,8 +2737,8 @@ http://batsov.com/projectile/
 ** [[https://github.com/milkypostman/powerline][powerline]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package powerline
-  :ensure t
+  (use-package powerline
+    :ensure t
   :config
     (setq powerline-arrow-shape 'arrow14)
     (setq powerline-default-separator-dir '(right . left))
@@ -3200,43 +3200,43 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 ** [[https://github.com/TheBB/spaceline][spaceline]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package spaceline
-  :ensure t
-  :init
-  (require 'spaceline-config)
-  :config
-  (setq-default powerline-default-separator 'wave
-                powerline-height 18
-                spaceline-highlight-face-func 'spaceline-highlight-face-modified
-                spaceline-separator-dir-left '(left . left)
-                spaceline-separator-dir-right '(right . right))
+  (use-package spaceline
+    :ensure t
+    :init
+    (require 'spaceline-config)
+    :config
+    (setq-default powerline-default-separator 'wave
+                  powerline-height 26
+                  spaceline-highlight-face-func 'spaceline-highlight-face-modified
+                  spaceline-separator-dir-left '(left . left)
+                  spaceline-separator-dir-right '(right . right))
 
-  (spaceline-helm-mode 1)
-  (spaceline-toggle-version-control-on)
+    (spaceline-helm-mode 1)
+    (spaceline-toggle-version-control-on)
 
-(spaceline-define-segment version-control
-  "Version control information."
-  (powerline-raw (s-trim vc-mode))
-  :when vc-mode)
+    (spaceline-define-segment version-control
+      "Version control information."
+      (powerline-raw (s-trim vc-mode))
+      :when vc-mode)
 
-  ;; theme stops displaying after using Emacs for a while, made this into a function so that
-  ;; it can be called again to restore the theme
-  (defun nl/spaceline-theme ()
-    (interactive)
-    (spaceline-install `nl-spaceline-theme
-      `(((projectile-root buffer-modified) :face avy-lead-face-0)
-        (remote-host buffer-id)
-        ((line column) :separator ":" :face avy-lead-face-2))
-      `((selection-info)
-        ((version-control :wehn acative) :face avy-lead-face-1)
-        ((flycheck-error flycheck-warning flycheck-info) :when active)
-        (major-mode :face avy-lead-face-0)
-        (minor-modes :when active :face avy-lead-face-1)
-        (global :face highlight-face)))
+    ;; theme stops displaying after using Emacs for a while, made this into a function so that
+    ;; it can be called again to restore the theme
+    (defun nl/spaceline-theme ()
+      (interactive)
+      (spaceline-install `nl-spaceline-theme
+        `(((projectile-root buffer-modified) :face avy-lead-face-0)
+          (remote-host buffer-id)
+          ((line column) :separator ":" :face avy-lead-face-2))
+        `((selection-info)
+          ((version-control :wehn acative) :face avy-lead-face-1)
+          ((flycheck-error flycheck-warning flycheck-info) :when active)
+          (major-mode :face avy-lead-face-0)
+          (minor-modes :when active :face avy-lead-face-1)
+          (global :face highlight-face)))
 
-    (setq-default mode-line-format '("%e" (:eval (spaceline-ml-nl-spaceline-theme)))))
+      (setq-default mode-line-format '("%e" (:eval (spaceline-ml-nl-spaceline-theme)))))
 
-  (nl/spaceline-theme))
+    (nl/spaceline-theme))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
