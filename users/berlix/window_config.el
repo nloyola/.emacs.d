@@ -52,7 +52,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame -1 0)
-    (set-face-attribute 'default frame :font "Ubuntu Mono" :height 110 :weight 'medium)
+    (set-face-attribute 'default frame :font "Fira Code Medium" :height 110 :weight 'medium)
     (set-frame-size frame
                     (/ (x-display-pixel-width frame) (frame-char-width frame))
                     (floor (* (/ (x-display-pixel-height frame) (frame-char-height frame)) 0.80)))))
