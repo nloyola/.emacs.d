@@ -26,11 +26,13 @@
       (set-frame-position frame -1 0)
       (set-frame-size frame 229 (/ (x-display-pixel-height) (frame-char-height))))
      ((eq num-displays 3)
-      (set-frame-position frame 2744 0)
+      (set-frame-position frame 2704 0)
       (set-frame-size frame
-                      (- (/ (x-display-pixel-width) (frame-char-width)) 390)
+                      (- (/ (x-display-pixel-width) (frame-char-width)) 356)
                       (/ (x-display-pixel-height) (frame-char-height)))
-      (set-face-attribute 'default frame :font "Ubuntu Mono" :height 180 :weight 'medium)))))
+      (set-face-attribute 'default frame :font "Fira Mono Medium" :height 160 :weight 'medium)))))
+
+(nl/main-frame-set-size-and-position)
 
 (defun nl/new-frame ()
   "Create a new frame on the 4k display."
@@ -39,7 +41,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame 2200 120)
-    (set-face-attribute 'default frame :font "Ubuntu Mono" :height 180 :weight 'medium)
+    (set-face-attribute 'default frame :font "Fira Mono Medium" :height 160 :weight 'medium)
     (set-frame-size frame
                     (* 100 (frame-char-width frame))
                     (* 70(frame-char-height frame))
@@ -52,7 +54,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame -1 0)
-    (set-face-attribute 'default frame :font "Fira Code Medium" :height 110 :weight 'medium)
+    (set-face-attribute 'default frame :font "Fira Mono Medium" :height 120)
     (set-frame-size frame
                     (/ (x-display-pixel-width frame) (frame-char-width frame))
                     (floor (* (/ (x-display-pixel-height frame) (frame-char-height frame)) 0.80)))))
@@ -65,3 +67,6 @@
     (select-frame-set-input-focus frame)))
 
 (add-hook 'window-setup-hook 'nl/window-setup-hook)
+
+;; 0      1         2         3         4         5         6        7          8         9         0
+;; 456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789
