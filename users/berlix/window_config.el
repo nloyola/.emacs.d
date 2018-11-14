@@ -26,13 +26,11 @@
       (set-frame-position frame -1 0)
       (set-frame-size frame 229 (/ (x-display-pixel-height) (frame-char-height))))
      ((eq num-displays 3)
-      (set-frame-position frame 2704 0)
+      (set-frame-position frame 2934 0)
       (set-frame-size frame
-                      (- (/ (x-display-pixel-width) (frame-char-width)) 356)
+                      (- (/ (x-display-pixel-width) (frame-char-width)) 406)
                       (/ (x-display-pixel-height) (frame-char-height)))
-      (set-face-attribute 'default frame :font "Fira Mono Medium" :height 160 :weight 'medium)))))
-
-(nl/main-frame-set-size-and-position)
+      (set-face-attribute 'default frame :font "Fira Mono Medium-15")))))
 
 (defun nl/new-frame ()
   "Create a new frame on the 4k display."
@@ -41,7 +39,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame 2200 120)
-    (set-face-attribute 'default frame :font "Fira Mono Medium" :height 160 :weight 'medium)
+    (set-face-attribute 'default frame :font "Fira Mono Medium-15")
     (set-frame-size frame
                     (* 100 (frame-char-width frame))
                     (* 70(frame-char-height frame))
@@ -54,7 +52,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame -1 0)
-    (set-face-attribute 'default frame :font "Fira Mono Medium" :height 120)
+    (set-face-attribute 'default frame :font "Fira Mono Medium-10")
     (set-frame-size frame
                     (/ (x-display-pixel-width frame) (frame-char-width frame))
                     (floor (* (/ (x-display-pixel-height frame) (frame-char-height frame)) 0.80)))))
@@ -62,7 +60,7 @@
 (defun nl/window-setup-hook ()
   (let ((frame (selected-frame)))
     (nl/main-frame-set-size-and-position)
-    (resume)
+    ;;(resume)
     (nl/frame-3rd-display)
     (select-frame-set-input-focus frame)))
 
