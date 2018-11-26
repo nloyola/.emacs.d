@@ -668,57 +668,55 @@ Prefer saving this file somewhere other than the default.
     (set (make-local-variable 'comint-last-output-start)
          (point-marker)))
 
-  :config
-  (add-hook 'compilation-filter-hook #'compilation-ansi-color-process-output))
+  :hook (compilation-filter . compilation-ansi-color-process-output))
 #+END_SRC
 
 ** =cc-mode=
 
 #+BEGIN_SRC emacs-lisp
-(use-package cc-mode
-  :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
-         ("\\.m\\'"                   . c-mode)
-         ("\\.mm\\'"                  . c++-mode)
-         ("\\.java\\'"                . java-mode))
-  :preface
-  (defconst nelson-c-style
-            '((c-tab-always-indent . t)
-              (c-set-style "K&R")
-              (c-offsets-alist . ((statement-block-intro . +)
-                                  (substatement-open     . 0)
-                                  (label                 . 0)
-                                  (case-label            . +)
-                                  (statement-cont        . +)
-                                  (innamespace           . 0))))
-            "Nelson programming style.")
+  (use-package cc-mode
+    :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
+           ("\\.m\\'"                   . c-mode)
+           ("\\.mm\\'"                  . c++-mode)
+           ("\\.java\\'"                . java-mode))
+    :preface
+    (defconst nelson-c-style
+              '((c-tab-always-indent . t)
+                (c-set-style "K&R")
+                (c-offsets-alist . ((statement-block-intro . +)
+                                    (substatement-open     . 0)
+                                    (label                 . 0)
+                                    (case-label            . +)
+                                    (statement-cont        . +)
+                                    (innamespace           . 0))))
+              "Nelson programming style.")
 
-;; Customizations for all of c-mode, c++-mode, and objc-mode
-  (defun my-c-mode-common-hook ()
-    ;; add my personal style and set it for the current buffer
-    (c-add-style "NELSON-c-mode" nelson-c-style t)
-    ;; offset customizations not in nelson-c-style
-    (c-set-offset 'member-init-intro '++)
-    ;; other customizations
-;;(c-toggle-auto-state 1) ;; Turn on auto newline
-    (my-common-prog-mode-settings)
-;; makes the underscore part of a word in C and C++ modes
-    (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
-    (modify-syntax-entry ?_ "w" c-mode-syntax-table)
-    (lambda ()
-      (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-        (ggtags-mode 1)))
+  ;; Customizations for all of c-mode, c++-mode, and objc-mode
+    (defun my-c-mode-common-hook ()
+      ;; add my personal style and set it for the current buffer
+      (c-add-style "NELSON-c-mode" nelson-c-style t)
+      ;; offset customizations not in nelson-c-style
+      (c-set-offset 'member-init-intro '++)
+      ;; other customizations
+  ;;(c-toggle-auto-state 1) ;; Turn on auto newline
+      (my-common-prog-mode-settings)
+  ;; makes the underscore part of a word in C and C++ modes
+      (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
+      (modify-syntax-entry ?_ "w" c-mode-syntax-table)
+      (lambda ()
+        (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+          (ggtags-mode 1)))
+      )
+
+    (defun my-java-mode-hook ()
+      (setq indent-tabs-mode nil)
+      ;;(setq zeal-at-point-docset "java")
+      (eclim-mode t)
     )
 
-  (defun my-java-mode-hook ()
-    (setq indent-tabs-mode nil)
-    ;;(setq zeal-at-point-docset "java")
-    (eclim-mode t)
-  )
-
-  :config
-  (add-hook 'c-mode-common-hook 'my-c-mode-common-hook)
-  (add-hook 'java-mode-hook 'my-java-mode-hook)
-  (add-hook 'java-mode-hook 'semantic-mode))
+    :hook ((c-mode-common . my-c-mode-common-hook)
+           (java-mode . my-java-mode-hook)
+           (java-mode . semantic-mode)))
 #+END_SRC
 
 ** =cperl-mode=
@@ -730,8 +728,7 @@ Prefer saving this file somewhere other than the default.
     (cperl-set-style "C++")
     (my-common-prog-mode-settings))
 
-  :config
-  (add-hook 'cperl-mode-hook 'my-cperl-setup))
+  :hook (cperl-mode . my-cperl-setup))
 #+END_SRC
 
 ** =desktop.el=
@@ -892,13 +889,11 @@ ibuffer is the improved version of list-buffers.
         (unless (eq ibuffer-sorting-mode 'alphabetic)
           (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
           (ibuffer-do-sort-by-major-mode)))) ; then do major-mode sort
+    (defalias 'list-buffers 'ibuffer)
 
-    (add-hook 'ibuffer-mode-hook
-              '(lambda ()
-                 (nl/ibuffer-customization)
-                 (ibuffer-switch-to-saved-filter-groups "home")))
-
-    (defalias 'list-buffers 'ibuffer))
+    :hook (ibuffer-mode . (lambda()
+                            (nl/ibuffer-customization)
+                            (ibuffer-switch-to-saved-filter-groups "home"))))
 #+END_SRC
 
 ** =org-mode=
@@ -1032,50 +1027,49 @@ comments.
 ** =prog-mode=
 
 #+BEGIN_SRC emacs-lisp
-(use-package prog-mode
-  :preface
-  (defun nl/indent-whole-buffer ()
-    (interactive)
-    (save-excursion
-      (indent-region (point-min) (point-max))))
+  (use-package prog-mode
+    :preface
+    (defun nl/indent-whole-buffer ()
+      (interactive)
+      (save-excursion
+        (indent-region (point-min) (point-max))))
 
-  (defun nl/beginning-of-line-or-indentation ()
-    "move to beginning of line, or indentation"
-    (interactive)
-    (if (bolp)
-        (back-to-indentation)
-      (beginning-of-line)))
+    (defun nl/beginning-of-line-or-indentation ()
+      "move to beginning of line, or indentation"
+      (interactive)
+      (if (bolp)
+          (back-to-indentation)
+        (beginning-of-line)))
 
-  (defun my-common-prog-mode-settings ()
-    "Enables settings common between programming language modes."
-    (nl/setup-indent 2) ; indent 2 spaces width
-    (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
-    ;;
-    ;; Set tab and CR/LF keys to call their corresponding more-general
-    ;; functions.  This needs to be here to override the settings of some modes
-    ;; (e.g. c++-mode changes the tab key to do a re-indent).
-    ;;
-    (local-set-key "\t" 'tab-to-tab-stop)
-    (local-set-key "\n" 'newline-and-indent)
-    (local-set-key "\r" 'newline-and-indent)
-    ;;
-    ;; Set paragraph/comment auto-formatting to wrap at column 100.
-    ;;
-    (set-fill-column 100)
-    ;;
-    ;; Set the comment column to zero so that lisp comment lines will act like
-    ;; C++ comments (i.e. line up with the code), and not automatically indent
-    ;; to column 50.
-    ;;
-    (setq comment-column 0)
-    (push '(">=" . ?≥) prettify-symbols-alist)
-    (push '("<=" . ?≤) prettify-symbols-alist)
-    (push '("->" . ?→) prettify-symbols-alist)
-    (yas-minor-mode))
-  :config
-  (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
-  (add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
-  (add-hook 'prog-mode-hook     'my-common-prog-mode-settings))
+    (defun my-common-prog-mode-settings ()
+      "Enables settings common between programming language modes."
+      (nl/setup-indent 2) ; indent 2 spaces width
+      (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
+      ;;
+      ;; Set tab and CR/LF keys to call their corresponding more-general
+      ;; functions.  This needs to be here to override the settings of some modes
+      ;; (e.g. c++-mode changes the tab key to do a re-indent).
+      ;;
+      (local-set-key "\t" 'tab-to-tab-stop)
+      (local-set-key "\n" 'newline-and-indent)
+      (local-set-key "\r" 'newline-and-indent)
+      ;;
+      ;; Set paragraph/comment auto-formatting to wrap at column 100.
+      ;;
+      (set-fill-column 100)
+      ;;
+      ;; Set the comment column to zero so that lisp comment lines will act like
+      ;; C++ comments (i.e. line up with the code), and not automatically indent
+      ;; to column 50.
+      ;;
+      (setq comment-column 0)
+      (push '(">=" . ?≥) prettify-symbols-alist)
+      (push '("<=" . ?≤) prettify-symbols-alist)
+      (push '("->" . ?→) prettify-symbols-alist)
+      (yas-minor-mode))
+    :hook ((makefile-mode . my-common-prog-mode-settings)
+           (sh-mode       . my-common-prog-mode-settings)
+           (prog-mode     . my-common-prog-mode-settings)))
 #+END_SRC
 
 ** =re-builder=
@@ -1338,15 +1332,15 @@ buffer name is too hard to see,  set it to white instead.
 
 Trying out Kaolin Theme 2017-10-25
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package base16-theme
   :ensure t
   :config
     ;;(load-theme 'base16-solarized-dark t)
     ;;(load-theme 'base16-oceanicnext t)
     ;;(load-theme 'base16-google-dark t)
-    ;;(load-theme 'base16-woodland t)
-    (load-theme 'base16-nord t)
+    (load-theme 'base16-woodland t)
+    ;;(load-theme 'base16-nord t)
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
 
@@ -1615,8 +1609,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 (use-package git-gutter
   :ensure t
   :diminish git-gutter-mode
-  :init
-  (add-hook 'prog-mode-hook 'git-gutter-mode))
+  :hook (prog-mode . git-gutter-mode))
 #+END_SRC
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -1634,8 +1627,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 #+BEGIN_SRC emacs-lisp
   (use-package ycmd
     :ensure t
-    :init
-    (add-hook 'js2-mode-hook 'ycmd-mode)
     :preface
     (setq ycmd-startup-timeout 10)
     (defun ycmd-setup-completion-at-point-function ()
@@ -1643,7 +1634,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
       (add-hook 'completion-at-point-functions
                 #'ycmd-complete-at-point nil :local))
 
-    (add-hook 'ycmd-mode-hook #'ycmd-setup-completion-at-point-function)
     :config
     (set-variable 'ycmd-server-command `("python" ,(file-truename "~/src/github/devtools/ycmd/ycmd")))
     ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
@@ -1657,8 +1647,9 @@ can be downloaded from [[http://eclim.org/install.html][here]].
       :config
       (flycheck-ycmd-setup))
     (use-package ycmd-eldoc
-      :config
-      (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)))
+      :hook (ycmd-mode . ycmd-eldoc-setup))
+    :hook ((js2-mode  .ycmd-mode)
+           ( ycmd-mod-hook . ycmd-setup-completion-at-point-function)))
 #+END_SRC
 
 ** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
@@ -1694,16 +1685,15 @@ Show FIXME/TODO/BUG/KLUDGE in special face only in comments and
 strings.
 
 #+BEGIN_SRC emacs-lisp
-(use-package fic-mode
-  :ensure t
-  :commands fic-mode
-  :config
-    (add-hook 'c++-mode-hook 'fic-mode)
-    (add-hook 'c-mode-hook 'fic-mode)
-    (add-hook 'java-mode-hook 'fic-mode)
-    (add-hook 'vala-mode-hook 'fic-mode)
-    (add-hook 'python-mode-hook 'fic-mode)
-    (add-hook 'php-mode-hook 'fic-mode))
+  (use-package fic-mode
+    :ensure t
+    :commands fic-mode
+    :hook ((c++-mode    . fic-mode)
+           (c-mode      . fic-mode)
+           (java-mode   . fic-mode)
+           (vala-mode   . fic-mode)
+           (python-mode . fic-mode)
+           (php-mode    . fic-mode)))
 #+END_SRC
 
 ** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
@@ -1725,8 +1715,8 @@ Allow windmove to jump between frames.
   :commands global-flycheck-mode
   :diminish flycheck-mode
   :commands flycheck-define-checker
+  :hook (after-init . global-flycheck-mode)
   :config
-  (add-hook 'after-init-hook #'global-flycheck-mode)
   (setq flycheck-standard-error-navigation nil)
 
   (setq-default flycheck-disabled-checkers
@@ -1748,8 +1738,7 @@ This package adds support for flow to flycheck.
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck-flow
   :ensure t
-  :config
-  (add-hook 'js2-mode-hook 'flycheck-mode))
+  :hook (js2-mode . flycheck-mode))
 #+END_SRC
 
 ** [[https://melpa.org/#/etags-select][etags-select]]
@@ -1918,10 +1907,10 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
           helm-yas-display-key-on-candidate t)
 
     ;; Save current position to mark ring when jumping to a different place
-    (add-hook 'helm-goto-line-before-hook 'helm-save-current-pos-to-mark-ring)
     (helm-mode)
     (helm-autoresize-mode 1)
     (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
+  :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
@@ -2124,7 +2113,7 @@ This minor mode highlights indentation levels via =font-lock=.
   :config
   (setq highlight-indent-guides-method 'character)
   (set-face-foreground 'highlight-indent-guides-character-face "gray18")
-  (add-hook 'prog-mode-hook 'highlight-indent-guides-mode))
+  :hook (prog-mode . highlight-indent-guides-mode))
 #+END_SRC
 
 ** [[https://github.com/boyw165/hl-anything][hl-anything]]
@@ -2448,16 +2437,16 @@ When using =counsel-ag=:
     ;;(eval-after-load 'js2-mode
     ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
 
-    ;;(add-hook 'js2-mode-hook 'ac-js2-mode)
     ;;(setq ac-js2-evaluate-calls t)
 
     (setq-default js2-mode-show-parse-errors t)
     (setq-default js2-strict-missing-semi-warning t)
     (setq-default js2-strict-trailing-comma-warning t)
 
-    (add-hook 'js2-mode-hook 'fic-mode)
-    (add-hook 'js2-mode-hook 'nl/javascript-mode-hook)
-    (add-hook 'js2-mode-hook 'my-common-prog-mode-settings))
+    :hook ((js2-mode . fic-mode)
+           ;;(js2-mode-hook  . ac-js2-mode)
+           (js2-mode . nl/javascript-mode-hook)
+           (js2-mode . my-common-prog-mode-settings)))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
@@ -2467,8 +2456,8 @@ When using =counsel-ag=:
   :ensure t
   :after js2-mode
   :diminish js2-refactor-mode
+  :hook (js-mode . js2-refactor-mode)
   :config
-  (add-hook 'js-mode-hook #'js2-refactor-mode)
   (js2r-add-keybindings-with-prefix "C-c C-m"))
 #+END_SRC
 
@@ -2567,9 +2556,7 @@ No more juggling windows after commiting. It's magit bliss.
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'"       . markdown-mode))
-  :config
-  (add-hook 'markdown-mode-hook
-            (lambda () (auto-fill-mode -1)))
+  :hook (markdown-mode . (lambda () (auto-fill-mode -1)))
   :init
   (setq markdown-command "pandoc"))
 #+END_SRC
@@ -2631,7 +2618,7 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
 
 ** paganini-theme
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package paganini-theme
     :ensure t
     :config
@@ -2697,7 +2684,7 @@ checker is loaded.
 
       :config
       (custom-set-variables '(php-mode-coding-style (quote nl/php)))
-      (add-hook 'php-mode-hook 'nl/php-mode-hook))
+      :hook (php-mode . nl/php-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/projectile][projectile]]
@@ -2746,16 +2733,15 @@ http://batsov.com/projectile/
 ** [[https://github.com/google/protobuf][protobuf]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package protobuf-mode
-  :ensure t
-  :config
-  (defconst my-protobuf-style
-    '((c-basic-offset . 2)
-      (indent-tabs-mode . nil)))
-  (add-hook 'protobuf-mode-hook
-            (lambda ()
-              (c-add-style "my-style" my-protobuf-style t)
-              (subword-mode 1))))
+  (use-package protobuf-mode
+    :ensure t
+    :config
+    (defconst my-protobuf-style
+      '((c-basic-offset . 2)
+        (indent-tabs-mode . nil)))
+    :hook (protobuf-mode . (lambda ()
+                             (c-add-style "my-style" my-protobuf-style t)
+                             (subword-mode 1))))
 #+END_SRC
 
 ** [[https://github.com/milkypostman/powerline][powerline]]
@@ -2815,8 +2801,7 @@ Show org-mode bullets as UTF-8 characters.
 #+BEGIN_SRC emacs-lisp
 (use-package org-bullets
   :ensure t
-  :config
-  (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1))))
+  :hook (org-mode . (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
 ** revive
@@ -2846,8 +2831,7 @@ Highlight brackets according to their depth
 (use-package rainbow-delimiters
   :ensure t
   :commands rainbow-delimiters-mode
-  :init
-    (add-hook 'prog-mode-hook (lambda () (rainbow-delimiters-mode t))))
+  :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
 
 ** [[https://github.com/fgallina/region-bindings-mode][region-bindings-mode]]
@@ -2923,8 +2907,8 @@ that outputs errors."
   ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
   (setq sbt:program-options '("-Djline.terminal=auto"))
 
+  :hook (sbt-mode . nl-sbt-mode-hook)
   :config
-  (add-hook 'sbt-mode-hook 'nl-sbt-mode-hook)
 
   ;; set this regex so that it knows about Play Framework SBT prompt
   (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
@@ -3107,8 +3091,8 @@ that outputs errors."
           scala-indent:align-forms t
           scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
           scala-indent:use-javadoc-style t)
-    (add-hook 'scala-mode-hook 'nl-scala-mode-hook)
-    (add-hook 'scala-mode-hook 'fic-mode))
+    :hook ((scala-mode . nl-scala-mode-hook)
+           (scala-mode . fic-mode)))
 #+END_SRC
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
@@ -3296,7 +3280,7 @@ think of it as both something that augments and replaces the standard
   :commands tern-mode
   :load-path "~/src/github/elisp/tern/emacs"
   :diminish tern-mode
-  :init (add-hook 'js2-mode-hook 'tern-mode))
+  :hook (js2-mode . tern-mode))
 
 (use-package company-tern
   :ensure t
@@ -3308,13 +3292,34 @@ think of it as both something that augments and replaces the standard
 #+BEGIN_SRC emacs-lisp
   (use-package tide
     :ensure t
+    :after (typescript-mode company flycheck)
+    :bind (:map tide-mode-map
+                ("C-c C-t c" . nl/jest-test-coverage)
+                ("C-c C-t f" . tide-fix)
+                ("C-c C-t o" . tide-organize-imports)
+                ("C-c C-t r" . tide-rename-symbol)
+                ("C-c C-t t" . nl/jest-test-only-this-file))
     :config
+    (defun ts-filename-p (filename)
+      (string-match "\.ts$" filename))
 
-    (use-package typescript-mode
-      :bind (:map tide-mode-map
-                  ("C-c C-t f" . tide-fix)
-                  ("C-c C-t o" . tide-organize-imports)
-                  ("C-c C-t r" . tide-rename-symbol)))
+    (defun nl/jest-test-compile (command)
+      "Run the jest test suite only for this file."
+      (interactive)
+      (compile (format "cd %s && %s" (projectile-project-root) command)))
+
+    (defun nl/jest-test-only-this-file ()
+      "Run the jest test suite only for this file."
+      (interactive)
+      (nl/jest-test-compile (format "node --inspect node_modules/.bin/jest --runInBand %s"
+                       (buffer-file-name))))
+
+    (defun nl/jest-test-coverage ()
+      "Run the jest test suite only for this file."
+      (interactive)
+      (nl/jest-test-compile (format "npm run test:cov")))
+
+    (use-package typescript-mode)
 
     (setq tide-server-max-response-length 204800)
 
@@ -3368,7 +3373,10 @@ think of it as both something that augments and replaces the standard
             company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
       (setq-default typescript-indent-level 2))
 
-    (add-hook 'typescript-mode-hook 'nl-tide-mode-hook))
+    :hook ((typescript-mode . tide-setup)
+           (typescript-mode . tide-hl-identifier-mode)
+           (typescript-mode . nl-tide-mode-hook)
+           (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
@@ -3485,36 +3493,36 @@ Wand is an extension that allows users to select a piece of text and perform act
 ** [[https://github.com/fxbois/web-mode][web-mode]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package web-mode
-  :ensure t
-  :mode (("\\.html?\\'" . web-mode)
-         ("\\.json\\'" . web-mode))
-  :bind ("C-c s h" . nl/counsel-ag-html)
-  :preface
-  (defun html-filename-p (filename)
-    (string-match "\.html$" filename))
+  (use-package web-mode
+    :ensure t
+    :mode (("\\.html?\\'" . web-mode)
+           ("\\.json\\'" . web-mode))
+    :bind ("C-c s h" . nl/counsel-ag-html)
+    :preface
+    (defun html-filename-p (filename)
+      (string-match "\.html$" filename))
 
-  (defun nl/counsel-ag-html ()
-    "Perform counsel-ag on the project's HTML files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "--html"))
+    (defun nl/counsel-ag-html ()
+      "Perform counsel-ag on the project's HTML files."
+      (interactive)
+      (counsel-ag "" (projectile-project-root) "--html"))
 
-  (defun nl/web-mode-hook ()
-    "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2)
-    (yas-minor-mode))
+    (defun nl/web-mode-hook ()
+      "Hooks for Web mode."
+      (setq web-mode-markup-indent-offset 2)
+      (yas-minor-mode))
 
-  :config
-  (setq web-mode-markup-indent-offset 2
-        web-mode-css-indent-offset 2
-        web-mode-code-indent-offset 2
-        web-mode-enable-auto-closing t
-        web-mode-enable-auto-quoting t
-        web-mode-ac-sources-alist
-        '(("css" . (ac-source-css-property))
-          ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
+    :config
+    (setq web-mode-markup-indent-offset 2
+          web-mode-css-indent-offset 2
+          web-mode-code-indent-offset 2
+          web-mode-enable-auto-closing t
+          web-mode-enable-auto-quoting t
+          web-mode-ac-sources-alist
+          '(("css" . (ac-source-css-property))
+            ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
 
-  (add-hook 'web-mode-hook  'nl/web-mode-hook))
+    :hook (web-mode  . nl/web-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/mhayashi1120/Emacs-wgrep][wgrep]]
