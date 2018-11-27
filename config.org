@@ -3298,6 +3298,7 @@ think of it as both something that augments and replaces the standard
                 ("C-c C-t f" . tide-fix)
                 ("C-c C-t o" . tide-organize-imports)
                 ("C-c C-t r" . tide-rename-symbol)
+                ("C-c C-t s" . nl/counsel-ag-ts-spec)
                 ("C-c C-t t" . nl/jest-test-only-this-file))
     :config
     (defun ts-filename-p (filename)
@@ -3312,12 +3313,17 @@ think of it as both something that augments and replaces the standard
       "Run the jest test suite only for this file."
       (interactive)
       (nl/jest-test-compile (format "node --inspect node_modules/.bin/jest --runInBand %s"
-                       (buffer-file-name))))
+                                    (buffer-file-name))))
 
     (defun nl/jest-test-coverage ()
       "Run the jest test suite only for this file."
       (interactive)
       (nl/jest-test-compile (format "npm run test:cov")))
+
+    (defun nl/counsel-ag-ts-spec ()
+      "Perform counsel-ag on the project's TypeScript spec files."
+      (interactive)
+      (counsel-ag "" (projectile-project-root) "-G spec.ts$"))
 
     (use-package typescript-mode)
 
