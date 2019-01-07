@@ -3217,43 +3217,43 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 ** [[https://github.com/TheBB/spaceline][spaceline]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package spaceline
-    :ensure t
+  (use-package spaceline-config
+    :ensure spaceline
     :init
     (require 'spaceline-config)
-    :config
+    (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
     (setq-default powerline-default-separator 'wave
                   powerline-height 26
-                  spaceline-highlight-face-func 'spaceline-highlight-face-modified
                   spaceline-separator-dir-left '(left . left)
                   spaceline-separator-dir-right '(right . right))
-
+    :config
     (spaceline-helm-mode 1)
     (spaceline-toggle-version-control-on)
 
-    (spaceline-define-segment version-control
-      "Version control information."
-      (powerline-raw (s-trim vc-mode))
-      :when vc-mode)
+    (spaceline-compile
+      ;; left side
+      '(((projectile-root buffer-modified) :face highlight-face :priority 100)
+        ((remote-host buffer-id) :face highlight-face)
+        ((line column) :separator ":" :face other-face)
+        (anzu :priority 95)
+        auto-compile
+        (process :when active)
+        (minor-modes :when active
+                     :priority 9)
+        (org-clock :when active))
+      ;; right side
+      '(which-function
+        (selection-info :priority 95)
+        input-method
+        (version-control :when active :priority 78)
+        ((flycheck-error flycheck-warning flycheck-info) :when active :priority 89)
+        (major-mode :priority 79)
+        (minor-mode :priority 79 :face other-face)
+        (global :when active)
+        (buffer-position :priority 99)
+        (hud :priority 99)))
 
-    ;; theme stops displaying after using Emacs for a while, made this into a function so that
-    ;; it can be called again to restore the theme
-    (defun nl/spaceline-theme ()
-      (interactive)
-      (spaceline-install `nl-spaceline-theme
-        `(((projectile-root buffer-modified) :face avy-lead-face-0)
-          (remote-host buffer-id)
-          ((line column) :separator ":" :face avy-lead-face-2))
-        `((selection-info)
-          ((version-control :wehn acative) :face avy-lead-face-1)
-          ((flycheck-error flycheck-warning flycheck-info) :when active)
-          (major-mode :face avy-lead-face-0)
-          (minor-modes :when active :face avy-lead-face-1)
-          (global :face highlight-face)))
-
-      (setq-default mode-line-format '("%e" (:eval (spaceline-ml-nl-spaceline-theme)))))
-
-    (nl/spaceline-theme))
+    (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
@@ -3290,99 +3290,105 @@ think of it as both something that augments and replaces the standard
 ** [[https://github.com/ananthakumaran/tide][tide]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package tide
-    :ensure t
-    :after (typescript-mode company flycheck)
-    :bind (:map tide-mode-map
-                ("C-c C-t c" . nl/jest-test-coverage)
-                ("C-c C-t f" . tide-fix)
-                ("C-c C-t o" . tide-organize-imports)
-                ("C-c C-t r" . tide-rename-symbol)
-                ("C-c C-t s" . nl/counsel-ag-ts-spec)
-                ("C-c C-t t" . nl/jest-test-only-this-file))
-    :config
-    (defun ts-filename-p (filename)
-      (string-match "\.ts$" filename))
+    (use-package tide
+      :ensure t
+      :after (typescript-mode company flycheck)
+      :bind (:map tide-mode-map
+                  ("C-c C-t c c" . nl/typescrip-compile-this-file)
+                  ("C-c C-t c t" . nl/jest-test-coverage)
+                  ("C-c C-t f" . tide-fix)
+                  ("C-c C-t o" . tide-organize-imports)
+                  ("C-c C-t r" . tide-rename-symbol)
+                  ("C-c C-t s" . nl/counsel-ag-ts-spec)
+                  ("C-c C-t t" . nl/jest-test-only-this-file))
+      :config
+      (defun ts-filename-p (filename)
+        (string-match "\.ts$" filename))
 
-    (defun nl/jest-test-compile (command)
-      "Run the jest test suite only for this file."
-      (interactive)
-      (compile (format "cd %s && %s" (projectile-project-root) command)))
+      (defun nl/command-in-proj-root (command)
+        "Run the jest test suite only for this file."
+        (interactive)
+        (compile (format "cd %s && %s" (projectile-project-root) command)))
 
-    (defun nl/jest-test-only-this-file ()
-      "Run the jest test suite only for this file."
-      (interactive)
-      (nl/jest-test-compile (format "node --inspect node_modules/.bin/jest --runInBand %s"
-                                    (buffer-file-name))))
+      (defun nl/typescrip-compile-this-file ()
+        "Run the jest test suite only for this file."
+        (interactive)
+        (nl/command-in-proj-root (format "node_modules/.bin/tsc --noEmit %s" (buffer-file-name))))
 
-    (defun nl/jest-test-coverage ()
-      "Run the jest test suite only for this file."
-      (interactive)
-      (nl/jest-test-compile (format "npm run test:cov")))
+      (defun nl/jest-test-only-this-file ()
+        "Run the jest test suite only for this file."
+        (interactive)
+        (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
+                                      (buffer-file-name))))
 
-    (defun nl/counsel-ag-ts-spec ()
-      "Perform counsel-ag on the project's TypeScript spec files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "-G spec.ts$"))
+      (defun nl/jest-test-coverage ()
+        "Run the jest test suite only for this file."
+        (interactive)
+        (nl/command-in-proj-root (format "npm run test:cov")))
 
-    (use-package typescript-mode)
+      (defun nl/counsel-ag-ts-spec ()
+        "Perform counsel-ag on the project's TypeScript spec files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "-G spec.ts$"))
 
-    (setq tide-server-max-response-length 204800)
+      (use-package typescript-mode)
 
-    ;; when buiding with Angular CLI, the first error always contains "ERROR in"
-    ;;
-    ;; adjusting this regexp makes 'next-error' work in compilation mode
-    (defconst typescript-tsc-error-regexp
-      (concat
-       "^[[:blank:]]*"
-       "\\(?:ERROR[[:blank:]]*in\\)?[[:blank:]]*"
-       "\\([^(\r\n)]+\\)(\\([0-9]+\\),\\([0-9]+\\)):[[:blank:]]+"
-       "error [[:alnum:]]+: [^\r\n]+$")
-      "Regexp to match errors generated by tsc.")
+      (setq tide-server-max-response-length 204800)
 
-    (add-to-list 'compilation-error-regexp-alist-alist
-                 `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
+      ;; when buiding with Angular CLI, the first error always contains "ERROR in"
+      ;;
+      ;; adjusting this regexp makes 'next-error' work in compilation mode
+      (defconst typescript-tsc-error-regexp
+        (concat
+         "^[[:blank:]]*"
+         "\\(?:ERROR[[:blank:]]*in\\)?[[:blank:]]*"
+         "\\([^(\r\n)]+\\)(\\([0-9]+\\),\\([0-9]+\\)):[[:blank:]]+"
+         "error [[:alnum:]]+: [^\r\n]+$")
+        "Regexp to match errors generated by tsc.")
 
-    ;; https://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/
-    ;; Add NodeJS error format
-    (add-to-list 'compilation-error-regexp-alist-alist
-                 '(node "^[  ]+at \\(?:[^\(\n]+ \(\\)?\\([a-zA-Z\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\)?$"
-                        1   ;; file
-                        2   ;; line
-                        3)) ;; column
+      (add-to-list 'compilation-error-regexp-alist-alist
+                   `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
 
-    (setq compilation-error-regexp-alist
-          (cons 'node compilation-error-regexp-alist))
+      ;; https://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/
+      ;; Add NodeJS error format
+      (add-to-list 'compilation-error-regexp-alist-alist
+                   '(node "^[  ]+at \\(?:[^\(\n]+ \(\\)?\\([a-zA-Z\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\)?$"
+                          1   ;; file
+                          2   ;; line
+                          3)) ;; column
 
-    (defconst
-      nl-typescript-pretty-symbols-alist
-      '(("=>" . ?⇒)
-        ("<=" . ?≤)
-        (">=" . ?≥)
-        ("==" . ?≡)
-        ("===" . ?≣)
-        ("!" . ?¬)
-        ("!=" . ?≢)
-        ("&&" . ?∧)
-        ("||" . ?∨)))
+      (setq compilation-error-regexp-alist
+            (cons 'node compilation-error-regexp-alist))
 
-    (defun nl-tide-mode-hook ()
-      (interactive)
-      (tide-setup)
-      (flycheck-mode +1)
-      (setq flycheck-check-syntax-automatically '(save mode-enabled))
-      (eldoc-mode +1)
-      (tide-hl-identifier-mode +1)
-      (company-mode +1)
-      (my-common-prog-mode-settings)
-      (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
-            company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
-      (setq-default typescript-indent-level 2))
+      (defconst
+        nl-typescript-pretty-symbols-alist
+        '(("=>" . ?⇒)
+          ("<=" . ?≤)
+          (">=" . ?≥)
+          ("==" . ?≡)
+          ("===" . ?≣)
+          ("!" . ?¬)
+          ("!=" . ?≢)
+          ("&&" . ?∧)
+          ("||" . ?∨)))
 
-    :hook ((typescript-mode . tide-setup)
-           (typescript-mode . tide-hl-identifier-mode)
-           (typescript-mode . nl-tide-mode-hook)
-           (typescript-mode . rainbow-delimiters-mode)))
+      (defun nl-tide-mode-hook ()
+        (interactive)
+        (tide-setup)
+        (flycheck-mode +1)
+        (setq flycheck-check-syntax-automatically '(save mode-enabled))
+        (eldoc-mode +1)
+        (tide-hl-identifier-mode +1)
+        (company-mode +1)
+        (my-common-prog-mode-settings)
+        (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
+              company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
+        (setq-default typescript-indent-level 2))
+
+      :hook ((typescript-mode . tide-setup)
+             (typescript-mode . tide-hl-identifier-mode)
+             (typescript-mode . nl-tide-mode-hook)
+             (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
