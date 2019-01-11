@@ -1536,6 +1536,24 @@ indexes (TAGS) or persistent background processes.
                 dumb-jump-prefer-searcher 'ag))
 #+END_SRC
 
+** [[https://github.com/leoliu/easy-kill][easy-kill]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package easy-kill
+  :ensure t
+  :config
+  (global-set-key [remap kill-ring-save] #'easy-kill)
+  (global-set-key [remap mark-sexp] #'easy-mark))
+#+END_SRC
+
+** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package ensime
+  :ensure t
+  :commands ensime ensime-mode))
+#+END_SRC
+
 ** [[https://github.com/emacs-eclim/emacs-eclim][emacs-eclim]]
 
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
@@ -1612,6 +1630,26 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :hook (prog-mode . git-gutter-mode))
 #+END_SRC
 
+** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package gradle-mode
+  :ensure t
+  :diminish gradle-mode
+  :init
+    (gradle-mode 1))
+#+END_SRC
+
+** [[https://github.com/lbolla/emacs-flycheck-flow][emacs-flycheck-flow]]
+
+This package adds support for flow to flycheck.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package flycheck-flow
+  :ensure t
+  :hook (js2-mode . flycheck-mode))
+#+END_SRC
+
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1652,22 +1690,20 @@ can be downloaded from [[http://eclim.org/install.html][here]].
            ( ycmd-mod-hook . ycmd-setup-completion-at-point-function)))
 #+END_SRC
 
-** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
+** [[https://melpa.org/#/etags-select][etags-select]]
+
+#+BEGIN_QUOTE
+Open a buffer with file/lines of exact-match tags shown. Select one by
+going to a line and pressing return. pop-tag-mark still works with
+this code.
+#+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package ensime
+(use-package etags-select
   :ensure t
-  :commands ensime ensime-mode))
-#+END_SRC
-
-** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package gradle-mode
-  :ensure t
-  :diminish gradle-mode
-  :init
-    (gradle-mode 1))
+  :config
+  (global-set-key "\M-?" 'etags-select-find-tag-at-point)
+  (global-set-key "\M-." 'etags-select-find-tag))
 #+END_SRC
 
 ** [[https://github.com/magnars/expand-region.el][expand-region]]
@@ -1677,6 +1713,15 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :ensure t
   :bind ("C-=" . er/expand-region)
   :config (setq expand-region-smart-cursor t))
+#+END_SRC
+
+** [[https://github.com/wasamasa/eyebrowse][eyebrowse]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package eyebrowse
+  :ensure t
+  :config
+  (eyebrowse-mode t))
 #+END_SRC
 
 ** [[http://www.emacswiki.org/emacs/fic-mode.el][fic-mode]]
@@ -1729,32 +1774,6 @@ Allow windmove to jump between frames.
   (flycheck-add-mode 'javascript-eslint 'web-mode)
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
   (flycheck-add-mode 'javascript-eslint 'js-mode))
-#+END_SRC
-
-** [[https://github.com/lbolla/emacs-flycheck-flow][emacs-flycheck-flow]]
-
-This package adds support for flow to flycheck.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package flycheck-flow
-  :ensure t
-  :hook (js2-mode . flycheck-mode))
-#+END_SRC
-
-** [[https://melpa.org/#/etags-select][etags-select]]
-
-#+BEGIN_QUOTE
-Open a buffer with file/lines of exact-match tags shown. Select one by
-going to a line and pressing return. pop-tag-mark still works with
-this code.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package etags-select
-  :ensure t
-  :config
-  (global-set-key "\M-?" 'etags-select-find-tag-at-point)
-  (global-set-key "\M-." 'etags-select-find-tag))
 #+END_SRC
 
 ** [[https://github.com/mola-T/flymd][flymd]]
@@ -2849,7 +2868,8 @@ to overwrite.
   (define-key region-bindings-mode-map "n" 'mc/mark-next-like-this)
   (define-key region-bindings-mode-map "m" 'mc/mark-more-like-this-extended)
   (define-key region-bindings-mode-map "q" 'anzu-query-replace-regexp)
-  (define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save))
+  ;;(define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save)
+)
 #+END_SRC
 
 ** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
@@ -3232,9 +3252,9 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
     (spaceline-compile
       ;; left side
-      '(((projectile-root buffer-modified) :face highlight-face :priority 100)
-        ((remote-host buffer-id) :face highlight-face)
-        ((line column) :separator ":" :face other-face)
+      '(((projectile-root buffer-modified) :face 'avy-lead-face-1 :priority 100)
+        ((remote-host buffer-id) :face 'avy-lead-face-0 :priority 100)
+        ((line column) :separator ":" :face default-face :priority 100)
         (anzu :priority 95)
         auto-compile
         (process :when active)
@@ -3403,7 +3423,7 @@ Allows for transposing window arrangements.
 
 ** [[http://melpa.org/#/undo-tree][undo-tree]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package undo-tree
   :ensure t
   :commands global-undo-tree-mode)
@@ -3555,7 +3575,7 @@ Required by ivy-occur.
 
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package whole-line-or-region
   :ensure t
   :diminish (whole-line-or-region-local-mode)
