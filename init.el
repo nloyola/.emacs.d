@@ -10,6 +10,11 @@
 (setq inhibit-startup-message t)
 (setq initial-scratch-message "")
 
+;; when tramp is slow
+;;
+;; - not working really
+;;(setq projectile-mode-line "Projectile")
+
 ;; A secure Emacs environment
 ;;
 ;; see https://glyph.twistedmatrix.com/2015/11/editor-malware.html
@@ -33,15 +38,14 @@
 
 ;;; Set up package
 (require 'package)
-
-(defvar gnu '("gnu" . "https://elpa.gnu.org/packages/"))
-(defvar melpa '("melpa" . "https://melpa.org/packages/"))
-(defvar org '("org" . "https://orgmode.org/elpa/"))
-
-(setq package-archives nil)
-(add-to-list 'package-archives melpa t)
-(add-to-list 'package-archives gnu t)
-(add-to-list 'package-archives org t)
+(setq package-archives
+      '(("GNU ELPA"     . "https://elpa.gnu.org/packages/")
+        ("MELPA Stable" . "https://stable.melpa.org/packages/")
+        ("MELPA"        . "https://melpa.org/packages/"))
+      package-archive-priorities
+      '(("GNU ELPA"     . 10)
+        ("MELPA Stable" . 5)
+        ("MELPA"        . 0)))
 
 (package-initialize)
 
