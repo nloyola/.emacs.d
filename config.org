@@ -1546,6 +1546,16 @@ indexes (TAGS) or persistent background processes.
   (global-set-key [remap mark-sexp] #'easy-mark))
 #+END_SRC
 
+** [[https://github.com/joaotavora/eglot][eglot]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package eglot
+  :ensure t
+  :config
+  (use-package typescript-mode)
+  (add-hook 'typescript-mode-hook 'eglot-ensure))
+#+END_SRC
+
 ** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -2507,7 +2517,6 @@ When using =counsel-ag=:
   :ensure t
   :commands less-css-mode)
 #+END_SRC
-
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
 
 Add filler lorem ipsum text to Emacs.
@@ -2515,6 +2524,19 @@ Add filler lorem ipsum text to Emacs.
 #+BEGIN_SRC emacs-lisp
 (use-package lorem-ipsum
   :ensure t)
+#+END_SRC
+
+** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package lsp-mode
+  :commands lsp
+  :init
+  ;;(setq ...)
+  )
+
+(use-package lsp-ui :commands lsp-ui-mode)
+(use-package company-lsp :commands company-lsp)
 #+END_SRC
 
 ** [[https://github.com/joddie/macrostep][macrostep]]
@@ -3317,10 +3339,13 @@ think of it as both something that augments and replaces the standard
                   ("C-c C-t c c" . nl/typescrip-compile-this-file)
                   ("C-c C-t c t" . nl/jest-test-coverage)
                   ("C-c C-t f" . tide-fix)
+                  ("C-c C-t i" . nl/indent-whole-buffer)
+                  ("C-c C-t n" . tide-nav)
                   ("C-c C-t o" . tide-organize-imports)
                   ("C-c C-t r" . tide-rename-symbol)
                   ("C-c C-t s" . nl/counsel-ag-ts-spec)
-                  ("C-c C-t t" . nl/jest-test-only-this-file))
+                  ("C-c C-t t" . nl/jest-test-only-this-file)
+                  ("C-c C-t x" . tide-references))
       :config
       (defun ts-filename-p (filename)
         (string-match "\.ts$" filename))
@@ -3574,6 +3599,8 @@ Required by ivy-occur.
 #+END_SRC
 
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
+
+Disabled since it does not work well with easy-kill (2019-01-31).
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package whole-line-or-region
