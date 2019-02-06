@@ -1272,8 +1272,14 @@ buffer navigation, but applies it to windows. The default keys are
 what I have them set to (with respect to Dvorak, of course).
 
 #+BEGIN_SRC emacs-lisp
-(use-package ace-window)
+  (use-package ace-window
+    :ensure t
+    :config
+    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 #+END_SRC
+
+#+RESULTS:
+: t
 
 ** [[https://github.com/Wilfred/ag.el][ag]]
 
@@ -2178,107 +2184,86 @@ This package can be used to tie related commands into a family of
 short bindings with a common prefix - a Hydra.
 
 #+BEGIN_SRC emacs-lisp
-(use-package hydra
-  :ensure t
-  :init
-  (use-package cl-lib)
-  (use-package lv)
-  (use-package ace-window :ensure t)
-  (use-package avy :ensure t)
-  (use-package key-chord
+  (use-package hydra
     :ensure t
-    :config (key-chord-mode 1))
-  :config
-  ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
+    :init
+    (use-package cl-lib)
+    (use-package lv)
+    (use-package ace-window :ensure t)
+    (use-package avy :ensure t)
+    (use-package key-chord
+      :ensure t
+      :init
+      (setq key-chord-one-key-delay 0.16)
+      :config (key-chordq-mode 1))
+    :config
+    ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
-  (defun nl/pull-window ()
-    "Pull a window to the window the point is at"
-    (interactive)
-    (aw--push-window (selected-window))
-    (ace-swap-window)
-    (aw-flip-window))
+    (defun nl/pull-window ()
+      "Pull a window to the window the point is at"
+      (interactive)
+      (aw--push-window (selected-window))
+      (ace-swap-window)
+      (aw-flip-window))
 
-  (defun hydra-universal-argument (arg)
-    (interactive "P")
-    (setq prefix-arg (if (consp arg)
-                         (list (* 4 (car arg)))
-                       (if (eq arg '-)
-                           (list -4)
-                         '(4)))))
+    (defun hydra-universal-argument (arg)
+      (interactive "P")
+      (setq prefix-arg (if (consp arg)
+                           (list (* 4 (car arg)))
+                         (if (eq arg '-)
+                             (list -4)
+                           '(4)))))
 
-  (defhydra hydra-window (:color red :hint nil)
-    "
- Split: _v_ert _x_:horz
-Delete: _o_nly  _da_ce  _dw_indow  _db_uffer  _df_rame
-  Move: _s_wap
-Frames: _f_rame new  _df_ delete
-  Misc: _m_ark _a_ce  _u_ndo  _r_edo"
-    ("h" windmove-left)
-    ("j" windmove-down)
-    ("k" windmove-up)
-    ("l" windmove-right)
-    ("H" hydra-move-splitter-left)
-    ("J" hydra-move-splitter-down)
-    ("K" hydra-move-splitter-up)
-    ("L" hydra-move-splitter-right)
-    ("|" (lambda ()
-           (interactive)
-           (split-window-right)
-           (windmove-right)))
-    ("_" (lambda ()
-           (interactive)
-           (split-window-below)
-           (windmove-down)))
-    ("v" split-window-right)
-    ("x" split-window-below)
-    ;;("t" transpose-frame "'")
-    ;; winner-mode must be enabled
-    ("u" winner-undo)
-    ("r" winner-redo) ;;Fixme, not working?
-    ("o" delete-other-windows :exit t)
-    ("a" ace-window :exit t)
-    ("f" new-frame :exit t)
-    ("p" nl/pull-window)
-    ("s" ace-swap-window)
-    ("da" ace-delete-window)
-    ("dw" delete-window)
-    ("db" kill-this-buffer)
-    ("df" delete-frame :exit t)
-    ("q" nil)
-    ;;("i" ace-maximize-window "ace-one" :color blue)
-    ;;("b" ido-switch-buffer "buf")
-    ("m" headlong-bookmark-jump))
+    (defhydra hydra-window (:color red :hint nil)
+      ("h" windmove-left)
+      ("j" windmove-down)
+      ("k" windmove-up)
+      ("l" windmove-right)
+      ("|" (progn (split-window-right) (windmove-right)))
+      ("_" (progn (split-window-below) (windmove-down)))
+      ("v" split-window-right)
+      ("x" split-window-below)
+      ("u" winner-undo)
+      ("r" winner-redo) ;;Fixme, not working?
+      ("o" delete-other-windows :exit t)
+      ("a" ace-window :exit t)
+      ("f" new-frame :exit t)
+      ("p" nl/pull-window)
+      ("s" ace-swap-window)
+      ("da" ace-delete-window)
+      ("dw" delete-window)
+      ("db" kill-this-buffer)
+      ("df" delete-frame :exit t)
+      ("q" nil)
+      ;;("i" ace-maximize-window "ace-one" :color blue)
+      ("m" headlong-bookmark-jump))
 
-  (key-chord-define-global "yy" 'hydra-window/body)
+    (key-chord-define-global "yy" 'hydra-window/body)
 
-  ;; for better next-buffer and previous-buffer see http://ergoemacs.org/emacs/elisp_next_prev_user_buffer.html
+    (defhydra hydra-buffer (:color blue :columns 3)
+      ("n" next-buffer "next" :color red)
+      ("b" helm-mini "switch")
+      ("B" ibuffer "ibuffer")
+      ("p" previous-buffer "prev" :color red)
+      ("C-b" buffer-menu "buffer menu")
+      ("d" kill-this-buffer "delete" :color red)
+      ;; don't come back to previous buffer after delete
+      ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
+      ("s" save-buffer "save" :color red))
 
-  (defhydra hydra-buffer (:color blue :columns 3)
-    "
-                Buffers :
-    "
-    ("n" next-buffer "next" :color red)
-    ("b" helm-mini "switch")
-    ("B" ibuffer "ibuffer")
-    ("p" previous-buffer "prev" :color red)
-    ("C-b" buffer-menu "buffer menu")
-    ("d" kill-this-buffer "delete" :color red)
-    ;; don't come back to previous buffer after delete
-    ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
-    ("s" save-buffer "save" :color red))
+    (key-chord-define-global "zz" 'hydra-buffer/body)
 
-  (key-chord-define-global "zz" 'hydra-buffer/body)
+    (defhydra hydra-goto-line (goto-map "")
+      "goto-line"
+      ("g" goto-line "go")
+      ("m" set-mark-command "mark" :bind nil)
+      ("q" nil "quit"))
 
-  (defhydra hydra-goto-line (goto-map ""
-                                      :pre (linum-mode 1)
-                                      :post (linum-mode -1))
-    "goto-line"
-    ("g" goto-line "go")
-    ("m" set-mark-command "mark" :bind nil)
-    ("q" nil "quit"))
-
-  (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
+    (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
 #+END_SRC
+
+#+RESULTS:
+: t
 
 ** [[https://github.com/mkcms/interactive-align][ialign]]
 
