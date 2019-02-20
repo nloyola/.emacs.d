@@ -529,7 +529,10 @@ Do not show these modes in the mode line.
 Use the whole window when opening up a shell (default behaviour is to
 split the window).
 
-#+BEGIN_SRC emacs-lisp
+Commented out since it is being configured in the "Side Windows"
+section now (2019-02-20)
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (add-to-list 'display-buffer-alist '("*shell*" display-buffer-same-window))
 #+END_SRC
 
@@ -567,6 +570,39 @@ possible.
     (setq browse-url-browser-function 'browse-url-generic
           browse-url-generic-program "google-chrome-stable"))
 (setenv "BROWSER" "google-chrome-stable")
+#+END_SRC
+
+** Side Windows
+
+https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side-Windows
+
+#+BEGIN_SRC emacs-lisp
+  (defvar nl/side-window-parameters
+    '(window-parameters . ((no-other-window . nil)
+                           (no-delete-other-windows . t))))
+
+  (setq fit-window-to-buffer-horizontally t)
+  (setq window-resize-pixelwise t)
+
+ (setq display-buffer-alist '())
+
+  (add-to-list 'display-buffer-alist
+               '("\\*\\(?:[Hh]elp\\|grep\\|Completions\\|xref\\)\\*"
+                  display-buffer-in-side-window
+                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
+                  ,nl/side-window-parameters))
+
+  (add-to-list 'display-buffer-alist
+               '("\\(?:HELM.?\\helm.?\\)*"
+                  display-buffer-in-side-window
+                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
+                  ,nl/side-window-parameters))
+
+  (add-to-list 'display-buffer-alist
+               '("\\*\\(?:shell\\|compilation\\|sbt\\)\\*"
+                 display-buffer-in-side-window
+                 (side . bottom) (slot . 1) (preserve-size . (nil . t)) (window-height . 0.15)
+                 ,nl/side-window-parameters))
 #+END_SRC
 
 ** Unicode
@@ -1342,10 +1378,10 @@ Trying out Kaolin Theme 2017-10-25
 (use-package base16-theme
   :ensure t
   :config
+    (load-theme 'base16-woodland t)
     ;;(load-theme 'base16-solarized-dark t)
     ;;(load-theme 'base16-oceanicnext t)
     ;;(load-theme 'base16-google-dark t)
-    (load-theme 'base16-woodland t)
     ;;(load-theme 'base16-nord t)
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
@@ -2013,6 +2049,7 @@ something, but so far hasn't shown any obvious side-effects
                         (inhibit-same-window . nil)
                         (reusable-frames . visible)
                         (side            . bottom)
+                        (slot            . -1)
                         (window-height   . 0.15)))
          )))
 #+END_SRC
@@ -2640,7 +2677,19 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
                 ("w"   . mc/mark-next-word-like-this)
                 ("W"   . mc/mark-previous-word-like-this)))
 #+END_SRC
+** [[https://github.com/joostkremers/nswbuff][nswbuff]]
 
+Quick switching between buffers.
+
+#+BEGIN_SRC emacs-lisp
+(use-package nswbuff
+  :ensure t
+  :bind* (("<C-tab>"           . nswbuff-switch-to-next-buffer)
+          ("<C-S-iso-lefttab>" . nswbuff-switch-to-previous-buffer))
+  :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
+                nswbuff-display-intermediate-buffers t
+                nswbuff-exclude-buffer-regexps '("^ .*" "^\\*.*\\*")))
+#+END_SRC
 
 ** paganini-theme
 
@@ -3159,7 +3208,7 @@ initial =*scratch*= buffer.
 Declarative popup window rules.
 #+END_QUOTE
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package shackle
     :ensure t
     :config
@@ -3329,7 +3378,8 @@ think of it as both something that augments and replaces the standard
                 ("C-c C-t o" . tide-organize-imports)
                 ("C-c C-t r" . tide-rename-symbol)
                 ("C-c C-t s" . nl/counsel-ag-ts-spec)
-                ("C-c C-t t" . nl/jest-test-only-this-file)
+                ("C-c C-t t t" . nl/jest-test-only-this-file)
+                ("C-c C-t t c" . nl/jest-test-and-coverage-only-this-file)
                 ("C-c C-t x" . tide-references))
     :init
     (use-package typescript-mode)
@@ -3351,6 +3401,12 @@ think of it as both something that augments and replaces the standard
       "Run the jest test suite only for this file."
       (interactive)
       (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
+                                       (buffer-file-name))))
+
+    (defun nl/jest-test-and-coverage-only-this-file ()
+      "Run the jest test suite only for this file."
+      (interactive)
+      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
                                        (buffer-file-name))))
 
     (defun nl/jest-test-coverage ()
@@ -3430,7 +3486,7 @@ think of it as both something that augments and replaces the standard
 #+END_SRC
 
 #+RESULTS:
-: tide-references
+: t
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
 
@@ -3846,7 +3902,7 @@ Views the same file side by side:
 #+BEGIN_SRC emacs-lisp
   (defun toggle-window-dedicated ()
     "Control whether or not Emacs is allowed to display another
-  buffer in current window."
+    buffer in current window."
     (interactive)
     (message
      (if (let (window (get-buffer-window (current-buffer)))
@@ -3859,8 +3915,11 @@ Views the same file side by side:
 
   ;; see https://www.reddit.com/r/emacs/comments/80pd2q/anyone_could_help_me_with_window_management/
   ;; possible values are: display-buffer-same-window, display-buffer-pop-up-window, display-buffer-reuse-window
-  (setq display-buffer-alist
-       '(("\*xref\*" . (display-buffer-same-window))))
+  ;;
+  ;; Commented out since it is being configured in the "Side Windows" section now (2019-02-20)
+  ;;
+  ;; (add-to-list 'display-buffer-alist
+  ;;              '("\*xref\*" . (display-buffer-same-window)))
 
   (defun nl/frame-grow-horizontally ()
     "Set the size and position of the Emacs window."
@@ -3908,8 +3967,8 @@ Views the same file side by side:
 
   (defhydra hydra-transparency (:columns 2)
     "
-  ALPHA : [ %(frame-parameter nil 'alpha) ]
-  "
+    ALPHA : [ %(frame-parameter nil 'alpha) ]
+    "
     ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
     ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
     ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
