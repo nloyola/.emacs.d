@@ -584,24 +584,22 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
   (setq fit-window-to-buffer-horizontally t)
   (setq window-resize-pixelwise t)
 
- (setq display-buffer-alist '())
+  ;; (setq display-buffer-alist '())
+
+  ;; (defun nl/display-buffer-debug(buf-name action)
+  ;;   (message "%s" buf-name)
+  ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
 
   (add-to-list 'display-buffer-alist
-               '("\\*\\(?:[Hh]elp\\|grep\\|Completions\\|xref\\)\\*"
-                  display-buffer-in-side-window
-                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
-                  ,nl/side-window-parameters))
-
-  (add-to-list 'display-buffer-alist
-               '("\\(?:HELM.?\\helm.?\\)*"
-                  display-buffer-in-side-window
-                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
-                  ,nl/side-window-parameters))
-
-  (add-to-list 'display-buffer-alist
-               '("\\*\\(?:shell\\|compilation\\|sbt\\)\\*"
+               '("\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)"
                  display-buffer-in-side-window
-                 (side . bottom) (slot . 1) (preserve-size . (nil . t)) (window-height . 0.15)
+                 (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
+                 ,nl/side-window-parameters))
+
+  (add-to-list 'display-buffer-alist
+               '("\\*\\(?:shell\\|compilation\\|tide-references\\|sbt\\)\\*"
+                 display-buffer-in-side-window
+                 (side . bottom) (slot . 1) (preserve-size . (nil . t)) (window-height . 0.2)
                  ,nl/side-window-parameters))
 #+END_SRC
 
