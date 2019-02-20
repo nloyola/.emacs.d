@@ -3,24 +3,11 @@
 
 (setq mc/cmds-to-run-for-all
       '(
-        delete-horizontal-space
-        easy-kill
-        helm-show-kill-ring
         hungry-delete-backward
         hungry-delete-forward
-        indent-for-tab-command
-        indent-new-comment-line
-        js2-line-break
-        nl/beginning-of-line-or-indentation
-        org-kill-line
-        org-self-insert-command
-        sbt-run-previous-command
-        typescript-insert-and-autoconvert-to-template
-        typescript-insert-and-indent
         whole-line-or-region-yank
         ))
 
 (setq mc/cmds-to-run-once
       '(
-        handle-switch-frame
         ))
