@@ -98,7 +98,7 @@ unzip symbola.zip
 *** Fira Mono
 
 #+BEGIN_SRC emacs-lisp
-(set-face-font 'default "Fira Mono Medium-15")
+(set-face-font 'default "Fira Mono Medium-14")
 #+END_SRC
 
 ** OSX
