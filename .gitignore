@@ -17,3 +17,4 @@ my-password.el.gpg
 .hl-save
 /layouts
 projectile.cache
+/transient

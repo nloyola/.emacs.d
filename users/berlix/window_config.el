@@ -12,7 +12,7 @@
       (let* ((desired-width-in-chars 244)
              (desired-width-in-pixels (* desired-width-in-chars (frame-char-width)))
              (window-frame-in-pixels 16))
-        (set-face-attribute 'default frame :font "Fira Mono Medium-14")
+        (set-face-attribute 'default frame :font "Input Mono Condensed-14")
         ;; cannot use negative value for X, it is not placed in correct location on startup
         (set-frame-position frame (- (+ 1920 3840) window-frame-in-pixels desired-width-in-pixels) 0)
         (set-frame-size frame
@@ -26,7 +26,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame 2200 120)
-    (set-face-attribute 'default frame :font "Fira Mono Medium-14")
+    (set-face-attribute 'default frame :font "Input Mono Condensed-14")
     (set-frame-size frame
                     (* 120 (frame-char-width frame))
                     (* 70 (frame-char-height frame))
@@ -39,7 +39,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame -1 0)
-    (set-face-attribute 'default frame :font "Fira Mono Medium-9")
+    (set-face-attribute 'default frame :font "Input Mono Condensed-9")
     (set-frame-size frame
                     (/ (x-display-pixel-width frame) (frame-char-width frame))
                     (floor (* (/ (x-display-pixel-height frame) (frame-char-height frame)) 0.80)))))

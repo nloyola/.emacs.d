@@ -64,7 +64,6 @@ cd ~/.fonts
 unzip Input-Font.zip
 #+END_SRC
 
-
 **** Emacs config
 
 And here's how to tell Emacs to use this font. Copy the following line to your
@@ -78,6 +77,10 @@ And then merge the setting to your X server resource database.
 
 #+BEGIN_SRC sh :tangle no
 xrdb -merge ~/.Xresources
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+(set-face-font 'default "Input Mono Condensed-14")
 #+END_SRC
 
 *** Symbola
@@ -97,7 +100,7 @@ unzip symbola.zip
 
 *** Fira Mono
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (set-face-font 'default "Fira Mono Medium-14")
 #+END_SRC
 
@@ -1372,7 +1375,7 @@ buffer name is too hard to see,  set it to white instead.
 
 Trying out Kaolin Theme 2017-10-25
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package base16-theme
   :ensure t
   :config
@@ -1397,6 +1400,20 @@ Never lose your cursor again
   (setq beacon-color "#666600")
   :config
   (beacon-mode 1))
+#+END_SRC
+
+
+** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
+
+Trying out Bubbleberry theme: 2019-02-25
+
+#+BEGIN_SRC emacs-lisp
+(use-package bubbleberry-theme
+  :ensure t
+  :config
+  (load-theme 'bubbleberry t)
+  ;; default region color is too hard to see on my display
+  (set-face-attribute 'region nil :background "#0f3b82"))
 #+END_SRC
 
 ** [[https://github.com/jorgenschaefer/circe][circe]]
