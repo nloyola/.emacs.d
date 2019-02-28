@@ -1477,6 +1477,7 @@ Complete anything.
     ;; enable yasnippet everywhere
     (defvar company-mode/enable-yas t
       "Enable yasnippet for all backends.")
+
     (defun company-mode/backend-with-yas (backend)
       (if (or
            (not company-mode/enable-yas)
@@ -1487,14 +1488,12 @@ Complete anything.
     :init (global-company-mode t)
     :config
     ;; no delay no autocomplete
-    (setq
-     company-idle-delay 0
-     company-minimum-prefix-length 4
-     company-tooltip-limit 20)
+    (setq company-idle-delay 0
+          company-minimum-prefix-length 4
+          company-tooltip-limit 20)
 
     (setq company-backends
-          (mapcar #'company-mode/backend-with-yas company-backends))
-    (add-hook 'after-init-hook 'global-company-mode))
+          (mapcar #'company-mode/backend-with-yas company-backends)))
 #+END_SRC
 
 ** [[https://github.com/emacsmirror/emacswiki.org/blob/master/cursor-chg.el][cursor-chg]]
@@ -1545,6 +1544,8 @@ Could not get this package to display changes (2017-10-15).
 #+END_SRC
 
 ** [[https://github.com/thamer/diredful][diredful]]
+
+Provides a simple UI for customizing dired mode to use different faces and colors.
 
 #+BEGIN_SRC emacs-lisp
 (use-package diredful
@@ -1827,7 +1828,7 @@ Allow windmove to jump between frames.
   :commands global-flycheck-mode
   :diminish flycheck-mode
   :commands flycheck-define-checker
-  :hook (after-init . global-flycheck-mode)
+  :init (global-flycheck-mode)
   :config
   (setq flycheck-standard-error-navigation nil)
 
@@ -2566,14 +2567,34 @@ Add filler lorem ipsum text to Emacs.
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package lsp-mode
-  :commands lsp
-  :init
-  ;;(setq ...)
-  )
+  (use-package lsp-mode
+    :ensure t
+    :init
+    (setq lsp-prefer-flymake nil))
 
-(use-package lsp-ui :commands lsp-ui-mode)
-(use-package company-lsp :commands company-lsp)
+  (use-package lsp-ui
+    :ensure t
+    :commands lsp-ui-mode)
+
+  (use-package company-lsp
+    :ensure t
+    :commands company-lsp
+    :config
+    (setq company-transformers nil
+          company-lsp-async t
+          company-lsp-cache-candidates nil))
+#+END_SRC
+
+** [[https://github.com/rossabaker/lsp-scala][lsp-scala]]
+
+Scala support for lsp-mode.
+
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-scala
+  :after scala-mode
+  :demand t
+  ;; Optional - enable lsp-scala automatically in scala files
+  :hook (scala-mode . lsp))
 #+END_SRC
 
 ** [[https://github.com/joddie/macrostep][macrostep]]
@@ -2946,75 +2967,74 @@ to overwrite.
 ** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package sbt-mode
-  :ensure t
-  ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
-  :commands (sbt-start sbt-command)
-  :preface
-  (defun nl-sbt-mode-hook ()
-    ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
-    ;; be skipped. 1 = skip info 2 = skip info and warnings.
-    (setq compilation-skip-threshold 1)
+  (use-package sbt-mode
+    :ensure t
+    ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
+    :commands (sbt-start sbt-command)
+    :preface
+    (defun nl-sbt-mode-hook ()
+      ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
+      ;; be skipped. 1 = skip info 2 = skip info and warnings.
+      (setq compilation-skip-threshold 1)
 
-    ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
-    (local-set-key (kbd "C-a") 'comint-bol)
+      ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
+      (local-set-key (kbd "C-a") 'comint-bol)
 
-    ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
-    ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
-    (local-set-key (kbd "M-RET") 'comint-accumulate))
+      ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
+      ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
+      (local-set-key (kbd "M-RET") 'comint-accumulate))
 
 
-  (defun nl-sbt-command ()
-    (interactive)
-    (setq completing-read-function 'completing-read-default)
-    (call-interactively 'sbt-command)
-    (setq completing-read-function 'ivy-completing-read))
+    (defun nl-sbt-command ()
+      (interactive)
+      (setq completing-read-function 'completing-read-default)
+      (call-interactively 'sbt-command)
+      (setq completing-read-function 'ivy-completing-read))
 
-  ;; Ivy and =sbt-command= do not behave well together right now, define
-  ;; our own wrapper function.
-  ;; --testing--
-  (defun sbt-command-ivy ()
-    "Send a command to the sbt process of the current buffer's sbt project.
-Prompts for the command to send when in interactive mode. You can
-use tab completion.
+    ;; Ivy and =sbt-command= do not behave well together right now, define
+    ;; our own wrapper function.
+    ;; --testing--
+    (defun sbt-command-ivy ()
+      "Send a command to the sbt process of the current buffer's sbt project.
+  Prompts for the command to send when in interactive mode. You can
+  use tab completion.
 
-This command does the following:
-  - displays the buffer moving focus to it if focus is t
-  - erases the buffer
-  - forgets about compilation errors
+  This command does the following:
+    - displays the buffer moving focus to it if focus is t
+    - erases the buffer
+    - forgets about compilation errors
 
-The command is most usefull for running a compilation command
-that outputs errors."
-    (interactive)
-    (setq sbt:command-history-temp
-          (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
-    (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
-              #'sbt:get-sbt-completions-for-command
-              :action #'sbt:command
-              :history 'sbt:command-history-temp
-              :preselect (sbt:get-previous-command)
-              :dynamic-collection t))
+  The command is most usefull for running a compilation command
+  that outputs errors."
+      (interactive)
+      (setq sbt:command-history-temp
+            (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
+      (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
+                #'sbt:get-sbt-completions-for-command
+                :action #'sbt:command
+                :history 'sbt:command-history-temp
+                :preselect (sbt:get-previous-command)
+                :dynamic-collection t))
 
-  ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
-  (setq sbt:program-options '("-Djline.terminal=auto"))
+    ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
+    (setq sbt:program-options '("-Djline.terminal=auto"))
 
-  :hook (sbt-mode . nl-sbt-mode-hook)
-  :config
+    :hook (sbt-mode . nl-sbt-mode-hook)
+    :config
 
-  ;; set this regex so that it knows about Play Framework SBT prompt
-  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-        sbt:ansi-support t
-        sbt:scroll-to-bottom-on-output nil)
-  (setenv "EMACS" "true"))
+    ;; set this regex so that it knows about Play Framework SBT prompt
+    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+          sbt:ansi-support t
+          sbt:scroll-to-bottom-on-output nil)
+    (setenv "EMACS" "true"))
 #+END_SRC
 
 ** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
 
 #+BEGIN_SRC emacs-lisp
   (use-package scala-mode
-    :ensure t
     ;;:load-path "~/src/github/elisp/emacs-scala-mode"
-    :mode "\\.scala\\'"
+    :mode "\\.s\\(cala\\|bt\\)$"
     :interpreter ("scala" . scala-mode)
     :preface
     (defun scala-filename-p (filename)
@@ -3068,7 +3088,7 @@ that outputs errors."
             ;; account for optional tag
             (group (? (not (syntax close-parenthesis))))
             (syntax close-parenthesis)))
-        "Regular expression for a scalatest FunSepc behaviour.")
+      "Regular expression for a scalatest FunSepc behaviour.")
 
     (defun nl/scalstest-find-suite-name ()
       "Determines the name of the ScalaTest suite name."
@@ -3120,12 +3140,12 @@ that outputs errors."
         (goto-char (point-min))
         (forward-line (- line-num 1))))
 
-  (defun nl/scalatest-find-next-failure ()
-    "Finds the next failed test in an SBT buffer that just ran scalatests."
-    (interactive)
-    (search-forward "*** FAILED ***")
-    (move-end-of-line nil)
-    (recenter))
+    (defun nl/scalatest-find-next-failure ()
+      "Finds the next failed test in an SBT buffer that just ran scalatests."
+      (interactive)
+      (search-forward "*** FAILED ***")
+      (move-end-of-line nil)
+      (recenter))
 
     (defhydra hydra-nl-scalatest (:hint nil)
       "Testing scala code with scalatest"
@@ -3177,6 +3197,13 @@ that outputs errors."
     (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
 
     :config
+    ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+    ;; allows using SPACE when in the minibuffer
+    (substitute-key-definition
+     'minibuffer-complete-word
+     'self-insert-command
+     minibuffer-local-completion-map)
+
     (setq scala-indent:indent-value-expression t
           scala-indent:align-parameters t
           scala-indent:align-forms t
@@ -3255,14 +3282,18 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package smartparens
-  :ensure t
-  :diminish smartparens-mode
-  :config
-  (require 'smartparens-config)
-  ;; https://github.com/Fuco1/smartparens/issues/783
-  (setq sp-escape-quotes-after-insert nil)
-  (smartparens-global-mode t))
+  (use-package smartparens
+    :ensure t
+    :diminish smartparens-mode
+    :config
+    (require 'smartparens-config)
+    ;; https://github.com/Fuco1/smartparens/issues/783
+    (setq sp-escape-quotes-after-insert nil)
+    (smartparens-global-mode t)
+
+    (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
+    (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
+    (sp-local-pair 'org-mode "*" "*" :actions '(wrap)))
 #+END_SRC
 
 
@@ -3270,12 +3301,6 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
 
 Set up some pairings for org mode markup. These pairings won't
 activate by default; they'll only apply for wrapping regions.
-
-#+BEGIN_SRC emacs-lisp
-(sp-local-pair 'org-mode "~" "~" :actions '(wrap))
-(sp-local-pair 'org-mode "/" "/" :actions '(wrap))
-(sp-local-pair 'org-mode "*" "*" :actions '(wrap))
-#+END_SRC
 
 ** [[https://github.com/mickeynp/smart-scan][smart-scan]]
 

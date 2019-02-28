@@ -7,8 +7,8 @@
 
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 
-(setq inhibit-startup-message t)
-(setq initial-scratch-message "")
+(setq inhibit-startup-message t
+      initial-scratch-message "")
 
 ;; when tramp is slow
 ;;
