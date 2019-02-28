@@ -18,4 +18,4 @@ my-password.el.gpg
 /layouts
 projectile.cache
 /transient
-/.lsp-session-v1
+/.lsp-session-*
