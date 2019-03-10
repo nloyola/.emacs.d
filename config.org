@@ -594,7 +594,7 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
   ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
 
   (add-to-list 'display-buffer-alist
-               '("\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)"
+               '("\\(?:\\*\\(?:[Hh]elp\\|grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)"
                  display-buffer-in-side-window
                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
                  ,nl/side-window-parameters))
@@ -718,26 +718,26 @@ Prefer saving this file somewhere other than the default.
            ("\\.java\\'"                . java-mode))
     :preface
     (defconst nelson-c-style
-              '((c-tab-always-indent . t)
-                (c-set-style "K&R")
-                (c-offsets-alist . ((statement-block-intro . +)
-                                    (substatement-open     . 0)
-                                    (label                 . 0)
-                                    (case-label            . +)
-                                    (statement-cont        . +)
-                                    (innamespace           . 0))))
-              "Nelson programming style.")
+      '((c-tab-always-indent . t)
+        (c-set-style "K&R")
+        (c-offsets-alist . ((statement-block-intro . +)
+                            (substatement-open     . 0)
+                            (label                 . 0)
+                            (case-label            . +)
+                            (statement-cont        . +)
+                            (innamespace           . 0))))
+      "Nelson programming style.")
 
-  ;; Customizations for all of c-mode, c++-mode, and objc-mode
+    ;; Customizations for all of c-mode, c++-mode, and objc-mode
     (defun my-c-mode-common-hook ()
       ;; add my personal style and set it for the current buffer
       (c-add-style "NELSON-c-mode" nelson-c-style t)
       ;; offset customizations not in nelson-c-style
       (c-set-offset 'member-init-intro '++)
       ;; other customizations
-  ;;(c-toggle-auto-state 1) ;; Turn on auto newline
+      ;;(c-toggle-auto-state 1) ;; Turn on auto newline
       (my-common-prog-mode-settings)
-  ;; makes the underscore part of a word in C and C++ modes
+      ;; makes the underscore part of a word in C and C++ modes
       (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
       (modify-syntax-entry ?_ "w" c-mode-syntax-table)
       (lambda ()
@@ -748,12 +748,11 @@ Prefer saving this file somewhere other than the default.
     (defun my-java-mode-hook ()
       (setq indent-tabs-mode nil)
       ;;(setq zeal-at-point-docset "java")
-      (eclim-mode t)
-    )
+      ;;(eclim-mode t)
+      (add-hook 'java-mode-hook #'yas-minor-mode))
 
     :hook ((c-mode-common . my-c-mode-common-hook)
-           (java-mode . my-java-mode-hook)
-           (java-mode . semantic-mode)))
+           (java-mode . my-java-mode-hook)))
 #+END_SRC
 
 ** =cperl-mode=
@@ -1413,7 +1412,8 @@ Trying out Bubbleberry theme: 2019-02-25
   :config
   (load-theme 'bubbleberry t)
   ;; default region color is too hard to see on my display
-  (set-face-attribute 'region nil :background "#0f3b82"))
+  (set-face-attribute 'region nil :background "#0f3b82")
+  (set-face-attribute 'font-lock-negation-char-face nil :foreground "red" :background "#0f3b82"))
 #+END_SRC
 
 ** [[https://github.com/jorgenschaefer/circe][circe]]
@@ -1516,6 +1516,18 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
   :ensure t
   :config
   (load-theme 'cyberpunk t))
+#+END_SRC
+
+** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package dap-mode
+  :ensure t :after lsp-mode
+  :config
+  (dap-mode t)
+  (dap-ui-mode t))
+
+(use-package dap-java :after (lsp-java))
 #+END_SRC
 
 ** [[https://github.com/skeeto/devdocs-lookup][devdocs-lookup]]
@@ -1627,7 +1639,9 @@ indexes (TAGS) or persistent background processes.
 Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
 can be downloaded from [[http://eclim.org/install.html][here]].
 
-#+BEGIN_SRC emacs-lisp
+2019-03-10 tyring out
+
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package eclim
     :load-path "~/src/github/elisp/emacs-eclim"
     :diminish eclim-mode
@@ -2566,23 +2580,31 @@ Add filler lorem ipsum text to Emacs.
 
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
-    :ensure t
     :init
     (setq lsp-prefer-flymake nil))
 
   (use-package lsp-ui
     :ensure t
-    :commands lsp-ui-mode)
+    :hook (lsp-mode . lsp-ui-mode))
 
   (use-package company-lsp
-    :ensure t
-    :commands company-lsp
+    :after company
+    :init
+    (add-to-list 'company-backends #'company-lsp)
     :config
     (setq company-transformers nil
-          company-lsp-async t
-          company-lsp-cache-candidates nil))
+            company-lsp-async t
+            company-lsp-cache-candidates nil))
+#+END_SRC
+
+** [[https://github.com/emacs-lsp/lsp-java][lsp-java]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-java
+  :defer 3
+  :init (add-hook 'java-mode-hook 'lsp))
 #+END_SRC
 
 ** [[https://github.com/rossabaker/lsp-scala][lsp-scala]]
@@ -2591,9 +2613,9 @@ Scala support for lsp-mode.
 
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-scala
-  :after scala-mode
+  :ensure t
+  :after (lsp scala-mode)
   :demand t
-  ;; Optional - enable lsp-scala automatically in scala files
   :hook (scala-mode . lsp))
 #+END_SRC
 
@@ -2860,7 +2882,7 @@ http://batsov.com/projectile/
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package powerline
     :ensure t
-  :config
+    :config
     (setq powerline-arrow-shape 'arrow14)
     (setq powerline-default-separator-dir '(right . left))
 
@@ -3453,6 +3475,11 @@ think of it as both something that augments and replaces the standard
       "Run the jest test suite only for this file."
       (interactive)
       (nl/command-in-proj-root (format "npm run test:cov")))
+
+    (defun nl/counsel-ag-ts ()
+      "Perform counsel-ag on the project's TypeScript files excluding spec files."
+      (interactive)
+      (counsel-ag "" (projectile-project-root) "-G '((?!spec)).ts$'"))
 
     (defun nl/counsel-ag-ts-spec ()
       "Perform counsel-ag on the project's TypeScript spec files."

@@ -19,3 +19,5 @@ my-password.el.gpg
 projectile.cache
 /transient
 /.lsp-session-*
+workspace/
+eclipse.jdt.ls/
