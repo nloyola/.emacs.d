@@ -2266,14 +2266,22 @@ short bindings with a common prefix - a Hydra.
       (setq key-chord-one-key-delay 0.16)
       :config (key-chord-mode 1))
     :config
-    ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
-
     (defun nl/pull-window ()
       "Pull a window to the window the point is at"
       (interactive)
       (aw--push-window (selected-window))
       (ace-swap-window)
       (aw-flip-window))
+
+    (defun nl/open-buffer-in-other-window ()
+      "Open buffer in another window."
+      (interactive)
+      (let ((buf (current-buffer))
+            (window (ace-select-window)))
+        (message "%s" buf)
+        (set-window-buffer window buf)))
+
+    ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
     (defun hydra-universal-argument (arg)
       (interactive "P")
@@ -2294,11 +2302,11 @@ short bindings with a common prefix - a Hydra.
       ("x" split-window-below)
       ("u" winner-undo)
       ("r" winner-redo) ;;Fixme, not working?
-      ("o" delete-other-windows :exit t)
       ("a" ace-window :exit t)
       ("f" new-frame :exit t)
-      ("p" nl/pull-window)
-      ("s" ace-swap-window)
+      ("o" nl/open-buffer-in-other-window :exit t)
+      ("p" nl/pull-window :exit t)
+      ("s" ace-swap-window :exit t)
       ("da" ace-delete-window)
       ("dw" delete-window)
       ("db" kill-this-buffer)
