@@ -1643,7 +1643,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package eclim
-    :load-path "~/src/github/elisp/emacs-eclim"
+    ;; :load-path "~/src/github/elisp/emacs-eclim"
     :diminish eclim-mode
     :preface
     (defun nl/restart-eclim (workspace-dir)
@@ -1671,7 +1671,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
       :commands company-emacs-eclim-setup)
 
     (use-package eclimd
-      :load-path "~/src/github/elisp/emacs-eclim"
+      ;;:load-path "~/src/github/elisp/emacs-eclim"
       :preface
       ;;(setq eclimd-autostart t)
       )
@@ -1791,10 +1791,12 @@ this code.
 ** [[https://github.com/magnars/expand-region.el][expand-region]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package expand-region
-  :ensure t
-  :bind ("C-=" . er/expand-region)
-  :config (setq expand-region-smart-cursor t))
+  (use-package expand-region
+    :load-path (lambda () (expand-file-name "~/src/github/elisp/expand-region.el"))
+    :bind ("C-=" . er/expand-region)
+    :config
+    (setq expand-region-smart-cursor t
+          er/enable-subword-mode? nil))
 #+END_SRC
 
 ** [[https://github.com/wasamasa/eyebrowse][eyebrowse]]
@@ -2583,6 +2585,7 @@ Add filler lorem ipsum text to Emacs.
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
     :init
+    ;;(setq lsp-response-timeout 25)
     (setq lsp-prefer-flymake nil))
 
   (use-package lsp-ui
@@ -2605,6 +2608,24 @@ Add filler lorem ipsum text to Emacs.
 (use-package lsp-java
   :defer 3
   :init (add-hook 'java-mode-hook 'lsp))
+#+END_SRC
+
+** [[https://github.com/emacs-lsp-legacy/lsp-php][lsp-php]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package lsp-php
+    ;; :defer 3
+    :init
+    ;; (custom-set-variables
+    ;;  ;; Run php-language server with a different php interpreter and from a different location.
+    ;;  '(lsp-php-server-install-dir "~/.emacs.d/php-language-server")
+    ;;  '(lsp-php-language-server-command
+    ;;    (list "/usr/bin/php" (expand-file-name "vendor/bin/php-language-server.php" lsp-php-server-install-dir)))
+    ;;  ;; Hide noisy messages when opening a large project
+    ;;  '(lsp-php-show-file-parse-notifications nil)
+    ;;  ;; Composer.json detection after Projectile.
+    ;;  '(lsp-php-workspace-root-detectors (quote (lsp-php-root-projectile lsp-php-root-composer-json "index.php" "robots.txt"))))
+    :hook (php-mode . lsp))
 #+END_SRC
 
 ** [[https://github.com/rossabaker/lsp-scala][lsp-scala]]
@@ -3139,7 +3160,7 @@ to overwrite.
       (sbt-command (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour))))
 
     (defun nl/scalatest-find-file ()
-      "From an scalatest failure backtrace, opens the file under the cursor at the line specified."
+      "From a scalatest failure backtrace, opens the file under the cursor at the line specified."
       (interactive)
       (let (p1 p2 err-line filename line-num file-with-proj-path)
         (save-some-buffers t)
@@ -3446,45 +3467,6 @@ think of it as both something that augments and replaces the standard
     :init
     (use-package typescript-mode)
     :config
-    (defun ts-filename-p (filename)
-      (string-match "\.ts$" filename))
-
-    (defun nl/command-in-proj-root (command)
-      "Run the jest test suite only for this file."
-      (interactive)
-      (compile (format "cd %s && %s" (projectile-project-root) command)))
-
-    (defun nl/typescrip-compile-this-file ()
-      "Run the jest test suite only for this file."
-      (interactive)
-      (nl/command-in-proj-root (format "node_modules/.bin/tsc --noEmit %s" (buffer-file-name))))
-
-    (defun nl/jest-test-only-this-file ()
-      "Run the jest test suite only for this file."
-      (interactive)
-      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
-                                       (buffer-file-name))))
-
-    (defun nl/jest-test-and-coverage-only-this-file ()
-      "Run the jest test suite only for this file."
-      (interactive)
-      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
-                                       (buffer-file-name))))
-
-    (defun nl/jest-test-coverage ()
-      "Run the jest test suite only for this file."
-      (interactive)
-      (nl/command-in-proj-root (format "npm run test:cov")))
-
-    (defun nl/counsel-ag-ts ()
-      "Perform counsel-ag on the project's TypeScript files excluding spec files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "-G '((?!spec)).ts$'"))
-
-    (defun nl/counsel-ag-ts-spec ()
-      "Perform counsel-ag on the project's TypeScript spec files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "-G spec.ts$"))
 
     (setq tide-server-max-response-length 204800)
 
