@@ -106,7 +106,7 @@
                               nil t)
            (setq filename (match-string-no-properties 1))))
     (when filename
-      (message "%s" filename)
+      (recenter-top-bottom 'top)
       (ace-select-window)
       (find-file (expand-file-name filename (projectile-project-root)))
       (goto-char (point-min)))))
