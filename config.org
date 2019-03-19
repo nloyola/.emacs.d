@@ -1413,6 +1413,7 @@ Trying out Bubbleberry theme: 2019-02-25
   (load-theme 'bubbleberry t)
   ;; default region color is too hard to see on my display
   (set-face-attribute 'region nil :background "#0f3b82")
+  (set-face-attribute 'font-lock-warning-face nil :background "#0f3b82")
   (set-face-attribute 'font-lock-negation-char-face nil :foreground "red" :background "#0f3b82"))
 #+END_SRC
 
@@ -2166,6 +2167,14 @@ instead of ~find-file-other-window~.
   :config
   (helm-projectile-on)
   (setq compilation-read-command t)) ; do prompt for a compilation command
+#+END_SRC
+
+
+** [[https://github.com/cosmicexplorer/helm-rg][helm-rg]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-rg
+  :ensure t)
 #+END_SRC
 
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
