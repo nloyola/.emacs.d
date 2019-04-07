@@ -54,6 +54,22 @@
   "Return TRUE if FILENAME is a match for a TypseScript spec."
   (string-match "\.spec\.ts$" filename))
 
+(defun nl/ng-compile ()
+    "Uses Angular CLI to build the project."
+  (interactive)
+  (with-output-to-temp-buffer "*ng-compile*"
+    (async-shell-command "ng build" "*ng-compile*" "*Messages*")
+    (pop-to-buffer "*ng-compile*"))
+  "")
+
+(defun nl/ng-test ()
+    "Uses Angular CLI to run the project tests."
+  (interactive)
+  (with-output-to-temp-buffer "*ng-test*"
+    (async-shell-command "npm run test" "*ng-test*" "*Messages*")
+    (pop-to-buffer "*ng-test*"))
+  "")
+
 (defun nl/related-files (path)
   "Tell Projectile that implementation and test files are in the same directory (PATH)."
   (let ((dir (file-name-directory path))
@@ -68,14 +84,16 @@
             :scss (concat dir base-name ".scss")))))
 
 (projectile-register-project-type 'ts '("package.json")
-                                  :compile "ng build"
-                                  :test "npm run test"
+                                  ;;:compile "ng build"   -- using projectile-project-compilation-cmd, see below
+                                  ;;:test "npm run test"  -- using projectile-project-test-cmd, see below
                                   :run "npm run start"
                                   :test-suffix ".spec"
                                   :related-files-fn #'nl/related-files)
 
 (setq projectile-test-suffix-function (lambda (project-type) "" ".spec")
-      projectile-find-dir-includes-top-level t)
+      projectile-find-dir-includes-top-level t
+      projectile-project-compilation-cmd #'nl/ng-compile
+      projectile-project-test-cmd #'nl/ng-test)
 
 ;; functions for finding files in project
 (defun nl/angular-find-with-filetypes (predicate)

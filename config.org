@@ -593,10 +593,10 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
 
   ;; (defun nl/display-buffer-debug(buf-name action)
   ;;   (message "%s" buf-name)
-  ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
+  ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
 
   (add-to-list 'display-buffer-alist
-               '("\\(?:\\*\\(?:[Hh]elp\\|grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)"
+               '("\\(?:\\*\\(?:[Hh]elp\\|grep\\|Find\\|Warnings\\|Completions\\|xref\\|ng-compile\\|ng-test\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)"
                  display-buffer-in-side-window
                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
                  ,nl/side-window-parameters))
