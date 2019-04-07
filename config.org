@@ -427,6 +427,8 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
   (global-set-key (kbd "C-x C-n")       'next-error)
   (global-set-key (kbd "C-x C-i")       'c-indent-exp)
   (global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
+  (global-set-key (kbd "M-f")           'forward-to-word)
+  (global-set-key (kbd "M-B")           'backward-to-word)
 
   (global-set-key (kbd "<f1>")          'indent-for-tab-command)
   (global-set-key [(shift f1)]          'indent-region)
@@ -571,8 +573,8 @@ possible.
 #+BEGIN_SRC emacs-lisp
 (when (equal system-type 'gnu/linux)
     (setq browse-url-browser-function 'browse-url-generic
-          browse-url-generic-program "google-chrome-stable"))
-(setenv "BROWSER" "google-chrome-stable")
+          browse-url-generic-program "google-chrome"))
+(setenv "BROWSER" "google-chrome")
 #+END_SRC
 
 ** Side Windows

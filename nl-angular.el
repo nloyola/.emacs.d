@@ -54,11 +54,25 @@
   "Return TRUE if FILENAME is a match for a TypseScript spec."
   (string-match "\.spec\.ts$" filename))
 
+(defun nl/related-files (path)
+  "Tell Projectile that implementation and test files are in the same directory (PATH)."
+  (let ((dir (file-name-directory path))
+        (base-name (file-name-nondirectory (file-name-sans-extension path))))
+    (if (string-suffix-p ".spec" base-name)
+        (let ((impl-name (file-name-sans-extension base-name)))
+          (list :impl (concat dir impl-name ".ts")
+                :other (concat dir impl-name ".html")
+                :scss (concat dir impl-name ".scss")))
+      (list :test (concat dir base-name ".spec.ts")
+            :other (concat dir base-name ".html")
+            :scss (concat dir base-name ".scss")))))
+
 (projectile-register-project-type 'ts '("package.json")
                                   :compile "ng build"
                                   :test "npm run test"
                                   :run "npm run start"
-                                  :test-suffix ".spec")
+                                  :test-suffix ".spec"
+                                  :related-files-fn #'nl/related-files)
 
 (setq projectile-test-suffix-function (lambda (project-type) "" ".spec")
       projectile-find-dir-includes-top-level t)
@@ -70,17 +84,17 @@
     (helm-comp-read "Find file: " files)))
 
 (defun nl/angular-find-ts-file ()
-  "Finds a TypeScript file in the project."
+  "Find TypeScript files in the project."
   (interactive)
   (nl/angular-find-with-filetypes 'ts-filename-p))
 
 (defun nl/angular-find-ts-spec-file ()
-  "Finds a TypeScript test file in the project."
+  "Find TypeScript test file in the project."
   (interactive)
   (nl/angular-find-with-filetypes 'ts-spec-filename-p))
 
 (defun nl/angular-find-html-file ()
-  "Finds an HTML file in the project."
+  "Find HTML file in the project."
   (interactive)
   (nl/angular-find-with-filetypes 'html-filename-p))
 
