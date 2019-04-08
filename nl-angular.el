@@ -90,6 +90,23 @@
                                   :test-suffix ".spec"
                                   :related-files-fn #'nl/related-files)
 
+;;
+;; override this function, from the projectile package, so that tests are created in the proper
+;; location for this project
+;;
+(defun projectile-create-test-file-for (impl-file-path)
+  "Create a test file for the file given by IMPL-FILE-PATH."
+  (let* ((test-file (projectile--test-name-for-impl-name impl-file-path))
+         (test-file-extension (file-name-extension impl-file-path))
+         (test-dir))
+    (cond
+     ((string= test-file-extension "ts")
+      (setq test-dir (file-name-directory impl-file-path))))
+    (unless (file-exists-p (expand-file-name test-file test-dir))
+      (progn (unless (file-exists-p test-dir)
+               (make-directory test-dir :create-parents))
+             (concat test-dir test-file)))))
+
 (setq projectile-test-suffix-function (lambda (project-type) "" ".spec")
       projectile-find-dir-includes-top-level t
       projectile-project-compilation-cmd #'nl/ng-compile
