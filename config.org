@@ -1409,14 +1409,24 @@ Never lose your cursor again
 Trying out Bubbleberry theme: 2019-02-25
 
 #+BEGIN_SRC emacs-lisp
-(use-package bubbleberry-theme
-  :ensure t
-  :config
-  (load-theme 'bubbleberry t)
-  ;; default region color is too hard to see on my display
-  (set-face-attribute 'region nil :background "#0f3b82")
-  (set-face-attribute 'font-lock-warning-face nil :background "#0f3b82")
-  (set-face-attribute 'font-lock-negation-char-face nil :foreground "red" :background "#0f3b82"))
+  (use-package bubbleberry-theme
+    :ensure t
+    :config
+    (load-theme 'bubbleberry t)
+    ;; default region color is too hard to see on my display
+    (custom-set-faces
+     '(region nil ((t (:background "#0f3b82"))))
+     '(font-lock-warning-face nil ((t (:background "#0f3b82"))))
+     '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+     '(ediff-odd-diff-A ((nil :background "#862b27")))
+     '(ediff-even-diff-A ((nil :background "#1f772c")))
+     '(ediff-current-diff-A ((nil :background "#2b538a")))
+     '(ediff-odd-diff-B ((nil :background "#862b27")))
+     '(ediff-even-diff-B ((nil :background "#1f772c")))
+     '(ediff-current-diff-B ((nil :background "#2b538a")))
+     '(ediff-odd-diff-C ((nil :background "#862b27")))
+     '(ediff-even-diff-C ((nil :background "#1f772c")))
+     '(ediff-current-diff-C ((nil :background "#2b538a")))))
 #+END_SRC
 
 ** [[https://github.com/jorgenschaefer/circe][circe]]
@@ -2677,13 +2687,16 @@ A great interface for git projects. It's much more pleasant to use than the git 
 command line. Use an easy keybinding to access magit.
 
 #+BEGIN_SRC emacs-lisp
-(use-package magit
-  :ensure t
-  :bind (("C-x g" . magit-status))
-  :config
-  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
-  (setq-default vc-handled-backends '(Git))
-  (setq magit-push-always-verify nil))
+  (use-package magit
+    :ensure t
+    :bind (("C-x g" . magit-status))
+    :config
+    (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
+    (setq-default vc-handled-backends '(Git))
+    (setq magit-push-always-verify nil
+
+          ;; only use A and B in Ediff
+          magit-ediff-dwim-show-on-hunks t))
 #+END_SRC
 
 *** Fullscreen magit
@@ -3396,44 +3409,44 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 ** [[https://github.com/TheBB/spaceline][spaceline]]
 
-#+BEGIN_SRC emacs-lisp
-  (use-package spaceline-config
-    :ensure spaceline
-    :init
-    (require 'spaceline-config)
-    (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
-    (setq-default powerline-default-separator 'wave
-                  powerline-height 26
-                  spaceline-separator-dir-left '(left . left)
-                  spaceline-separator-dir-right '(right . right))
-    :config
-    (spaceline-helm-mode 1)
-    (spaceline-toggle-version-control-on)
+#+BEGIN_SRC emacs-lisp :tangle no
+    (use-package spaceline-config
+      :ensure spaceline
+      :init
+      (require 'spaceline-config)
+      (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+      (setq-default powerline-default-separator 'wave
+                    powerline-height 26
+                    spaceline-separator-dir-left '(left . left)
+                    spaceline-separator-dir-right '(right . right))
+      :config
+      (spaceline-helm-mode 1)
+      (spaceline-toggle-version-control-on)
 
-    (spaceline-compile
-      ;; left side
-      '(((projectile-root buffer-modified) :face 'avy-lead-face-1 :priority 100)
-        ((remote-host buffer-id) :face 'avy-lead-face-0 :priority 100)
-        ((line column) :separator ":" :face default-face :priority 100)
-        (anzu :priority 95)
-        auto-compile
-        (process :when active)
-        (minor-modes :when active
-                     :priority 9)
-        (org-clock :when active))
-      ;; right side
-      '(which-function
-        (selection-info :priority 95)
-        input-method
-        (version-control :when active :priority 78)
-        ((flycheck-error flycheck-warning flycheck-info) :when active :priority 89)
-        (major-mode :priority 79)
-        (minor-mode :priority 79 :face other-face)
-        (global :when active)
-        (buffer-position :priority 99)
-        (hud :priority 99)))
+      (spaceline-compile
+        ;; left side
+        '(((projectile-root buffer-modified) :face 'avy-lead-face-1 :priority 100)
+          ((remote-host buffer-id) :face 'avy-lead-face-0 :priority 100)
+          ((line column) :separator ":" :face default-face :priority 100)
+          (anzu :priority 95)
+          auto-compile
+          (process :when active)
+          (minor-modes :when active
+                       :priority 9)
+          (org-clock :when active))
+        ;; right side
+        '(which-function
+          (selection-info :priority 95)
+          input-method
+          (version-control :when active :priority 78)
+          ((flycheck-error flycheck-warning flycheck-info) :when active :priority 89)
+          (major-mode :priority 79)
+          (minor-mode :priority 79 :face other-face)
+          (global :when active)
+          (buffer-position :priority 99)
+          (hud :priority 99)))
 
-    (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
+      (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
