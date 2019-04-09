@@ -43,8 +43,8 @@
         ("MELPA Stable" . "https://stable.melpa.org/packages/")
         ("MELPA"        . "https://melpa.org/packages/"))
       package-archive-priorities
-      '(("GNU ELPA"     . 10)
-        ("MELPA Stable" . 5)
+      '(("MELPA Stable" . 10)
+        ("GNU ELPA"     . 5)
         ("MELPA"        . 0)))
 
 (package-initialize)
