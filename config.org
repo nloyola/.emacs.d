@@ -2822,7 +2822,7 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
   (use-package multiple-cursors
     :ensure t
     :after selected
-    :init (require 'multiple-cursors)
+    :defer 5
     :bind (("C-S-c C-S-c" . mc/edit-lines)
            ("C->"         . mc/mark-next-like-this)
            ("C-<"         . mc/mark-previous-like-this)
@@ -3359,9 +3359,8 @@ initial =*scratch*= buffer.
 #+BEGIN_SRC emacs-lisp
 (use-package selected
   :ensure t
-  :defer 5
+  :demand t
   :diminish selected-minor-mode
-  :commands selected-minor-mode
   ;;:bind (:map selected-keymap
   ;;            ("M-%" . query-replace-regexp)
   ;;            ("C-[" . align-entire)
