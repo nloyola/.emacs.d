@@ -604,7 +604,7 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
                  ,nl/side-window-parameters))
 
   (add-to-list 'display-buffer-alist
-               '("\\*\\(?:shell\\|compilation\\|tide-references\\|sbt\\)\\*"
+               '("\\*\\(?:shell\\|compilation\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
                  display-buffer-in-side-window
                  (side . bottom) (slot . 1) (preserve-size . (nil . t)) (window-height . 0.2)
                  ,nl/side-window-parameters))
@@ -1300,75 +1300,32 @@ direction keys.
   :bind ("S-<f10>" . whitespace-mode))
 #+END_SRC
 
-* ELPA packages
+* Themes
 
-These are the packages that are not built into Emacs.
+** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
 
-** [[https://github.com/abo-abo/ace-window][ace-window]]
+Trying out Bubbleberry theme: 2019-02-25
+Switched to Dracula theme: 2019-04-10
 
-A package that uses the same idea from ace-jump-mode for
-buffer navigation, but applies it to windows. The default keys are
-1-9, but it's faster to access the keys on the home row, so that's
-what I have them set to (with respect to Dvorak, of course).
-
-#+BEGIN_SRC emacs-lisp
-  (use-package ace-window
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package bubbleberry-theme
     :ensure t
     :config
-    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
-#+END_SRC
-
-#+RESULTS:
-: t
-
-** [[https://github.com/Wilfred/ag.el][ag]]
-
-Use silver surfer to search.
-
-#+BEGIN_SRC emacs-lisp
-(use-package ag
-  :commands ag
-  :ensure t)
-#+END_SRC
-
-** [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons-dired]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package all-the-icons-dired
-    ;; M-x all-the-icons-install-fonts
-    :ensure t
-    :commands (all-the-icons-dired-mode))
-#+END_SRC
-
-** [[https://github.com/syohex/emacs-anzu][anzu]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package anzu
-  :ensure t
-  :bind
-  (([remap query-replace] . anzu-query-replace)
-   ([remap query-replace-regexp] . anzu-query-replace-regexp))
-  :config
-  (global-anzu-mode +1)
-  (set-face-attribute 'anzu-mode-line nil
-                      :foreground "yellow" :weight 'bold)
-  (custom-set-variables
-   '(anzu-mode-lighter "")
-   '(anzu-deactivate-region t)
-   '(anzu-search-threshold 1000)
-   '(anzu-replace-threshold 50)
-   '(anzu-replace-to-string-separator " => ")))
-#+END_SRC
-
-** [[https://github.com/abo-abo/avy][avy]]
-
-A quick way to jump around text in buffers.
-
-#+BEGIN_SRC emacs-lisp
-(use-package avy
-  :bind
-  (("C-c SPC" . avy-goto-char)
-   ("C-'" . avy-goto-char-2)))
+    (load-theme 'bubbleberry t)
+    ;; default region color is too hard to see on my display
+    (custom-set-faces
+     '(region ((t (:background "#0f3b82"))))
+     '(font-lock-warning-face ((t (:background "#0f3b82"))))
+     '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+     '(ediff-odd-diff-A ((nil :background "#862b27")))
+     '(ediff-even-diff-A ((nil :background "#1f772c")))
+     '(ediff-current-diff-A ((nil :background "#2b538a")))
+     '(ediff-odd-diff-B ((nil :background "#862b27")))
+     '(ediff-even-diff-B ((nil :background "#1f772c")))
+     '(ediff-current-diff-B ((nil :background "#2b538a")))
+     '(ediff-odd-diff-C ((nil :background "#862b27")))
+     '(ediff-even-diff-C ((nil :background "#1f772c")))
+     '(ediff-current-diff-C ((nil :background "#2b538a")))))
 #+END_SRC
 
 ** [[https://github.com/belak/base16-emacs][base16-emacs]]
@@ -1390,6 +1347,147 @@ Trying out Kaolin Theme 2017-10-25
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
 
+** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package cyberpunk-theme
+  :ensure t
+  :config
+  (load-theme 'cyberpunk t))
+#+END_SRC
+** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
+
+Trying out new theme: 2019-04-10
+
+#+BEGIN_SRC emacs-lisp
+    (use-package dracula-theme
+      :ensure t
+      :config
+      (load-theme 'dracula t)
+      ;; default region color is too hard to see on my display
+      (custom-set-faces
+       ;; '(region ((t (:background "#0f3b82"))))
+       '(font-lock-warning-face ((t (:background "#0f3b82"))))
+       '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+       '(ediff-odd-diff-A ((nil :background "#862b27")))
+       '(ediff-even-diff-A ((nil :background "#1f772c")))
+       '(ediff-current-diff-A ((nil :background "#2b538a")))
+       '(ediff-odd-diff-B ((nil :background "#862b27")))
+       '(ediff-even-diff-B ((nil :background "#1f772c")))
+       '(ediff-current-diff-B ((nil :background "#2b538a")))
+       '(ediff-odd-diff-C ((nil :background "#862b27")))
+       '(ediff-even-diff-C ((nil :background "#1f772c")))
+       '(ediff-current-diff-C ((nil :background "#2b538a")))))
+#+END_SRC
+
+** [[https://github.com/ogdenwebb/emacs-kaolin-themes][kaolin-themes]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package kaolin-themes
+  :ensure t
+  :config
+  ;;(load-theme 'base16-solarized-dark t)
+  (setq kaolin-wave t
+        kaolin-hl-line-colored t)
+  (load-theme 'kaolin-dark))
+#+END_SRC
+
+** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
+
+TextMate like theme.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package monokai-theme
+  :ensure t
+  :config
+    (load-theme 'monokai t)
+    (setq frame-background-mode `dark)
+    (setq monokai-use-variable-pitch nil))
+#+END_SRC
+
+** paganini-theme
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package paganini-theme
+    :ensure t
+    :config
+    (load-theme 'paganini t))
+#+END_SRC
+
+** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package solarized-theme
+  :ensure t
+  :config
+    (load-theme 'solarized-dark t))
+#+END_SRC
+* ELPA packages
+
+These are the packages that are not built into Emacs.
+
+** [[https://github.com/abo-abo/ace-window][ace-window]]
+
+A package that uses the same idea from ace-jump-mode for
+buffer navigation, but applies it to windows. The default keys are
+1-9, but it's faster to access the keys on the home row, so that's
+what I have them set to (with respect to Dvorak, of course).
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ace-window
+    :ensure t
+    :config
+    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+#+END_SRC
+
+#+RESULTS:
+: t
+** [[https://github.com/Wilfred/ag.el][ag]]
+
+Use silver surfer to search.
+
+#+BEGIN_SRC emacs-lisp
+(use-package ag
+  :commands ag
+  :ensure t)
+#+END_SRC
+** [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons-dired]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package all-the-icons-dired
+    ;; M-x all-the-icons-install-fonts
+    :ensure t
+    :commands (all-the-icons-dired-mode))
+#+END_SRC
+** [[https://github.com/syohex/emacs-anzu][anzu]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package anzu
+  :ensure t
+  :bind
+  (([remap query-replace] . anzu-query-replace)
+   ([remap query-replace-regexp] . anzu-query-replace-regexp))
+  :config
+  (global-anzu-mode +1)
+  (set-face-attribute 'anzu-mode-line nil
+                      :foreground "yellow" :weight 'bold)
+  (custom-set-variables
+   '(anzu-mode-lighter "")
+   '(anzu-deactivate-region t)
+   '(anzu-search-threshold 1000)
+   '(anzu-replace-threshold 50)
+   '(anzu-replace-to-string-separator " => ")))
+#+END_SRC
+** [[https://github.com/abo-abo/avy][avy]]
+
+A quick way to jump around text in buffers.
+
+#+BEGIN_SRC emacs-lisp
+(use-package avy
+  :bind
+  (("C-c SPC" . avy-goto-char)
+   ("C-'" . avy-goto-char-2)))
+#+END_SRC
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
 Never lose your cursor again
@@ -1404,31 +1502,6 @@ Never lose your cursor again
   :config
   (beacon-mode 1))
 #+END_SRC
-** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
-
-Trying out Bubbleberry theme: 2019-02-25
-
-#+BEGIN_SRC emacs-lisp
-  (use-package bubbleberry-theme
-    :ensure t
-    :config
-    (load-theme 'bubbleberry t)
-    ;; default region color is too hard to see on my display
-    (custom-set-faces
-     '(region ((t (:background "#0f3b82"))))
-     '(font-lock-warning-face ((t (:background "#0f3b82"))))
-     '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-     '(ediff-odd-diff-A ((nil :background "#862b27")))
-     '(ediff-even-diff-A ((nil :background "#1f772c")))
-     '(ediff-current-diff-A ((nil :background "#2b538a")))
-     '(ediff-odd-diff-B ((nil :background "#862b27")))
-     '(ediff-even-diff-B ((nil :background "#1f772c")))
-     '(ediff-current-diff-B ((nil :background "#2b538a")))
-     '(ediff-odd-diff-C ((nil :background "#862b27")))
-     '(ediff-even-diff-C ((nil :background "#1f772c")))
-     '(ediff-current-diff-C ((nil :background "#2b538a")))))
-#+END_SRC
-
 ** [[https://github.com/jorgenschaefer/circe][circe]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -1509,6 +1582,18 @@ Complete anything.
           (mapcar #'company-mode/backend-with-yas company-backends)))
 #+END_SRC
 
+** [[https://github.com/twada/coverlay.el][coverlay.el]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package coverlay
+    ;; :ensure t
+    :load-path "~/src/github/elisp/coverlay.el"
+    :config
+    (custom-set-variables
+     '(coverlay:untested-line-background-color "#862b27")
+     '(coverlay:tested-line-background-color "#1f772c")))
+#+END_SRC
+
 ** [[https://github.com/emacsmirror/emacswiki.org/blob/master/cursor-chg.el][cursor-chg]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1521,15 +1606,6 @@ Complete anything.
 #+END_SRC
 
 This package was removed from MELPA since it was only found on Emacs Wiki.
-
-** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package cyberpunk-theme
-  :ensure t
-  :config
-  (load-theme 'cyberpunk t))
-#+END_SRC
 
 ** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
 
@@ -1574,7 +1650,8 @@ Provides a simple UI for customizing dired mode to use different faces and color
 
 #+BEGIN_SRC emacs-lisp
 (use-package diredful
-  :ensure t
+  ;; :ensure t
+  :load-path "~/src/github/elisp/diredful"
   :config (diredful-mode 1))
 #+END_SRC
 
@@ -1806,6 +1883,7 @@ this code.
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
     ;; :load-path (lambda () (expand-file-name "~/src/github/elisp/expand-region.el"))
+    :ensure t
     :bind ("C-=" . er/expand-region)
     :config
     (setq expand-region-smart-cursor t
@@ -1986,7 +2064,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
     ;; prefix "C-x c", which is inconvenient because you can
     ;; accidentially press "C-x C-c"
     (setq helm-command-prefix-key "C-c h")
-    (helm-flx-mode +1)
     (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
           ;; not occupy whole other window
           helm-ff-newfile-prompt-p nil
@@ -2151,6 +2228,7 @@ instead of ~find-file-other-window~.
 #+BEGIN_SRC emacs-lisp
 (use-package helm-flx
   :ensure t
+  :after helm
   :commands helm-flx-mode
   :config
     (helm-flx-mode +1))
@@ -2575,18 +2653,6 @@ When using =counsel-ag=:
   (js2r-add-keybindings-with-prefix "C-c C-m"))
 #+END_SRC
 
-** [[https://github.com/ogdenwebb/emacs-kaolin-themes][kaolin-themes]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package kaolin-themes
-  :ensure t
-  :config
-  ;;(load-theme 'base16-solarized-dark t)
-  (setq kaolin-wave t
-        kaolin-hl-line-colored t)
-  (load-theme 'kaolin-dark))
-#+END_SRC
-
 ** [[https://github.com/tonini/karma.el][karma]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2624,6 +2690,7 @@ Add filler lorem ipsum text to Emacs.
     :hook (lsp-mode . lsp-ui-mode))
 
   (use-package company-lsp
+    :ensure t
     :after company
     :init
     (add-to-list 'company-backends #'company-lsp)
@@ -2737,19 +2804,6 @@ No more juggling windows after commiting. It's magit bliss.
   (setq markdown-command "pandoc"))
 #+END_SRC
 
-** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
-
-TextMate like theme.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package monokai-theme
-  :ensure t
-  :config
-    (load-theme 'monokai t)
-    (setq frame-background-mode `dark)
-    (setq monokai-use-variable-pitch nil))
-#+END_SRC
-
 ** [[https://github.com/emacsfodder/move-text][move-text]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2802,15 +2856,6 @@ Quick switching between buffers.
   :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
                 nswbuff-display-intermediate-buffers t
                 nswbuff-exclude-buffer-regexps '("^ .*" "^\\*.*\\*")))
-#+END_SRC
-
-** paganini-theme
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package paganini-theme
-    :ensure t
-    :config
-    (load-theme 'paganini t))
 #+END_SRC
 
 ** [[https://github.com/politza/pdf-tools][pdf-tools]]
@@ -3119,6 +3164,7 @@ to overwrite.
 #+BEGIN_SRC emacs-lisp
   (use-package scala-mode
     ;;:load-path "~/src/github/elisp/emacs-scala-mode"
+    :ensure t
     :mode "\\.s\\(cala\\|bt\\)$"
     :interpreter ("scala" . scala-mode)
     :preface
@@ -3404,15 +3450,6 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 (use-package smooth-scrolling
   :ensure t
   :config (setq smooth-scroll-margin 6))
-#+END_SRC
-
-** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package solarized-theme
-  :ensure t
-  :config
-    (load-theme 'solarized-dark t))
 #+END_SRC
 
 ** [[https://github.com/TheBB/spaceline][spaceline]]

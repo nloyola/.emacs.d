@@ -7,12 +7,10 @@
 ;;; Code:
 
 (eval-and-compile
-  (require 'projectile)
-  (require 'eclimd))
+  (require 'projectile))
 
 (setq projectile-test-suffix-function (lambda (project-type) "" "Spec")
-      projectile-find-dir-includes-top-level t
-      eclimd-default-workspace (concat (locate-dominating-file default-directory ".dir-locals.el") ".."))
+      projectile-find-dir-includes-top-level t)
 
 (setq-default indent-tabs-mode nil)
 (puthash (projectile-project-root) "grunt karma:unit" projectile-test-cmd-map)
