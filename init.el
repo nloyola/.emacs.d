@@ -1,4 +1,23 @@
 ;;; Begin initialization
+
+(defconst emacs-start-time (current-time))
+
+(defvar file-name-handler-alist-old file-name-handler-alist)
+
+(setq package-enable-at-startup nil
+      file-name-handler-alist nil
+      message-log-max 16384
+      gc-cons-threshold 402653184
+      gc-cons-percentage 0.6
+      auto-window-vscroll nil)
+
+(add-hook 'after-init-hook
+          `(lambda ()
+             (setq file-name-handler-alist file-name-handler-alist-old
+                   gc-cons-threshold 800000
+                   gc-cons-percentage 0.1)
+             (garbage-collect)) t)
+
 ;; Turn off mouse interface early in startup to avoid momentary display
 (when window-system
   (tool-bar-mode -1)
@@ -54,6 +73,12 @@
 (setenv "http_proxy" "")
 
 ;;; Bootstrap use-package
+(setq-default use-package-always-ensure t ; Auto-download package if not exists
+              use-package-always-defer nil ; Always defer load package to speed up startup time
+              use-package-verbose nil ; Don't report loading details
+              use-package-expand-minimally t  ; make the expanded code as minimal as possible
+              use-package-enable-imenu-support t) ; Let imenu finds use-package definitions
+
 ;; Install use-package if it's not already installed.
 ;; use-package is used to configure the rest of the packages.
 (unless (package-installed-p 'use-package)
@@ -135,3 +160,16 @@
       (setq initial-buffer-choice (lambda () (get-buffer "*init errors*"))))))
 
 (load-config-org)
+;;; Finalization
+
+(let ((elapsed (float-time (time-subtract (current-time)
+                                          emacs-start-time))))
+  (message "Loading %s...done (%.3fs)" load-file-name elapsed))
+
+(add-hook 'after-init-hook
+          `(lambda ()
+             (let ((elapsed
+                    (float-time
+                     (time-subtract (current-time) emacs-start-time))))
+               (message "Loading %s...done (%.3fs) [after-init]"
+                        ,load-file-name elapsed))) t)
