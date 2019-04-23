@@ -797,7 +797,6 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 #+BEGIN_SRC emacs-lisp
 (use-package edit-server
-  :ensure t
   :if window-system
   :init
   (add-hook 'after-init-hook 'server-start t)
@@ -808,7 +807,6 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 #+BEGIN_SRC emacs-lisp
 (use-package flyspell
-  :ensure t
   :diminish flyspell-mode
   :init
   (add-hook 'prog-mode-hook 'flyspell-prog-mode)
@@ -920,7 +918,6 @@ ibuffer is the improved version of list-buffers.
                          (name . "\*info\*"))))))
     :config
     (use-package ibuffer-projectile
-      :ensure t
       :config
       (defun nl/ibuffer-customization ()
         "My customization for `ibuffer'."
@@ -1067,49 +1064,48 @@ comments.
 ** =prog-mode=
 
 #+BEGIN_SRC emacs-lisp
-  (use-package prog-mode
-    :preface
-    (defun nl/indent-whole-buffer ()
-      (interactive)
-      (save-excursion
-        (indent-region (point-min) (point-max))))
+  (defun nl/indent-whole-buffer ()
+    (interactive)
+    (save-excursion
+      (indent-region (point-min) (point-max))))
 
-    (defun nl/beginning-of-line-or-indentation ()
-      "move to beginning of line, or indentation"
-      (interactive)
-      (if (bolp)
-          (back-to-indentation)
-        (beginning-of-line)))
+  (defun nl/beginning-of-line-or-indentation ()
+    "move to beginning of line, or indentation"
+    (interactive)
+    (if (bolp)
+        (back-to-indentation)
+      (beginning-of-line)))
 
-    (defun my-common-prog-mode-settings ()
-      "Enables settings common between programming language modes."
-      (nl/setup-indent 2) ; indent 2 spaces width
-      (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
-      ;;
-      ;; Set tab and CR/LF keys to call their corresponding more-general
-      ;; functions.  This needs to be here to override the settings of some modes
-      ;; (e.g. c++-mode changes the tab key to do a re-indent).
-      ;;
-      (local-set-key "\t" 'tab-to-tab-stop)
-      (local-set-key "\n" 'newline-and-indent)
-      (local-set-key "\r" 'newline-and-indent)
-      ;;
-      ;; Set paragraph/comment auto-formatting to wrap at column 100.
-      ;;
-      (set-fill-column 100)
-      ;;
-      ;; Set the comment column to zero so that lisp comment lines will act like
-      ;; C++ comments (i.e. line up with the code), and not automatically indent
-      ;; to column 50.
-      ;;
-      (setq comment-column 0)
-      (push '(">=" . ?≥) prettify-symbols-alist)
-      (push '("<=" . ?≤) prettify-symbols-alist)
-      (push '("->" . ?→) prettify-symbols-alist)
-      (yas-minor-mode))
-    :hook ((makefile-mode . my-common-prog-mode-settings)
-           (sh-mode       . my-common-prog-mode-settings)
-           (prog-mode     . my-common-prog-mode-settings)))
+  (defun my-common-prog-mode-settings ()
+    "Enables settings common between programming language modes."
+    (nl/setup-indent 2) ; indent 2 spaces width
+    (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
+    ;;
+    ;; Set tab and CR/LF keys to call their corresponding more-general
+    ;; functions.  This needs to be here to override the settings of some modes
+    ;; (e.g. c++-mode changes the tab key to do a re-indent).
+    ;;
+    (local-set-key "\t" 'tab-to-tab-stop)
+    (local-set-key "\n" 'newline-and-indent)
+    (local-set-key "\r" 'newline-and-indent)
+    ;;
+    ;; Set paragraph/comment auto-formatting to wrap at column 100.
+    ;;
+    (set-fill-column 100)
+    ;;
+    ;; Set the comment column to zero so that lisp comment lines will act like
+    ;; C++ comments (i.e. line up with the code), and not automatically indent
+    ;; to column 50.
+    ;;
+    (setq comment-column 0)
+    (push '(">=" . ?≥) prettify-symbols-alist)
+    (push '("<=" . ?≤) prettify-symbols-alist)
+    (push '("->" . ?→) prettify-symbols-alist)
+    (yas-minor-mode))
+
+  (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
+  (add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
+  (add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
 #+END_SRC
 
 ** =re-builder=
@@ -1189,72 +1185,71 @@ Taken from:
 Save command history between sessions (taken from EmacsWiki).
 
 #+BEGIN_SRC emacs-lisp
-  (use-package sql
-    :preface
-    (use-package epa-file
+    (use-package sql
+      :preface
+      (require 'epa-file)
+      (epa-file-enable)
+
+      (setq sql-connection-alist
+            '((localhost.dev (sql-product 'mysql)
+                             (sql-port 3306)
+                             (sql-server "localhost")
+                             (sql-user "root")
+                             (sql-database "mysql"))))
+
+      (defun nl/sql-connect (product connection)
+        "Connects to a database server of type PRODUCT using the CONNECTION type."
+        (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
+
+        ;; update the password to the sql-connection-alist
+        (let ((connection-info (assoc connection sql-connection-alist))
+              (sql-password (car (last (assoc connection nl-sql-passwords)))))
+          (delete sql-password connection-info)
+          (nconc connection-info `((sql-password ,sql-password)))
+          (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
+          (add-to-list 'sql-connection-alist connection-info))
+
+        ;; connect to database
+        (setq sql-product product)
+        (if current-prefix-arg
+            (sql-connect connection connection)
+          (sql-connect connection)))
+
+      (defun nl/sql-localhost-dev ()
+        "Connects to the MySQL server running on machine 'localhost'."
+        (nl/sql-connect 'mysql 'localhost.dev))
+
+      (defun nl/sql-obelix-dev ()
+        "Connects to the MySQL server running on machine 'obelix'."
+        (nl/sql-connect 'mysql 'obelix.dev))
+
+      (defvar nl/sql-servers-list
+        '(("localhost dev" nl/sql-localhost-dev)
+          ;;("Obelix Dev" nl/sql-obelix-dev)
+          )
+        "A list of server name and the function to connect.")
+
+      (defun nl/sql-connect-server (func)
+        "Connect to the input server using nl/sql-servers-list and FUNC."
+        (interactive
+         (helm-comp-read "Select server: " nl/sql-servers-list))
+        (funcall func))
+
+      (defun my-sql-save-history-hook ()
+        (let ((lval 'sql-input-ring-file-name)
+              (rval 'sql-product))
+          (if (symbol-value rval)
+              (let ((filename
+                     (concat "~/.emacs.d/sql/"
+                             (symbol-name (symbol-value rval))
+                             "-history.sql")))
+                (set (make-local-variable lval) filename))
+            (error
+             (format "SQL history will not be saved because %s is nil"
+                     (symbol-name rval))))))
+
       :config
-      (epa-file-enable))
-
-    (setq sql-connection-alist
-          '((localhost.dev (sql-product 'mysql)
-                           (sql-port 3306)
-                           (sql-server "localhost")
-                           (sql-user "root")
-                           (sql-database "mysql"))))
-
-    (defun nl/sql-connect (product connection)
-      "Connects to a database server of type PRODUCT using the CONNECTION type."
-      (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
-
-      ;; update the password to the sql-connection-alist
-      (let ((connection-info (assoc connection sql-connection-alist))
-            (sql-password (car (last (assoc connection nl-sql-passwords)))))
-        (delete sql-password connection-info)
-        (nconc connection-info `((sql-password ,sql-password)))
-        (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
-        (add-to-list 'sql-connection-alist connection-info))
-
-      ;; connect to database
-      (setq sql-product product)
-      (if current-prefix-arg
-          (sql-connect connection connection)
-        (sql-connect connection)))
-
-    (defun nl/sql-localhost-dev ()
-      "Connects to the MySQL server running on machine 'localhost'."
-      (nl/sql-connect 'mysql 'localhost.dev))
-
-    (defun nl/sql-obelix-dev ()
-      "Connects to the MySQL server running on machine 'obelix'."
-      (nl/sql-connect 'mysql 'obelix.dev))
-
-    (defvar nl/sql-servers-list
-      '(("localhost dev" nl/sql-localhost-dev)
-        ;;("Obelix Dev" nl/sql-obelix-dev)
-        )
-      "A list of server name and the function to connect.")
-
-    (defun nl/sql-connect-server (func)
-      "Connect to the input server using nl/sql-servers-list and FUNC."
-      (interactive
-       (helm-comp-read "Select server: " nl/sql-servers-list))
-      (funcall func))
-
-    (defun my-sql-save-history-hook ()
-      (let ((lval 'sql-input-ring-file-name)
-            (rval 'sql-product))
-        (if (symbol-value rval)
-            (let ((filename
-                   (concat "~/.emacs.d/sql/"
-                           (symbol-name (symbol-value rval))
-                           "-history.sql")))
-              (set (make-local-variable lval) filename))
-          (error
-           (format "SQL history will not be saved because %s is nil"
-                   (symbol-name rval))))))
-
-    :config
-    (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
+      (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
 #+END_SRC
 
 ** =subword-mode=
@@ -1309,7 +1304,6 @@ Switched to Dracula theme: 2019-04-10
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package bubbleberry-theme
-    :ensure t
     :config
     (load-theme 'bubbleberry t)
     ;; default region color is too hard to see on my display
@@ -1337,7 +1331,6 @@ Trying out Kaolin Theme 2017-10-25
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package base16-theme
-  :ensure t
   :config
     (load-theme 'base16-woodland t)
     ;;(load-theme 'base16-solarized-dark t)
@@ -1351,7 +1344,6 @@ Trying out Kaolin Theme 2017-10-25
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package cyberpunk-theme
-  :ensure t
   :config
   (load-theme 'cyberpunk t))
 #+END_SRC
@@ -1361,7 +1353,6 @@ Trying out new theme: 2019-04-10
 
 #+BEGIN_SRC emacs-lisp
     (use-package dracula-theme
-      :ensure t
       :config
       (load-theme 'dracula t)
       ;; default region color is too hard to see on my display
@@ -1384,7 +1375,6 @@ Trying out new theme: 2019-04-10
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package kaolin-themes
-  :ensure t
   :config
   ;;(load-theme 'base16-solarized-dark t)
   (setq kaolin-wave t
@@ -1398,7 +1388,6 @@ TextMate like theme.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package monokai-theme
-  :ensure t
   :config
     (load-theme 'monokai t)
     (setq frame-background-mode `dark)
@@ -1409,7 +1398,6 @@ TextMate like theme.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package paganini-theme
-    :ensure t
     :config
     (load-theme 'paganini t))
 #+END_SRC
@@ -1418,7 +1406,6 @@ TextMate like theme.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package solarized-theme
-  :ensure t
   :config
     (load-theme 'solarized-dark t))
 #+END_SRC
@@ -1435,7 +1422,6 @@ what I have them set to (with respect to Dvorak, of course).
 
 #+BEGIN_SRC emacs-lisp
   (use-package ace-window
-    :ensure t
     :config
     (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 #+END_SRC
@@ -1448,22 +1434,19 @@ Use silver surfer to search.
 
 #+BEGIN_SRC emacs-lisp
 (use-package ag
-  :commands ag
-  :ensure t)
+  :commands ag)
 #+END_SRC
 ** [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons-dired]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package all-the-icons-dired
     ;; M-x all-the-icons-install-fonts
-    :ensure t
     :commands (all-the-icons-dired-mode))
 #+END_SRC
 ** [[https://github.com/syohex/emacs-anzu][anzu]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package anzu
-  :ensure t
   :bind
   (([remap query-replace] . anzu-query-replace)
    ([remap query-replace-regexp] . anzu-query-replace-regexp))
@@ -1494,7 +1477,6 @@ Never lose your cursor again
 
 #+BEGIN_SRC emacs-lisp
 (use-package beacon
-  :ensure t
   :diminish beacon-mode
   :init
   (setq beacon-push-mark 35)
@@ -1506,7 +1488,6 @@ Never lose your cursor again
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package circe
-  :ensure t
   :config (setq circe-default-nick "chucho"
                 circe-default-user "chucho"
                 circe-default-realname "chucho"
@@ -1522,7 +1503,6 @@ Never lose your cursor again
 
 #+BEGIN_SRC emacs-lisp
 (use-package clipmon
-  :ensure t
   :commands clipmon-mode-start
   :bind ("M-S-<f2>" . clipmon-autoinsert-toggle)
   :config
@@ -1540,7 +1520,6 @@ Disable for now since it is slow when editing Scala code.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package color-identifiers-mode
-  :ensure t
   :diminish color-identifiers-mode
   :config
     (add-hook 'after-init-hook 'global-color-identifiers-mode)
@@ -1553,7 +1532,6 @@ Complete anything.
 
 #+BEGIN_SRC emacs-lisp
   (use-package company
-    :ensure t
     :diminish company-mode
     :bind (:map company-active-map
                 ("C-n" . company-select-next)
@@ -1586,7 +1564,6 @@ Complete anything.
 
 #+BEGIN_SRC emacs-lisp
   (use-package coverlay
-    ;; :ensure t
     :load-path "~/src/github/elisp/coverlay.el"
     :config
     (custom-set-variables
@@ -1611,19 +1588,17 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dap-mode
-  :ensure t :after lsp-mode
+  :after lsp-mode
   :config
   (dap-mode t)
-  (dap-ui-mode t))
-
-(use-package dap-java :after (lsp-java))
+  (dap-ui-mode t)
+  (require 'dap-java))
 #+END_SRC
 
 ** [[https://github.com/skeeto/devdocs-lookup][devdocs-lookup]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package devdocs
-  :ensure t)
+(use-package devdocs)
 #+END_SRC
 
 ** [[https://github.com/dgutov/diff-hl][diff-hl]]
@@ -1632,7 +1607,6 @@ Could not get this package to display changes (2017-10-15).
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package diff-hl
-  :ensure t
   :init
   (add-hook 'prog-mode-hook #'diff-hl-mode)
   (add-hook 'org-mode-hook #'diff-hl-mode)
@@ -1650,7 +1624,6 @@ Provides a simple UI for customizing dired mode to use different faces and color
 
 #+BEGIN_SRC emacs-lisp
 (use-package diredful
-  ;; :ensure t
   :load-path "~/src/github/elisp/diredful"
   :config (diredful-mode 1))
 #+END_SRC
@@ -1660,7 +1633,6 @@ Provides a simple UI for customizing dired mode to use different faces and color
 #+BEGIN_SRC emacs-lisp
 (use-package dired-sidebar
   :bind (("C-c C-n" . dired-sidebar-toggle-sidebar))
-  :ensure t
   :commands (dired-sidebar-toggle-sidebar)
   :config
   (when (eq system-type 'windows-nt)
@@ -1687,7 +1659,6 @@ indexes (TAGS) or persistent background processes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package dumb-jump
-  :ensure t
   :bind (("M-g o" . dumb-jump-go-other-window)
          ("M-g j" . dumb-jump-go)
          ("M-g x" . dumb-jump-go-prefer-external)
@@ -1700,7 +1671,6 @@ indexes (TAGS) or persistent background processes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package easy-kill
-  :ensure t
   :config
   (global-set-key [remap kill-ring-save] #'easy-kill)
   (global-set-key [remap mark-sexp] #'easy-mark))
@@ -1710,7 +1680,6 @@ indexes (TAGS) or persistent background processes.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package eglot
-  :ensure t
   :config
   (use-package typescript-mode)
   (add-hook 'typescript-mode-hook 'eglot-ensure))
@@ -1720,7 +1689,6 @@ indexes (TAGS) or persistent background processes.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package ensime
-  :ensure t
   :commands ensime ensime-mode))
 #+END_SRC
 
@@ -1757,7 +1725,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
     :init (use-package cl)
     :config
     (use-package company-emacs-eclim
-      :ensure t
       :commands company-emacs-eclim-setup)
 
     (use-package eclimd
@@ -1797,7 +1764,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package git-gutter
-  :ensure t
   :diminish git-gutter-mode
   :hook (prog-mode . git-gutter-mode))
 #+END_SRC
@@ -1806,7 +1772,6 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package gradle-mode
-  :ensure t
   :diminish gradle-mode
   :init
     (gradle-mode 1))
@@ -1818,7 +1783,6 @@ This package adds support for flow to flycheck.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package flycheck-flow
-  :ensure t
   :hook (js2-mode . flycheck-mode))
 #+END_SRC
 
@@ -1826,7 +1790,6 @@ This package adds support for flow to flycheck.
 
 #+BEGIN_SRC emacs-lisp
 (use-package emr
-  :ensure t
   :bind (:map prog-mode-map
               ("M-RET" . emr-show-refactor-menu))
   :config (emr-initialize))
@@ -1836,7 +1799,6 @@ This package adds support for flow to flycheck.
 
 #+BEGIN_SRC emacs-lisp
   (use-package ycmd
-    :ensure t
     :preface
     (setq ycmd-startup-timeout 10)
     (defun ycmd-setup-completion-at-point-function ()
@@ -1849,11 +1811,9 @@ This package adds support for flow to flycheck.
     ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
 
     (use-package company-ycmd
-      :ensure t
       :config
       (company-ycmd-setup))
     (use-package flycheck-ycmd
-      :ensure t
       :config
       (flycheck-ycmd-setup))
     (use-package ycmd-eldoc
@@ -1872,7 +1832,6 @@ this code.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package etags-select
-  :ensure t
   :config
   (global-set-key "\M-?" 'etags-select-find-tag-at-point)
   (global-set-key "\M-." 'etags-select-find-tag))
@@ -1883,7 +1842,6 @@ this code.
 #+BEGIN_SRC emacs-lisp
   (use-package expand-region
     ;; :load-path (lambda () (expand-file-name "~/src/github/elisp/expand-region.el"))
-    :ensure t
     :bind ("C-=" . er/expand-region)
     :config
     (setq expand-region-smart-cursor t
@@ -1894,7 +1852,6 @@ this code.
 
 #+BEGIN_SRC emacs-lisp
 (use-package eyebrowse
-  :ensure t
   :config
   (eyebrowse-mode t))
 #+END_SRC
@@ -1906,7 +1863,6 @@ strings.
 
 #+BEGIN_SRC emacs-lisp
   (use-package fic-mode
-    :ensure t
     :commands fic-mode
     :hook ((c++-mode    . fic-mode)
            (c-mode      . fic-mode)
@@ -1931,7 +1887,6 @@ Allow windmove to jump between frames.
 
 #+BEGIN_SRC emacs-lisp
 (use-package flycheck
-  :ensure t
   :commands global-flycheck-mode
   :diminish flycheck-mode
   :commands flycheck-define-checker
@@ -1950,6 +1905,17 @@ Allow windmove to jump between frames.
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
   (flycheck-add-mode 'javascript-eslint 'js-mode))
 #+END_SRC
+** [[https://github.com/flycheck/flycheck-pos-tip][flycheck-pos-tip]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck-pos-tip
+  :after flycheck
+  :commands flycheck-pos-tip-mode
+  :init
+  (flycheck-pos-tip-mode)
+  :config
+  (setq flycheck-pos-tip-timeout 10))
+#+END_SRC
 
 ** [[https://github.com/mola-T/flymd][flymd]]
 
@@ -1961,7 +1927,6 @@ On the fly markdown preview.
     (browse-url url)))
 
 (use-package flymd
-  :ensure t
   :config
   (setq flymd-browser-open-function 'my-flymd-browser-function))
 #+END_SRC
@@ -1973,7 +1938,6 @@ Updte tags on command line with ~global -u~.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package ggtags
-  :ensure t
   :commands ggtags-mode)
 #+END_SRC
 
@@ -1981,7 +1945,6 @@ Updte tags on command line with ~global -u~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package git-timemachine
-  :ensure t
   :commands git-timemachine)
 #+END_SRC
 
@@ -1989,7 +1952,6 @@ Updte tags on command line with ~global -u~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package goto-last-change
-  :ensure t
   :bind
   ("C-x C-\\" . goto-last-change)
   :config
@@ -2007,7 +1969,6 @@ Disable for now, not working the way I prefer.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package golden-ratio
-  :ensure t
   :config
   (golden-ratio-mode 1))
 #+END_SRC
@@ -2018,14 +1979,12 @@ Required for gradle build files.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package groovy-mode
-  :ensure t)
 #+END_SRC
 
 ** [[*][grunt]]
 
-#+BEGIN_SRC emacs-lisp
-(use-package grunt
-  :ensure t)
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package grunt)
 #+END_SRC
 
 ** [[https://github.com/kai2nenobu/guide-key][guide-key]]
@@ -2034,7 +1993,6 @@ Guide the following key bindings automatically and dynamically.
 
 #+BEGIN_SRC emacs-lisp
 (use-package guide-key
-  :ensure t
   :diminish guide-key-mode
   :config
     (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h"))
@@ -2043,9 +2001,8 @@ Guide the following key bindings automatically and dynamically.
 
 ** [[https://github.com/abo-abo/headlong][headlong]]
 
-#+BEGIN_SRC emacs-lisp
-(use-package headlong
-  :ensure t)
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package headlong)
 #+END_SRC
 
 ** [[https://github.com/emacs-helm/helm][helm]]
@@ -2055,7 +2012,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm
-  :ensure t
   ;;:load-path "~/src/github/elisp/helm"
   :commands (helm-config helm-files helm-grep)
   :diminish helm-mode
@@ -2198,7 +2154,6 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
   (use-package helm-ag
-    :ensure t
     :bind (:map helm-ag-mode-map
                 ("C-o" . nl/jump-other-window))
     :preface
@@ -2217,7 +2172,6 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm-c-yasnippet
-  :ensure t
   :commands helm-yas-complete
   ;;:init (use-package yasnippet)
   :bind ("C-c y" . helm-yas-complete))
@@ -2227,7 +2181,6 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm-flx
-  :ensure t
   :after helm
   :commands helm-flx-mode
   :config
@@ -2238,7 +2191,6 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-gtags
-  :ensure t
   :commands (helm-gtags-mode)
   :bind (("M-." . helm-gtags-find-tag)
          ("M-," . helm-gtags-find-rtag))
@@ -2253,7 +2205,6 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
-  :ensure t
   :config
   (helm-projectile-on)
   ;;(setq compilation-read-command t)
@@ -2263,15 +2214,13 @@ instead of ~find-file-other-window~.
 ** [[https://github.com/cosmicexplorer/helm-rg][helm-rg]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package helm-rg
-  :ensure t)
+(use-package helm-rg)
 #+END_SRC
 
 ** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-swoop
-  :ensure t
   :bind (("M-i" . helm-swoop))
   :config
     ;; When doing isearch, hand the word over to helm-swoop
@@ -2296,7 +2245,6 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm-xref
-  :ensure t
   :init
   (require 'helm-xref)
   :config
@@ -2312,7 +2260,6 @@ This minor mode highlights indentation levels via =font-lock=.
 
 #+BEGIN_SRC emacs-lisp
 (use-package highlight-indent-guides
-  :ensure t
   :config
   (setq highlight-indent-guides-method 'character)
   (set-face-foreground 'highlight-indent-guides-character-face "gray18")
@@ -2325,7 +2272,6 @@ Not used for now since it breaks ERC font lock.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package hl-anything
-  :ensure t
   :config
     (hl-highlight-mode 1)
     ;; (hl-setup-default-advices nil)
@@ -2340,7 +2286,6 @@ So that hungry deletion can be used in all modes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package hungry-delete
-  :ensure t
   :diminish hungry-delete-mode
   :config
   (global-hungry-delete-mode))
@@ -2353,14 +2298,10 @@ short bindings with a common prefix - a Hydra.
 
 #+BEGIN_SRC emacs-lisp
     (use-package hydra
-      :ensure t
       :init
       (use-package cl-lib)
       (use-package lv)
-      (use-package ace-window :ensure t)
-      (use-package avy :ensure t)
       (use-package key-chord
-        :ensure t
         :init
         (setq key-chord-one-key-delay 0.16)
         :config (key-chord-mode 1))
@@ -2449,7 +2390,6 @@ Emacs package that provides visual version of align-regexp command.
 
 #+BEGIN_SRC emacs-lisp
 (use-package ialign
-  :ensure t
   :bind ("C-x l" . ialign))
 #+END_SRC
 
@@ -2457,7 +2397,6 @@ Emacs package that provides visual version of align-regexp command.
 
 #+BEGIN_SRC emacs-lisp
 (use-package ivy
-  :ensure t
   :diminish (ivy-mode . "")
   :bind
   (:map ivy-mode-map
@@ -2477,8 +2416,7 @@ Emacs package that provides visual version of align-regexp command.
   (setq ivy-re-builders-alist ;; allow input not in order
         '((t . ivy--regex-ignore-order))))
 
-(use-package ivy-hydra
-  :ensure t)
+(use-package ivy-hydra)
 #+END_SRC
 
 *** [[https://github.com/abo-abo/swiper][swiper]]
@@ -2487,7 +2425,6 @@ This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Iv
 
 #+BEGIN_SRC emacs-lisp
 (use-package swiper
-  :ensure t
   :bind (("C-c C-r" . ivy-resume)
          ("C-s" . swiper)
          ("<f6>" . ivy-resume))
@@ -2504,7 +2441,6 @@ See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05
 
 #+BEGIN_SRC emacs-lisp
 (use-package counsel
-  :ensure t
   :bind (;;("C-x C-f" . counsel-find-file)
          ;;("M-y" . counsel-yank-pop)
          ("C-h f" . counsel-describe-function)
@@ -2525,7 +2461,6 @@ When using =counsel-ag=:
 
 #+BEGIN_SRC emacs-lisp
   (use-package js2-mode
-    :ensure t
     :mode "\\.js\\'"
     :bind (("C-c s j" . nl/counsel-ag-js))
     :preface
@@ -2645,7 +2580,6 @@ When using =counsel-ag=:
 
 #+BEGIN_SRC emacs-lisp
 (use-package js2-refactor
-  :ensure t
   :after js2-mode
   :diminish js2-refactor-mode
   :hook (js-mode . js2-refactor-mode)
@@ -2657,7 +2591,6 @@ When using =counsel-ag=:
 
 #+BEGIN_SRC emacs-lisp
 (use-package karma
-  :ensure t
   :commands karma-mode)
 #+END_SRC
 
@@ -2665,7 +2598,6 @@ When using =counsel-ag=:
 
 #+BEGIN_SRC emacs-lisp
 (use-package less-css-mode
-  :ensure t
   :commands less-css-mode)
 #+END_SRC
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
@@ -2673,8 +2605,7 @@ When using =counsel-ag=:
 Add filler lorem ipsum text to Emacs.
 
 #+BEGIN_SRC emacs-lisp
-(use-package lorem-ipsum
-  :ensure t)
+(use-package lorem-ipsum)
 #+END_SRC
 
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
@@ -2686,11 +2617,9 @@ Add filler lorem ipsum text to Emacs.
     (setq lsp-prefer-flymake nil))
 
   (use-package lsp-ui
-    :ensure t
     :hook (lsp-mode . lsp-ui-mode))
 
   (use-package company-lsp
-    :ensure t
     :after company
     :init
     (add-to-list 'company-backends #'company-lsp)
@@ -2732,7 +2661,6 @@ Scala support for lsp-mode.
 
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-scala
-  :ensure t
   :after (lsp scala-mode)
   :demand t
   :hook (scala-mode . lsp))
@@ -2744,8 +2672,7 @@ Macrostep allows you to see what Elisp macros expand to. Learned about
 it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight talk for use-package]].
 
 #+BEGIN_SRC emacs-lisp
-(use-package macrostep
-  :ensure t)
+(use-package macrostep)
 #+END_SRC
 
 ** [[https://github.com/magit/magit][magit]]
@@ -2755,7 +2682,6 @@ command line. Use an easy keybinding to access magit.
 
 #+BEGIN_SRC emacs-lisp
   (use-package magit
-    :ensure t
     :bind (("C-x g" . magit-status))
     :config
     (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
@@ -2794,7 +2720,6 @@ No more juggling windows after commiting. It's magit bliss.
 
 #+BEGIN_SRC emacs-lisp
 (use-package markdown-mode
-  :ensure t
   :commands (markdown-mode gfm-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.markdown\\'" . markdown-mode)
@@ -2808,7 +2733,6 @@ No more juggling windows after commiting. It's magit bliss.
 
 #+BEGIN_SRC emacs-lisp
 (use-package move-text
-  :ensure t
   :bind (("C-S-<up>" . move-text-up)
          ("C-S-<down>" . move-text-down)))
 #+END_SRC
@@ -2820,7 +2744,6 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
 
 #+BEGIN_SRC emacs-lisp
   (use-package multiple-cursors
-    :ensure t
     :after selected
     :defer 5
     :bind (("C-S-c C-S-c" . mc/edit-lines)
@@ -2850,7 +2773,6 @@ Quick switching between buffers.
 
 #+BEGIN_SRC emacs-lisp
 (use-package nswbuff
-  :ensure t
   :bind* (("<C-tab>"           . nswbuff-switch-to-next-buffer)
           ("<C-S-iso-lefttab>" . nswbuff-switch-to-previous-buffer))
   :config (setq nswbuff-buffer-list-function #'nswbuff-projectile-buffer-list
@@ -2870,7 +2792,6 @@ This package provides tagged workspaces.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package perspective
-  :ensure t
   :config (persp-mode))
 #+END_SRC
 
@@ -2881,7 +2802,6 @@ checker is loaded.
 
 #+BEGIN_SRC emacs-lisp
     (use-package php-mode
-      :ensure t
       :mode "\\.php[345]?\\'"
       :preface
       ;; this style is based on the symfony2 style
@@ -2930,7 +2850,6 @@ http://batsov.com/projectile/
 
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
-  :ensure t
   :diminish projectile-mode
   :commands projectile-global-mode
   :config
@@ -2953,7 +2872,6 @@ http://batsov.com/projectile/
 
 #+BEGIN_SRC emacs-lisp
     (use-package phpunit
-       :ensure t
        :after (php-mode)
        :bind (:map php-mode-map
                    ("C-c , t" . phpunit-current-test)
@@ -2967,7 +2885,6 @@ http://batsov.com/projectile/
 
 #+BEGIN_SRC emacs-lisp
   (use-package protobuf-mode
-    :ensure t
     :config
     (defconst my-protobuf-style
       '((c-basic-offset . 2)
@@ -2981,7 +2898,6 @@ http://batsov.com/projectile/
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package powerline
-    :ensure t
     :config
     (setq powerline-arrow-shape 'arrow14)
     (setq powerline-default-separator-dir '(right . left))
@@ -2999,7 +2915,6 @@ http://batsov.com/projectile/
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package window-purpose
-  :ensure t
   :commands purpose-mode
   :config
     (add-to-list 'purpose-user-mode-purposes '(scala-mode . scala))
@@ -3013,14 +2928,12 @@ Integrates with IPython.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package python-mode
-    :ensure t)
 #+END_SRC
 
 ** [[https://github.com/openscad/openscad/tree/ba38885dcae54336c85bec0ca4ac2a5e7d038bbe][openscad]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package scad-mode
-  :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.scad$" . scad-mode)))
 #+END_SRC
@@ -3033,7 +2946,6 @@ Show org-mode bullets as UTF-8 characters.
 
 #+BEGIN_SRC emacs-lisp
 (use-package org-bullets
-  :ensure t
   :hook (org-mode . (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
@@ -3062,7 +2974,6 @@ Highlight brackets according to their depth
 
 #+BEGIN_SRC emacs-lisp
 (use-package rainbow-delimiters
-  :ensure t
   :commands rainbow-delimiters-mode
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
@@ -3074,7 +2985,6 @@ to overwrite.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package region-bindings-mode
-  :ensure t
   :config
   (region-bindings-mode-enable)
   (define-key region-bindings-mode-map "a" 'mc/mark-all-like-this)
@@ -3090,15 +3000,13 @@ to overwrite.
 ** [[https://github.com/nlamirault/ripgrep.el][ripgrep]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package ripgrep
-  :ensure t)
+(use-package ripgrep)
 #+END_SRC
 
 ** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
 #+BEGIN_SRC emacs-lisp
   (use-package sbt-mode
-    :ensure t
     ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
     :commands (sbt-start sbt-command)
     :preface
@@ -3164,7 +3072,6 @@ to overwrite.
 #+BEGIN_SRC emacs-lisp
   (use-package scala-mode
     ;;:load-path "~/src/github/elisp/emacs-scala-mode"
-    :ensure t
     :mode "\\.s\\(cala\\|bt\\)$"
     :interpreter ("scala" . scala-mode)
     :preface
@@ -3350,15 +3257,13 @@ This is more convienent than manually creating a buffer to do some scratch work 
 initial =*scratch*= buffer.
 
 #+BEGIN_SRC emacs-lisp
-(use-package scratch
-  :ensure t)
+(use-package scratch)
 #+END_SRC
 
 ** [[https://github.com/Kungsgeten/selected.el][selected]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package selected
-  :ensure t
   :demand t
   :diminish selected-minor-mode
   ;;:bind (:map selected-keymap
@@ -3382,7 +3287,6 @@ Declarative popup window rules.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package shackle
-    :ensure t
     :config
     (setq shackle-rules
           '(("*Help*" :align t :ratio 0.4 :select t)
@@ -3403,7 +3307,6 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
 
 #+BEGIN_SRC emacs-lisp
 (use-package slime
-  :ensure t
   :config
   (setq inferior-lisp-program "/home/nelson/apps/clozureCL/ccl/lx86cl64")
   (setq slime-contribs '(slime-fancy)))
@@ -3413,7 +3316,6 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
 
 #+BEGIN_SRC emacs-lisp
   (use-package smartparens
-    :ensure t
     :diminish smartparens-mode
     :config
     (require 'smartparens-config)
@@ -3439,7 +3341,6 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 #+BEGIN_SRC emacs-lisp
 (use-package smartscan
-  :ensure t
   :config (global-smartscan-mode 1))
 #+END_SRC
 
@@ -3447,7 +3348,6 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 #+BEGIN_SRC emacs-lisp
 (use-package smooth-scrolling
-  :ensure t
   :config (setq smooth-scroll-margin 6))
 #+END_SRC
 
@@ -3455,7 +3355,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 #+BEGIN_SRC emacs-lisp :tangle no
     (use-package spaceline-config
-      :ensure spaceline
+      :after spaceline
       :init
       (require 'spaceline-config)
       (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
@@ -3504,7 +3404,6 @@ think of it as both something that augments and replaces the standard
 
 #+BEGIN_SRC emacs-lisp
 (use-package super-save
-  :ensure t
   :diminish super-save-mode
   :config (super-save-mode +1))
 #+END_SRC
@@ -3513,14 +3412,12 @@ think of it as both something that augments and replaces the standard
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package tern
-  :ensure t
   :commands tern-mode
   :load-path "~/src/github/elisp/tern/emacs"
   :diminish tern-mode
   :hook (js2-mode . tern-mode))
 
 (use-package company-tern
-  :ensure t
   :init (add-to-list 'company-backends 'company-tern))
 #+END_SRC
 
@@ -3528,7 +3425,6 @@ think of it as both something that augments and replaces the standard
 
 #+BEGIN_SRC emacs-lisp
   (use-package tide
-    :ensure t
     :after (typescript-mode company flycheck)
     :bind (:map tide-mode-map
                 ("C-c C-t c c" . nl/typescrip-compile-this-file)
@@ -3621,7 +3517,6 @@ Allows for transposing window arrangements.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package transpose-frame
-  :ensure t
   :bind ("S-M-t" . transpose-frame))
 #+END_SRC
 
@@ -3629,7 +3524,6 @@ Allows for transposing window arrangements.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package undo-tree
-  :ensure t
   :commands global-undo-tree-mode)
 #+END_SRC
 
@@ -3637,7 +3531,6 @@ Allows for transposing window arrangements.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package vimish-fold
-  :ensure t
   :config (vimish-fold-global-mode 1)
   )
 #+END_SRC
@@ -3649,7 +3542,6 @@ forward and backward to the next bookmark.
 
 #+BEGIN_SRC emacs-lisp
 (use-package bm
-  :ensure t
   :bind ("C-<f4>" . bm-toggle)
         ("A-<f4>" . bm-next)
         ("S-<f4>" . bm-previous))
@@ -3666,9 +3558,8 @@ and other goodies!).
 
 #+BEGIN_SRC emacs-lisp
 (use-package visual-regexp
-  :ensure t
   :init
-  (use-package visual-regexp-steroids :ensure t)
+  (use-package visual-regexp-steroids)
   :bind (("C-c r" . vr/replace)
          ("C-c q" . vr/query-replace)
          ("C-c m" . vr/mc-mark) ; Need multiple cursors
@@ -3695,13 +3586,11 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 
 #+BEGIN_SRC emacs-lisp
   (use-package yasnippet
-    :ensure t
     :diminish yas-minor-mode
     ;;:init
     ;;(yas-global-mode 1)
     :config
-    (use-package yasnippet-snippets
-      :ensure t)
+    (use-package yasnippet-snippets)
     (yas-reload-all))
 #+END_SRC
 
@@ -3715,7 +3604,6 @@ Wand is an extension that allows users to select a piece of text and perform act
 
 #+BEGIN_SRC emacs-lisp
 (use-package wand
-  :ensure t
   :bind (("<C-return>" . wand:execute))
   :config
   (wand:add-rule-by-pattern :match "\\$ "
@@ -3730,7 +3618,6 @@ Wand is an extension that allows users to select a piece of text and perform act
 
 #+BEGIN_SRC emacs-lisp
   (use-package web-mode
-    :ensure t
     :mode (("\\.html?\\'" . web-mode)
            ("\\.json\\'" . web-mode))
     :bind ("C-c s h" . nl/counsel-ag-html)
@@ -3766,15 +3653,13 @@ Wand is an extension that allows users to select a piece of text and perform act
 Required by ivy-occur.
 
 #+BEGIN_SRC emacs-lisp
-(use-package wgrep
-  :ensure t)
+(use-package wgrep)
 #+END_SRC
 
 ** [[https://github.com/tlh/workgroups.el][workgroups]]
 
-#+BEGIN_SRC emacs-lisp
-(use-package workgroups
-  :ensure t)
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package workgroups)
 #+END_SRC
 
 ** [[https://github.com/purcell/whole-line-or-region][whole-line-or-region]]
@@ -3783,7 +3668,6 @@ Disabled since it does not work well with easy-kill (2019-01-31).
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package whole-line-or-region
-  :ensure t
   :diminish (whole-line-or-region-local-mode)
   :config
   (custom-set-variables '(whole-line-or-region-global-mode t)))
@@ -3793,7 +3677,6 @@ Disabled since it does not work well with easy-kill (2019-01-31).
 
 #+BEGIN_SRC emacs-lisp
 (use-package yaml-mode
-  :ensure t
   :config
   (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode)))
 #+END_SRC
@@ -3808,7 +3691,6 @@ Using DevDocs.io now - 2017-10-19
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package zeal-at-point
-  :ensure t
   ;;:diminish
   :commands zeal-at-point)
 #+END_SRC
@@ -3817,7 +3699,6 @@ Using DevDocs.io now - 2017-10-19
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package zop-to-char
-  :ensure t
   :bind ("M-z" . zop-up-to-char)
   :init
   (progn
@@ -3832,7 +3713,6 @@ Ztree is a project dedicated to implementation of several text-tree applications
 
 #+BEGIN_SRC emacs-lisp
 (use-package ztree
-  :ensure t
   :commands (ztree-diff ztree-dir))
 #+END_SRC
 
@@ -3840,7 +3720,6 @@ Ztree is a project dedicated to implementation of several text-tree applications
 
 #+BEGIN_SRC emacs-lisp
 (use-package zzz-to-char
-  :ensure t
   :bind ("M-z" . zzz-up-to-char))
 #+END_SRC
 * Computer-specific settings
