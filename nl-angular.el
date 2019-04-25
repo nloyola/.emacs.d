@@ -18,7 +18,7 @@
   (interactive)
   (compile (format "cd %s && %s" (projectile-project-root) command)))
 
-(defun nl/typescrip-compile-this-file ()
+(defun nl/typescript-compile-this-file ()
   "Run the jest test suite only for this file."
   (interactive)
   (nl/command-in-proj-root (format "node_modules/.bin/tsc --noEmit %s" (buffer-file-name))))
@@ -29,11 +29,23 @@
   (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
                                    (buffer-file-name))))
 
+(defun nl/jest-test-only-this-directory ()
+  "Run the jest test suite only for all files in the directory this file is in."
+  (interactive)
+  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
+                                   (file-name-directory buffer-file-name))))
+
 (defun nl/jest-test-and-coverage-only-this-file ()
   "Run the jest test suite only for this file."
   (interactive)
   (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
                                    (buffer-file-name))))
+
+(defun nl/jest-test-and-coverage-only-this-directory ()
+  "Run the jest test suite only for all files in the directory this file is in."
+  (interactive)
+  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
+                                   (file-name-directory buffer-file-name))))
 
 (defun nl/jest-test-coverage ()
   "Run the jest test suite with code coverage."
@@ -133,13 +145,40 @@
   (interactive)
   (nl/angular-find-with-filetypes 'html-filename-p))
 
+(defhydra hydra-nl/angular-compile (:color blue)
+  "angular project test"
+  ("t" nl/typescript-compile-this-file "compile this file"))
+
+(defhydra hydra-nl/angular-test-coverage (:color blue)
+  "angular project test"
+  ("d" nl/jest-test-and-coverage-only-this-directory "test only this directory")
+  ("t" nl/jest-test-and-coverage-only-this-file "test only this file"))
+
+(defhydra hydra-nl/angular-test (:color blue)
+  "angular project test"
+  ("c" hydra-nl/angular-test-coverage/body "test coverage")
+  ("d" nl/jest-test-only-this-directory "test only this directory")
+  ("t" nl/jest-test-only-this-file "test only this file"))
+
+(defhydra hydra-nl/angular-search (:color blue)
+  "angular project search"
+  ("s" nl/counsel-ag-ts-spec "search only test files"))
+
 (defhydra hydra-nl/angular-find-file (:color blue)
   "angular project find file"
   ("t" nl/angular-find-ts-file "TypeScript file")
   ("s" nl/angular-find-ts-spec-file "TypeScript spec file")
   ("h" nl/angular-find-html-file "HTML file"))
 
-(key-chord-define-global "jc" '(lambda () (interactive) (hydra-nl/angular-find-file/body)))
+(defhydra hydra-nl/angular-project (:hint nil)
+  "angular project commands"
+  ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue)
+  ("i" nl/indent-whole-buffer "indent buffer" :color blue)
+  ("f" hydra-nl/angular-find-file/body "find files" :color blue)
+  ("s" hydra-nl/angular-search/body "search" :color blue)
+  ("t" hydra-nl/angular-test/body "test" :color blue))
+
+(key-chord-define-global "jc" '(lambda () (interactive) (hydra-nl/angular-project/body)))
 
 (defun nl/jest-failure-find-file ()
   "From a Jest backtrace, opens the file under the cursor at the line specified."
@@ -159,6 +198,15 @@
       (ace-select-window)
       (find-file (expand-file-name filename (projectile-project-root)))
       (goto-char (point-min)))))
+
+(define-key tide-mode-map (kbd "C-c C-t c c") 'nl/typescript-compile-this-file)
+(define-key tide-mode-map (kbd "C-c C-t c t") 'nl/jest-test-coverage)
+(define-key tide-mode-map (kbd "C-c C-t i") 'nl/indent-whole-buffer)
+(define-key tide-mode-map (kbd "C-c C-t s") 'nl/counsel-ag-ts-spec)
+(define-key tide-mode-map (kbd "C-c C-t t t") 'nl/jest-test-only-this-file)
+(define-key tide-mode-map (kbd "C-c C-t t d") 'nl/jest-test-only-this-directory)
+(define-key tide-mode-map (kbd "C-c C-t t c t") 'nl/jest-test-and-coverage-only-this-file)
+(define-key tide-mode-map (kbd "C-c C-t t c d") 'nl/jest-test-and-coverage-only-this-directory)
 
 (provide 'nl-angular)
 ;;; nl-angular.el ends here

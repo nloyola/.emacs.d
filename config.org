@@ -955,7 +955,7 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
       org-log-into-drawer t)
 
 (setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/Dropbox/todo.org" "Tasks")
+      '(("t" "Todo" entry (file+headline "~/Dropbox/orgfiles/todo.org" "Tasks")
              "* TODO %?\n  %i\n  %a")
         ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
              "* %? %^L %^g \n%T" :prepend t)
@@ -1000,11 +1000,8 @@ See the doc for speed keys by checking out [[elisp:(info%20"(org)%20speed%20keys
 speed keys in Org mode]].
 
 #+BEGIN_SRC emacs-lisp
-(setq org-use-speed-commands t)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(setq org-image-actual-width 550)
+(setq org-use-speed-commands t
+      org-image-actual-width 550)
 #+END_SRC
 
 *** Org tags
@@ -1161,10 +1158,11 @@ save file and history length first. Also save search entries.
 Remember position in a file.
 
 #+BEGIN_SRC emacs-lisp
-(use-package saveplace
-  :init
-    (setq save-place-file "~/.emacs.d/etc/saveplace"
-          save-place-forget-unreadable-files nil)
+  (use-package saveplace
+    :init
+    (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
+          save-place-forget-unreadable-files nil
+          save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
     (setq-default save-place t))
 #+END_SRC
 
@@ -1908,13 +1906,19 @@ Allow windmove to jump between frames.
 ** [[https://github.com/flycheck/flycheck-pos-tip][flycheck-pos-tip]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package flycheck-pos-tip
-  :after flycheck
-  :commands flycheck-pos-tip-mode
-  :init
-  (flycheck-pos-tip-mode)
-  :config
-  (setq flycheck-pos-tip-timeout 10))
+    (use-package flycheck-pos-tip
+      :after flycheck
+      :commands flycheck-pos-tip-mode
+      :init
+      (flycheck-pos-tip-mode)
+      :config
+      ;; (custom-set-faces
+      ;;  `(popup-face ((t (:inherit default :height 200))))
+      ;;  `(popup-tip-face ((t (:inherit default :height 200)))))
+      (setq flycheck-pos-tip-timeout 10
+            x-gtk-use-system-tooltips nil
+            pos-tip-foreground-color "tomato"
+            pos-tip-background-color "gray20"))
 #+END_SRC
 
 ** [[https://github.com/mola-T/flymd][flymd]]
@@ -3427,16 +3431,10 @@ think of it as both something that augments and replaces the standard
   (use-package tide
     :after (typescript-mode company flycheck)
     :bind (:map tide-mode-map
-                ("C-c C-t c c" . nl/typescrip-compile-this-file)
-                ("C-c C-t c t" . nl/jest-test-coverage)
                 ("C-c C-t f" . tide-fix)
-                ("C-c C-t i" . nl/indent-whole-buffer)
                 ("C-c C-t n" . tide-nav)
                 ("C-c C-t o" . tide-organize-imports)
                 ("C-c C-t r" . tide-rename-symbol)
-                ("C-c C-t s" . nl/counsel-ag-ts-spec)
-                ("C-c C-t t t" . nl/jest-test-only-this-file)
-                ("C-c C-t t c" . nl/jest-test-and-coverage-only-this-file)
                 ("C-c C-t x" . tide-references))
     :init
     (use-package typescript-mode)
