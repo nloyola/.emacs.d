@@ -2430,7 +2430,7 @@ This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Iv
 #+BEGIN_SRC emacs-lisp
 (use-package swiper
   :bind (("C-c C-r" . ivy-resume)
-         ("C-s" . swiper)
+         ("C-s" . swiper-isearch)
          ("<f6>" . ivy-resume))
   :config
   (ivy-mode 1)
