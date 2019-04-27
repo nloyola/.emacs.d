@@ -6,8 +6,10 @@
 
 ;;; Code:
 
-(eval-and-compile
-  (require 'projectile))
+(eval-when-compile
+  (require 'seq)
+  (require 'projectile)
+  (require 'tide))
 
 (defun ts-filename-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
@@ -61,6 +63,11 @@
   "Perform counsel-ag on the project's TypeScript spec files."
   (interactive)
   (counsel-ag "" (projectile-project-root) "-G spec.ts$"))
+
+(defun nl/counsel-ag-html ()
+  "Perform counsel-ag on the project's HTML files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "-G .html$"))
 
 (defun ts-spec-filename-p (filename)
   "Return TRUE if FILENAME is a match for a TypseScript spec."
@@ -127,13 +134,13 @@
 ;; functions for finding files in project
 (defun nl/angular-find-with-filetypes (predicate)
   "Find project files given a file name PREDICATE."
-  (let ((files (remove-if-not predicate (projectile-current-project-files))))
-    (helm-comp-read "Find file: " files)))
+  (let ((files (seq-filter predicate (projectile-current-project-files))))
+    (find-file (helm-comp-read "Find file: " files))))
 
 (defun nl/angular-find-ts-file ()
   "Find TypeScript files in the project."
   (interactive)
-  (nl/angular-find-with-filetypes 'ts-filename-p))
+  (nl/angular-find-with-filetypes #'ts-filename-p))
 
 (defun nl/angular-find-ts-spec-file ()
   "Find TypeScript test file in the project."
@@ -146,35 +153,32 @@
   (nl/angular-find-with-filetypes 'html-filename-p))
 
 (defhydra hydra-nl/angular-compile (:color blue)
-  "angular project test"
-  ("t" nl/typescript-compile-this-file "compile this file"))
-
-(defhydra hydra-nl/angular-test-coverage (:color blue)
-  "angular project test"
-  ("d" nl/jest-test-and-coverage-only-this-directory "test only this directory")
-  ("t" nl/jest-test-and-coverage-only-this-file "test only this file"))
+  "Compile"
+  ("b" nl/ng-compile "project")
+  ("t" nl/typescript-compile-this-file "this file"))
 
 (defhydra hydra-nl/angular-test (:color blue)
-  "angular project test"
-  ("c" hydra-nl/angular-test-coverage/body "test coverage")
-  ("d" nl/jest-test-only-this-directory "test only this directory")
-  ("t" nl/jest-test-only-this-file "test only this file"))
+  "Test"
+  ("f" nl/jest-test-only-this-file "only this file" :column "Test")
+  ("d" nl/jest-test-only-this-directory "only this directory")
+  ("p" nl/ng-test "project")
+  ("F" nl/jest-test-and-coverage-only-this-file "only this file" :column "Coverage")
+  ("D" nl/jest-test-and-coverage-only-this-directory "only this directory")
+  ("P" nl/jest-test-coverage "project")
+  ("g" coverlay-toggle-overlays "toggle overlay" :column "Coverage")
+  ("l" (coverlay-load-file (concat (projectile-project-root) "coverage/lcov.info")) "load data")
+  ("s" coverlay-display-stats "display stats"))
 
 (defhydra hydra-nl/angular-search (:color blue)
-  "angular project search"
-  ("s" nl/counsel-ag-ts-spec "search only test files"))
+  "Search"
+  ("f" nl/counsel-ag-ts "TypeScript files")
+  ("s" nl/counsel-ag-ts-spec "TypeScript test specificaton files")
+  ("h" nl/counsel-ag-html "HTML files"))
 
-(defhydra hydra-nl/angular-find-file (:color blue)
-  "angular project find file"
-  ("t" nl/angular-find-ts-file "TypeScript file")
-  ("s" nl/angular-find-ts-spec-file "TypeScript spec file")
-  ("h" nl/angular-find-html-file "HTML file"))
-
-(defhydra hydra-nl/angular-project (:hint nil)
-  "angular project commands"
+(defhydra hydra-nl/angular-project (:color red :hint nil)
+  "Angular project commands"
   ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue)
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
-  ("f" hydra-nl/angular-find-file/body "find files" :color blue)
   ("s" hydra-nl/angular-search/body "search" :color blue)
   ("t" hydra-nl/angular-test/body "test" :color blue))
 

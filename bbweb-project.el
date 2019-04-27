@@ -37,7 +37,7 @@
 ;; functions for finding files in project
 (defun bbweb-find-with-filetypes (predicate)
   (let ((files (remove-if-not predicate (projectile-current-project-files))))
-    (helm-comp-read "Find file: " files)))
+    (find-file (helm-comp-read "Find file: " files))))
 
 (defun bbweb-find-scala-file ()
   (interactive)
