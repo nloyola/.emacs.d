@@ -24,7 +24,7 @@
   (interactive)
   (let ((frame (make-frame)))
     (select-frame-set-input-focus frame)
-    (switch-to-buffer "*scratch*")
+    (switch-to-buffer (current-buffer))
     (set-frame-position frame 2200 120)
     (set-face-attribute 'default frame :font "Input Mono Condensed-14")
     (set-frame-size frame

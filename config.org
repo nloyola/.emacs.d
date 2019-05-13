@@ -1646,6 +1646,19 @@ Provides a simple UI for customizing dired mode to use different faces and color
           '(:family "Arial" :height 90)))))
 #+END_SRC
 
+
+** [[https://github.com/seagle0128/doom-modeline][doom-modeline]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package doom-modeline
+    :config
+    (custom-set-faces
+     '(doom-modeline-project-parent-dir ((t (:foreground "#0f3b82")))))
+    (setq doom-modeline-height 20
+          doom-modeline-bar-width 3)
+    :hook (after-init . doom-modeline-mode))
+#+END_SRC
+
 ** [[https://github.com/jacktasia/dumb-jump/blob/master/README.md][dumb-jump]]
 
 #+BEGIN_QUOTE

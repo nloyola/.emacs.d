@@ -162,6 +162,7 @@
   ("f" nl/jest-test-only-this-file "only this file" :column "Test")
   ("d" nl/jest-test-only-this-directory "only this directory")
   ("p" nl/ng-test "project")
+  ("e" nl/jest-failure-find-file "find failure")
   ("F" nl/jest-test-and-coverage-only-this-file "only this file" :column "Coverage")
   ("D" nl/jest-test-and-coverage-only-this-directory "only this directory")
   ("P" nl/jest-test-coverage "project")
