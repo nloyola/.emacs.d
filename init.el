@@ -58,13 +58,13 @@
 ;;; Set up package
 (require 'package)
 (setq package-archives
-      '(("GNU ELPA"     . "https://elpa.gnu.org/packages/")
-        ;;("MELPA Stable" . "https://stable.melpa.org/packages/")
-        ("MELPA"        . "https://melpa.org/packages/"))
+      '(("gnu"     . "https://elpa.gnu.org/packages/")
+        ;;("melpa-stable" . "https://stable.melpa.org/packages/")
+        ("melpa"        . "https://melpa.org/packages/"))
       package-archive-priorities
-      '(;;("MELPA Stable" . 10)
-        ("GNU ELPA"     . 5)
-        ("MELPA"        . 0)))
+      '(;;("melpa-stable" . 10)
+        ("gnu"     . 10)
+        ("melpa"        . 5)))
 
 (package-initialize)
 

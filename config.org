@@ -2314,88 +2314,91 @@ This package can be used to tie related commands into a family of
 short bindings with a common prefix - a Hydra.
 
 #+BEGIN_SRC emacs-lisp
-    (use-package hydra
+  (use-package hydra
+    :pin melpa
+    :init
+    (use-package cl-lib)
+    (use-package lv)
+    (use-package key-chord
       :init
-      (use-package cl-lib)
-      (use-package lv)
-      (use-package key-chord
-        :init
-        (setq key-chord-one-key-delay 0.16)
-        :config (key-chord-mode 1))
-      :config
-      (defun nl/pull-window ()
-        "Pull a window to the window the point is at"
-        (interactive)
-        (aw--push-window (selected-window))
-        (ace-swap-window)
-        (aw-flip-window))
+      (setq key-chord-one-key-delay 0.16)
+      :config (key-chord-mode 1))
+    (use-package posframe)
+    :config
+    (setq hydra-hint-display-type 'posframe)
+    (defun nl/pull-window ()
+      "Pull a window to the window the point is at"
+      (interactive)
+      (aw--push-window (selected-window))
+      (ace-swap-window)
+      (aw-flip-window))
 
-      (defun nl/open-buffer-in-other-window ()
-        "Open buffer in another window."
-        (interactive)
-        (let ((pt (point))
-              (buf (current-buffer))
-              (window (ace-select-window)))
-          (set-window-buffer window buf)
-          (goto-char pt)
-          (recenter-top-bottom 'top)))
+    (defun nl/open-buffer-in-other-window ()
+      "Open buffer in another window."
+      (interactive)
+      (let ((pt (point))
+            (buf (current-buffer))
+            (window (ace-select-window)))
+        (set-window-buffer window buf)
+        (goto-char pt)
+        (recenter-top-bottom 'top)))
 
-      ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
+    ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
-      (defun hydra-universal-argument (arg)
-        (interactive "P")
-        (setq prefix-arg (if (consp arg)
-                             (list (* 4 (car arg)))
-                           (if (eq arg '-)
-                               (list -4)
-                             '(4)))))
+    (defun hydra-universal-argument (arg)
+      (interactive "P")
+      (setq prefix-arg (if (consp arg)
+                           (list (* 4 (car arg)))
+                         (if (eq arg '-)
+                             (list -4)
+                           '(4)))))
 
-      (defhydra hydra-window (:color red :hint nil)
-        ("h" windmove-left)
-        ("j" windmove-down)
-        ("k" windmove-up)
-        ("l" windmove-right)
-        ("|" (progn (split-window-right) (windmove-right)))
-        ("_" (progn (split-window-below) (windmove-down)))
-        ("v" split-window-right)
-        ("x" split-window-below)
-        ("u" winner-undo)
-        ("r" winner-redo) ;;Fixme, not working?
-        ("a" ace-window :exit t)
-        ("f" new-frame :exit t)
-        ("o" nl/open-buffer-in-other-window :exit t)
-        ("p" nl/pull-window :exit t)
-        ("s" ace-swap-window :exit t)
-        ("da" ace-delete-window)
-        ("dw" delete-window)
-        ("db" kill-this-buffer)
-        ("df" delete-frame :exit t)
-        ("q" nil)
-        ;;("i" ace-maximize-window "ace-one" :color blue)
-        ("m" headlong-bookmark-jump))
+    (defhydra hydra-window (:color red :hint nil)
+      ("h" windmove-left)
+      ("j" windmove-down)
+      ("k" windmove-up)
+      ("l" windmove-right)
+      ("|" (progn (split-window-right) (windmove-right)))
+      ("_" (progn (split-window-below) (windmove-down)))
+      ("v" split-window-right)
+      ("x" split-window-below)
+      ("u" winner-undo)
+      ("r" winner-redo) ;;Fixme, not working?
+      ("a" ace-window :exit t)
+      ("f" new-frame :exit t)
+      ("o" nl/open-buffer-in-other-window :exit t)
+      ("p" nl/pull-window :exit t)
+      ("s" ace-swap-window :exit t)
+      ("da" ace-delete-window)
+      ("dw" delete-window)
+      ("db" kill-this-buffer)
+      ("df" delete-frame :exit t)
+      ("q" nil)
+      ;;("i" ace-maximize-window "ace-one" :color blue)
+      ("m" headlong-bookmark-jump))
 
-      (key-chord-define-global "yy" 'hydra-window/body)
+    (key-chord-define-global "yy" 'hydra-window/body)
 
-      (defhydra hydra-buffer (:color blue :columns 3)
-        ("n" next-buffer "next" :color red)
-        ("b" helm-mini "switch")
-        ("B" ibuffer "ibuffer")
-        ("p" previous-buffer "prev" :color red)
-        ("C-b" buffer-menu "buffer menu")
-        ("d" kill-this-buffer "delete" :color red)
-        ;; don't come back to previous buffer after delete
-        ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
-        ("s" save-buffer "save" :color red))
+    (defhydra hydra-buffer (:color blue :columns 3)
+      ("n" next-buffer "next" :color red)
+      ("b" helm-mini "switch")
+      ("B" ibuffer "ibuffer")
+      ("p" previous-buffer "prev" :color red)
+      ("C-b" buffer-menu "buffer menu")
+      ("d" kill-this-buffer "delete" :color red)
+      ;; don't come back to previous buffer after delete
+      ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
+      ("s" save-buffer "save" :color red))
 
-      (key-chord-define-global "zz" 'hydra-buffer/body)
+    (key-chord-define-global "zz" 'hydra-buffer/body)
 
-      (defhydra hydra-goto-line (goto-map "")
-        "goto-line"
-        ("g" goto-line "go")
-        ("m" set-mark-command "mark" :bind nil)
-        ("q" nil "quit"))
+    (defhydra hydra-goto-line (goto-map "")
+      "goto-line"
+      ("g" goto-line "go")
+      ("m" set-mark-command "mark" :bind nil)
+      ("q" nil "quit"))
 
-      (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
+    (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
 #+END_SRC
 
 #+RESULTS:

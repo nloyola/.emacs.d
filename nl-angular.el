@@ -152,9 +152,8 @@
   (interactive)
   (nl/angular-find-with-filetypes 'html-filename-p))
 
-(defhydra hydra-nl/angular-compile (:color blue)
-  "Compile"
-  ("b" nl/ng-compile "project")
+(defhydra hydra-nl/angular-compile (:exit t)
+  ("b" nl/ng-compile "project" :column "Compile")
   ("t" nl/typescript-compile-this-file "this file"))
 
 (defhydra hydra-nl/angular-test (:color blue)
@@ -171,14 +170,12 @@
   ("s" coverlay-display-stats "display stats"))
 
 (defhydra hydra-nl/angular-search (:color blue)
-  "Search"
-  ("f" nl/counsel-ag-ts "TypeScript files")
+  ("f" nl/counsel-ag-ts "TypeScript files" :column "Search")
   ("s" nl/counsel-ag-ts-spec "TypeScript test specificaton files")
   ("h" nl/counsel-ag-html "HTML files"))
 
-(defhydra hydra-nl/angular-project (:color red :hint nil)
-  "Angular project commands"
-  ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue)
+(defhydra hydra-nl/angular-project (:exit nil :color red :hint nil)
+  ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue :column "Angular")
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
   ("s" hydra-nl/angular-search/body "search" :color blue)
   ("t" hydra-nl/angular-test/body "test" :color blue))
