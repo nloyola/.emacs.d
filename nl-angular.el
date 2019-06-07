@@ -159,9 +159,9 @@
 (defhydra hydra-nl/angular-test (:color blue)
   "Test"
   ("f" nl/jest-test-only-this-file "only this file" :column "Test")
-  ("d" nl/jest-test-only-this-directory "only this directory")
-  ("p" nl/ng-test "project")
-  ("e" nl/jest-failure-find-file "find failure")
+  ("d" nl/jest-test-only-this-directory "only this directory" :column "Test")
+  ("p" nl/ng-test "project" :column "Test")
+  ("e" nl/jest-failure-find-file "find failure" :column "Test")
   ("F" nl/jest-test-and-coverage-only-this-file "only this file" :column "Coverage")
   ("D" nl/jest-test-and-coverage-only-this-directory "only this directory")
   ("P" nl/jest-test-coverage "project")
@@ -174,8 +174,9 @@
   ("s" nl/counsel-ag-ts-spec "TypeScript test specificaton files")
   ("h" nl/counsel-ag-html "HTML files"))
 
-(defhydra hydra-nl/angular-project (:exit nil :color red :hint nil)
+(defhydra hydra-nl/angular-project (:color red :hint nil)
   ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue :column "Angular")
+  ("a" hydra-nl-align/body "align" :color blue)
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
   ("s" hydra-nl/angular-search/body "search" :color blue)
   ("t" hydra-nl/angular-test/body "test" :color blue))

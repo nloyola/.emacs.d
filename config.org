@@ -3345,9 +3345,15 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
 
     (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
     (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
-    (sp-local-pair 'org-mode "*" "*" :actions '(wrap)))
-#+END_SRC
+    (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
 
+    ;; https://emacs.stackexchange.com/questions/26912/smartparens-do-not-insert-parenthesis-pair-when-point-is-at-the-beginning-of-wo
+    (sp-pair "{" nil :unless '(sp-point-before-word-p))
+    (sp-pair "(" nil :unless '(sp-point-before-word-p))
+    (sp-pair "[" nil :unless '(sp-point-before-word-p))
+
+    (sp-local-pair 'typescript-mode "\<" "\>"))
+#+END_SRC
 
 *** Smartparens org mode
 
@@ -3801,8 +3807,7 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
   (align-regexp beg end "\\w+\\(\\s-*\\)\\w+,?" 1 1 t))
 
 (defhydra hydra-nl-align (:hint nil)
-  "Align things"
-  (":" align-colons "colons" :color blue)
+  (":" align-colons "colons" :color blue :column "Align things")
   ("," align-commas "commas" :color blue)
   ("=" align-equals "equals" :color blue)
   ("p" align-parameters "parameters" :color blue))

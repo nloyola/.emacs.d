@@ -1,0 +1,9 @@
+# -*- mode: snippet; eval: (setq require-final-newline nil) -*-
+# name: ondestroy
+# key: ondestroy
+# --
+private unsubscribe$ = new Subject<void>();
+ngOnDestroy() {
+  this.unsubscribe$.next();
+  this.unsubscribe$.complete();
+}
