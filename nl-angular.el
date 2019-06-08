@@ -76,17 +76,23 @@
 (defun nl/ng-compile ()
     "Uses Angular CLI to build the project."
   (interactive)
+  (if (get-buffer "*ng-compile*")
+      (kill-buffer "*ng-compile*"))
   (with-output-to-temp-buffer "*ng-compile*"
     (async-shell-command "ng build" "*ng-compile*" "*Messages*")
-    (pop-to-buffer "*ng-compile*"))
+    (pop-to-buffer "*ng-compile*")
+    (local-set-key (kbd "g") 'nl/ng-compile))
   "")
 
 (defun nl/ng-test ()
-    "Uses Angular CLI to run the project tests."
+  "Uses Angular CLI to run the project tests."
   (interactive)
+  (if (get-buffer "*ng-test*")
+      (kill-buffer "*ng-test*"))
   (with-output-to-temp-buffer "*ng-test*"
     (async-shell-command "npm run test" "*ng-test*" "*Messages*")
-    (pop-to-buffer "*ng-test*"))
+    (pop-to-buffer "*ng-test*")
+    (local-set-key (kbd "g") 'nl/ng-test))
   "")
 
 (defun nl/related-files (path)
@@ -153,7 +159,7 @@
   (nl/angular-find-with-filetypes 'html-filename-p))
 
 (defhydra hydra-nl/angular-compile (:exit t)
-  ("b" nl/ng-compile "project" :column "Compile")
+  ("p" nl/ng-compile "project" :column "Compile")
   ("t" nl/typescript-compile-this-file "this file"))
 
 (defhydra hydra-nl/angular-test (:color blue)
