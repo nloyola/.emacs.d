@@ -1,5 +1,6 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
+#+STARTUP: content
 
 This configuration uses the [[https://github.com/jwiegley/use-package][use-package]] package from John Wiegley,
 which is a fantastic way to manage package configurations.
@@ -980,15 +981,15 @@ Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a
 (setq org-agenda-files
       (delq nil
             (mapcar (lambda (x) (and (file-exists-p x) x))
-                    '("~/Dropbox/todo.org"
-                      "~/Dropbox/cbsr_todo.org"))))
+                    '("~/Dropbox/orgfiles/todo.org"
+                      "~/Dropbox/orgfiles/cbsr_todo.org"))))
 #+END_SRC
 
 *** Org capture
 
 #+BEGIN_SRC emacs-lisp
 (bind-key "C-c c" 'org-capture)
-(setq org-default-notes-file "~/Dropbox/notes.org")
+(setq org-default-notes-file "~/Dropbox/orgfiles/notes.org")
 #+END_SRC
 
 *** Org setup
@@ -1158,12 +1159,14 @@ save file and history length first. Also save search entries.
 Remember position in a file.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package saveplace
-    :init
-    (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
-          save-place-forget-unreadable-files nil
-          save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
-    (setq-default save-place t))
+    (use-package saveplace
+      :init
+      (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
+            save-place-forget-unreadable-files nil
+            save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
+      (setq-default save-place t)
+      :config
+      (save-place-mode 1))
 #+END_SRC
 
 ** =shell=
@@ -1464,10 +1467,10 @@ Use silver surfer to search.
 A quick way to jump around text in buffers.
 
 #+BEGIN_SRC emacs-lisp
-(use-package avy
-  :bind
-  (("C-c SPC" . avy-goto-char)
-   ("C-'" . avy-goto-char-2)))
+  (use-package avy
+    :bind
+    (("C-c SPC" . avy-goto-char-timer)
+     ("C-'" . avy-goto-char)))
 #+END_SRC
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
@@ -1646,7 +1649,6 @@ Provides a simple UI for customizing dired mode to use different faces and color
           '(:family "Arial" :height 90)))))
 #+END_SRC
 
-
 ** [[https://github.com/seagle0128/doom-modeline][doom-modeline]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1797,6 +1799,14 @@ This package adds support for flow to flycheck.
   :hook (js2-mode . flycheck-mode))
 #+END_SRC
 
+** [[https://github.com/akermu/emacs-libvterm][emacs-libvterm]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package vterm
+  :load-path "~/src/github/elisp/emacs-libvterm"
+  :commands vterm vterm-other-window)
+#+END_SRC
+
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1882,7 +1892,6 @@ strings.
            (python-mode . fic-mode)
            (php-mode    . fic-mode)))
 #+END_SRC
-
 ** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
 
 Allow windmove to jump between frames.
@@ -1946,6 +1955,15 @@ On the fly markdown preview.
 (use-package flymd
   :config
   (setq flymd-browser-open-function 'my-flymd-browser-function))
+#+END_SRC
+** [[https://github.com/waymondo/frog-jump-buffer][frog-jump-buffer]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package frog-jump-buffer
+  :load-path "~/src/github/elisp/frog-jump-buffer"
+  :bind
+  ("C-x C-b" . frog-jump-buffer)
+  :commands frog-jump-buffer)
 #+END_SRC
 
 ** [[https://github.com/leoliu/ggtags][ggtags]]
@@ -3015,8 +3033,6 @@ to overwrite.
   ;;(define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save)
 )
 #+END_SRC
-
-
 ** [[https://github.com/nlamirault/ripgrep.el][ripgrep]]
 
 #+BEGIN_SRC emacs-lisp
@@ -4128,4 +4144,43 @@ With a prefix argument P, isearch for the symbol at point."
       (goto-char (point-min))
       (replace-string "&gt;" ">")
       (goto-char (point-min)))))
+#+END_SRC
+** Smarter Backward kill word
+
+Taken from: https://old.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/
+
+#+BEGIN_SRC emacs-lisp
+  (defun user/smarter-backward-kill-word ()
+    "Deletes the previous word, respecting:
+  1. If the cursor is at the beginning of line, delete the '\n'.
+  2. If there is only whitespace, delete only to beginning of line.
+  3. If there is whitespace, delete whitespace and check 4-5.
+  4. If there are other characters instead of words, delete one only char.
+  5. If it's a word at point, delete it."
+    (interactive)
+
+    (if (bolp)
+        ;; 1
+        (delete-char -1)
+
+      (if (string-match-p "^[[:space:]]+$"
+                          (buffer-substring-no-properties
+                           (line-beginning-position) (point)))
+          ;; 2
+          (delete-horizontal-space)
+
+        (when (thing-at-point 'whitespace)
+          ;; 3
+          (delete-horizontal-space))
+
+        (if (thing-at-point 'word)
+            ;; 5
+            (let ((start (car (bounds-of-thing-at-point 'word)))
+                  (end (point)))
+              (if (> end start)
+                  (delete-region start end)
+                (delete-char -1)))
+          ;; 4
+          (delete-char -1)))))
+(global-set-key [remap backward-kill-word] #'user/smarter-backward-kill-word)
 #+END_SRC
