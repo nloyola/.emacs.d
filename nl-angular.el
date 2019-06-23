@@ -28,7 +28,7 @@
 (defun nl/jest-test-only-this-file ()
   "Run the jest test suite only for this file."
   (interactive)
-  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
+  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest -e --runInBand %s"
                                    (buffer-file-name))))
 
 (defun nl/jest-test-only-this-directory ()
