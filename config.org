@@ -1161,12 +1161,12 @@ Remember position in a file.
 #+BEGIN_SRC emacs-lisp
     (use-package saveplace
       :init
+      (save-place-mode 1)
+      :config
       (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
             save-place-forget-unreadable-files nil
             save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
-      (setq-default save-place t)
-      :config
-      (save-place-mode 1))
+      (setq-default save-place t))
 #+END_SRC
 
 ** =shell=
@@ -1594,6 +1594,14 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
   (dap-mode t)
   (dap-ui-mode t)
   (require 'dap-java))
+#+END_SRC
+
+
+** [[https://github.com/patrickt/emacs][deadgrep]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package deadgrep
+  :bind (("C-c h" . deadgrep)))
 #+END_SRC
 
 ** [[https://github.com/skeeto/devdocs-lookup][devdocs-lookup]]
