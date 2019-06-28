@@ -12,7 +12,7 @@
       (let* ((desired-width-in-chars 244)
              (desired-width-in-pixels (* desired-width-in-chars (frame-char-width)))
              (window-frame-in-pixels 16))
-        (set-face-attribute 'default frame :font "Input Mono Condensed-14")
+        (set-face-attribute 'default frame :font "Fira Code Medium-14")
         ;; cannot use negative value for X, it is not placed in correct location on startup
         (set-frame-position frame (- (+ 1920 3840) window-frame-in-pixels desired-width-in-pixels) 0)
         (set-frame-size frame
@@ -26,7 +26,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer (current-buffer))
     (set-frame-position frame 2200 120)
-    (set-face-attribute 'default frame :font "Input Mono Condensed-14")
+    (set-face-attribute 'default frame :font "Fira Code Medium-14")
     (set-frame-size frame
                     (* 120 (frame-char-width frame))
                     (* 70 (frame-char-height frame))
@@ -39,7 +39,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer "*scratch*")
     (set-frame-position frame -1 0)
-    (set-face-attribute 'default frame :font "Input Mono Condensed-9" :height 90)
+    (set-face-attribute 'default frame :font "Fira Code Medium-9")
     (set-frame-size frame
                     (/ (x-display-pixel-width frame) (frame-char-width frame))
                     (floor (* (/ (x-display-pixel-height frame) (frame-char-height frame)) 0.80)))))
@@ -53,7 +53,7 @@
 
 (add-hook 'window-setup-hook 'nl/window-setup-hook)
 
-(setq default-font "Input Mono Condensed-14")
+(setq default-font "Fira Code Medium-14")
 (set-frame-font default-font)
 
 ;; Search specified tree for the item with the specified key
@@ -71,8 +71,8 @@
   (if window-system
   (let ((vert-mm (nth 2 (tree-assoc 'mm-size (frame-monitor-attributes (selected-frame))))))
     (if (< vert-mm 300)
-        (set-frame-parameter 'nil 'font "Input Mono Condensed-9")
-      (set-frame-parameter 'nil 'font "Input Mono Condensed-14")))))
+        (set-frame-parameter 'nil 'font "Fira Code Medium-9")
+      (set-frame-parameter 'nil 'font "Fira Code Medium-14")))))
 
 (push
  'fontify-frame after-make-frame-functions)

@@ -80,7 +80,9 @@ And then merge the setting to your X server resource database.
 xrdb -merge ~/.Xresources
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+Using Fira Code now. See below.
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (set-face-font 'default "Input Mono Condensed-14")
 #+END_SRC
 
@@ -94,9 +96,15 @@ cd ~/.fonts
 unzip symbola.zip
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (set-fontset-font "fontset-default" nil
                   (font-spec :size 20 :name "Symbola"))
+#+END_SRC
+
+*** Fira Code
+
+#+BEGIN_SRC emacs-lisp
+(set-face-font 'default "Fira Code Medium-14")
 #+END_SRC
 
 *** Fira Mono
@@ -3526,10 +3534,10 @@ think of it as both something that augments and replaces the standard
       '(("=>" . ?⇒)
         ("<=" . ?≤)
         (">=" . ?≥)
-        ("==" . ?≡)
-        ("===" . ?≣)
+        ("===" . ?≡)
         ("!" . ?¬)
-        ("!=" . ?≢)
+        ("!=" . ?≠)
+        ("!==" . ?≢)
         ("&&" . ?∧)
         ("||" . ?∨)))
 
@@ -3543,6 +3551,7 @@ think of it as both something that augments and replaces the standard
       (company-mode +1)
       (my-common-prog-mode-settings)
       (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
+            prettify-symbols-unprettify-at-point 'right-edge
             company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
       (setq-default typescript-indent-level 2))
 
@@ -3551,9 +3560,6 @@ think of it as both something that augments and replaces the standard
            (typescript-mode . nl-tide-mode-hook)
            (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
-
-#+RESULTS:
-: t
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
 
