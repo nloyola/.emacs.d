@@ -22,7 +22,8 @@
 (when window-system
   (tool-bar-mode -1)
   (scroll-bar-mode -1)
-  (tooltip-mode -1))
+  (tooltip-mode -1)
+  (fringe-mode -1))
 
 (if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
 
@@ -60,11 +61,13 @@
 (setq package-archives
       '(("gnu"     . "https://elpa.gnu.org/packages/")
         ;;("melpa-stable" . "https://stable.melpa.org/packages/")
-        ("melpa"        . "https://melpa.org/packages/"))
+        ("melpa"        . "https://melpa.org/packages/")
+        ("marmalade"    . "https://marmalade-repo.org/packages/"))
       package-archive-priorities
       '(;;("melpa-stable" . 10)
-        ("gnu"     . 10)
-        ("melpa"        . 5)))
+        ("gnu"       . 10)
+        ("marmalade" . 7)
+        ("melpa"     . 5)))
 
 (package-initialize)
 
@@ -73,10 +76,10 @@
 (setenv "http_proxy" "")
 
 ;;; Bootstrap use-package
-(setq-default use-package-always-ensure t ; Auto-download package if not exists
-              use-package-always-defer nil ; Always defer load package to speed up startup time
-              use-package-verbose nil ; Don't report loading details
-              use-package-expand-minimally t  ; make the expanded code as minimal as possible
+(setq-default use-package-always-ensure t         ; Auto-download package if not exists
+              use-package-always-defer nil        ; Always defer load package to speed up startup time
+              use-package-verbose t               ; report loading details
+              use-package-expand-minimally t      ; make the expanded code as minimal as possible
               use-package-enable-imenu-support t) ; Let imenu finds use-package definitions
 
 ;; Install use-package if it's not already installed.

@@ -291,7 +291,9 @@ of the compilation buffer when it is opened.
 
 #+BEGIN_SRC emacs-lisp
 (setq compilation-ask-about-save nil
-      compilation-scroll-output t)
+      compilation-scroll-output t
+      compilation-always-kill t
+      compilation-scroll-output 'first-error)
 #+END_SRC
 
 Enable ANSI colors for compilation buffers.
@@ -1535,6 +1537,15 @@ Disable for now since it is slow when editing Scala code.
     (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
     (set-face-attribute 'font-lock-comment-face nil :slant 'italic))
 #+END_SRC
+** [[https://github.com/jordonbiondo/column-enforce-mode][column-enforce-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package column-enforce-mode
+  :config
+  (setq column-enforce-column 110)
+  :hook (progmode-hook . column-enforce-mode))
+#+END_SRC
+
 ** [[https://github.com/company-mode/company-mode][company-mode]]
 
 Complete anything.
@@ -1559,6 +1570,10 @@ Complete anything.
         (append (if (consp backend) backend (list backend))
                 '(:with company-yasnippet))))
     :init (global-company-mode t)
+    :custom
+    (company-dabbrev-downcase nil "Don't downcase returned candidates.")
+    (company-show-numbers t "Numbers are helpful.")
+    (company-abort-manual-when-too-short t "Be less enthusiastic about completion.")
     :config
     ;; no delay no autocomplete
     (setq company-idle-delay 0
@@ -1603,8 +1618,6 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
   (dap-ui-mode t)
   (require 'dap-java))
 #+END_SRC
-
-
 ** [[https://github.com/patrickt/emacs][deadgrep]]
 
 #+BEGIN_SRC emacs-lisp
