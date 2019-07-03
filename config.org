@@ -86,6 +86,7 @@ Using Fira Code now. See below.
 (set-face-font 'default "Input Mono Condensed-14")
 #+END_SRC
 
+
 *** Symbola
 
 download from here: [[https://fonts2u.com/symbola.font][Symbola font]]
@@ -286,12 +287,12 @@ Set environment variable for shells.
 (setenv "PAGER" "cat")
 #+END_SRC
 
-Do not ask me to save files before compiling. Also scroll to the end
-of the compilation buffer when it is opened.
+Do not ask me to save files before compiling, or kill a previous
+compilation. Also scroll to the end of the compilation buffer when it
+is opened.
 
 #+BEGIN_SRC emacs-lisp
 (setq compilation-ask-about-save nil
-      compilation-scroll-output t
       compilation-always-kill t
       compilation-scroll-output 'first-error)
 #+END_SRC
@@ -315,6 +316,26 @@ buffers (has to be called for each frame):
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
+#+END_SRC
+
+These are taken from
+https://github.com/patrickt/emacs/blob/master/init.el:
+
+#+BEGIN_SRC emacs-lisp
+(setq
+  kill-whole-line t                      ; Lets C-k delete the whole line
+  default-directory "~/src/"             ; My code lives here
+  enable-recursive-minibuffers t         ; don't freak out if I use the minibuffer twice
+  sentence-end-double-space nil          ; are you kidding me
+  confirm-kill-processes nil             ; don't when quitting
+  )
+
+(setq-default
+  cursor-type 'hbar
+  indent-tabs-mode nil
+  cursor-in-non-selected-windows nil)
+
+(unbind-key "C-z")     ;; I never want to suspend the frame
 #+END_SRC
 
 ** Cursor Movement
@@ -393,7 +414,6 @@ Add =\n= to end of file if required.
 #+BEGIN_SRC emacs-lisp
 (setq eshell-history-size 100000)
 #+END_SRC
-
 
 ** Garbage collection
 
@@ -567,8 +587,7 @@ Case sensitive tags search:
 #+BEGIN_SRC emacs-lisp
 (setq text-mode-hook
       '(lambda ()
-         (turn-on-auto-fill)            ; Enable automatic line wrapping.
-         (setq-default indent-tabs-mode nil)))    ; Use real tabs.
+         (turn-on-auto-fill)))            ; Enable automatic line wrapping
 #+END_SRC
 
 ** Prefer Newer Versions
@@ -586,7 +605,8 @@ possible.
 #+BEGIN_SRC emacs-lisp
 (when (equal system-type 'gnu/linux)
     (setq browse-url-browser-function 'browse-url-generic
-          browse-url-generic-program "google-chrome"))
+          browse-url-generic-program "/usr/bin/brave-browser"
+          browse-url-generic-args '()))
 (setenv "BROWSER" "google-chrome")
 #+END_SRC
 
@@ -649,7 +669,6 @@ A way to set up indentation for all programming modes. Taken from
                 js-indent-level n                    ; js-mode
                 js2-basic-offset n                   ; js2-mode, in latest js2-mode, it's alias of js-indent-level
                 js2-strict-missing-semi-warning nil  ;
-                indent-tabs-mode nil
                 web-mode-markup-indent-offset n      ; web-mode, html tag in html file
                 web-mode-css-indent-offset n         ; web-mode, css in html file
                 web-mode-code-indent-offset n        ; web-mode, js code in html file
@@ -927,21 +946,9 @@ ibuffer is the improved version of list-buffers.
              ("Help" (or (name . "\*Help\*")
                          (name . "\*Apropos\*")
                          (name . "\*info\*"))))))
-    :config
-    (use-package ibuffer-projectile
-      :config
-      (defun nl/ibuffer-customization ()
-        "My customization for `ibuffer'."
-        ;; ibuffer-projectile setup
-        (ibuffer-projectile-set-filter-groups)
-        (unless (eq ibuffer-sorting-mode 'alphabetic)
-          (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
-          (ibuffer-do-sort-by-major-mode)))) ; then do major-mode sort
     (defalias 'list-buffers 'ibuffer)
 
-    :hook (ibuffer-mode . (lambda()
-                            (nl/ibuffer-customization)
-                            (ibuffer-switch-to-saved-filter-groups "home"))))
+    :hook (ibuffer-mode . (lambda() (ibuffer-switch-to-saved-filter-groups "home"))))
 #+END_SRC
 
 ** =org-mode=
@@ -977,10 +984,18 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
 *** Org activation bindings
 
 Set up some global key bindings that integrate with Org Mode features.
+Also, Unbind some keys (I prefer windmove).
 
 #+BEGIN_SRC emacs-lisp
-(bind-key "C-c l" 'org-store-link)
-(bind-key "C-c a" 'org-agenda)
+  (defun nl/org-mode-hook ()
+    (define-key org-mode-map (kbd "C-c l") 'org-store-link)
+    (define-key org-mode-map (kbd "C-c a") 'org-agenda)
+    (define-key org-mode-map (kbd "M-<left>") nil)
+    (define-key org-mode-map (kbd "M-<right>") nil)
+    (define-key org-mode-map (kbd "M-<down>") nil)
+    (define-key org-mode-map (kbd "M-<up>") nil))
+
+  (add-hook 'org-mode-hook 'nl/org-mode-hook)
 #+END_SRC
 
 *** Org agenda
@@ -1189,9 +1204,6 @@ Remember position in a file.
 ** =sql=
 
 This configuration allows me to connect to predefined MySQL servers.
-
-Taken from:
-- http://truongtx.me/2014/08/23/setup-emacs-as-an-sql-database-client/
 
 Save command history between sessions (taken from EmacsWiki).
 
@@ -1611,13 +1623,14 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 ** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package dap-mode
-  :after lsp-mode
-  :config
-  (dap-mode t)
-  (dap-ui-mode t)
-  (require 'dap-java))
+  (use-package dap-mode
+    :after lsp-mode
+    :config
+    (dap-mode t)
+    (dap-ui-mode t)
+    (require 'dap-java))
 #+END_SRC
+
 ** [[https://github.com/patrickt/emacs][deadgrep]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1814,6 +1827,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package gradle-mode
+  :disabled
   :diminish gradle-mode
   :init
     (gradle-mode 1))
@@ -1976,14 +1990,15 @@ Allow windmove to jump between frames.
 
 On the fly markdown preview.
 
-#+BEGIN_SRC emacs-lisp :tangle no
-(defun my-flymd-browser-function (url)
-  (let ((browse-url-browser-function 'browse-url-firefox))
-    (browse-url url)))
-
-(use-package flymd
-  :config
-  (setq flymd-browser-open-function 'my-flymd-browser-function))
+#+BEGIN_SRC emacs-lisp
+    (use-package flymd
+      :commands (flymd-flyit)
+      :preface
+      (defun my-flymd-browser-function (url)
+        (let ((browse-url-browser-function 'browse-url-firefox))
+          (browse-url url)))
+      :config
+      (setq flymd-browser-open-function 'my-flymd-browser-function))
 #+END_SRC
 ** [[https://github.com/waymondo/frog-jump-buffer][frog-jump-buffer]]
 
@@ -2075,104 +2090,81 @@ Guide the following key bindings automatically and dynamically.
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 #+BEGIN_SRC emacs-lisp
-(use-package helm
-  ;;:load-path "~/src/github/elisp/helm"
-  :commands (helm-config helm-files helm-grep)
-  :diminish helm-mode
-  :init
-    ;; must set before helm-config, otherwise helm uses the default
-    ;; prefix "C-x c", which is inconvenient because you can
-    ;; accidentially press "C-x C-c"
-    (setq helm-command-prefix-key "C-c h")
-    (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
-          ;; not occupy whole other window
-          helm-ff-newfile-prompt-p nil
-          ;;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
-          helm-scroll-amount 4                    ; scroll 4 lines other window using
-          ;; M-<next>/M-<prior>
-          ;;helm-quick-update t                     ; do not display invisible candidates
-          ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
-          ;; updating in delayed sources.
-          ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
-          ;; updating candidate buffer
-          helm-ff-search-library-in-sexp t        ; search for library in `require` and
-          ;; `declare-function` sexp.
+    (use-package helm
+      ;;:load-path "~/src/github/elisp/helm"
+      :commands (helm-config helm-files helm-grep)
+      :diminish helm-mode
+      :init
+        ;; must set before helm-config, otherwise helm uses the default
+        ;; prefix "C-x c", which is inconvenient because you can
+        ;; accidentially press "C-x C-c"
+        (setq helm-command-prefix-key "C-c h")
+        (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
+              ;; not occupy whole other window
+              helm-ff-newfile-prompt-p nil
+              ;;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
+              helm-scroll-amount 4                    ; scroll 4 lines other window using
+              ;; M-<next>/M-<prior>
+              ;;helm-quick-update t                     ; do not display invisible candidates
+              ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
+              ;; updating in delayed sources.
+              ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
+              ;; updating candidate buffer
+              helm-ff-search-library-in-sexp t        ; search for library in `require` and
+              ;; `declare-function` sexp.
 
-          ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
-          ;;                                    '(picture-mode artist-mode))
-          ;; limit the number of displayed canidates
-          ;;helm-candidate-number-limit 100
-          ;; show all candidates when set to 0
-          ;;helm-M-x-requires-pattern 0
-          helm-ff-file-name-history-use-recentf t
-          ;; move to end or beginning of source when reaching top or bottom of source.
-          helm-move-to-line-cycle-in-source t
-          ;; Needed in helm-buffers-list
-          ;;ido-use-virtual-buffers t
-          ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
-          ;;helm-buffers-fuzzy-matching t
-          ;; truncate long lines
-          ;;helm-truncate-lines t
-          helm-autoresize-min-height 30
-          helm-autoresize-max-height 30
-          helm-display-header-line nil
-          helm-buffer-max-length 45
-          helm-yas-display-key-on-candidate t)
+              ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
+              ;;                                    '(picture-mode artist-mode))
+              ;; limit the number of displayed canidates
+              ;;helm-candidate-number-limit 100
+              ;; show all candidates when set to 0
+              ;;helm-M-x-requires-pattern 0
+              helm-ff-file-name-history-use-recentf t
+              ;; move to end or beginning of source when reaching top or bottom of source.
+              helm-move-to-line-cycle-in-source t
+              ;; Needed in helm-buffers-list
+              ;;ido-use-virtual-buffers t
+              ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
+              ;;helm-buffers-fuzzy-matching t
+              ;; truncate long lines
+              ;;helm-truncate-lines t
+              helm-autoresize-min-height 30
+              helm-autoresize-max-height 30
+              helm-display-header-line nil
+              helm-buffer-max-length 45
+              helm-yas-display-key-on-candidate t)
 
-    ;; Save current position to mark ring when jumping to a different place
-    (helm-mode)
-    (helm-autoresize-mode 1)
-    (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
-  :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
-  :bind (("M-x" . helm-M-x)
-         ("M-y" . helm-show-kill-ring)
-         ("C-x b" . helm-mini)
-         ("C-x C-f" . helm-find-files)
-         ("C-`" . helm-resume)))
+        ;; Save current position to mark ring when jumping to a different place
+        (helm-mode)
+        (helm-autoresize-mode 1)
+        (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
+      :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
+      :bind (("M-x" . helm-M-x)
+             ("M-y" . helm-show-kill-ring)
+             ("C-x b" . helm-mini)
+             ("C-x C-f" . helm-find-files)
+             ("C-`" . helm-resume)
+             (:map helm-map
+                   ("<tab>" . helm-execute-presistent-action)
+                   ("C-i" . helm-execute-persistent-action)
+                   ("C-z"  . helm-select-action))
+             (:map helm-grep-mode-map
+                   ("<return>"  . helm-grep-mode-jump-other-window)
+                   ("n" . helm-grep-mode-jump-other-window-forward)
+                   ("p" . helm-grep-mode-jump-other-window-backward))))
 
-(defun nl/helm-eval-expression ()
-  (interactive)
-  (let ((selected-expression
-         (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
-    ;;(message "selected: %s" selected-expression)
-    (eval-expression (car (read-from-string selected-expression)))))
+    (defun nl/helm-eval-expression ()
+      (interactive)
+      (let ((selected-expression
+             (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
+        ;;(message "selected: %s" selected-expression)
+        (eval-expression (car (read-from-string selected-expression)))))
 
-(defun nl/helm-async-shell-command ()
-  (interactive)
-  (let ((selected-command
-         (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
-    (async-shell-command selected-command)))
-#+END_SRC
-
-*** Helm Search
-
-[[http://www.gnu.org/software/grep/][grep]] is very fast, but not the best tool for code search, especially
-not within compressed files. That's why I'll go for [[https://github.com/ggreer/the_silver_searcher/][ag]] instead, its
-=-z= option enables the usage of the very great [[http://libarchive.org/][libarchive]]. For =helm=
-to recognize the matches properly I need to enable line numbers and
-columns in its output, something the =--vimgrep== option (the irony)
-does. Another subtle hack hidden in here is deliberately using the
-recursing variant for both types of searches, this might break
-something, but so far hasn't shown any obvious side-effects
-
-#+BEGIN_SRC emacs-lisp
-(setq helm-grep-default-command "rg -i -M 120 --no-heading --line-number '%p' %f"
-      helm-grep-default-recurse-command "rg -i -M 120 --no-heading --line-number '%p' %f")
-#+END_SRC
-
-*** Helm Key bindings
-
-#+BEGIN_SRC emacs-lisp
-(with-eval-after-load 'helm-files
-  ;; rebind tab to do persistent action
-  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-  ;; make TAB works in terminal
-  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
-  ;; list actions using C-z
-  (define-key helm-map (kbd "C-z")  'helm-select-action)
-  (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
-  (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
-  (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
+    (defun nl/helm-async-shell-command ()
+      (interactive)
+      (let ((selected-command
+             (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
+        (async-shell-command selected-command)))
 #+END_SRC
 
 *** Helm Window config
@@ -2458,6 +2450,22 @@ Emacs package that provides visual version of align-regexp command.
 #+BEGIN_SRC emacs-lisp
 (use-package ialign
   :bind ("C-x l" . ialign))
+#+END_SRC
+
+** [[https://github.com/purcell/ibuffer-projectile][ibuffer-projectile]]
+
+#+BEGIN_SRC emacs-lisp
+  (use-package ibuffer-projectile
+      :after (ibuffer projectile)
+      :config
+      (defun nl/ibuffer-customization ()
+        "My customization for `ibuffer'."
+        ;; ibuffer-projectile setup
+        (ibuffer-projectile-set-filter-groups)
+        (unless (eq ibuffer-sorting-mode 'alphabetic)
+          (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
+          (ibuffer-do-sort-by-major-mode)))  ; then do major-mode sort
+      :hook (ibuffer-mode . nl/ibuffer-customization))
 #+END_SRC
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
@@ -3571,6 +3579,7 @@ think of it as both something that augments and replaces the standard
     :hook ((typescript-mode . tide-setup)
            (typescript-mode . tide-hl-identifier-mode)
            (typescript-mode . nl-tide-mode-hook)
+           (typescript-mode . column-enforce-mode)
            (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
 
@@ -3639,6 +3648,24 @@ clears the history."
   (setq query-replace-history nil))
 #+END_SRC
 
+** [[https://github.com/cmpitg/wand][wand]]
+
+#+BEGIN_QUOTE
+Wand is an extension that allows users to select a piece of text and perform actions based on predefined patterns.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package wand
+  :bind (("<C-return>" . wand:execute))
+  :config
+  (wand:add-rule-by-pattern :match "\\$ "
+                            :capture :after
+                            :action popup-shell-command)
+  (wand:add-rule-by-pattern :match "https?://"
+                            :capture :whole
+                            :action browse-url))
+#+END_SRC
+
 ** [[https://github.com/capitaomorte/yasnippet][yasnippet]]
 
 It takes a few seconds to load and I don't need them immediately when
@@ -3658,24 +3685,6 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 #+END_SRC
 
 *** [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]]
-
-** [[https://github.com/cmpitg/wand][wand]]
-
-#+BEGIN_QUOTE
-Wand is an extension that allows users to select a piece of text and perform actions based on predefined patterns.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp
-(use-package wand
-  :bind (("<C-return>" . wand:execute))
-  :config
-  (wand:add-rule-by-pattern :match "\\$ "
-                            :capture :after
-                            :action popup-shell-command)
-  (wand:add-rule-by-pattern :match "https?://"
-                            :capture :whole
-                            :action browse-url))
-#+END_SRC
 
 ** [[https://github.com/fxbois/web-mode][web-mode]]
 
