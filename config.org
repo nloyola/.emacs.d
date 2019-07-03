@@ -1604,7 +1604,8 @@ Complete anything.
     :config
     (custom-set-variables
      '(coverlay:untested-line-background-color "#862b27")
-     '(coverlay:tested-line-background-color "#1f772c")))
+     '(coverlay:tested-line-background-color "#1f772c")
+     '(coverlay:mark-tested-lines nil)))
 #+END_SRC
 
 ** [[https://github.com/emacsmirror/emacswiki.org/blob/master/cursor-chg.el][cursor-chg]]
@@ -1863,6 +1864,7 @@ This package adds support for flow to flycheck.
 
 #+BEGIN_SRC emacs-lisp
   (use-package ycmd
+    :disabled
     :preface
     (setq ycmd-startup-timeout 10)
     (defun ycmd-setup-completion-at-point-function ()
