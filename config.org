@@ -294,7 +294,7 @@ is opened.
 #+BEGIN_SRC emacs-lisp
 (setq compilation-ask-about-save nil
       compilation-always-kill t
-      compilation-scroll-output 'first-error)
+      compilation-scroll-output t)
 #+END_SRC
 
 Enable ANSI colors for compilation buffers.
@@ -2092,82 +2092,94 @@ Guide the following key bindings automatically and dynamically.
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 #+BEGIN_SRC emacs-lisp
-    (use-package helm
-      ;;:load-path "~/src/github/elisp/helm"
-      :commands (helm-config helm-files helm-grep)
-      :diminish helm-mode
-      :init
-        ;; must set before helm-config, otherwise helm uses the default
-        ;; prefix "C-x c", which is inconvenient because you can
-        ;; accidentially press "C-x C-c"
-        (setq helm-command-prefix-key "C-c h")
-        (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
-              ;; not occupy whole other window
-              helm-ff-newfile-prompt-p nil
-              ;;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
-              helm-scroll-amount 4                    ; scroll 4 lines other window using
-              ;; M-<next>/M-<prior>
-              ;;helm-quick-update t                     ; do not display invisible candidates
-              ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
-              ;; updating in delayed sources.
-              ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
-              ;; updating candidate buffer
-              helm-ff-search-library-in-sexp t        ; search for library in `require` and
-              ;; `declare-function` sexp.
+        (use-package helm
+          ;;:load-path "~/src/github/elisp/helm"
+          :commands (helm-config helm-files helm-grep)
+          :diminish helm-mode
+          :init
+            ;; must set before helm-config, otherwise helm uses the default
+            ;; prefix "C-x c", which is inconvenient because you can
+            ;; accidentially press "C-x C-c"
+            (setq helm-command-prefix-key "C-c h")
+            (setq helm-split-window-in-side-p t           ; open helm buffer inside current window,
+                  ;; not occupy whole other window
+                  helm-ff-newfile-prompt-p nil
+                  ;;helm-google-suggest-use-curl-p t        ; helm-M-x-fuzzy-match t ; using flx for now
+                  helm-scroll-amount 4                    ; scroll 4 lines other window using
+                  ;; M-<next>/M-<prior>
+                  ;;helm-quick-update t                     ; do not display invisible candidates
+                  ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
+                  ;; updating in delayed sources.
+                  ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
+                  ;; updating candidate buffer
+                  helm-ff-search-library-in-sexp t        ; search for library in `require` and
+                  ;; `declare-function` sexp.
 
-              ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
-              ;;                                    '(picture-mode artist-mode))
-              ;; limit the number of displayed canidates
-              ;;helm-candidate-number-limit 100
-              ;; show all candidates when set to 0
-              ;;helm-M-x-requires-pattern 0
-              helm-ff-file-name-history-use-recentf t
-              ;; move to end or beginning of source when reaching top or bottom of source.
-              helm-move-to-line-cycle-in-source t
-              ;; Needed in helm-buffers-list
-              ;;ido-use-virtual-buffers t
-              ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
-              ;;helm-buffers-fuzzy-matching t
-              ;; truncate long lines
-              ;;helm-truncate-lines t
-              helm-autoresize-min-height 30
-              helm-autoresize-max-height 30
-              helm-display-header-line nil
-              helm-buffer-max-length 45
-              helm-yas-display-key-on-candidate t)
+                  ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
+                  ;;                                    '(picture-mode artist-mode))
+                  ;; limit the number of displayed canidates
+                  ;;helm-candidate-number-limit 100
+                  ;; show all candidates when set to 0
+                  ;;helm-M-x-requires-pattern 0
+                  helm-ff-file-name-history-use-recentf t
+                  ;; move to end or beginning of source when reaching top or bottom of source.
+                  helm-move-to-line-cycle-in-source t
+                  ;; Needed in helm-buffers-list
+                  ;;ido-use-virtual-buffers t
+                  ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
+                  ;;helm-buffers-fuzzy-matching t
+                  ;; truncate long lines
+                  ;;helm-truncate-lines t
+                  helm-autoresize-min-height 30
+                  helm-autoresize-max-height 30
+                  helm-display-header-line nil
+                  helm-buffer-max-length 45
+                  helm-yas-display-key-on-candidate t
+                  helm-mini-default-sources '(helm-source-buffers-list
+                                              helm-source-recentf
+                                              helm-source-bookmarks
+                                              helm-source-buffer-not-found))
 
-        ;; Save current position to mark ring when jumping to a different place
-        (helm-mode)
-        (helm-autoresize-mode 1)
-        (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
-      :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
-      :bind (("M-x" . helm-M-x)
-             ("M-y" . helm-show-kill-ring)
-             ("C-x b" . helm-mini)
-             ("C-x C-f" . helm-find-files)
-             ("C-`" . helm-resume)
-             (:map helm-map
-                   ("<tab>" . helm-execute-presistent-action)
-                   ("C-i" . helm-execute-persistent-action)
-                   ("C-z"  . helm-select-action))
-             (:map helm-grep-mode-map
-                   ("<return>"  . helm-grep-mode-jump-other-window)
-                   ("n" . helm-grep-mode-jump-other-window-forward)
-                   ("p" . helm-grep-mode-jump-other-window-backward))))
+            ;; Save current position to mark ring when jumping to a different place
+            (helm-mode)
+            (helm-autoresize-mode 1)
+            (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
+          :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
+          :bind (("M-x" . helm-M-x)
+                 ("M-y" . helm-show-kill-ring)
+                 ("C-x b" . helm-mini)
+                 ("C-x C-f" . helm-find-files)
+                 ("C-`" . helm-resume))
 
-    (defun nl/helm-eval-expression ()
-      (interactive)
-      (let ((selected-expression
-             (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
-        ;;(message "selected: %s" selected-expression)
-        (eval-expression (car (read-from-string selected-expression)))))
+        (defun nl/helm-eval-expression ()
+          (interactive)
+          (let ((selected-expression
+                 (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
+            ;;(message "selected: %s" selected-expression)
+            (eval-expression (car (read-from-string selected-expression)))))
 
-    (defun nl/helm-async-shell-command ()
-      (interactive)
-      (let ((selected-command
-             (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
-        (async-shell-command selected-command)))
+        (defun nl/helm-async-shell-command ()
+          (interactive)
+          (let ((selected-command
+                 (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
+            (async-shell-command selected-command)))
 #+END_SRC
+
+*** Helm Key bindings
+
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'helm-files
+  ;; rebind tab to do persistent action
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+  ;; make TAB works in terminal
+  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
+  ;; list actions using C-z
+  (define-key helm-map (kbd "C-z")  'helm-select-action)
+  (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
+  (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
+  (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
+#+END_SRC
+
 
 *** Helm Window config
 
@@ -2493,7 +2505,8 @@ Emacs package that provides visual version of align-regexp command.
   (setq ivy-re-builders-alist ;; allow input not in order
         '((t . ivy--regex-ignore-order))))
 
-(use-package ivy-hydra)
+(use-package ivy-hydra
+  :after (ivy hydra))
 #+END_SRC
 
 *** [[https://github.com/abo-abo/swiper][swiper]]
@@ -2501,15 +2514,14 @@ Emacs package that provides visual version of align-regexp command.
 This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Ivy 0.8.0 is out]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package swiper
-  :bind (("C-c C-r" . ivy-resume)
-         ("C-s" . swiper-isearch)
-         ("<f6>" . ivy-resume))
-  :config
-  (ivy-mode 1)
-  (setq ivy-initial-inputs-alist nil)
-  (setq ivy-use-virtual-buffers t)
-  (setq swiper-action-recenter t))
+  (use-package swiper
+    :bind (("C-c C-r" . ivy-resume)
+           ("C-s" . swiper)
+           ("<f6>" . ivy-resume))
+    :config
+    (setq ivy-initial-inputs-alist nil)
+    (setq ivy-use-virtual-buffers t)
+    (setq swiper-action-recenter t))
 #+END_SRC
 
 Also, install counsel:
