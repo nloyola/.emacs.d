@@ -13,7 +13,6 @@
       projectile-find-dir-includes-top-level t)
 
 (setq-default indent-tabs-mode nil)
-(puthash (projectile-project-root) "grunt karma:unit" projectile-test-cmd-map)
 
 ;;
 ;; override this function, from the projectile package, so that tests are created in the proper
@@ -57,78 +56,18 @@
   ("j" bbweb-find-js-file "JS file")
   ("h" bbweb-find-html-file "HTML file"))
 
-;; JavaScript hydras
-
-(defhydra hydra-nl-bbweb-js-test (:color red)
-  "bbweb js test"
-  ("t" (lambda ()
-         (interactive)
-         (compile (concat "cd " (projectile-project-root) " && npm run test-watch"))) "test-watch"))
-
-(defhydra hydra-nl-bbweb-js-build (:color red)
-  "bbweb js build"
-  ("d" (lambda ()
-         (interactive)
-         (compile (concat "cd " (projectile-project-root) " && npm run dev-build"))) "dev-build")
-  ("w" nl/webpack-find-next-error "webpack find next error and find file"))
-
-(defhydra hydra-nl-bbweb-js (:color blue)
-  "bbweb js test"
-  ("b" hydra-nl-bbweb-js-build/body "Build" :exit t)
-  ("t" hydra-nl-bbweb-js-test/body "Test" :exit t))
-
-;; Scala hydras
-
-(defhydra hydra-nl-bbweb-scala-build (:color red)
+(defhydra hydra-nl-bbweb-scala (:hint nil)
   "bbweb scala build"
-  ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload")
-  ("r" (lambda () (interactive) (sbt-command "run")) "sbt run")
-  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile"))
-
-(defhydra hydra-nl-bbweb-scala (:color blue)
-  "bbweb scala test"
-  ("b" hydra-nl-bbweb-scala-build/body "Build" :exit t)
-  ("t" hydra-nl-scalatest/body "Test" :exit t))
-
-;; npm hydras
-
-(defhydra hydra-nl-bbweb-npm (:color blue)
-  "bbweb npm"
-  ("c" (lambda () (interactive)
-         (async-shell-command
-          (concat "cd " (projectile-project-root) " && npm run test-coverage")
-          "*bbweb test coverage*"))
-   "test coverage" :exit t)
-  ("d" (lambda () (interactive)
-         (compile (concat "cd " (projectile-project-root) " && npm run dev")))
-   "dev" :exit t)
-  ("s" (lambda () (interactive)
-         (setq async-shell-command-buffer 'confirm-kill-process)
-         (async-shell-command (concat "cd " (projectile-project-root) " && npm run dev-server") "*bbweb server*"))
-   "dev-server" :exit t))
-
-(defhydra hydra-nl-bbweb-project (:hint nil)
-  "bbweb project commands"
-  ("j" hydra-nl-bbweb-js/body "javascript" :color blue)
-  ("n" hydra-nl-bbweb-npm/body "npm" :color blue)
-  ("s" hydra-nl-bbweb-scala/body "scala" :color blue)
-  ("x" xref-find-definitions "find definition" :color blue))
+  ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload" :color blue :column "Scala")
+  ("r" (lambda () (interactive) (sbt-command "run")) "sbt run" :color blue)
+  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
+  ("f" nl/scalatest-find-file "find file from traceback" :color blue :column "Scala Test")
+  ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
+  ("s" nl/scalatest-test-only "select suite to run" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
 (key-chord-define-global "jc" '(lambda () (interactive)
-                                 (hydra-nl-bbweb-project/body)))
-
-;;
-;;
-(defun nl-karma-compile-filter ()
-  "Filters unwanted lines from karma compile buffer."
-  (interactive)
-  (if (get-buffer "*karma start*")
-      (progn
-        (switch-to-buffer "*karma start*")
-        (read-only-mode -1)2
-        (delete-matching-lines "\\bbweb\/(node_modules\\|target\\)" (point-min) (point-max))
-        (read-only-mode 1))))
+                                 (hydra-nl-bbweb-scala/body)))
 
 ;;
 ;;

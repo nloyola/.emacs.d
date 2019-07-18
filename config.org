@@ -2706,6 +2706,8 @@ Add filler lorem ipsum text to Emacs.
     (setq lsp-prefer-flymake nil))
 
   (use-package lsp-ui
+    :config
+    (setq lsp-ui-sideline-enable nil)
     :hook (lsp-mode . lsp-ui-mode))
 
   (use-package company-lsp
@@ -3275,6 +3277,7 @@ to overwrite.
     (defun nl/scalatest-find-next-failure ()
       "Finds the next failed test in an SBT buffer that just ran scalatests."
       (interactive)
+      (sbt-switch-to-active-sbt-buffer)
       (search-forward "*** FAILED ***")
       (move-end-of-line nil)
       (recenter))
