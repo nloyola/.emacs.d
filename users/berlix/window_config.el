@@ -32,23 +32,26 @@
                     (* 70 (frame-char-height frame))
                     t)))
 
-(defun nl/frame-3rd-display ()
+(defun nl/frame-2nd-display ()
   "Create a new frame on the 3rd display."
   (interactive)
-  (let ((frame (make-frame)))
+  (let ((frame (make-frame))
+        (monitor-pixel-width (nth 3 (assq 'geometry (nth 0 (display-monitor-attributes-list)))))
+        (monitor-pixel-height (nth 4 (assq 'geometry (nth 0 (display-monitor-attributes-list))))))
     (select-frame-set-input-focus frame)
+    (set-face-attribute 'default frame :font "Fira Code Medium-10")
     (switch-to-buffer "*scratch*")
-    (set-frame-position frame -1 0)
-    (set-face-attribute 'default frame :font "Fira Code Medium-9")
+    (set-frame-position frame
+                        (/ monitor-pixel-width 2)
+                        0)
     (set-frame-size frame
-                    (/ (x-display-pixel-width frame) (frame-char-width frame))
-                    (floor (* (/ (x-display-pixel-height frame) (frame-char-height frame)) 0.80)))))
+                    (/ (/ monitor-pixel-width (frame-char-width frame)) 2)
+                    (floor (* (/ monitor-pixel-height (frame-char-height frame)) 0.97)))))
 
 (defun nl/window-setup-hook ()
   (let ((frame (selected-frame)))
     (nl/main-frame-set-size-and-position)
     ;;(resume)
-    (nl/frame-3rd-display)
     (select-frame-set-input-focus frame)))
 
 (add-hook 'window-setup-hook 'nl/window-setup-hook)
