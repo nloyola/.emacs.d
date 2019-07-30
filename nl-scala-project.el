@@ -93,6 +93,12 @@ The class name must have the postfix 'Spec' for this function to work."
   (interactive)
   (sbt-command (format "testOnly %s.*" (nl/scalstest-find-suite-package-name))))
 
+(defun nl/scalstest-find-scalatest-behaviour ()
+  "Determines the name of the ScalaTest suite name."
+  (save-excursion
+    (when (re-search-backward scalatest-beginning-of-behaviour-regexp nil t)
+      (match-string-no-properties 1))))
+
 (defun nl/scalatest-test-project ()
   "For the class the cursor is in, run the scalatest test suite.
 The class name must have the postfix 'Spec' for this function to work."

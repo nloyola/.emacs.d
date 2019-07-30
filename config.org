@@ -86,7 +86,6 @@ Using Fira Code now. See below.
 (set-face-font 'default "Input Mono Condensed-14")
 #+END_SRC
 
-
 *** Symbola
 
 download from here: [[https://fonts2u.com/symbola.font][Symbola font]]
@@ -331,7 +330,7 @@ https://github.com/patrickt/emacs/blob/master/init.el:
   )
 
 (setq-default
-  cursor-type 'hbar
+  cursor-type 'box
   indent-tabs-mode nil
   cursor-in-non-selected-windows nil)
 
@@ -836,14 +835,13 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 ** =flyspell=
 
 #+BEGIN_SRC emacs-lisp
-(use-package flyspell
-  :diminish flyspell-mode
-  :init
-  (add-hook 'prog-mode-hook 'flyspell-prog-mode)
-  (add-hook 'text-mode-hook 'flyspell-mode)
-  :config
-  ;; Sets flyspell correction to use two-finger mouse click
-  (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word))
+    (use-package flyspell
+      :diminish flyspell-mode
+      :hook ((prog-mode-hook . flyspell-prog-mode)
+             (text-mode-hook . flyspell-mode))
+      :config
+      ;; Sets flyspell correction to use two-finger mouse click
+      (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word))
 #+END_SRC
 
 ** =ispell=
@@ -1594,6 +1592,22 @@ Complete anything.
 
     (setq company-backends
           (mapcar #'company-mode/backend-with-yas company-backends)))
+#+END_SRC
+
+** [[https://github.com/TommyX12/company-tabnine][company-tabnine]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package company-tabnine
+    :after company
+    :config
+    (add-to-list 'company-backends #'company-tabnine)
+    ;; Use the tab-and-go frontend.
+    ;; Allows TAB to select and complete at the same time.
+    (company-tng-configure-default)
+    (setq company-frontends
+          '(company-tng-frontend
+            company-pseudo-tooltip-frontend
+            company-echo-metadata-frontend)))
 #+END_SRC
 
 ** [[https://github.com/twada/coverlay.el][coverlay.el]]
@@ -3166,186 +3180,47 @@ to overwrite.
 ** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package scala-mode
-    ;;:load-path "~/src/github/elisp/emacs-scala-mode"
-    :mode "\\.s\\(cala\\|bt\\)$"
-    :interpreter ("scala" . scala-mode)
-    :preface
-    (defun scala-filename-p (filename)
-      (string-match "\.scala$" filename))
+    (use-package scala-mode
+      ;;:load-path "~/src/github/elisp/emacs-scala-mode"
+      :mode "\\.s\\(cala\\|bt\\)$"
+      :interpreter ("scala" . scala-mode)
+      :preface
+      (defun nl-scala-mode-hook ()
+        (yas-minor-mode)
+        ;; sbt-find-definitions is a command that tries to find (with grep)
+        ;; the definition of the thing at point.
+        ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
 
-    ;; created after reading this article:
-    ;;
-    ;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
-    (setq nl/helm-scala-project-test-spec
-          '((name . "Select a ScalaTest specification to run:")
-            (candidates
-             . (lambda ()
-                 (remove-if-not (lambda (filename)
-                                  (string-match "Spec.scala$" filename))
-                                (projectile-current-project-files))
-                 ))
-            (nomark . t)
-            (action
-             . (lambda (candidate)
-                 ;;(message "file name is: %s" candidate)
-                 ;;(message "test name is: %s" (file-name-nondirectory candidate))
-                 (sbt-command (message "testOnly *.%s"
-                                       (file-name-sans-extension (file-name-nondirectory candidate))))
-                 ))))
+        (setq-default indent-tabs-mode nil)
+        (setq compilation-ask-about-save nil
+              prettify-symbols-alist scala-prettify-symbols-alist
+              prettify-symbols-unprettify-at-point 'right-edge)
+        (my-common-prog-mode-settings)
+        (prettify-symbols-mode))
 
-    (defun nl/scalatest-test-only ()
-      (interactive)
-      (helm :sources '(nl/helm-scala-project-test-spec)))
+      (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 
-    (defun sbt-hydra:run-sbt-command (command)
-      (sbt-switch-to-active-sbt-buffer)
-      (sbt-hydra:add-to-history command)
-      (sbt-hydra:run-previous-sbt-command))
+      (defun nl/counsel-ag-scala ()
+        "Perform counsel-ag on the project's Scala files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "--scala"))
+      (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
 
-    (defconst scalatest-beginning-of-class
-      (rx line-start
-          (* (syntax whitespace))
-          "class"
-          (+ (syntax whitespace))
-          (group (+ (or (syntax word) (syntax symbol))))
-          (* (syntax whitespace)))
-      "Regular expression for a scalatest suite.")
+      :config
+      ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+      ;; allows using SPACE when in the minibuffer
+      (substitute-key-definition
+       'minibuffer-complete-word
+       'self-insert-command
+       minibuffer-local-completion-map)
 
-    (defconst scalatest-beginning-of-behaviour-regexp
-      (eval-when-compile
-        (rx line-start
-            (one-or-more (syntax whitespace))
-            (| "it" "describe") (syntax open-parenthesis) (syntax string-quote)
-            (group (+ (not (syntax string-quote))))
-            (syntax string-quote)
-            ;; account for optional tag
-            (group (? (not (syntax close-parenthesis))))
-            (syntax close-parenthesis)))
-      "Regular expression for a scalatest FunSepc behaviour.")
-
-    (defun nl/scalstest-find-suite-name ()
-      "Determines the name of the ScalaTest suite name."
-      (save-excursion
-        (goto-char (point-min))
-        (when (re-search-forward scalatest-beginning-of-class nil t)
-          (match-string-no-properties 1))))
-
-    (defun nl/scalstest-find-scalatest-behaviour ()
-      "Determines the name of the ScalaTest suite name."
-      (save-excursion
-        (when (re-search-backward scalatest-beginning-of-behaviour-regexp nil t)
-          (match-string-no-properties 1))))
-
-    (defun nl/scalatest-test-only-this-buffer ()
-      "For the class in the current buffer, run the scalatest test suite.
-  The class name must have the postfix 'Spec' for this function to work."
-      (interactive)
-      (sbt-command (format "testOnly *.%s" (nl/scalstest-find-suite-name))))
-
-    (defun nl/scalatest-test-only-this-buffer-with-substring-tag ()
-      "For the class in the current buffer, run the scalatest test suite.
-  The class name must have the postfix 'Spec' for this function to work."
-      (interactive)
-      ;;(message (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour)))
-      (sbt-command (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour))))
-
-    (defun nl/scalatest-find-file ()
-      "From a scalatest failure backtrace, opens the file under the cursor at the line specified."
-      (interactive)
-      (let (p1 p2 err-line filename line-num file-with-proj-path)
-        (save-some-buffers t)
-        (setq p1 (line-beginning-position) )
-        (setq p2 (line-end-position) )
-        (setq err-line (buffer-substring-no-properties p1 p2))
-        (save-match-data ; is usually a good idea
-          (and (string-match "\\[info\\]\\s-+at\\s-+org.biobank[^(]+(\\([^:]+\\):\\([0-9]+\\))" err-line)
-               (setq filename (concat "/" (match-string 1 err-line)) ; add leading slash as a delimiter
-                     line-num (string-to-number (match-string 2 err-line))
-                     )))
-        (setq file-with-proj-path
-              (car (remove-if-not
-                    (lambda (projfile)
-                      (string-match filename projfile))
-                    (projectile-current-project-files))))
-        (message "%s %s" file-with-proj-path line-num)
-        (ace-select-window)
-        (find-file (expand-file-name file-with-proj-path (projectile-project-root)))
-        (goto-char (point-min))
-        (forward-line (- line-num 1))))
-
-    (defun nl/scalatest-find-next-failure ()
-      "Finds the next failed test in an SBT buffer that just ran scalatests."
-      (interactive)
-      (sbt-switch-to-active-sbt-buffer)
-      (search-forward "*** FAILED ***")
-      (move-end-of-line nil)
-      (recenter))
-
-    (defhydra hydra-nl-scalatest (:hint nil)
-      "Testing scala code with scalatest"
-      ("f" nl/scalatest-find-file "find file from traceback" :color blue)
-      ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
-      ("s" nl/scalatest-test-only "select suite to run" :color blue))
-
-    (defun scala-mode-newline-comments ()
-      "Custom newline appropriate for `scala-mode'."
-      ;; shouldn't this be in a post-insert hook?
-      (interactive)
-      (newline-and-indent)
-      (scala-indent:insert-asterisk-on-multiline-comment))
-
-    (defun nl/scala-mode-keys ()
-      "My extra key definitions for 'scala-mode'."
-      (interactive)
-      ;; use sbt-run-previous-command to re-compile your code after changes
-      (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-      (local-set-key (kbd "C-c , c") 'nl/scalatest-test-only-this-buffer)
-      (local-set-key (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
-      (local-set-key (kbd "RET") 'newline-and-indent)
-      ;; Bind the backtab (shift tab) to
-      ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-      ;; when using the 'eager' mode by default and you want to "outdent" a
-      ;; code line as a new statement.
-      (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
-      (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
-
-    (defun nl-scala-mode-hook ()
-      (yas-minor-mode)
-      ;; sbt-find-definitions is a command that tries to find (with grep)
-      ;; the definition of the thing at point.
-      ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
-
-      (setq-default indent-tabs-mode nil)
-      (setq compilation-ask-about-save nil)
-      (my-common-prog-mode-settings)
-      (setq prettify-symbols-alist scala-prettify-symbols-alist)
-      (prettify-symbols-mode)
-      (nl/scala-mode-keys))
-
-    (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
-
-    (defun nl/counsel-ag-scala ()
-      "Perform counsel-ag on the project's Scala files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "--scala"))
-    (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
-
-    :config
-    ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-    ;; allows using SPACE when in the minibuffer
-    (substitute-key-definition
-     'minibuffer-complete-word
-     'self-insert-command
-     minibuffer-local-completion-map)
-
-    (setq scala-indent:indent-value-expression t
-          scala-indent:align-parameters t
-          scala-indent:align-forms t
-          scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-          scala-indent:use-javadoc-style t)
-    :hook ((scala-mode . nl-scala-mode-hook)
-           (scala-mode . fic-mode)))
+      (setq scala-indent:indent-value-expression t
+            scala-indent:align-parameters t
+            scala-indent:align-forms t
+            scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+            scala-indent:use-javadoc-style t)
+      :hook ((scala-mode . nl-scala-mode-hook)
+             (scala-mode . fic-mode)))
 #+END_SRC
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
@@ -4189,7 +4064,7 @@ With a prefix argument P, isearch for the symbol at point."
 # org-src-preserve-indentation: nil
 # org-edit-src-content-indentation: 0
 # End:
-** Strip HML
+** Strip HTML
 
 #+BEGIN_SRC emacs-lisp
 (defun nl/strip-html ()
@@ -4212,42 +4087,43 @@ With a prefix argument P, isearch for the symbol at point."
       (replace-string "&gt;" ">")
       (goto-char (point-min)))))
 #+END_SRC
+
 ** Smarter Backward kill word
 
 Taken from: https://old.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/
 
-#+BEGIN_SRC emacs-lisp
-  (defun user/smarter-backward-kill-word ()
-    "Deletes the previous word, respecting:
-  1. If the cursor is at the beginning of line, delete the '\n'.
-  2. If there is only whitespace, delete only to beginning of line.
-  3. If there is whitespace, delete whitespace and check 4-5.
-  4. If there are other characters instead of words, delete one only char.
-  5. If it's a word at point, delete it."
-    (interactive)
+#+BEGIN_SRC emacs-lisp :tangle no
+    (defun user/smarter-backward-kill-word ()
+      "Deletes the previous word, respecting:
+    1. If the cursor is at the beginning of line, delete the '\n'.
+    2. If there is only whitespace, delete only to beginning of line.
+    3. If there is whitespace, delete whitespace and check 4-5.
+    4. If there are other characters instead of words, delete one only char.
+    5. If it's a word at point, delete it."
+      (interactive)
 
-    (if (bolp)
-        ;; 1
-        (delete-char -1)
+      (if (bolp)
+          ;; 1
+          (delete-char -1)
 
-      (if (string-match-p "^[[:space:]]+$"
-                          (buffer-substring-no-properties
-                           (line-beginning-position) (point)))
-          ;; 2
-          (delete-horizontal-space)
+        (if (string-match-p "^[[:space:]]+$"
+                            (buffer-substring-no-properties
+                             (line-beginning-position) (point)))
+            ;; 2
+            (delete-horizontal-space)
 
-        (when (thing-at-point 'whitespace)
-          ;; 3
-          (delete-horizontal-space))
+          (when (thing-at-point 'whitespace)
+            ;; 3
+            (delete-horizontal-space))
 
-        (if (thing-at-point 'word)
-            ;; 5
-            (let ((start (car (bounds-of-thing-at-point 'word)))
-                  (end (point)))
-              (if (> end start)
+          (if (thing-at-point 'word)
+              ;; 5
+              (let ((start (car (bounds-of-thing-at-point 'word)))
+                    (end (point)))
+                (if (> end start)
                   (delete-region start end)
                 (delete-char -1)))
-          ;; 4
-          (delete-char -1)))))
-(global-set-key [remap backward-kill-word] #'user/smarter-backward-kill-word)
+            ;; 4
+            (delete-char -1)))))
+  (global-set-key [remap backward-kill-word] #'user/smarter-backward-kill-word)
 #+END_SRC

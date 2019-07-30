@@ -3,17 +3,23 @@
   (interactive)
   (let* ((frame (selected-frame))
          (display-attributes (display-monitor-attributes-list))
-         (num-displays (length display-attributes)))
+         (num-displays (length display-attributes))
+         (desired-width-in-chars 235)
+         (desired-width-in-pixels (* desired-width-in-chars (frame-char-width))))
+    (set-face-attribute 'default frame :font "Fira Code Medium-14")
     (cond
      ((eq num-displays 2)
-      (set-frame-position frame -1 0)
-      (set-frame-size frame 229 (/ (x-display-pixel-height) (frame-char-height))))
+      (let* ((second-monitor-x-pixel-offset (nth 1 (assq 'geometry (nth 1 (display-monitor-attributes-list)))))
+             (second-monitor-x-pixel-width (nth 3 (assq 'geometry (nth 1 (display-monitor-attributes-list)))))
+             (window-frame-x-pixel-offset (+ second-monitor-x-pixel-offset second-monitor-x-pixel-width)))
+        (set-frame-size frame
+                        desired-width-in-chars
+                        (/ (x-display-pixel-height) (frame-char-height)))
+        ;; cannot use negative value for X since it is not placed in correct location on startup
+        (set-frame-position frame (- window-frame-x-pixel-offset desired-width-in-pixels) 0)))
      ((eq num-displays 3)
-      (let* ((desired-width-in-chars 244)
-             (desired-width-in-pixels (* desired-width-in-chars (frame-char-width)))
-             (window-frame-in-pixels 16))
-        (set-face-attribute 'default frame :font "Fira Code Medium-14")
-        ;; cannot use negative value for X, it is not placed in correct location on startup
+      (let* ((window-frame-in-pixels 16))
+        ;; cannot use negative value for X since it is not placed in correct location on startup
         (set-frame-position frame (- (+ 1920 3840) window-frame-in-pixels desired-width-in-pixels) 0)
         (set-frame-size frame
                         desired-width-in-chars
