@@ -414,6 +414,13 @@ Add =\n= to end of file if required.
 (setq eshell-history-size 100000)
 #+END_SRC
 
+
+** Follow Buffer
+
+#+BEGIN_SRC elisp
+(add-to-list 'auto-mode-alist '("\\.log\\'" . auto-revert-mode))
+#+END_SRC
+
 ** Garbage collection
 
 Don’t compact font caches during GC.
@@ -812,8 +819,25 @@ Make dired show directories first. Dired buffers should auto revert
 and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]).
 
 #+BEGIN_SRC emacs-lisp
-(setq dired-listing-switches "-aBhl  --group-directories-first"
-      dired-dwim-target t)
+  (use-package dired
+    :ensure nil
+    :custom
+    (dired-recursive-copies 'always)
+    ;; Auto refresh Dired, but be quiet about it
+    (global-auto-revert-non-file-buffers t)
+    ;; Move files to trash when deleting
+    (delete-by-moving-to-trash t)
+    (dired-dwim-target t)
+    :config
+    (setq dired-listing-switches "-aBhl --group-directories-first")
+    ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
+    (put 'dired-find-alternate-file 'disabled nil)
+    :hook
+    (dired-mode . (lambda ()
+                    (local-set-key (kbd "<mouse-2>") #'dired-find-alternate-file)
+                    ;;(local-set-key (kbd "RET") #'dired-find-alternate-file)
+                    (local-set-key (kbd "^")
+                                   (lambda () (interactive) (find-alternate-file ".."))))))
 #+END_SRC
 
 ** =ediff=
@@ -822,6 +846,7 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
       ediff-window-setup-function 'ediff-setup-windows-plain
       ediff-diff-options "-bw")
 #+END_SRC
+
 ** =emacsclient=
 
 #+BEGIN_SRC emacs-lisp
@@ -1317,8 +1342,57 @@ direction keys.
 #+END_SRC
 
 * Themes
+** Current
+*** [[https://github.com/TheSuspiciousWombat/SusColors-emacs][suscolors]]
 
-** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
+Trying out new theme: 2019-08-04
+
+#+BEGIN_SRC emacs-lisp
+  (use-package suscolors-theme
+    :config
+    (load-theme 'suscolors t)
+    ;; default region color is too hard to see on my display
+    (custom-set-faces
+     ;; '(region ((t (:background "#0f3b82"))))
+     ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
+     ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+     '(ediff-odd-diff-A ((nil :background "#862b27")))
+     '(ediff-even-diff-A ((nil :background "#1f772c")))
+     '(ediff-current-diff-A ((nil :background "#2b538a")))
+     '(ediff-odd-diff-B ((nil :background "#862b27")))
+     '(ediff-even-diff-B ((nil :background "#1f772c")))
+     '(ediff-current-diff-B ((nil :background "#2b538a")))
+     '(ediff-odd-diff-C ((nil :background "#862b27")))
+     '(ediff-even-diff-C ((nil :background "#1f772c")))
+     '(ediff-current-diff-C ((nil :background "#2b538a")))))
+#+END_SRC
+
+** Past
+*** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
+
+Trying out new theme: 2019-04-10
+
+#+BEGIN_SRC emacs-lisp :tangle no
+    (use-package dracula-theme
+      :config
+      (load-theme 'dracula t)
+      ;; default region color is too hard to see on my display
+      (custom-set-faces
+       ;; '(region ((t (:background "#0f3b82"))))
+       '(font-lock-warning-face ((t (:background "#0f3b82"))))
+       '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+       '(ediff-odd-diff-A ((nil :background "#862b27")))
+       '(ediff-even-diff-A ((nil :background "#1f772c")))
+       '(ediff-current-diff-A ((nil :background "#2b538a")))
+       '(ediff-odd-diff-B ((nil :background "#862b27")))
+       '(ediff-even-diff-B ((nil :background "#1f772c")))
+       '(ediff-current-diff-B ((nil :background "#2b538a")))
+       '(ediff-odd-diff-C ((nil :background "#862b27")))
+       '(ediff-even-diff-C ((nil :background "#1f772c")))
+       '(ediff-current-diff-C ((nil :background "#2b538a")))))
+#+END_SRC
+
+*** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
 
 Trying out Bubbleberry theme: 2019-02-25
 Switched to Dracula theme: 2019-04-10
@@ -1343,7 +1417,7 @@ Switched to Dracula theme: 2019-04-10
      '(ediff-current-diff-C ((nil :background "#2b538a")))))
 #+END_SRC
 
-** [[https://github.com/belak/base16-emacs][base16-emacs]]
+*** [[https://github.com/belak/base16-emacs][base16-emacs]]
 
 One tweak to the base16-google-dark theme; the face for the mode line
 buffer name is too hard to see,  set it to white instead.
@@ -1361,38 +1435,15 @@ Trying out Kaolin Theme 2017-10-25
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
 
-** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
+*** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package cyberpunk-theme
   :config
   (load-theme 'cyberpunk t))
 #+END_SRC
-** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
 
-Trying out new theme: 2019-04-10
-
-#+BEGIN_SRC emacs-lisp
-    (use-package dracula-theme
-      :config
-      (load-theme 'dracula t)
-      ;; default region color is too hard to see on my display
-      (custom-set-faces
-       ;; '(region ((t (:background "#0f3b82"))))
-       '(font-lock-warning-face ((t (:background "#0f3b82"))))
-       '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-       '(ediff-odd-diff-A ((nil :background "#862b27")))
-       '(ediff-even-diff-A ((nil :background "#1f772c")))
-       '(ediff-current-diff-A ((nil :background "#2b538a")))
-       '(ediff-odd-diff-B ((nil :background "#862b27")))
-       '(ediff-even-diff-B ((nil :background "#1f772c")))
-       '(ediff-current-diff-B ((nil :background "#2b538a")))
-       '(ediff-odd-diff-C ((nil :background "#862b27")))
-       '(ediff-even-diff-C ((nil :background "#1f772c")))
-       '(ediff-current-diff-C ((nil :background "#2b538a")))))
-#+END_SRC
-
-** [[https://github.com/ogdenwebb/emacs-kaolin-themes][kaolin-themes]]
+*** [[https://github.com/ogdenwebb/emacs-kaolin-themes][kaolin-themes]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package kaolin-themes
@@ -1403,7 +1454,7 @@ Trying out new theme: 2019-04-10
   (load-theme 'kaolin-dark))
 #+END_SRC
 
-** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
+*** [[https://github.com/oneKelvinSmith/monokai-emacs][monokai-emacs]]
 
 TextMate like theme.
 
@@ -1415,7 +1466,7 @@ TextMate like theme.
     (setq monokai-use-variable-pitch nil))
 #+END_SRC
 
-** paganini-theme
+*** [[https://emacsthemes.com/themes/paganini-theme.html][paganini-theme]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package paganini-theme
@@ -1423,13 +1474,14 @@ TextMate like theme.
     (load-theme 'paganini t))
 #+END_SRC
 
-** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
+*** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package solarized-theme
   :config
     (load-theme 'solarized-dark t))
 #+END_SRC
+
 * ELPA packages
 
 These are the packages that are not built into Emacs.
@@ -1457,6 +1509,7 @@ Use silver surfer to search.
 (use-package ag
   :commands ag)
 #+END_SRC
+
 ** [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons-dired]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1464,24 +1517,25 @@ Use silver surfer to search.
     ;; M-x all-the-icons-install-fonts
     :commands (all-the-icons-dired-mode))
 #+END_SRC
+
 ** [[https://github.com/syohex/emacs-anzu][anzu]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package anzu
-  :bind
-  (([remap query-replace] . anzu-query-replace)
-   ([remap query-replace-regexp] . anzu-query-replace-regexp))
-  :config
-  (global-anzu-mode +1)
-  (set-face-attribute 'anzu-mode-line nil
-                      :foreground "yellow" :weight 'bold)
-  (custom-set-variables
-   '(anzu-mode-lighter "")
-   '(anzu-deactivate-region t)
-   '(anzu-search-threshold 1000)
-   '(anzu-replace-threshold 50)
-   '(anzu-replace-to-string-separator " => ")))
+  (use-package anzu
+    :bind
+    (([remap query-replace] . anzu-query-replace)
+     ([remap query-replace-regexp] . anzu-query-replace-regexp))
+    :custom
+    (anzu-mode-lighter "")
+    (anzu-deactivate-region t)
+    (anzu-search-threshold 1000)
+    (anzu-replace-threshold 50)
+    (anzu-replace-to-string-separator " => ")
+    :config
+    (global-anzu-mode +1)
+    (set-face-attribute 'anzu-mode-line nil :foreground "yellow" :weight 'bold))
 #+END_SRC
+
 ** [[https://github.com/abo-abo/avy][avy]]
 
 A quick way to jump around text in buffers.
@@ -1492,6 +1546,7 @@ A quick way to jump around text in buffers.
     (("C-c SPC" . avy-goto-char-timer)
      ("C-'" . avy-goto-char)))
 #+END_SRC
+
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
 Never lose your cursor again
@@ -1505,6 +1560,7 @@ Never lose your cursor again
   :config
   (beacon-mode 1))
 #+END_SRC
+
 ** [[https://github.com/jorgenschaefer/circe][circe]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -1615,11 +1671,10 @@ Complete anything.
 #+BEGIN_SRC emacs-lisp
   (use-package coverlay
     :load-path "~/src/github/elisp/coverlay.el"
-    :config
-    (custom-set-variables
-     '(coverlay:untested-line-background-color "#862b27")
-     '(coverlay:tested-line-background-color "#1f772c")
-     '(coverlay:mark-tested-lines nil)))
+    :custom
+     (coverlay:untested-line-background-color "#862b27")
+     (coverlay:tested-line-background-color "#1f772c")
+     (coverlay:mark-tested-lines nil))
 #+END_SRC
 
 ** [[https://github.com/emacsmirror/emacswiki.org/blob/master/cursor-chg.el][cursor-chg]]
@@ -1637,7 +1692,7 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 
 ** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC elisp
   (use-package dap-mode
     :after lsp-mode
     :config
@@ -1830,6 +1885,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
      '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
      '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
 #+END_SRC
+
 ** [[https://github.com/syohex/emacs-git-gutter][emacs-git-gutter]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1951,6 +2007,7 @@ strings.
            (python-mode . fic-mode)
            (php-mode    . fic-mode)))
 #+END_SRC
+
 ** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
 
 Allow windmove to jump between frames.
@@ -1984,6 +2041,7 @@ Allow windmove to jump between frames.
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
   (flycheck-add-mode 'javascript-eslint 'js-mode))
 #+END_SRC
+
 ** [[https://github.com/flycheck/flycheck-pos-tip][flycheck-pos-tip]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2016,6 +2074,7 @@ On the fly markdown preview.
       :config
       (setq flymd-browser-open-function 'my-flymd-browser-function))
 #+END_SRC
+
 ** [[https://github.com/waymondo/frog-jump-buffer][frog-jump-buffer]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2157,7 +2216,8 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
       ;; Save current position to mark ring when jumping to a different place
       (helm-mode)
       (helm-autoresize-mode 1)
-      (custom-set-variables '(helm-ag-use-temp-buffer nil)) ; setting to 't' does not work with js2-mode
+    :custom
+    (helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
     :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
     :bind (("M-x" . helm-M-x)
            ("M-y" . helm-show-kill-ring)
@@ -2193,7 +2253,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
   (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
   (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
 #+END_SRC
-
 
 *** Helm Window config
 
@@ -2274,15 +2333,14 @@ instead of ~find-file-other-window~.
 ** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
-(use-package helm-gtags
-  :commands (helm-gtags-mode)
-  :bind (("M-." . helm-gtags-find-tag)
-         ("M-," . helm-gtags-find-rtag))
-  :config
-  (custom-set-variables
-   '(helm-gtags-path-style 'relative)
-   '(helm-gtags-ignore-case t)
-   '(helm-gtags-auto-update t)))
+  (use-package helm-gtags
+    :commands (helm-gtags-mode)
+    :bind (("M-." . helm-gtags-find-tag)
+           ("M-," . helm-gtags-find-rtag))
+    :custom
+    (helm-gtags-path-style 'relative)
+    (helm-gtags-ignore-case t)
+    (helm-gtags-auto-update t))
 #+END_SRC
 
 ** [[https://github.com/bbatsov/projectile][helm-projectile]]
@@ -2563,120 +2621,120 @@ When using =counsel-ag=:
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package js2-mode
-    :mode "\\.js\\'"
-    :bind (("C-c s j" . nl/counsel-ag-js))
-    :preface
-    (defun js-filename-p (filename)
-      (string-match "\.js$" filename))
+    (use-package js2-mode
+      :mode "\\.js\\'"
+      :bind (("C-c s j" . nl/counsel-ag-js))
+      :preface
+      (defun js-filename-p (filename)
+        (string-match "\.js$" filename))
 
-    (defun nl/counsel-ag-js ()
-      "Perform counsel-ag on the project's JavaScript files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "--js"))
+      (defun nl/counsel-ag-js ()
+        "Perform counsel-ag on the project's JavaScript files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "--js"))
 
-    (defun nl/counsel-ag-js-spec ()
-      "Perform counsel-ag on the project's JavaScript files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
+      (defun nl/counsel-ag-js-spec ()
+        "Perform counsel-ag on the project's JavaScript files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
 
-    (defun nl/webpack-find-file ()
-      "From a webpack failure backtrace, opens the file under the cursor at the line specified."
-      (interactive)
-      (let (p1 p2 err-line filename file-with-proj-path)
-        (save-some-buffers t)
-        (setq p1 (line-beginning-position) )
-        (setq p2 (line-end-position) )
-        (setq err-line (buffer-substring-no-properties p1 p2))
-        (save-match-data ; is usually a good idea
-          (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
-               (setq filename (match-string 2 err-line))))
-        (message "filename: %s" (expand-file-name filename (projectile-project-root)))
-        (ace-select-window)
-        (find-file (expand-file-name filename (projectile-project-root)))
-        (goto-char (point-min))))
+      (defun nl/webpack-find-file ()
+        "From a webpack failure backtrace, opens the file under the cursor at the line specified."
+        (interactive)
+        (let (p1 p2 err-line filename file-with-proj-path)
+          (save-some-buffers t)
+          (setq p1 (line-beginning-position) )
+          (setq p2 (line-end-position) )
+          (setq err-line (buffer-substring-no-properties p1 p2))
+          (save-match-data ; is usually a good idea
+            (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
+                 (setq filename (match-string 2 err-line))))
+          (message "filename: %s" (expand-file-name filename (projectile-project-root)))
+          (ace-select-window)
+          (find-file (expand-file-name filename (projectile-project-root)))
+          (goto-char (point-min))))
 
-    (defun nl/webpack-find-next-error ()
-      "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
-      (interactive)
-      (next-line)
-      (while (re-search-forward "^ERROR" nil t)
-        (goto-char (match-beginning 0))
-        (recenter 0)
-        (nl/webpack-find-file)))
+      (defun nl/webpack-find-next-error ()
+        "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
+        (interactive)
+        (next-line)
+        (while (re-search-forward "^ERROR" nil t)
+          (goto-char (match-beginning 0))
+          (recenter 0)
+          (nl/webpack-find-file)))
 
-    :init
-    (setq js2-global-externs '("define"
-                               "jasmine"
-                               "describe"
-                               "fdescribe"
-                               "fail"
-                               "beforeEach"
-                               "afterEach"
-                               "inject"
-                               "expect"
-                               "spyOn"
-                               "it"
-                               "fit"
-                               "xdescribe"
-                               "xit"))
-    :config
-    (setq javascript-common-imenu-regex-list
-          '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
-            ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
-            ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
-            ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
-            ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
-            ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
-            ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
-            ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
-            ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
-            ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
-            ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
-            ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
-            ))
+      :init
+      (setq js2-global-externs '("define"
+                                 "jasmine"
+                                 "describe"
+                                 "fdescribe"
+                                 "fail"
+                                 "beforeEach"
+                                 "afterEach"
+                                 "inject"
+                                 "expect"
+                                 "spyOn"
+                                 "it"
+                                 "fit"
+                                 "xdescribe"
+                                 "xit"))
+      :config
+      (setq javascript-common-imenu-regex-list
+            '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+              ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+              ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+              ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+              ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+              ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+              ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+              ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
+              ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
+              ))
 
-    ;; js-mode imenu enhancement
-    ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
-    (defun nl-js-imenu-make-index ()
-      (save-excursion
-        (imenu--generic-function javascript-common-imenu-regex-list)))
+      ;; js-mode imenu enhancement
+      ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+      (defun nl-js-imenu-make-index ()
+        (save-excursion
+          (imenu--generic-function javascript-common-imenu-regex-list)))
 
-    (defun nl/javascript-mode-hook ()
-      (nl/setup-indent 2) ; indent 2 spaces width
-      (setq comment-multi-line t
-            mode-name "JS2")
-      (define-key js-mode-map [remap indent-new-comment-line]
-        'c-indent-new-comment-line)
-      (setq indent-tabs-mode nil)
-      (setq imenu-create-index-function 'nl-js-imenu-make-index)
-      (flycheck-mode t))
+      (defun nl/javascript-mode-hook ()
+        (nl/setup-indent 2) ; indent 2 spaces width
+        (setq comment-multi-line t
+              mode-name "JS2")
+        (define-key js-mode-map [remap indent-new-comment-line]
+          'c-indent-new-comment-line)
+        (setq indent-tabs-mode nil)
+        (setq imenu-create-index-function 'nl-js-imenu-make-index)
+        (flycheck-mode t))
 
-    (custom-set-variables '(js2-basic-offset 2)
-                          '(js2-bounce-indent-p nil)
-                          '(js2-highlight-level 3))
+      ;;(eval-after-load 'js2-mode
+      ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
 
-    ;;(eval-after-load 'js2-mode
-    ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+      ;;(setq ac-js2-evaluate-calls t)
 
-    ;;(setq ac-js2-evaluate-calls t)
+      (setq-default js2-mode-show-parse-errors t)
+      (setq-default js2-strict-missing-semi-warning t)
+      (setq-default js2-strict-trailing-comma-warning t)
 
-    (setq-default js2-mode-show-parse-errors t)
-    (setq-default js2-strict-missing-semi-warning t)
-    (setq-default js2-strict-trailing-comma-warning t)
-
-    :hook ((js2-mode . fic-mode)
-           ;;(js2-mode-hook  . ac-js2-mode)
-           (js2-mode . nl/javascript-mode-hook)
-           (js2-mode . my-common-prog-mode-settings)))
+      :custom
+      (js2-basic-offset 2)
+      (js2-bounce-indent-p nil)
+      (js2-highlight-level 3)
+      :hook ((js2-mode . fic-mode)
+             ;;(js2-mode-hook  . ac-js2-mode)
+             (js2-mode . nl/javascript-mode-hook)
+             (js2-mode . my-common-prog-mode-settings)))
 #+END_SRC
 
 ** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
@@ -2703,6 +2761,7 @@ When using =counsel-ag=:
 (use-package less-css-mode
   :commands less-css-mode)
 #+END_SRC
+
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
 
 Add filler lorem ipsum text to Emacs.
@@ -2715,19 +2774,28 @@ Add filler lorem ipsum text to Emacs.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
-    :init
+    :custom
+    (lsp-enable-snippet t)
+    (lsp-prefer-flymake nil))
     ;;(setq lsp-response-timeout 25)
-    (setq lsp-prefer-flymake nil))
 
   (use-package lsp-ui
+    :custom
+    (lsp-ui-sideline-enable t)
     :config
-    (setq lsp-ui-sideline-enable nil)
-    :hook (lsp-mode . lsp-ui-mode))
+    (define-key lsp-ui-mode-map
+      [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+    (define-key lsp-ui-mode-map
+      [remap xref-find-references] #'lsp-ui-peek-find-references)
+    :hook
+    (lsp-mode . lsp-ui-mode))
 
   (use-package company-lsp
     :after company
     :init
     (add-to-list 'company-backends #'company-lsp)
+    :custom
+    (company-lsp-cache-candidates 'auto)
     :config
     (setq company-transformers nil
             company-lsp-async t
@@ -2872,6 +2940,7 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
                 ("w"   . mc/mark-next-word-like-this)
                 ("W"   . mc/mark-previous-word-like-this)))
 #+END_SRC
+
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
 
 Quick switching between buffers.
@@ -2906,43 +2975,43 @@ Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-dev
 checker is loaded.
 
 #+BEGIN_SRC emacs-lisp
-    (use-package php-mode
-      :mode "\\.php[345]?\\'"
-      :preface
-      ;; this style is based on the symfony2 style
-      (c-add-style
-       "nl/php"
-       '("php"
-         (c-basic-offset . 2)
-         (indent-tabs-mode . nil)
-         (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-         (c-indent-comments-syntactically-p . t)
-         (fill-column . 78)
-         (require-final-newline . t)))
-      :init
-      (defun nl/php-mode-hook ()
-        "My PHP mode configuration."
-        (flycheck-mode t)
-        (setq c-basic-offset 2)
-        ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
-        (php-set-style "nl/php"))
+      (use-package php-mode
+        :mode "\\.php[345]?\\'"
+        :preface
+        ;; this style is based on the symfony2 style
+        (c-add-style
+         "nl/php"
+         '("php"
+           (c-basic-offset . 2)
+           (indent-tabs-mode . nil)
+           (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+           (c-indent-comments-syntactically-p . t)
+           (fill-column . 78)
+           (require-final-newline . t)))
+        :init
+        (defun nl/php-mode-hook ()
+          "My PHP mode configuration."
+          (flycheck-mode t)
+          (setq c-basic-offset 2)
+          ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
+          (php-set-style "nl/php"))
 
-      (flycheck-define-checker nl/php-checker
-        "A PHP syntax checker using the PHP command line interpreter.
-        See URL http://php.net/manual/en/features.commandline.php."
-        :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-                  "-d" "log_errors=0" source)
-        :error-patterns
-        ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-                (message) " in " (file-name) " on line " line line-end))
-        :modes (php-mode web-mode))
+        (flycheck-define-checker nl/php-checker
+          "A PHP syntax checker using the PHP command line interpreter.
+          See URL http://php.net/manual/en/features.commandline.php."
+          :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+                    "-d" "log_errors=0" source)
+          :error-patterns
+          ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+                  (message) " in " (file-name) " on line " line line-end))
+          :modes (php-mode web-mode))
 
-      (eval-after-load 'flycheck
-        '(add-to-list 'flycheck-checkers 'nl/php-checker))
+        (eval-after-load 'flycheck
+          '(add-to-list 'flycheck-checkers 'nl/php-checker))
 
-      :config
-      (custom-set-variables '(php-mode-coding-style (quote nl/php)))
-      :hook (php-mode . nl/php-mode-hook))
+        :custom
+        (php-mode-coding-style (quote nl/php))
+        :hook (php-mode . nl/php-mode-hook))
 #+END_SRC
 
 ** [[https://github.com/prettier/prettier-emacs][prettier-js]]
@@ -2980,6 +3049,7 @@ http://batsov.com/projectile/
     "Open project root in dired."
     (projectile-dired)))
 #+END_SRC
+
 ** [[https://github.com/nlamirault/phpunit.el][php-unit]]
 
 #+BEGIN_SRC emacs-lisp
@@ -3107,6 +3177,7 @@ to overwrite.
   ;;(define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save)
 )
 #+END_SRC
+
 ** [[https://github.com/nlamirault/ripgrep.el][ripgrep]]
 
 #+BEGIN_SRC emacs-lisp
@@ -3222,6 +3293,7 @@ to overwrite.
       :hook ((scala-mode . nl-scala-mode-hook)
              (scala-mode . fic-mode)))
 #+END_SRC
+
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
@@ -3647,8 +3719,8 @@ Disabled since it does not work well with easy-kill (2019-01-31).
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package whole-line-or-region
   :diminish (whole-line-or-region-local-mode)
-  :config
-  (custom-set-variables '(whole-line-or-region-global-mode t)))
+  :custom
+  (whole-line-or-region-global-mode t))
 #+END_SRC
 
 ** [[https://github.com/yoshiki/yaml-mode][yaml-mode]]
@@ -3658,6 +3730,7 @@ Disabled since it does not work well with easy-kill (2019-01-31).
   :config
   (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode)))
 #+END_SRC
+
 ** [[https://github.com/jinzhu/zeal-at-point][zeal-at-point]]
 
 Search the word at point with Zeal
@@ -3683,6 +3756,7 @@ Using DevDocs.io now - 2017-10-19
     (setq zop-to-char-kill-keys '(?\C-k))
     (setq zop-to-char-quit-at-point-keys '(?\r))))
 #+END_SRC
+
 ** [[https://github.com/fourier/ztree][ztree]]
 
 #+BEGIN_QUOTE
@@ -3700,6 +3774,7 @@ Ztree is a project dedicated to implementation of several text-tree applications
 (use-package zzz-to-char
   :bind ("M-z" . zzz-up-to-char))
 #+END_SRC
+
 * Computer-specific settings
 
 Load some computer-specific settings, such as the name and and email address. The way the settings
