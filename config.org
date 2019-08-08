@@ -2716,6 +2716,7 @@ When using =counsel-ag=:
           'c-indent-new-comment-line)
         (setq indent-tabs-mode nil)
         (setq imenu-create-index-function 'nl-js-imenu-make-index)
+        (prettier-js-mode)
         (flycheck-mode t))
 
       ;;(eval-after-load 'js2-mode
@@ -3680,6 +3681,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
     (defun nl/web-mode-hook ()
       "Hooks for Web mode."
       (setq web-mode-markup-indent-offset 2)
+      (prettier-js-mode)
       (yas-minor-mode))
 
     :config
