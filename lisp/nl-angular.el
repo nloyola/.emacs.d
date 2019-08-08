@@ -11,6 +11,10 @@
   (require 'projectile)
   (require 'tide))
 
+(defun angular-component-filename-p (filename)
+  "Return non-nil if FILENAME is for a TypeScript file."
+  (string-match "\.component\." filename))
+
 (defun ts-filename-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
   (string-match "\.ts$" filename))
@@ -158,6 +162,32 @@
   (interactive)
   (nl/angular-find-with-filetypes 'html-filename-p))
 
+(defun nl/angular-component-base-name ()
+  "Return the component's base name for the file that the buffer is visiting."
+  (interactive)
+  (if (buffer-file-name)
+      (let ((file-name (file-name-nondirectory (buffer-file-name))))
+        (if (angular-component-filename-p file-name)
+            (file-name-base (replace-regexp-in-string ".spec" "" file-name))
+          (progn
+            (message "not an angular component file")
+            nil)))
+    (progn
+      (message "not a file buffer")
+      nil)))
+
+(defun nl/angular-component-jump-to-file (ext)
+  "Switch to buffer visiting angular component file with extension EXT."
+  (let ((component-base-name (nl/angular-component-base-name)))
+    (if component-base-name
+        (find-file (concat component-base-name ext)))))
+
+(defhydra hydra-nl/angular-jump-to-file (:color red :hint nil)
+  ("c" (nl/angular-component-jump-to-file ".ts") "jump to component" :color blue :column "Angular")
+  ("t" (nl/angular-component-jump-to-file ".spec.ts") "jump to test" :color blue)
+  ("h" (nl/angular-component-jump-to-file ".html") "jump to HTML" :color blue)
+  ("s" (nl/angular-component-jump-to-file ".scss") "jump to SCSS" :color blue))
+
 (defhydra hydra-nl/angular-compile (:exit t)
   ("p" nl/ng-compile "project" :column "Compile")
   ("t" nl/typescript-compile-this-file "this file"))
@@ -181,7 +211,8 @@
   ("h" nl/counsel-ag-html "HTML files"))
 
 (defhydra hydra-nl/angular-project (:color red :hint nil)
-  ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue :column "Angular")
+  ("j" hydra-nl/angular-jump-to-file/body "Jump to file" :color blue :column "Angular")
+  ("c" hydra-nl/angular-compile/body "TypeScript compile" :color blue)
   ("a" hydra-nl-align/body "align" :color blue)
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
   ("s" hydra-nl/angular-search/body "search" :color blue)
