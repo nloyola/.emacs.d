@@ -32,26 +32,34 @@
 (defun nl/jest-test-only-this-file ()
   "Run the jest test suite only for this file."
   (interactive)
-  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest -e --runInBand %s"
-                                   (buffer-file-name))))
+  (if (buffer-file-name)
+      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest -e --runInBand %s"
+                                       (buffer-file-name)))
+    (message "not in a buffer visiting a file")))
 
 (defun nl/jest-test-only-this-directory ()
   "Run the jest test suite only for all files in the directory this file is in."
   (interactive)
-  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
-                                   (file-name-directory buffer-file-name))))
+  (if (buffer-file-name)
+      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --runInBand %s"
+                                       (file-name-directory buffer-file-name)))
+    (message "not in a buffer visiting a file")))
 
 (defun nl/jest-test-and-coverage-only-this-file ()
   "Run the jest test suite only for this file."
   (interactive)
-  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
-                                   (buffer-file-name))))
+  (if (buffer-file-name)
+      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
+                                       (buffer-file-name)))
+    (message "not in a buffer visiting a file")))
 
 (defun nl/jest-test-and-coverage-only-this-directory ()
   "Run the jest test suite only for all files in the directory this file is in."
   (interactive)
-  (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
-                                   (file-name-directory buffer-file-name))))
+  (if (buffer-file-name)
+      (nl/command-in-proj-root (format "node --inspect node_modules/.bin/jest --coverage --runInBand %s"
+                                       (file-name-directory buffer-file-name)))
+    (message "not in a buffer visiting a file")))
 
 (defun nl/jest-test-coverage ()
   "Run the jest test suite with code coverage."
@@ -168,7 +176,7 @@
   (if (buffer-file-name)
       (let ((file-name (file-name-nondirectory (buffer-file-name))))
         (if (angular-component-filename-p file-name)
-            (file-name-base (replace-regexp-in-string ".spec" "" file-name))
+            (file-name-base (replace-regexp-in-string "\.spec" "" file-name))
           (progn
             (message "not an angular component file")
             nil)))
