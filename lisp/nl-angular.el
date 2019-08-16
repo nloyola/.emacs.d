@@ -85,26 +85,28 @@
   "Return TRUE if FILENAME is a match for a TypseScript spec."
   (string-match "\.spec\.ts$" filename))
 
+(defun nl/delete-process-for-buffer (buffer)
+  "Delte process running in BUFFER."
+  (let ((proc (get-buffer-process (get-buffer buffer))))
+    (when proc
+      (pop-to-buffer buffer)
+      (delete-process proc))))
+
 (defun nl/ng-compile ()
     "Uses Angular CLI to build the project."
   (interactive)
-  (if (get-buffer "*ng-compile*")
-      (kill-buffer "*ng-compile*"))
+  (nl/delete-process-for-buffer "*ng-compile*")
   (with-output-to-temp-buffer "*ng-compile*"
     (async-shell-command "ng build" "*ng-compile*" "*Messages*")
-    (pop-to-buffer "*ng-compile*")
-    (local-set-key (kbd "g") 'nl/ng-compile))
+    (pop-to-buffer "*ng-compile*"))
   "")
 
 (defun nl/ng-test ()
-  "Uses Angular CLI to run the project tests."
+  "Use Angular CLI to run the project tests."
   (interactive)
-  (if (get-buffer "*ng-test*")
-      (kill-buffer "*ng-test*"))
+  (nl/delete-process-for-buffer "*ng-test*")
   (with-output-to-temp-buffer "*ng-test*"
-    (async-shell-command "npm run test" "*ng-test*" "*Messages*")
-    (pop-to-buffer "*ng-test*")
-    (local-set-key (kbd "g") 'nl/ng-test))
+    (async-shell-command "npm run test" "*ng-test*" "*Messages*"))
   "")
 
 (defun nl/related-files (path)
@@ -255,6 +257,14 @@
 (define-key tide-mode-map (kbd "C-c C-t t d") 'nl/jest-test-only-this-directory)
 (define-key tide-mode-map (kbd "C-c C-t t c t") 'nl/jest-test-and-coverage-only-this-file)
 (define-key tide-mode-map (kbd "C-c C-t t c d") 'nl/jest-test-and-coverage-only-this-directory)
+
+(defun nl/typepscript-mode-keys ()
+  "My extra key definitions for typescript-mode."
+  (local-set-key (kbd "C-c , c") 'nl/jest-test-only-this-file)
+  (local-set-key (kbd "C-c , d") 'nl/jest-test-only-this-directory)
+  (local-set-key (kbd "C-c , p") 'nl/ng-test))
+
+(add-hook 'typescript-mode-hook 'nl/typepscript-mode-keys)
 
 (provide 'nl-angular)
 ;;; nl-angular.el ends here

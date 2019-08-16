@@ -164,7 +164,7 @@ The class name must have the postfix 'Spec' for this function to work."
   (scala-indent:insert-asterisk-on-multiline-comment))
 
 (defun nl/scala-mode-keys ()
-  "My extra key definitions for 'scala-mode'."
+  "My extra key definitions for scala-mode."
   (interactive)
   ;; use sbt-run-previous-command to re-compile your code after changes
   (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
