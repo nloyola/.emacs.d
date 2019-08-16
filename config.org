@@ -635,7 +635,7 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
   ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
 
   (add-to-list 'display-buffer-alist
-               '("\\(?:\\*\\(?:[Hh]elp\\|grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\|\\*Flycheck.*\\)\\)"
+               '("\\(?:\\*\\(?:grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\|\\*Flycheck.*\\)\\)"
                  display-buffer-in-side-window
                  (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
                  ,nl/side-window-parameters))
@@ -2298,12 +2298,17 @@ instead of ~find-file-other-window~.
 #+BEGIN_SRC emacs-lisp
   (use-package helm-ag
     :bind (:map helm-ag-mode-map
-                ("C-o" . nl/jump-other-window))
+                ("C-<return>" . nl/jump-other-window))
     :preface
     (defun nl/ace-find-file (filename)
       (setq helm-ag--last-default-directory default-directory)
-      (ace-select-window)
-      (find-file (concat helm-ag--last-default-directory filename)))
+      ;; use ace-select-window if there are more than 2 windows in the frame
+      (let ((path (concat helm-ag--last-default-directory filename)))
+        (if (> (length (window-list)) 2)
+            (ace-select-window)
+          (other-window 1))
+        (find-file path)))
+
     (defun nl/jump-other-window ()
       (interactive)
       (let ((line (helm-current-line-contents)))
@@ -3360,24 +3365,24 @@ SLIME is the Superior Lisp Interaction Mode for Emacs.
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package smartparens
-    :diminish smartparens-mode
-    :config
-    (require 'smartparens-config)
-    ;; https://github.com/Fuco1/smartparens/issues/783
-    (setq sp-escape-quotes-after-insert nil)
-    (smartparens-global-mode t)
+    (use-package smartparens
+      :diminish smartparens-mode
+      :config
+      (require 'smartparens-config)
+      ;; https://github.com/Fuco1/smartparens/issues/783
+      (setq sp-escape-quotes-after-insert nil)
+      (smartparens-global-mode t)
 
-    (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
-    (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
-    (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
+      (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
+      (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
+      (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
 
-    ;; https://emacs.stackexchange.com/questions/26912/smartparens-do-not-insert-parenthesis-pair-when-point-is-at-the-beginning-of-wo
-    (sp-pair "{" nil :unless '(sp-point-before-word-p))
-    (sp-pair "(" nil :unless '(sp-point-before-word-p))
-    (sp-pair "[" nil :unless '(sp-point-before-word-p))
+      ;; https://emacs.stackexchange.com/questions/26912/smartparens-do-not-insert-parenthesis-pair-when-point-is-at-the-beginning-of-wo
+      (sp-pair "{" nil :unless '(sp-point-before-word-p))
+      (sp-pair "(" nil :unless '(sp-point-before-word-p))
+      (sp-pair "[" nil :unless '(sp-point-before-word-p))
 
-    (sp-local-pair 'typescript-mode "\<" "\>"))
+      (sp-local-pair 'typescript-mode "\<" "\>"))
 #+END_SRC
 
 *** Smartparens org mode
