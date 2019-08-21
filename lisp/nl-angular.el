@@ -228,7 +228,7 @@
   ("s" hydra-nl/angular-search/body "search" :color blue)
   ("t" hydra-nl/angular-test/body "test" :color blue))
 
-(key-chord-define-global "jc" '(lambda () (interactive) (hydra-nl/angular-project/body)))
+(key-chord-define typescript-mode-map "jc" '(lambda () (interactive) (hydra-nl/angular-project/body)))
 
 (defun nl/jest-failure-find-file ()
   "From a Jest backtrace, opens the file under the cursor at the line specified."
@@ -249,22 +249,22 @@
       (find-file (expand-file-name filename (projectile-project-root)))
       (goto-char (point-min)))))
 
-(define-key tide-mode-map (kbd "C-c C-t c c") 'nl/typescript-compile-this-file)
-(define-key tide-mode-map (kbd "C-c C-t c t") 'nl/jest-test-coverage)
-(define-key tide-mode-map (kbd "C-c C-t i") 'nl/indent-whole-buffer)
-(define-key tide-mode-map (kbd "C-c C-t s") 'nl/counsel-ag-ts-spec)
-(define-key tide-mode-map (kbd "C-c C-t t t") 'nl/jest-test-only-this-file)
-(define-key tide-mode-map (kbd "C-c C-t t d") 'nl/jest-test-only-this-directory)
-(define-key tide-mode-map (kbd "C-c C-t t c t") 'nl/jest-test-and-coverage-only-this-file)
-(define-key tide-mode-map (kbd "C-c C-t t c d") 'nl/jest-test-and-coverage-only-this-directory)
+(define-key typescript-mode-map (kbd "C-c C-t c c") 'nl/typescript-compile-this-file)
+(define-key typescript-mode-map (kbd "C-c C-t c t") 'nl/jest-test-coverage)
+(define-key typescript-mode-map (kbd "C-c C-t i") 'nl/indent-whole-buffer)
+(define-key typescript-mode-map (kbd "C-c C-t s") 'nl/counsel-ag-ts-spec)
+(define-key typescript-mode-map (kbd "C-c C-t t t") 'nl/jest-test-only-this-file)
+(define-key typescript-mode-map (kbd "C-c C-t t d") 'nl/jest-test-only-this-directory)
+(define-key typescript-mode-map (kbd "C-c C-t t c t") 'nl/jest-test-and-coverage-only-this-file)
+(define-key typescript-mode-map (kbd "C-c C-t t c d") 'nl/jest-test-and-coverage-only-this-directory)
 
-(defun nl/typepscript-mode-keys ()
-  "My extra key definitions for typescript-mode."
-  (local-set-key (kbd "C-c , c") 'nl/jest-test-only-this-file)
-  (local-set-key (kbd "C-c , d") 'nl/jest-test-only-this-directory)
-  (local-set-key (kbd "C-c , p") 'nl/ng-test))
-
-(add-hook 'typescript-mode-hook 'nl/typepscript-mode-keys)
+(define-key typescript-mode-map (kbd "C-c , c") 'nl/jest-test-only-this-file)
+(define-key typescript-mode-map (kbd "C-c , d") 'nl/jest-test-only-this-directory)
+(define-key typescript-mode-map (kbd "C-c , p") 'nl/ng-test)
 
 (provide 'nl-angular)
 ;;; nl-angular.el ends here
+
+;; Local Variables:
+;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)
+;; End:

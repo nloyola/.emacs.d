@@ -78,13 +78,15 @@
 (defun nl/scalstest-find-suite-package-name ()
   "Determines the name of the package the ScalaTest suite is in."
   (save-excursion
-    (when (re-search-backward scalatest-class-package-regexp nil t)
+    (goto-char (point-min))
+    (when (re-search-forward scalatest-class-package-regexp nil t)
       (match-string-no-properties 1))))
 
 (defun nl/scalstest-find-suite-class-name ()
   "Determines the name of the ScalaTest suite name."
   (save-excursion
-    (when (re-search-backward scalatest-beginning-of-class-regexp nil t)
+    (goto-char (point-min))
+    (when (re-search-forward scalatest-beginning-of-class-regexp nil t)
       (match-string-no-properties 1))))
 
 (defun nl/scalatest-test-this-package ()
@@ -163,27 +165,23 @@ The class name must have the postfix 'Spec' for this function to work."
   (newline-and-indent)
   (scala-indent:insert-asterisk-on-multiline-comment))
 
-(defun nl/scala-mode-keys ()
-  "My extra key definitions for scala-mode."
-  (interactive)
-  ;; use sbt-run-previous-command to re-compile your code after changes
-  (local-set-key (kbd "C-x '") 'sbt-run-previous-command)
-  (local-set-key (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
-  (local-set-key (kbd "C-c , c") 'nl/scalatest-test-only-this-class)
-  (local-set-key (kbd "C-c , d") 'nl/scalatest-test-this-package)
-  (local-set-key (kbd "C-c , p") 'nl/scalatest-test-project)
-  (local-set-key (kbd "RET") 'newline-and-indent)
-  ;; Bind the backtab (shift tab) to
-  ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
-  ;; when using the 'eager' mode by default and you want to "outdent" a
-  ;; code line as a new statement.
-  (local-set-key (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
-  (bind-key "M-j" 'scala-mode-newline-comments scala-mode-map))
-
-(defun nl/scala-project-mode-hook ()
-  (nl/scala-mode-keys))
-
-(add-hook 'scala-mode-hook 'nl/scala-project-mode-hook)
+;; use sbt-run-previous-command to re-compile your code after changes
+(define-key scala-mode-map (kbd "C-x '") 'sbt-run-previous-command)
+(define-key scala-mode-map (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
+(define-key scala-mode-map (kbd "C-c , c") 'nl/scalatest-test-only-this-class)
+(define-key scala-mode-map (kbd "C-c , d") 'nl/scalatest-test-this-package)
+(define-key scala-mode-map (kbd "C-c , p") 'nl/scalatest-test-project)
+(define-key scala-mode-map (kbd "RET") 'newline-and-indent)
+;; Bind the backtab (shift tab) to
+;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
+;; when using the 'eager' mode by default and you want to "outdent" a
+;; code line as a new statement.
+(define-key scala-mode-map (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
+(define-key scala-mode-map (kbd "M-j") 'scala-mode-newline-comments)
 
 (provide 'nl-scala-project)
 ;;; bbweb-project.el ends here
+
+;; Local Variables:
+;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)
+;; End:

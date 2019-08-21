@@ -6,8 +6,12 @@
 
 ;;; Code:
 
+
 (eval-and-compile
-  (require 'projectile))
+  (require 'projectile)
+  (require 'scala-mode))
+
+(defvar scala-mode-map)
 
 (setq projectile-test-suffix-function (lambda (project-type) "" "Spec")
       projectile-find-dir-includes-top-level t)
@@ -68,8 +72,8 @@
   ("s" nl/scalatest-test-only "select suite to run" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
-(key-chord-define-global "jc" '(lambda () (interactive)
-                                 (hydra-nl-bbweb-scala/body)))
+(key-chord-define scala-mode-map "jc" '(lambda () (interactive)
+                                         (hydra-nl-bbweb-scala/body)))
 
 ;;
 ;;
@@ -86,3 +90,7 @@
 
 (provide 'bbweb-project)
 ;;; bbweb-project.el ends here
+
+;; Local Variables:
+;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)
+;; End:
