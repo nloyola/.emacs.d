@@ -2783,8 +2783,9 @@ Add filler lorem ipsum text to Emacs.
     :pin melpa
     :custom
     (lsp-enable-snippet t)
-    (lsp-prefer-flymake nil))
+    (lsp-prefer-flymake nil)
     ;;(setq lsp-response-timeout 25)
+    :hook (scala-mode . lsp))
 
   (use-package lsp-ui
     :custom
@@ -2839,7 +2840,9 @@ Add filler lorem ipsum text to Emacs.
 
 Scala support for lsp-mode.
 
-#+BEGIN_SRC emacs-lisp
+Disabled since ls-mode is being used. 2019-08-21
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package lsp-scala
   :after (lsp scala-mode)
   :demand t
