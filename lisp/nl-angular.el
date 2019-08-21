@@ -229,6 +229,7 @@
   ("t" hydra-nl/angular-test/body "test" :color blue))
 
 (key-chord-define typescript-mode-map "jc" '(lambda () (interactive) (hydra-nl/angular-project/body)))
+(key-chord-define web-mode-map "jc" '(lambda () (interactive) (hydra-nl/angular-project/body)))
 
 (defun nl/jest-failure-find-file ()
   "From a Jest backtrace, opens the file under the cursor at the line specified."
