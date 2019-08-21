@@ -57,6 +57,7 @@
   (setq gnutls-trustfiles (list trustfile)))
 
 ;;; Set up package
+(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (require 'package)
 (setq package-archives
       '(("gnu"     . "https://elpa.gnu.org/packages/")
