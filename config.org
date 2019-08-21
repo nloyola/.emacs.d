@@ -2780,6 +2780,7 @@ Add filler lorem ipsum text to Emacs.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-mode
+    :pin melpa
     :custom
     (lsp-enable-snippet t)
     (lsp-prefer-flymake nil))
