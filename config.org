@@ -1356,6 +1356,8 @@ Trying out new theme: 2019-08-04
      ;; '(region ((t (:background "#0f3b82"))))
      ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
      ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+     '(vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
+
      '(ediff-odd-diff-A ((nil :background "#862b27")))
      '(ediff-even-diff-A ((nil :background "#1f772c")))
      '(ediff-current-diff-A ((nil :background "#2b538a")))
