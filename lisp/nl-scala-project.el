@@ -7,7 +7,6 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'cl)
   (require 'sbt-mode))
 
 (defvar scala-mode-map)
@@ -43,7 +42,7 @@
   "Regular expression for a scalatest FunSepc behaviour.")
 
 (defun scala-filename-p (filename)
-  (string-match "\.scala$" filename))
+  (string-match-p "\.\\(scala\\|sbt\\)$" filename))
 
 ;; created after reading this article:
 ;;
@@ -167,17 +166,36 @@ The class name must have the postfix 'Spec' for this function to work."
 
 ;; use sbt-run-previous-command to re-compile your code after changes
 (define-key scala-mode-map (kbd "C-x '") 'sbt-run-previous-command)
+
 (define-key scala-mode-map (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
 (define-key scala-mode-map (kbd "C-c , c") 'nl/scalatest-test-only-this-class)
 (define-key scala-mode-map (kbd "C-c , d") 'nl/scalatest-test-this-package)
 (define-key scala-mode-map (kbd "C-c , p") 'nl/scalatest-test-project)
 (define-key scala-mode-map (kbd "RET") 'newline-and-indent)
+
 ;; Bind the backtab (shift tab) to
 ;; 'scala-indent:indent-with-reluctant-strategy command. This is usefull
 ;; when using the 'eager' mode by default and you want to "outdent" a
 ;; code line as a new statement.
 (define-key scala-mode-map (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
 (define-key scala-mode-map (kbd "M-j") 'scala-mode-newline-comments)
+
+(defun nl/scala-project-hook ()
+  (add-hook 'before-save-hook 'lsp-format-buffer nil 'local))
+
+(add-hook 'scala-mode-hook #'nl/scala-project-hook)
+
+(defun nl/scalafmt-project-files ()
+  (interactive)
+  (let ((files (seq-filter 'scala-filename-p (projectile-current-project-files))))
+    (loop for file in files do
+          (progn
+            (setq default-directory (projectile-project-root))
+            (message "formatting: %s" file)
+            (find-file file)
+            (goto-char (point-min))
+            (lsp-format-buffer)
+            (save-buffer)))))
 
 (provide 'nl-scala-project)
 ;;; bbweb-project.el ends here
