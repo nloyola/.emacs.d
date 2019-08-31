@@ -67,6 +67,8 @@
   ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
   ("a" hydra-nl-align/body "align" :color blue)
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
+  ("x" lsp-find-references "find references" :column "Source Navigation" :color blue)
+  ("p" dumb-jump-go-prompt "prompt" :color blue)
   ("f" nl/scalatest-find-file "find file from traceback" :color blue :column "Scala Test")
   ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
   ("s" nl/scalatest-test-only "select suite to run" :color blue))
