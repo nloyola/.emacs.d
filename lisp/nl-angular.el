@@ -5,11 +5,16 @@
 ;; Settings and functions to support software development.
 
 ;;; Code:
+(require 'web-mode)
 
 (eval-when-compile
   (require 'seq)
   (require 'projectile)
   (require 'tide))
+
+(defun angular-project-source-file-p (filename)
+  "Return non-nil if FILENAME is for a TypeScript file."
+  (string-match "\.\\(html\\|ts\\)$" filename))
 
 (defun angular-component-filename-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
@@ -262,6 +267,18 @@
 (define-key typescript-mode-map (kbd "C-c , c") 'nl/jest-test-only-this-file)
 (define-key typescript-mode-map (kbd "C-c , d") 'nl/jest-test-only-this-directory)
 (define-key typescript-mode-map (kbd "C-c , p") 'nl/ng-test)
+
+(defun nl/prettier-on-project-files ()
+  (interactive)
+  (let ((files (seq-filter 'angular-project-source-file-p (projectile-current-project-files))))
+    (loop for file in files do
+          (progn
+            (setq default-directory (projectile-project-root))
+            (message "formatting: %s" file)
+            (find-file file)
+            (goto-char (point-min))
+            (prettier-js)
+            (save-buffer)))))
 
 (provide 'nl-angular)
 ;;; nl-angular.el ends here
