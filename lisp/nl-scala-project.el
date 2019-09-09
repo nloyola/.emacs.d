@@ -42,7 +42,15 @@
   "Regular expression for a scalatest FunSepc behaviour.")
 
 (defun scala-filename-p (filename)
-  (string-match-p "\.\\(scala\\|sbt\\)$" filename))
+  (string-match-p "\\.\\(scala\\|sbt\\)$" filename))
+
+(defun scala-spec-filename-p (filename)
+  (string-match-p "\\.Spec\\.scala$" filename))
+
+(defun nl/counsel-ag-scala-spec ()
+  "Perform counsel-ag on the project's Scala Spec files."
+  (interactive)
+  (counsel-ag "" (concat (projectile-project-root) "test") "-G Spec.scala$"))
 
 ;; created after reading this article:
 ;;
@@ -84,15 +92,8 @@
 (defun nl/scalstest-find-suite-class-name ()
   "Determines the name of the ScalaTest suite name."
   (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward scalatest-beginning-of-class-regexp nil t)
+    (when (re-search-backward scalatest-beginning-of-class-regexp nil t)
       (match-string-no-properties 1))))
-
-(defun nl/scalatest-test-this-package ()
-  "For the class the cursor is in, run the scalatest test suite.
-The class name must have the postfix 'Spec' for this function to work."
-  (interactive)
-  (sbt-command (format "testOnly %s.*" (nl/scalstest-find-suite-package-name))))
 
 (defun nl/scalstest-find-scalatest-behaviour ()
   "Determines the name of the ScalaTest suite name."
@@ -100,24 +101,44 @@ The class name must have the postfix 'Spec' for this function to work."
     (when (re-search-backward scalatest-beginning-of-behaviour-regexp nil t)
       (match-string-no-properties 1))))
 
-(defun nl/scalatest-test-project ()
+(defun nl/scala-command-in-proj-root (command)
+  "Run the compile COMMAND at the project's root directory."
+  (interactive)
+  (compile (format "cd %s && %s" (projectile-project-root) command)))
+
+(defun nl/scala-bloop-command (command)
+  "Run the compile COMMAND at the project's root directory."
+  (interactive)
+  (nl/scala-command-in-proj-root (format "bloop %s" command)))
+
+(defun nl/scala-bloop-test-command (command)
+  "Run the compile COMMAND at the project's root directory."
+  (interactive)
+  (nl/scala-bloop-command (format "test --reporter scalac %s root-test" command)))
+
+(defun nl/scalatest-test-this-package ()
   "For the class the cursor is in, run the scalatest test suite.
 The class name must have the postfix 'Spec' for this function to work."
   (interactive)
-  (sbt-command (format "test")))
+  (nl/scala-bloop-test-command (format "-o %s.\\*" (nl/scalstest-find-suite-package-name))))
+
+(defun nl/scalatest-test-project ()
+  "Run the scalatest test suite."
+  (interactive)
+  (nl/scala-bloop-test-command "root-test"))
 
 (defun nl/scalatest-test-only-this-class ()
   "For the class the cursor is in, run the scalatest test suite.
 The class name must have the postfix 'Spec' for this function to work."
   (interactive)
-  (sbt-command (format "testOnly *.%s" (nl/scalstest-find-suite-class-name))))
+  (nl/scala-bloop-test-command (format "-o \\*.%s" (nl/scalstest-find-suite-class-name))))
 
 (defun nl/scalatest-test-only-this-buffer-with-substring-tag ()
   "For the class in the current buffer, run the scalatest test suite.
 The class name must have the postfix 'Spec' for this function to work."
   (interactive)
   ;;(message (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour)))
-  (sbt-command (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-class-name) (nl/scalstest-find-scalatest-behaviour))))
+  (nl/scala-bloop-test-command (format "-o \\*.%s --args -z \"%s\"" (nl/scalstest-find-suite-class-name) (nl/scalstest-find-scalatest-behaviour))))
 
 (defun nl/scalatest-find-file ()
   "From a scalatest failure backtrace, opens the file under the cursor at the line specified."
@@ -181,6 +202,7 @@ The class name must have the postfix 'Spec' for this function to work."
 (define-key scala-mode-map (kbd "M-j") 'scala-mode-newline-comments)
 
 (defun nl/scala-project-hook ()
+  (lsp-ui-mode -1)
   (add-hook 'before-save-hook 'lsp-format-buffer nil 'local))
 
 (add-hook 'scala-mode-hook #'nl/scala-project-hook)
@@ -196,6 +218,7 @@ The class name must have the postfix 'Spec' for this function to work."
             (goto-char (point-min))
             (lsp-format-buffer)
             (save-buffer)))))
+
 
 (provide 'nl-scala-project)
 ;;; bbweb-project.el ends here
