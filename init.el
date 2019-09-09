@@ -73,8 +73,8 @@
 (package-initialize)
 
 ;; Using HTTPS for downloading packages, make sure HTTPS is not going through a proxy.
-(setenv "https_proxy" "")
-(setenv "http_proxy" "")
+;; (setenv "https_proxy" "")
+;; (setenv "http_proxy" "")
 
 ;;; Bootstrap use-package
 (setq-default use-package-always-ensure t         ; Auto-download package if not exists
