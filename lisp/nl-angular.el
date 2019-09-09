@@ -14,11 +14,11 @@
 
 (defun angular-project-source-file-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
-  (string-match "\.\\(html\\|ts\\)$" filename))
+  (string-match "\\.\\(html\\|ts\\)$" filename))
 
 (defun angular-component-filename-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
-  (string-match "\.component\." filename))
+  (string-match "\\.component\\." filename))
 
 (defun ts-filename-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
