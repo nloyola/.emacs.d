@@ -71,7 +71,7 @@
   ("p" dumb-jump-go-prompt "prompt" :color blue)
   ("f" nl/scalatest-find-file "find file from traceback" :color blue :column "Scala Test")
   ("n" nl/scalatest-find-next-failure "find next scalatest failure in SBT buffer" :color blue)
-  ("s" nl/scalatest-test-only "select suite to run" :color blue))
+  ("s" nl/counsel-ag-scala-spec "Search Spec files" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
 (key-chord-define scala-mode-map "jc" '(lambda () (interactive)
