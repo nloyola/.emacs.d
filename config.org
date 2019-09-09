@@ -2788,6 +2788,7 @@ Add filler lorem ipsum text to Emacs.
     :custom
     (lsp-enable-snippet t)
     (lsp-prefer-flymake nil)
+    (lsp-enable-file-watchers nil)
     ;;(setq lsp-response-timeout 25)
     :hook (scala-mode . lsp))
 
@@ -3640,9 +3641,7 @@ clears the history."
 
 ** [[https://github.com/cmpitg/wand][wand]]
 
-#+BEGIN_QUOTE
 Wand is an extension that allows users to select a piece of text and perform actions based on predefined patterns.
-#+END_QUOTE
 
 #+BEGIN_SRC emacs-lisp
 (use-package wand
