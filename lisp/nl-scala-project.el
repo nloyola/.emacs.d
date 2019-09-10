@@ -52,35 +52,11 @@
   (interactive)
   (counsel-ag "" (concat (projectile-project-root) "test") "-G Spec.scala$"))
 
-;; created after reading this article:
-;;
-;; http://kitchingroup.cheme.cmu.edu/blog/2015/01/24/Anatomy-of-a-helm-source/
-(setq nl/helm-scala-project-test-spec
-      '((name . "Select a ScalaTest specification to run:")
-        (candidates
-         . (lambda ()
-             (remove-if-not (lambda (filename)
-                              (string-match "Spec.scala$" filename))
-                            (projectile-current-project-files))
-             ))
-        (nomark . t)
-        (action
-         . (lambda (candidate)
-             ;;(message "file name is: %s" candidate)
-             ;;(message "test name is: %s" (file-name-nondirectory candidate))
-             (sbt-command (message "testOnly *.%s"
-                                   (file-name-sans-extension (file-name-nondirectory candidate))))
-             ))))
+(defun nl/scala-find-with-filetypes (predicate)
+  "Find project files given a file name PREDICATE."
+  (let ((files (seq-filter predicate (projectile-current-project-files))))
+    (find-file (helm-comp-read "Find file: " files))))
 
-(defun nl/scalatest-test-only ()
-  (interactive)
-  (helm :sources '(nl/helm-scala-project-test-spec)))
-
-(defun sbt-hydra:run-sbt-command (command)
-  (interactive)
-  (sbt-switch-to-active-sbt-buffer)
-  (sbt-hydra:add-to-history command)
-  (sbt-hydra:run-previous-sbt-command))
 
 (defun nl/scalstest-find-suite-package-name ()
   "Determines the name of the package the ScalaTest suite is in."
@@ -125,7 +101,7 @@ The class name must have the postfix 'Spec' for this function to work."
 (defun nl/scalatest-test-project ()
   "Run the scalatest test suite."
   (interactive)
-  (nl/scala-bloop-test-command "root-test"))
+  (nl/scala-bloop-command "test --reporter scalac root-test"))
 
 (defun nl/scalatest-test-only-this-class ()
   "For the class the cursor is in, run the scalatest test suite.
@@ -138,7 +114,7 @@ The class name must have the postfix 'Spec' for this function to work."
 The class name must have the postfix 'Spec' for this function to work."
   (interactive)
   ;;(message (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour)))
-  (nl/scala-bloop-test-command (format "-o \\*.%s --args -z \"%s\"" (nl/scalstest-find-suite-class-name) (nl/scalstest-find-scalatest-behaviour))))
+  (nl/scala-bloop-command (format "test --reporter scalac -o \\*.%s root-test -- -z \"%s\"" (nl/scalstest-find-suite-class-name) (nl/scalstest-find-scalatest-behaviour))))
 
 (defun nl/scalatest-find-file ()
   "From a scalatest failure backtrace, opens the file under the cursor at the line specified."
@@ -167,7 +143,6 @@ The class name must have the postfix 'Spec' for this function to work."
 (defun nl/scalatest-find-next-failure ()
   "Find the next failed test in an SBT buffer that just ran scalatests."
   (interactive)
-  (sbt-switch-to-active-sbt-buffer)
   (search-forward "*** FAILED ***")
   (move-end-of-line nil)
   (recenter))
@@ -186,7 +161,7 @@ The class name must have the postfix 'Spec' for this function to work."
   (scala-indent:insert-asterisk-on-multiline-comment))
 
 ;; use sbt-run-previous-command to re-compile your code after changes
-(define-key scala-mode-map (kbd "C-x '") 'sbt-run-previous-command)
+(define-key scala-mode-map (kbd "C-x '") 'recompile)
 
 (define-key scala-mode-map (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
 (define-key scala-mode-map (kbd "C-c , c") 'nl/scalatest-test-only-this-class)

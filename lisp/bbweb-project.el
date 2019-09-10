@@ -60,11 +60,16 @@
   ("j" bbweb-find-js-file "JS file")
   ("h" bbweb-find-html-file "HTML file"))
 
+(defun nl/sbt-bloop-install ()
+  (interactive)
+  (async-shell-command
+   (format "cd %s && sbt bloopInstall" (projectile-project-root))
+   "*sbt-bloop*"
+   "*Messages*"))
+
 (defhydra hydra-nl-bbweb-scala (:hint nil)
   "bbweb scala build"
-  ("d" (lambda () (interactive) (sbt-command "reload")) "sbt reload" :color blue :column "Scala")
-  ("r" (lambda () (interactive) (sbt-command "run")) "sbt run" :color blue)
-  ("t" (lambda () (interactive) (sbt-command "test:compile")) "sbt test:compile" :color blue)
+  ("b" nl/sbt-bloop-install "sbt bloopInstall" :color blue :column "Scala")
   ("a" hydra-nl-align/body "align" :color blue)
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
   ("x" lsp-find-references "find references" :column "Source Navigation" :color blue)
