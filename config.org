@@ -3491,98 +3491,113 @@ think of it as both something that augments and replaces the standard
 ** [[https://github.com/ananthakumaran/tide][tide]]
 
 #+BEGIN_SRC emacs-lisp
-      (use-package tide
-        :after (typescript-mode company flycheck)
-        :bind (:map tide-mode-map
-                    ("C-c C-t f" . tide-fix)
-                    ("C-c C-t n" . tide-nav)
-                    ("C-c C-t o" . tide-organize-imports)
-                    ("C-c C-t r" . tide-rename-symbol)
-                    ("C-c C-t x" . tide-references))
-        :init
-        (use-package typescript-mode)
-        :config
+        (use-package tide
+          :after (typescript-mode company flycheck)
+          :bind (:map tide-mode-map
+                      ("C-c C-t f" . tide-fix)
+                      ("C-c C-t n" . tide-nav)
+                      ("C-c C-t o" . tide-organize-imports)
+                      ("C-c C-t r" . tide-rename-symbol)
+                      ("C-c C-t x" . tide-references))
+          :init
+          (use-package typescript-mode)
+          :config
 
-        (setq tide-sync-request-timeout 5
-              tide-server-max-response-length 204800)
+          (setq tide-sync-request-timeout 5
+                tide-server-max-response-length 204800)
 
-        ;; when buiding with Angular CLI, the first error always contains "ERROR in"
-        ;;
-        ;; adjusting this regexp makes 'next-error' work in compilation mode
-        ;;
-        ;; Used the following to generate the regular expression:
-        ;;
-        ;; (rx line-start
-        ;; (zero-or-more whitespace)
-        ;; (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
-        ;; (zero-or-more whitespace)
-        ;; (group (one-or-more not-newline)) ":" (group (one-or-more digit)) ":" (group (one-or-more digit))
-        ;; (zero-or-more whitespace) "-" (zero-or-more whitespace)
-        ;; (* "error" (zero-or-more whitespace) (one-or-more alnum)))
-        ;;
-        (push '(typescript-tsc-error-regexp
-                "^[[:space:]]*\\(?:\\(?:ERROR[[:space:]]*in\\)*\\)?[[:space:]]*\\(.+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)[[:space:]]*-[[:space:]]*\\(?:error[[:space:]]*[[:alnum:]]+\\)*" 1 2 3 2)
-              compilation-error-regexp-alist-alist)
+          ;; when buiding with Angular CLI, the first error always contains "ERROR in"
+          ;;
+          ;; adjusting this regexp makes 'next-error' work in compilation mode
+          ;;
+          ;; Used the following to generate the regular expression:
+          ;;
+          ;; (rx line-start
+          ;;     (zero-or-more whitespace)
+          ;;     (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
+          ;;     (zero-or-more whitespace)
+          ;;     (group (one-or-more not-newline)) ":" (group (one-or-more digit)) ":" (group (one-or-more digit)))
+          ;;
+          (push '(typescript-tsc-error-regexp
+                "^[[:space:]]*\\(?:\\(?:ERROR[[:space:]]*in\\)*\\)?[[:space:]]*\\(.+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)" 1 2 3 2)
+                compilation-error-regexp-alist-alist)
 
-        (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
+          (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
 
-        ;; (add-to-list 'compilation-error-regexp-alist-alist
-        ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
+          ;;
+          ;; Used the following to generate the regular expression:
+          ;;
+          ;; (rx line-start
+          ;;     (zero-or-more whitespace)
+          ;;     (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
+          ;;     (zero-or-more whitespace)
+          ;;     (group (one-or-more not-newline))
+          ;;     (syntax open-parenthesis) (group (one-or-more digit)) ","
+          ;;     (group (one-or-more digit)) (syntax close-parenthesis) ":")
+          ;;
+          (push '(angular-html-error-regexp
+                "^[[:space:]]*\\(?:\\(?:ERROR[[:space:]]*in\\)*\\)?[[:space:]]*\\(.+\\)\\s(\\([[:digit:]]+\\),\\([[:digit:]]+\\)\\s):" 1 2 3 2)
+                compilation-error-regexp-alist-alist)
 
-        ;; https://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/
-        ;; Add NodeJS error format
-        (add-to-list 'compilation-error-regexp-alist-alist
-                     '(node "^[  ]+at \\(?:[^\\(\n]+ \\(\\)?\\([a-zA-Z\\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\\)?$"
-                            1   ;; file
-                            2   ;; line
-                            3)) ;; column
+          (push 'angular-html-error-regexp compilation-error-regexp-alist)
 
-        (setq compilation-error-regexp-alist
-              (cons 'node compilation-error-regexp-alist))
+          ;; (add-to-list 'compilation-error-regexp-alist-alist
+          ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
 
-        (add-to-list 'compilation-error-regexp-alist-alist
-                     '(typescript-tslint
-                       "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
-                       2 3 4 1))
+          ;; https://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/
+          ;; Add NodeJS error format
+          (add-to-list 'compilation-error-regexp-alist-alist
+                       '(node "^[  ]+at \\(?:[^\\(\n]+ \\(\\)?\\([a-zA-Z\\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\\)?$"
+                              1   ;; file
+                              2   ;; line
+                              3)) ;; column
 
-        (setq compilation-error-regexp-alist
-              (cons 'typescript-tslint compilation-error-regexp-alist))
+          (setq compilation-error-regexp-alist
+                (cons 'node compilation-error-regexp-alist))
 
-        (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
-        (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
+          (add-to-list 'compilation-error-regexp-alist-alist
+                       '(typescript-tslint
+                         "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
+                         2 3 4 1))
 
-        (defconst
-          nl-typescript-pretty-symbols-alist
-          '(("=>" . ?⇒)
-            ("<=" . ?≤)
-            (">=" . ?≥)
-            ("===" . ?≡)
-            ("!" . ?¬)
-            ("!=" . ?≠)
-            ("!==" . ?≢)
-            ("&&" . ?∧)
-            ("||" . ?∨)))
+          (setq compilation-error-regexp-alist
+                (cons 'typescript-tslint compilation-error-regexp-alist))
 
-        (defun nl-tide-mode-hook ()
-          (interactive)
-          (tide-setup)
-          (flycheck-mode +1)
-          (setq flycheck-check-syntax-automatically '(save mode-enabled))
-          (eldoc-mode +1)
-          (tide-hl-identifier-mode +1)
-          (company-mode +1)
-          (prettier-js-mode)
-          (my-common-prog-mode-settings)
-          (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
-                prettify-symbols-unprettify-at-point 'right-edge
-                company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
-          (setq-default typescript-indent-level 2))
+          (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+          (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
 
-        :hook ((typescript-mode . tide-setup)
-               (typescript-mode . tide-hl-identifier-mode)
-               (typescript-mode . nl-tide-mode-hook)
-               (typescript-mode . column-enforce-mode)
-               (typescript-mode . rainbow-delimiters-mode)))
+          (defconst
+            nl-typescript-pretty-symbols-alist
+            '(("=>" . ?⇒)
+              ("<=" . ?≤)
+              (">=" . ?≥)
+              ("===" . ?≡)
+              ("!" . ?¬)
+              ("!=" . ?≠)
+              ("!==" . ?≢)
+              ("&&" . ?∧)
+              ("||" . ?∨)))
+
+          (defun nl-tide-mode-hook ()
+            (interactive)
+            (tide-setup)
+            (flycheck-mode +1)
+            (setq flycheck-check-syntax-automatically '(save mode-enabled))
+            (eldoc-mode +1)
+            (tide-hl-identifier-mode +1)
+            (company-mode +1)
+            (prettier-js-mode)
+            (my-common-prog-mode-settings)
+            (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
+                  prettify-symbols-unprettify-at-point 'right-edge
+                  company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
+            (setq-default typescript-indent-level 2))
+
+          :hook ((typescript-mode . tide-setup)
+                 (typescript-mode . tide-hl-identifier-mode)
+                 (typescript-mode . nl-tide-mode-hook)
+                 (typescript-mode . column-enforce-mode)
+                 (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
 
 #+RESULTS:
