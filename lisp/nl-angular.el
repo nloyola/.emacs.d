@@ -90,29 +90,20 @@
   "Return TRUE if FILENAME is a match for a TypseScript spec."
   (string-match "\.spec\.ts$" filename))
 
-(defun nl/delete-process-for-buffer (buffer)
-  "Delte process running in BUFFER."
-  (let ((proc (get-buffer-process (get-buffer buffer))))
-    (when proc
-      (pop-to-buffer buffer)
-      (delete-process proc))))
+(defun nl/compile-command-in-proj-root (command)
+  "Run the compile COMMAND at the project's root directory."
+  (interactive)
+  (compile (format "cd %s && %s" (projectile-project-root) command)))
 
 (defun nl/ng-compile ()
-    "Uses Angular CLI to build the project."
+  "Uses Angular CLI to build the project."
   (interactive)
-  (nl/delete-process-for-buffer "*ng-compile*")
-  (with-output-to-temp-buffer "*ng-compile*"
-    (async-shell-command "ng build" "*ng-compile*" "*Messages*")
-    (pop-to-buffer "*ng-compile*"))
-  "")
+  (nl/compile-command-in-proj-root "ng build"))
 
 (defun nl/ng-test ()
   "Use Angular CLI to run the project tests."
   (interactive)
-  (nl/delete-process-for-buffer "*ng-test*")
-  (with-output-to-temp-buffer "*ng-test*"
-    (async-shell-command "npm run test" "*ng-test*" "*Messages*"))
-  "")
+  (nl/compile-command-in-proj-root "npm run test"))
 
 (defun nl/related-files (path)
   "Tell Projectile that implementation and test files are in the same directory (PATH)."
@@ -267,6 +258,8 @@
 (define-key typescript-mode-map (kbd "C-c , c") 'nl/jest-test-only-this-file)
 (define-key typescript-mode-map (kbd "C-c , d") 'nl/jest-test-only-this-directory)
 (define-key typescript-mode-map (kbd "C-c , p") 'nl/ng-test)
+
+(define-key typescript-mode-map (kbd "C-x '") 'recompile)
 
 (defun nl/prettier-on-project-files ()
   (interactive)
