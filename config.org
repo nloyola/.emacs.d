@@ -3510,9 +3510,8 @@ think of it as both something that augments and replaces the standard
     ;;
     (push `(typescript-tsc-error-regexp
             ,(rx line-start
-                 (zero-or-more whitespace)
-                 (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
-                 (zero-or-more whitespace)
+                 (zero-or-more space)
+                 (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
                  (group-n 1 (one-or-more (not (in space ":" "\n"))))
                  ":" (group-n 2 (one-or-more digit))
                  ":" (group-n 3 (one-or-more digit))
@@ -3524,9 +3523,8 @@ think of it as both something that augments and replaces the standard
 
     (push `(angular-html-error-regexp
             ,(rx line-start
-                 (zero-or-more whitespace)
-                 (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
-                 (zero-or-more whitespace)
+                 (zero-or-more space)
+                 (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
                  (group-n 1 (one-or-more (not (in space ":" "\n"))))
                  (syntax open-parenthesis)
                  (group-n 2 (one-or-more digit))
@@ -3543,7 +3541,7 @@ think of it as both something that augments and replaces the standard
     (push `(node-error-regexp
             ,(rx line-start
                  (zero-or-more (not (in "\n")))
-                 "at" (zero-or-more whitespace)
+                 (one-or-more "at" (one-or-more space))
                  (group-n 1 (one-or-more (not (in space ":" "\n"))))
                  ":" (group-n 2 (one-or-more digit))
                  ":" (group-n 3 (one-or-more digit))
