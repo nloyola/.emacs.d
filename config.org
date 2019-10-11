@@ -2760,8 +2760,11 @@ When using =counsel-ag=:
 
 ** [[https://github.com/tonini/karma.el][karma]]
 
+Disabled since Jest is being used. 2019-10-11
+
 #+BEGIN_SRC emacs-lisp
 (use-package karma
+  :disabled
   :commands karma-mode)
 #+END_SRC
 
@@ -3509,12 +3512,11 @@ think of it as both something that augments and replaces the standard
             ,(rx line-start
                  (zero-or-more whitespace)
                  (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
-                 (zero-or-one "at" )
                  (zero-or-more whitespace)
-                 (group-n 1 (one-or-more (and alphanumeric "/" not-newline)))
+                 (group-n 1 (one-or-more (not (in space ":" "\n"))))
                  ":" (group-n 2 (one-or-more digit))
                  ":" (group-n 3 (one-or-more digit))
-                 (one-or-more not-newline))
+                 (zero-or-more not-newline))
             1 2 3 2)
           compilation-error-regexp-alist-alist)
 
@@ -3525,7 +3527,7 @@ think of it as both something that augments and replaces the standard
                  (zero-or-more whitespace)
                  (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
                  (zero-or-more whitespace)
-                 (group-n 1 (one-or-more (and alphanumeric "/" not-newline)))
+                 (group-n 1 (one-or-more (not (in space ":" "\n"))))
                  (syntax open-parenthesis)
                  (group-n 2 (one-or-more digit))
                  "," (group-n 3 (one-or-more digit))
@@ -3538,16 +3540,18 @@ think of it as both something that augments and replaces the standard
     ;; (add-to-list 'compilation-error-regexp-alist-alist
     ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
 
-    ;; https://benhollis.net/blog/2015/12/20/nodejs-stack-traces-in-emacs-compilation-mode/
-    ;; Add NodeJS error format
-    (add-to-list 'compilation-error-regexp-alist-alist
-                 `(node "^[  ]+at \\(?:[^\\(\n]+ \\(\\)?\\([a-zA-Z\\.0-9_/-]+\\):\\([0-9]+\\):\\([0-9]+\\)\\)?$"
-                        1   ;; file
-                        2   ;; line
-                        3)) ;; column
+    (push `(node-error-regexp
+            ,(rx line-start
+                 (zero-or-more (not (in "\n")))
+                 "at" (zero-or-more whitespace)
+                 (group-n 1 (one-or-more (not (in space ":" "\n"))))
+                 ":" (group-n 2 (one-or-more digit))
+                 ":" (group-n 3 (one-or-more digit))
+                 (zero-or-more not-newline))
+            1 2 3 2)
+          compilation-error-regexp-alist-alist)
 
-    (setq compilation-error-regexp-alist
-          (cons 'node compilation-error-regexp-alist))
+    (push 'node-error-regexp compilation-error-regexp-alist)
 
     (add-to-list 'compilation-error-regexp-alist-alist
                  '(typescript-tslint
