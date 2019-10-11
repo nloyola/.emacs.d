@@ -991,7 +991,7 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
       org-src-preserve-indentation t
       org-enforce-todo-dependencies t
       org-enforce-todo-checkbox-dependencies t
-      org-link-frame-setup '((file . find-file))
+      ;; org-link-frame-setup '((file . find-file))
       org-export-backends '(ascii html icalendar latex md)
       org-log-into-drawer t)
 
@@ -3507,13 +3507,14 @@ think of it as both something that augments and replaces the standard
     ;;
     (push `(typescript-tsc-error-regexp
             ,(rx line-start
-                (zero-or-more whitespace)
-                (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
-                (zero-or-more whitespace)
-                (group-n 1 (one-or-more not-newline))
-                ":" (group-n 2 (one-or-more digit))
-                ":" (group-n 3 (one-or-more digit))
-                (one-or-more not-newline))
+                 (zero-or-more whitespace)
+                 (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
+                 (zero-or-one "at" )
+                 (zero-or-more whitespace)
+                 (group-n 1 (one-or-more (and alphanumeric "/" not-newline)))
+                 ":" (group-n 2 (one-or-more digit))
+                 ":" (group-n 3 (one-or-more digit))
+                 (one-or-more not-newline))
             1 2 3 2)
           compilation-error-regexp-alist-alist)
 
@@ -3524,7 +3525,7 @@ think of it as both something that augments and replaces the standard
                  (zero-or-more whitespace)
                  (zero-or-one (* "ERROR" (zero-or-more whitespace) "in"))
                  (zero-or-more whitespace)
-                 (group-n 1 (one-or-more not-newline))
+                 (group-n 1 (one-or-more (and alphanumeric "/" not-newline)))
                  (syntax open-parenthesis)
                  (group-n 2 (one-or-more digit))
                  "," (group-n 3 (one-or-more digit))
