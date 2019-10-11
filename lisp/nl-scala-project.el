@@ -160,7 +160,6 @@ The class name must have the postfix 'Spec' for this function to work."
   (newline-and-indent)
   (scala-indent:insert-asterisk-on-multiline-comment))
 
-;; use sbt-run-previous-command to re-compile your code after changes
 (define-key scala-mode-map (kbd "C-x '") 'recompile)
 
 (define-key scala-mode-map (kbd "C-c , t") 'nl/scalatest-test-only-this-buffer-with-substring-tag)
