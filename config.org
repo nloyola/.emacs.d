@@ -612,7 +612,7 @@ possible.
 (when (equal system-type 'gnu/linux)
     (setq browse-url-browser-function 'browse-url-generic
           browse-url-generic-program "/usr/bin/brave-browser"
-          browse-url-generic-args '()))
+          browse-url-generic-args '("--force-device-scale-factor=1.4")))
 (setenv "BROWSER" "google-chrome")
 #+END_SRC
 
