@@ -1774,7 +1774,8 @@ Provides a simple UI for customizing dired mode to use different faces and color
     :config
     (custom-set-faces
      '(doom-modeline-project-parent-dir ((t (:foreground "#0f3b82")))))
-    (setq doom-modeline-height 20
+    (setq doom-modeline-buffer-file-name-style 'buffer-name
+          doom-modeline-height 20
           doom-modeline-bar-width 3)
     :hook (after-init . doom-modeline-mode))
 #+END_SRC
