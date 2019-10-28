@@ -104,7 +104,10 @@ unzip symbola.zip
 *** Fira Code
 
 #+BEGIN_SRC emacs-lisp
-(set-face-font 'default "Fira Code Medium-14")
+  (set-face-font 'default "Fira Code Medium-14")
+
+  (use-package fira-code-mode
+    :load-path "~/.emacs.d/lisp")
 #+END_SRC
 
 *** Fira Mono
@@ -1147,6 +1150,7 @@ comments.
     (push '(">=" . ?≥) prettify-symbols-alist)
     (push '("<=" . ?≤) prettify-symbols-alist)
     (push '("->" . ?→) prettify-symbols-alist)
+    (fira-code-mode)
     (yas-minor-mode))
 
   (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
