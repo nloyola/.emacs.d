@@ -1803,6 +1803,7 @@ indexes (TAGS) or persistent background processes.
 
 #+BEGIN_SRC emacs-lisp
 (use-package easy-kill
+  :pin melpa
   :config
   (global-set-key [remap kill-ring-save] #'easy-kill)
   (global-set-key [remap mark-sexp] #'easy-mark))
@@ -2462,7 +2463,7 @@ short bindings with a common prefix - a Hydra.
       :init
       (setq key-chord-one-key-delay 0.16)
       :config (key-chord-mode 1))
-    (use-package posframe)
+    (use-package posframe :pin melpa)
     :config
     (setq hydra-hint-display-type 'posframe)
     (defun nl/pull-window ()
