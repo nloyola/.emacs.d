@@ -246,18 +246,14 @@
       (find-file (expand-file-name filename (projectile-project-root)))
       (goto-char (point-min)))))
 
-(define-key typescript-mode-map (kbd "C-c C-t c c") 'nl/typescript-compile-this-file)
-(define-key typescript-mode-map (kbd "C-c C-t c t") 'nl/jest-test-coverage)
-(define-key typescript-mode-map (kbd "C-c C-t i") 'nl/indent-whole-buffer)
+(define-key typescript-mode-map (kbd "C-c C-t c") 'nl/typescript-compile-this-file)
 (define-key typescript-mode-map (kbd "C-c C-t s") 'nl/counsel-ag-ts-spec)
-(define-key typescript-mode-map (kbd "C-c C-t t t") 'nl/jest-test-only-this-file)
-(define-key typescript-mode-map (kbd "C-c C-t t d") 'nl/jest-test-only-this-directory)
-(define-key typescript-mode-map (kbd "C-c C-t t c t") 'nl/jest-test-and-coverage-only-this-file)
-(define-key typescript-mode-map (kbd "C-c C-t t c d") 'nl/jest-test-and-coverage-only-this-directory)
 
-(define-key typescript-mode-map (kbd "C-c , c") 'nl/jest-test-only-this-file)
+(define-key typescript-mode-map (kbd "C-c , f") 'nl/jest-test-only-this-file)
+(define-key typescript-mode-map (kbd "C-c , F") 'nl/jest-test-and-coverage-only-this-file)
 (define-key typescript-mode-map (kbd "C-c , d") 'nl/jest-test-only-this-directory)
 (define-key typescript-mode-map (kbd "C-c , p") 'nl/ng-test)
+(define-key typescript-mode-map (kbd "C-c , P") 'nl/jest-test-coverage)
 
 (define-key typescript-mode-map (kbd "C-x '") 'recompile)
 
