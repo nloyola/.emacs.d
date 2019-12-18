@@ -104,7 +104,7 @@ unzip symbola.zip
 *** Fira Code
 
 #+BEGIN_SRC emacs-lisp
-  (set-face-font 'default "Fira Code Medium-14")
+  (set-face-font 'default "Fira Code Medium-12")
 
   (use-package fira-code-mode
     :load-path "~/.emacs.d/lisp")
@@ -1671,7 +1671,6 @@ Complete anything.
             company-pseudo-tooltip-frontend
             company-echo-metadata-frontend)))
 #+END_SRC
-
 ** [[https://github.com/twada/coverlay.el][coverlay.el]]
 
 #+BEGIN_SRC emacs-lisp
@@ -1745,6 +1744,16 @@ Provides a simple UI for customizing dired mode to use different faces and color
 (use-package diredful
   :load-path "~/src/github/elisp/diredful"
   :config (diredful-mode 1))
+#+END_SRC
+
+
+** [[https://github.com/Fuco1/dired-hacks][dired-narrow]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package dired-narrow
+  :ensure t
+  :bind (:map dired-mode-map
+              ("/" . dired-narrow)))
 #+END_SRC
 
 ** [[https://github.com/jojojames/dired-sidebar][dired-sidebar]]
