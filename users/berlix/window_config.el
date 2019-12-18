@@ -19,7 +19,7 @@
          (num-displays (length (display-monitor-attributes-list)))
          (desired-width-in-chars 235)
          (desired-width-in-pixels (* desired-width-in-chars (frame-char-width))))
-    (set-face-attribute 'default frame :font "Fira Code Medium-14")
+    (set-face-attribute 'default frame :font "Fira Code Medium-12")
     (cond
      ((eq num-displays 2)
       (set-frame-size frame
@@ -49,7 +49,7 @@
     (select-frame-set-input-focus frame)
     (switch-to-buffer (current-buffer))
     (set-frame-position frame (+ (nl/monitor-pixel-width 1) 400) 120)
-    (set-face-attribute 'default frame :font "Fira Code Medium-14")
+    (set-face-attribute 'default frame :font "Fira Code Medium-12")
     (set-frame-size frame
                     (* 120 (frame-char-width frame))
                     (* 70 (frame-char-height frame))
@@ -62,7 +62,7 @@
         (monitor-pixel-width (nth 3 (assq 'geometry (nth 0 (display-monitor-attributes-list)))))
         (monitor-pixel-height (nth 4 (assq 'geometry (nth 0 (display-monitor-attributes-list))))))
     (select-frame-set-input-focus frame)
-    (set-face-attribute 'default frame :font "Fira Code Medium-14")
+    (set-face-attribute 'default frame :font "Fira Code Medium-12")
     (switch-to-buffer "*scratch*")
     (set-frame-position frame
                         (/ (nl/monitor-pixel-width 0) 2)
@@ -96,7 +96,7 @@
       (let ((monitor-pixel-height (nth 4 (assq 'geometry (frame-monitor-attributes frame)))))
         (if (<= monitor-pixel-height 1080)
             (set-frame-parameter 'nil 'font "Fira Code Medium-9")
-          (set-frame-parameter 'nil 'font "Fira Code Medium-14")))))
+          (set-frame-parameter 'nil 'font "Fira Code Medium-12")))))
 
 ;;(push
 ;; 'fontify-frame after-make-frame-functions)
