@@ -68,7 +68,8 @@
 (defun nl/scalstest-find-suite-class-name ()
   "Determines the name of the ScalaTest suite name."
   (save-excursion
-    (when (re-search-backward scalatest-beginning-of-class-regexp nil t)
+    (goto-char (point-min))
+    (when (re-search-forward scalatest-beginning-of-class-regexp nil t)
       (match-string-no-properties 1))))
 
 (defun nl/scalstest-find-scalatest-behaviour ()
