@@ -37,7 +37,7 @@
         (group (+ (not (syntax string-quote))))
         (syntax string-quote)
         ;; account for optional tag
-        (group (? (not (syntax close-parenthesis))))
+        (group (? (+ (not (syntax close-parenthesis)))))
         (syntax close-parenthesis)))
   "Regular expression for a scalatest FunSepc behaviour.")
 
