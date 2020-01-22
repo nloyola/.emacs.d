@@ -417,7 +417,6 @@ Add =\n= to end of file if required.
 (setq eshell-history-size 100000)
 #+END_SRC
 
-
 ** Follow Buffer
 
 #+BEGIN_SRC elisp
@@ -1013,6 +1012,8 @@ Set up some global key bindings that integrate with Org Mode features.
 Also, Unbind some keys (I prefer windmove).
 
 #+BEGIN_SRC emacs-lisp
+  (require 'org-tempo)
+
   (defun nl/org-mode-hook ()
     (define-key org-mode-map (kbd "C-c l") 'org-store-link)
     (define-key org-mode-map (kbd "C-c a") 'org-agenda)
@@ -1315,7 +1316,10 @@ Save command history between sessions (taken from EmacsWiki).
 
 #+BEGIN_SRC emacs-lisp
 (use-package tramp
-  :init (setq tramp-ssh-controlmaster-options ""))
+  :init (setq tramp-ssh-controlmaster-options "")
+  :config
+  (let ((cert-path "~/.ssh/id_dsa")
+        (ssh-methods '("ssh" "sshx")))))
 #+END_SRC
 
 ** =windmove=
@@ -1347,32 +1351,23 @@ direction keys.
 
 * Themes
 ** Current
-*** [[https://github.com/TheSuspiciousWombat/SusColors-emacs][suscolors]]
+*** [[https://github.com/belak/base16-emacs][base16-emacs]]
 
-Trying out new theme: 2019-08-04
+One tweak to the base16-google-dark theme; the face for the mode line
+buffer name is too hard to see,  set it to white instead.
+
+Trying out 2020-01-20
 
 #+BEGIN_SRC emacs-lisp
-  (use-package suscolors-theme
-    :config
-    (load-theme 'suscolors t)
-    ;; default region color is too hard to see on my display
-    (custom-set-faces
-     ;; '(region ((t (:background "#0f3b82"))))
-     ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
-     ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-     '(vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
-
-     '(ediff-odd-diff-A ((nil :background "#862b27")))
-     '(ediff-even-diff-A ((nil :background "#1f772c")))
-     '(ediff-current-diff-A ((nil :background "#2b538a")))
-     '(ediff-odd-diff-B ((nil :background "#862b27")))
-     '(ediff-even-diff-B ((nil :background "#1f772c")))
-     '(ediff-current-diff-B ((nil :background "#2b538a")))
-     '(ediff-odd-diff-C ((nil :background "#862b27")))
-     '(ediff-even-diff-C ((nil :background "#1f772c")))
-     '(ediff-current-diff-C ((nil :background "#2b538a")))))
+(use-package base16-theme
+  :config
+    (load-theme 'base16-woodland t)
+    ;;(load-theme 'base16-solarized-dark t)
+    ;;(load-theme 'base16-oceanicnext t)
+    ;;(load-theme 'base16-google-dark t)
+    ;;(load-theme 'base16-nord t)
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
-
 ** Past
 *** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
 
@@ -1423,24 +1418,6 @@ Switched to Dracula theme: 2019-04-10
      '(ediff-current-diff-C ((nil :background "#2b538a")))))
 #+END_SRC
 
-*** [[https://github.com/belak/base16-emacs][base16-emacs]]
-
-One tweak to the base16-google-dark theme; the face for the mode line
-buffer name is too hard to see,  set it to white instead.
-
-Trying out Kaolin Theme 2017-10-25
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package base16-theme
-  :config
-    (load-theme 'base16-woodland t)
-    ;;(load-theme 'base16-solarized-dark t)
-    ;;(load-theme 'base16-oceanicnext t)
-    ;;(load-theme 'base16-google-dark t)
-    ;;(load-theme 'base16-nord t)
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
-#+END_SRC
-
 *** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -1486,6 +1463,32 @@ TextMate like theme.
 (use-package solarized-theme
   :config
     (load-theme 'solarized-dark t))
+#+END_SRC
+
+*** [[https://github.com/TheSuspiciousWombat/SusColors-emacs][suscolors]]
+
+Tried out new theme: 2019-08-04
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package suscolors-theme
+    :config
+    (load-theme 'suscolors t)
+    ;; default region color is too hard to see on my display
+    (custom-set-faces
+     ;; '(region ((t (:background "#0f3b82"))))
+     ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
+     ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+     '(vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
+
+     '(ediff-odd-diff-A ((nil :background "#862b27")))
+     '(ediff-even-diff-A ((nil :background "#1f772c")))
+     '(ediff-current-diff-A ((nil :background "#2b538a")))
+     '(ediff-odd-diff-B ((nil :background "#862b27")))
+     '(ediff-even-diff-B ((nil :background "#1f772c")))
+     '(ediff-current-diff-B ((nil :background "#2b538a")))
+     '(ediff-odd-diff-C ((nil :background "#862b27")))
+     '(ediff-even-diff-C ((nil :background "#1f772c")))
+     '(ediff-current-diff-C ((nil :background "#2b538a")))))
 #+END_SRC
 
 * ELPA packages
@@ -2235,8 +2238,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
        ;; Save current position to mark ring when jumping to a different place
        (helm-mode)
        (helm-autoresize-mode 1)
-     :custom
-     (helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
      :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
      :bind (("M-x" . helm-M-x)
             ("M-y" . helm-show-kill-ring)
@@ -2318,6 +2319,9 @@ instead of ~find-file-other-window~.
   (use-package helm-ag
     :bind (:map helm-ag-mode-map
                 ("C-<return>" . nl/jump-other-window))
+    :custom
+    ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
+    (helm-ag-use-temp-buffer nil)
     :preface
     (defun nl/ace-find-file (filename)
       (setq helm-ag--last-default-directory default-directory)
@@ -2987,6 +2991,25 @@ Quick switching between buffers.
                 nswbuff-exclude-buffer-regexps '("^ .*" "^\\*.*\\*")))
 #+END_SRC
 
+** [[https://github.com/openscad/openscad/tree/ba38885dcae54336c85bec0ca4ac2a5e7d038bbe][openscad]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package scad-mode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.scad$" . scad-mode)))
+#+END_SRC
+
+** [[https://github.com/sabof/org-bullets][org-bullets]]
+
+#+BEGIN_QUOTE
+Show org-mode bullets as UTF-8 characters.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package org-bullets
+  :hook (org-mode . (lambda () (org-bullets-mode 1))))
+#+END_SRC
+
 ** [[https://github.com/politza/pdf-tools][pdf-tools]]
 
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -3145,25 +3168,6 @@ Integrates with IPython.
 
 #+BEGIN_SRC emacs-lisp :tangle no
   (use-package python-mode
-#+END_SRC
-
-** [[https://github.com/openscad/openscad/tree/ba38885dcae54336c85bec0ca4ac2a5e7d038bbe][openscad]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package scad-mode
-  :config
-  (add-to-list 'auto-mode-alist '("\\.scad$" . scad-mode)))
-#+END_SRC
-
-** [[https://github.com/sabof/org-bullets][org-bullets]]
-
-#+BEGIN_QUOTE
-Show org-mode bullets as UTF-8 characters.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp
-(use-package org-bullets
-  :hook (org-mode . (lambda () (org-bullets-mode 1))))
 #+END_SRC
 
 ** revive
