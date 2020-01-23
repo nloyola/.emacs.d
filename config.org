@@ -1316,10 +1316,12 @@ Save command history between sessions (taken from EmacsWiki).
 
 #+BEGIN_SRC emacs-lisp
 (use-package tramp
-  :init (setq tramp-ssh-controlmaster-options "")
+  :init (setq tramp-ssh-controlmaster-options nil)
   :config
   (let ((cert-path "~/.ssh/id_dsa")
-        (ssh-methods '("ssh" "sshx")))))
+        (ssh-methods '("ssh" "sshx"))))
+  (setq tramp-terminal-type "dumb"
+        tramp-shell-prompt-pattern "^[^$>\n]*[#$%>] *\\(\[[0-9;]*[a-zA-Z] *\\)*"))
 #+END_SRC
 
 ** =windmove=
