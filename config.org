@@ -1,4 +1,4 @@
-#+TITLE: Emacs Configuration
++TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 #+STARTUP: content
 
@@ -1353,46 +1353,44 @@ direction keys.
 
 * Themes
 ** Current
-*** [[https://github.com/belak/base16-emacs][base16-emacs]]
 
-One tweak to the base16-google-dark theme; the face for the mode line
-buffer name is too hard to see,  set it to white instead.
+*** [[https://github.com/fniessen/emacs-leuven-theme][emacs-leuven-theme]]
 
-Trying out 2020-01-20
+Trying out 2020-01-30
 
 #+BEGIN_SRC emacs-lisp
-(use-package base16-theme
+(use-package leuven-theme
   :config
-    (load-theme 'base16-woodland t)
-    ;;(load-theme 'base16-solarized-dark t)
-    ;;(load-theme 'base16-oceanicnext t)
-    ;;(load-theme 'base16-google-dark t)
-    ;;(load-theme 'base16-nord t)
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
+  (load-theme 'leuven-dark t)
+  :custom-face
+   (dired-directory ((nil :background "#25202a")))
+   (show-paren-match ((nil :background "#ffad65"))))
 #+END_SRC
+
 ** Past
 *** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
 
 Trying out new theme: 2019-04-10
 
-#+BEGIN_SRC emacs-lisp :tangle no
-    (use-package dracula-theme
-      :config
-      (load-theme 'dracula t)
-      ;; default region color is too hard to see on my display
-      (custom-set-faces
-       ;; '(region ((t (:background "#0f3b82"))))
-       '(font-lock-warning-face ((t (:background "#0f3b82"))))
-       '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-       '(ediff-odd-diff-A ((nil :background "#862b27")))
-       '(ediff-even-diff-A ((nil :background "#1f772c")))
-       '(ediff-current-diff-A ((nil :background "#2b538a")))
-       '(ediff-odd-diff-B ((nil :background "#862b27")))
-       '(ediff-even-diff-B ((nil :background "#1f772c")))
-       '(ediff-current-diff-B ((nil :background "#2b538a")))
-       '(ediff-odd-diff-C ((nil :background "#862b27")))
-       '(ediff-even-diff-C ((nil :background "#1f772c")))
-       '(ediff-current-diff-C ((nil :background "#2b538a")))))
+#+BEGIN_SRC emacs-lisp
+(use-package dracula-theme
+  :disabled
+  :config
+  (load-theme 'dracula t)
+  ;; default region color is too hard to see on my display
+  :custom-face
+   ;; (region ((t (:background "#0f3b82"))))
+   (font-lock-warning-face ((t (:background "#0f3b82"))))
+   (font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+   (ediff-odd-diff-A ((nil :background "#862b27")))
+   (ediff-even-diff-A ((nil :background "#1f772c")))
+   (ediff-current-diff-A ((nil :background "#2b538a")))
+   (ediff-odd-diff-B ((nil :background "#862b27")))
+   (ediff-even-diff-B ((nil :background "#1f772c")))
+   (ediff-current-diff-B ((nil :background "#2b538a")))
+   (ediff-odd-diff-C ((nil :background "#862b27")))
+   (ediff-even-diff-C ((nil :background "#1f772c")))
+   (ediff-current-diff-C ((nil :background "#2b538a"))))
 #+END_SRC
 
 *** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
@@ -1491,6 +1489,40 @@ Tried out new theme: 2019-08-04
      '(ediff-odd-diff-C ((nil :background "#862b27")))
      '(ediff-even-diff-C ((nil :background "#1f772c")))
      '(ediff-current-diff-C ((nil :background "#2b538a")))))
+#+END_SRC
+
+*** [[https://github.com/belak/base16-emacs][base16-emacs]]
+
+One tweak to the base16-google-dark theme; the face for the mode line
+buffer name is too hard to see,  set it to white instead.
+
+Tried out 2020-01-20
+
+#+BEGIN_SRC emacs-lisp
+(use-package base16-theme
+  :disabled
+  :config
+    (load-theme 'base16-woodland t)
+    ;;(load-theme 'base16-solarized-dark t)
+    ;;(load-theme 'base16-oceanicnext t)
+    ;;(load-theme 'base16-google-dark t)
+    ;;(load-theme 'base16-nord t)
+    (custom-set-faces
+     ;; '(region ((t (:background "#0f3b82"))))
+     ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
+     ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+     '(vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
+
+     '(ediff-odd-diff-A ((nil :background "#862b27")))
+     '(ediff-even-diff-A ((nil :background "#1f772c")))
+     '(ediff-current-diff-A ((nil :background "#2b538a")))
+     '(ediff-odd-diff-B ((nil :background "#862b27")))
+     '(ediff-even-diff-B ((nil :background "#1f772c")))
+     '(ediff-current-diff-B ((nil :background "#2b538a")))
+     '(ediff-odd-diff-C ((nil :background "#862b27")))
+     '(ediff-even-diff-C ((nil :background "#1f772c")))
+     '(ediff-current-diff-C ((nil :background "#2b538a"))))
+    (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
 #+END_SRC
 
 * ELPA packages
@@ -2117,7 +2149,7 @@ Updte tags on command line with ~global -u~.
   :commands ggtags-mode)
 #+END_SRC
 
-** [[https://github.com/pidu/git-timemachine][git-timemachine]]
+** [[https://gitlab.com/pidu/git-timemachine][git-timemachine]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package git-timemachine
@@ -2318,27 +2350,27 @@ Define my own function for ~C-o~ key mapping. Uses ~ace-select-window~
 instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package helm-ag
-    :bind (:map helm-ag-mode-map
-                ("C-<return>" . nl/jump-other-window))
-    :custom
-    ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
-    (helm-ag-use-temp-buffer nil)
-    :preface
-    (defun nl/ace-find-file (filename)
-      (setq helm-ag--last-default-directory default-directory)
-      ;; use ace-select-window if there are more than 2 windows in the frame
-      (let ((path (concat helm-ag--last-default-directory filename)))
-        (if (> (length (window-list)) 2)
-            (ace-select-window)
-          (other-window 1))
-        (find-file path)))
+(use-package helm-ag
+  :bind (:map helm-ag-mode-map
+              ("C-<return>" . nl/jump-other-window))
+  :custom
+  ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
+  (helm-ag-use-temp-buffer nil)
+  :preface
+  (defun nl/ace-find-file (filename)
+    (setq helm-ag--last-default-directory default-directory)
+    ;; use ace-select-window if there are more than 2 windows in the frame
+    (let ((path (concat helm-ag--last-default-directory filename)))
+      (if (> (length (window-list)) 2)
+          (ace-select-window)
+        (other-window 1))
+      (find-file path)))
 
-    (defun nl/jump-other-window ()
-      (interactive)
-      (let ((line (helm-current-line-contents)))
-        (helm-ag--find-file-action line 'nl/ace-find-file helm-ag--search-this-file-p)))
-    :commands helm-ag)
+  (defun nl/jump-other-window ()
+    (interactive)
+    (let ((line (helm-current-line-contents)))
+      (helm-ag--find-file-action line 'nl/ace-find-file helm-ag--search-this-file-p)))
+  :commands helm-ag)
 #+END_SRC
 
 ** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
@@ -2349,6 +2381,16 @@ instead of ~find-file-other-window~.
   ;;:init (use-package yasnippet)
   :bind ("C-c y" . helm-yas-complete))
 #+END_SRC
+** [[https://github.com/lerouxrgd/helm-fd][helm-fd]]
+
+#+begin_src emacs-lisp
+(use-package helm-fd
+  :after helm
+  :custom
+  (helm-fd-cmd "fdfind")
+  :bind (:map helm-map
+              ("/" . helm-fd)))
+#+end_src
 
 ** [[https://github.com/PythonNut/helm-flx][helm-flx]]
 
@@ -2852,16 +2894,15 @@ Add filler lorem ipsum text to Emacs.
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-php
     ;; :defer 3
-    :init
-    ;; (custom-set-variables
+    ;; :custom
     ;;  ;; Run php-language server with a different php interpreter and from a different location.
-    ;;  '(lsp-php-server-install-dir "~/.emacs.d/php-language-server")
-    ;;  '(lsp-php-language-server-command
+    ;;  (lsp-php-server-install-dir "~/.emacs.d/php-language-server")
+    ;;  (lsp-php-language-server-command
     ;;    (list "/usr/bin/php" (expand-file-name "vendor/bin/php-language-server.php" lsp-php-server-install-dir)))
     ;;  ;; Hide noisy messages when opening a large project
-    ;;  '(lsp-php-show-file-parse-notifications nil)
+    ;;  (lsp-php-show-file-parse-notifications nil)
     ;;  ;; Composer.json detection after Projectile.
-    ;;  '(lsp-php-workspace-root-detectors (quote (lsp-php-root-projectile lsp-php-root-composer-json "index.php" "robots.txt"))))
+    ;;  (lsp-php-workspace-root-detectors (quote (lsp-php-root-projectile lsp-php-root-composer-json "index.php" "robots.txt")))
     :hook (php-mode . lsp))
 #+END_SRC
 
@@ -3117,8 +3158,8 @@ http://batsov.com/projectile/
                    ("C-c , t" . phpunit-current-test)
                    ("C-c , c" . phpunit-current-class)
                    ("C-c , p" . phpunit-current-project))
-       :config
-       (custom-set-variables '(phpunit-arg "--stderr")))
+       :custom
+       (phpunit-arg "--stderr"))
 #+END_SRC
 
 ** [[https://github.com/google/protobuf][protobuf]]
