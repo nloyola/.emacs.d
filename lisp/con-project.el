@@ -28,6 +28,13 @@
                (make-directory test-dir :create-parents))
              (concat test-dir test-file)))))
 
+(defun nl/phpunit-test-this-package ()
+  "For the class the cursor is in, run the scalatest test suite.
+The class name must have the postfix 'Spec' for this function to work."
+  (interactive)
+  (let ((args (s-concat (file-name-directory (buffer-file-name)))))
+    (phpunit-run args)))
+
 (defhydra hydra-nl-con-project (:hint nil)
   "con project commands"
   ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue)
@@ -44,12 +51,13 @@
     (concat "rm -rf logs/test.log && " (funcall orig-function args))))
 
 (defun nl/con-project-php-mode-hook ()
-  (message "-----------------> here")
   ;;(advice-remove 'phpunit-get-compile-command 'nl/con-project-remove-test-log)
   (advice-add 'phpunit-get-compile-command :around #'nl/con-project-remove-test-log))
 
 ;; Before running phpunit, remove the logs/test.log file
 (add-hook 'php-mode-hook 'nl/con-project-php-mode-hook)
+
+(define-key php-mode-map (kbd "C-c , d") 'nl/phpunit-test-this-package)
 
 
 (provide 'con-project)
