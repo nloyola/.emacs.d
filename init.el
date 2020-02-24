@@ -9,6 +9,7 @@
       message-log-max 16384
       gc-cons-threshold 402653184
       gc-cons-percentage 0.6
+      read-process-output-max (* 1024 1024)
       auto-window-vscroll nil)
 
 (add-hook 'after-init-hook

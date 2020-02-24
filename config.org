@@ -844,9 +844,18 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 ** =ediff=
 #+BEGIN_SRC emacs-lisp
-(setq ediff-split-window-function 'split-window-horizontally
-      ediff-window-setup-function 'ediff-setup-windows-plain
-      ediff-diff-options "-bw")
+(use-package ediff
+  :bind (:map ediff-mode-map
+              ("j" . ediff-next-difference)
+              ("k" . ediff-previous-difference))
+  :custom
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-merge-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain)
+  (ediff-diff-options "-w")
+  :config
+  (setq-default ediff-ignore-similar-regions t)
+  (add-hook 'ediff-after-quit-hook-internal 'winner-undo))
 #+END_SRC
 
 ** =emacsclient=
@@ -1719,7 +1728,6 @@ Complete anything.
 
 #+BEGIN_SRC emacs-lisp
   (use-package coverlay
-    :disabled
     :load-path "~/src/github/elisp/coverlay.el"
     :custom
      (coverlay:untested-line-background-color "#862b27")
@@ -2861,38 +2869,40 @@ Add filler lorem ipsum text to Emacs.
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package lsp-mode
-    :pin melpa
-    :custom
-    (lsp-enable-snippet t)
-    (lsp-prefer-flymake nil)
-    (lsp-enable-file-watchers nil)
-    ;;(setq lsp-response-timeout 25)
-    :hook (scala-mode . lsp)
-          (php-mode . lsp))
+(use-package lsp-mode
+  :pin melpa
+  :custom
+  (lsp-enable-snippet t)
+  (lsp-prefer-flymake nil)
+  (lsp-enable-file-watchers nil)
+  ;;(setq lsp-response-timeout 25)
+  :hook (scala-mode . lsp)
+  :config
+  (setq lsp-prefer-capf t
+        lsp-idle-delay 0.5))
 
-  (use-package lsp-ui
-    :custom
-    (lsp-ui-sideline-enable t)
-    :config
-    (setq lsp-ui-doc-enable nil)
-    (define-key lsp-ui-mode-map
-      [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-    (define-key lsp-ui-mode-map
-      [remap xref-find-references] #'lsp-ui-peek-find-references)
-    :hook
-    (lsp-mode . lsp-ui-mode))
+(use-package lsp-ui
+  :custom
+  (lsp-ui-sideline-enable t)
+  :config
+  (setq lsp-ui-doc-enable nil)
+  (define-key lsp-ui-mode-map
+    [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map
+    [remap xref-find-references] #'lsp-ui-peek-find-references)
+  :hook
+  (lsp-mode . lsp-ui-mode))
 
-  (use-package company-lsp
-    :after company
-    :init
-    (add-to-list 'company-backends #'company-lsp)
-    :custom
-    (company-lsp-cache-candidates 'auto)
-    :config
-    (setq company-transformers nil
-            company-lsp-async t
-            company-lsp-cache-candidates nil))
+;;(use-package company-lsp
+;;  :after company
+;;  :init
+;;  (add-to-list 'company-backends #'company-lsp)
+;;  :custom
+;;  (company-lsp-cache-candidates 'auto)
+;;  :config
+;;  (setq company-transformers nil
+;;          company-lsp-async t
+;;          company-lsp-cache-candidates nil))
 #+END_SRC
 
 ** [[https://github.com/emacs-lsp/lsp-java][lsp-java]]
@@ -2907,7 +2917,6 @@ Add filler lorem ipsum text to Emacs.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-php
-    :disabled
     ;; :defer 3
     ;; :custom
     ;;  ;; Run php-language server with a different php interpreter and from a different location.
@@ -3168,11 +3177,23 @@ http://batsov.com/projectile/
 
 #+BEGIN_SRC emacs-lisp
 (use-package phpunit
-  :after php-mode
+  :after (php-mode)
   :bind (:map php-mode-map
               ("C-c , t" . phpunit-current-test)
               ("C-c , c" . phpunit-current-class)
               ("C-c , p" . phpunit-current-project))
+  :init
+  (push `(php-error-regexp
+          ,(rx line-start
+               (zero-or-more "Trace:" space)
+               "#" (one-or-more digit)
+               (zero-or-more space)
+               (group-n 1 (one-or-more (not (in space "(" "\n"))))
+               "(" (group-n 2 (one-or-more digit))
+               (zero-or-more not-newline))
+          1 2)
+        compilation-error-regexp-alist-alist)
+  (push 'php-error-regexp compilation-error-regexp-alist)
   :custom
   (phpunit-arg "--stderr"))
 #+END_SRC
@@ -3587,11 +3608,12 @@ think of it as both something that augments and replaces the standard
     ;;
     (push `(typescript-tsc-error-regexp
             ,(rx line-start
+                 (zero-or-more "[tsl]")
                  (zero-or-more space)
                  (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-                 (group-n 1 (one-or-more (not (in space ":" "\n"))))
-                 ":" (group-n 2 (one-or-more digit))
-                 ":" (group-n 3 (one-or-more digit))
+                 (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
+                 (in ":" "(") (group-n 2 (one-or-more digit))
+                 (in ":" ",") (group-n 3 (one-or-more digit))
                  (zero-or-more not-newline))
             1 2 3 2)
           compilation-error-regexp-alist-alist)
@@ -3619,6 +3641,8 @@ think of it as both something that augments and replaces the standard
             ,(rx line-start
                  (zero-or-more (not (in "\n")))
                  (one-or-more "at" (one-or-more space))
+                 (zero-or-more (not (in "(")))
+                 (zero-or-more "(")
                  (group-n 1 (one-or-more (not (in space ":" "\n"))))
                  ":" (group-n 2 (one-or-more digit))
                  ":" (group-n 3 (one-or-more digit))
