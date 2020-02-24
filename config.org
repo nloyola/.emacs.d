@@ -1719,6 +1719,7 @@ Complete anything.
 
 #+BEGIN_SRC emacs-lisp
   (use-package coverlay
+    :disabled
     :load-path "~/src/github/elisp/coverlay.el"
     :custom
      (coverlay:untested-line-background-color "#862b27")
@@ -2867,7 +2868,8 @@ Add filler lorem ipsum text to Emacs.
     (lsp-prefer-flymake nil)
     (lsp-enable-file-watchers nil)
     ;;(setq lsp-response-timeout 25)
-    :hook (scala-mode . lsp))
+    :hook (scala-mode . lsp)
+          (php-mode . lsp))
 
   (use-package lsp-ui
     :custom
@@ -2905,6 +2907,7 @@ Add filler lorem ipsum text to Emacs.
 
 #+BEGIN_SRC emacs-lisp
   (use-package lsp-php
+    :disabled
     ;; :defer 3
     ;; :custom
     ;;  ;; Run php-language server with a different php interpreter and from a different location.
@@ -3164,14 +3167,14 @@ http://batsov.com/projectile/
 ** [[https://github.com/nlamirault/phpunit.el][php-unit]]
 
 #+BEGIN_SRC emacs-lisp
-    (use-package phpunit
-       :after (php-mode)
-       :bind (:map php-mode-map
-                   ("C-c , t" . phpunit-current-test)
-                   ("C-c , c" . phpunit-current-class)
-                   ("C-c , p" . phpunit-current-project))
-       :custom
-       (phpunit-arg "--stderr"))
+(use-package phpunit
+  :after php-mode
+  :bind (:map php-mode-map
+              ("C-c , t" . phpunit-current-test)
+              ("C-c , c" . phpunit-current-class)
+              ("C-c , p" . phpunit-current-project))
+  :custom
+  (phpunit-arg "--stderr"))
 #+END_SRC
 
 ** [[https://github.com/google/protobuf][protobuf]]
