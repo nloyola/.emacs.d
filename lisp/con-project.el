@@ -6,6 +6,7 @@
 
 ;;; Code:
 
+(require 'php-mode)
 (eval-and-compile
   (require 'projectile))
 
