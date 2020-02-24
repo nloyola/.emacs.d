@@ -66,9 +66,9 @@
         ("melpa"        . "https://melpa.org/packages/"))
       package-archive-priorities
       '(;;("melpa-stable" . 10)
-        ("gnu"       . 10)
+        ("gnu"       . 5)
         ;; ("marmalade" . 7)
-        ("melpa"     . 5)))
+        ("melpa"     . 10)))
 
 (package-initialize)
 
