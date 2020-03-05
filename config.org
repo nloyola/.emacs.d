@@ -845,9 +845,6 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 ** =ediff=
 #+BEGIN_SRC emacs-lisp
 (use-package ediff
-  :bind (:map ediff-mode-map
-              ("j" . ediff-next-difference)
-              ("k" . ediff-previous-difference))
   :custom
   (ediff-split-window-function 'split-window-horizontally)
   (ediff-merge-split-window-function 'split-window-horizontally)
@@ -1728,6 +1725,7 @@ Complete anything.
 
 #+BEGIN_SRC emacs-lisp
   (use-package coverlay
+    :disabled
     :load-path "~/src/github/elisp/coverlay.el"
     :custom
      (coverlay:untested-line-background-color "#862b27")
@@ -2876,7 +2874,9 @@ Add filler lorem ipsum text to Emacs.
   (lsp-prefer-flymake nil)
   (lsp-enable-file-watchers nil)
   ;;(setq lsp-response-timeout 25)
-  :hook (scala-mode . lsp)
+  :hook
+  (scala-mode . lsp)
+  (php-mode . lsp)
   :config
   (setq lsp-prefer-capf t
         lsp-idle-delay 0.5))
@@ -2915,8 +2915,9 @@ Add filler lorem ipsum text to Emacs.
 
 ** [[https://github.com/emacs-lsp-legacy/lsp-php][lsp-php]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package lsp-php
+    :disabled
     ;; :defer 3
     ;; :custom
     ;;  ;; Run php-language server with a different php interpreter and from a different location.
@@ -3139,7 +3140,7 @@ checker is loaded.
 
 ** [[https://github.com/prettier/prettier-emacs][prettier-js]]
 
-#+BEGIN_SRC
+#+BEGIN_SRC emacs-lisp
 (use-package prettier-js
   :after typescript-mode)
 #+END_SRC
@@ -3592,114 +3593,114 @@ think of it as both something that augments and replaces the standard
 ** [[https://github.com/ananthakumaran/tide][tide]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package tide
-    :after (typescript-mode company flycheck)
-    :bind (:map tide-mode-map
-                ("C-c C-t f" . tide-fix)
-                ("C-c C-t n" . tide-nav)
-                ("C-c C-t o" . tide-organize-imports)
-                ("C-c C-t r" . tide-rename-symbol)
-                ("C-c C-t x" . tide-references))
-    :init
-    (use-package typescript-mode)
-    ;; when buiding with Angular CLI, the first error always contains "ERROR in"
-    ;;
-    ;; adjusting this regexp makes 'next-error' work in compilation mode
-    ;;
-    (push `(typescript-tsc-error-regexp
-            ,(rx line-start
-                 (zero-or-more "[tsl]")
-                 (zero-or-more space)
-                 (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-                 (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
-                 (in ":" "(") (group-n 2 (one-or-more digit))
-                 (in ":" ",") (group-n 3 (one-or-more digit))
-                 (zero-or-more not-newline))
-            1 2 3 2)
-          compilation-error-regexp-alist-alist)
+(use-package tide
+  :after (typescript-mode company flycheck)
+  :bind (:map tide-mode-map
+              ("C-c C-t f" . tide-fix)
+              ("C-c C-t n" . tide-nav)
+              ("C-c C-t o" . tide-organize-imports)
+              ("C-c C-t r" . tide-rename-symbol)
+              ("C-c C-t x" . tide-references))
+  :init
+  (use-package typescript-mode)
+  ;; when buiding with Angular CLI, the first error always contains "ERROR in"
+  ;;
+  ;; adjusting this regexp makes 'next-error' work in compilation mode
+  ;;
+  (push `(typescript-tsc-error-regexp
+          ,(rx line-start
+               (zero-or-more "[tsl]")
+               (zero-or-more space)
+               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
+               (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
+               (in ":" "(") (group-n 2 (one-or-more digit))
+               (in ":" ",") (group-n 3 (one-or-more digit))
+               (zero-or-more not-newline))
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
 
-    (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
+  (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
 
-    (push `(angular-html-error-regexp
-            ,(rx line-start
-                 (zero-or-more space)
-                 (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-                 (group-n 1 (one-or-more (not (in space ":" "\n"))))
-                 (syntax open-parenthesis)
-                 (group-n 2 (one-or-more digit))
-                 "," (group-n 3 (one-or-more digit))
-                 (syntax close-parenthesis) ":")
-            1 2 3 2)
-          compilation-error-regexp-alist-alist)
+  (push `(angular-html-error-regexp
+          ,(rx line-start
+               (zero-or-more space)
+               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
+               (group-n 1 (one-or-more (not (in space ":" "\n"))))
+               (syntax open-parenthesis)
+               (group-n 2 (one-or-more digit))
+               "," (group-n 3 (one-or-more digit))
+               (syntax close-parenthesis) ":")
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
 
-    (push 'angular-html-error-regexp compilation-error-regexp-alist)
+  (push 'angular-html-error-regexp compilation-error-regexp-alist)
 
-    ;; (add-to-list 'compilation-error-regexp-alist-alist
-    ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
+  ;; (add-to-list 'compilation-error-regexp-alist-alist
+  ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
 
-    (push `(node-error-regexp
-            ,(rx line-start
-                 (zero-or-more (not (in "\n")))
-                 (one-or-more "at" (one-or-more space))
-                 (zero-or-more (not (in "(")))
-                 (zero-or-more "(")
-                 (group-n 1 (one-or-more (not (in space ":" "\n"))))
-                 ":" (group-n 2 (one-or-more digit))
-                 ":" (group-n 3 (one-or-more digit))
-                 (zero-or-more not-newline))
-            1 2 3 2)
-          compilation-error-regexp-alist-alist)
+  (push `(node-error-regexp
+          ,(rx line-start
+               (zero-or-more (not (in "\n")))
+               (one-or-more "at" (one-or-more space))
+               (zero-or-more (not (in "(")))
+               (zero-or-more "(")
+               (group-n 1 (one-or-more (not (in space ":" "\n"))))
+               ":" (group-n 2 (one-or-more digit))
+               ":" (group-n 3 (one-or-more digit))
+               (zero-or-more not-newline))
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
 
-    (push 'node-error-regexp compilation-error-regexp-alist)
+  (push 'node-error-regexp compilation-error-regexp-alist)
 
-    (add-to-list 'compilation-error-regexp-alist-alist
-                 '(typescript-tslint
-                   "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
-                   2 3 4 1))
+  (add-to-list 'compilation-error-regexp-alist-alist
+               '(typescript-tslint
+                 "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
+                 2 3 4 1))
 
-    (setq compilation-error-regexp-alist
-          (cons 'typescript-tslint compilation-error-regexp-alist))
+  (setq compilation-error-regexp-alist
+        (cons 'typescript-tslint compilation-error-regexp-alist))
 
-    :config
+  :config
+  (message "===================> here")
+  (setq tide-sync-request-timeout 5
+        tide-server-max-response-length 204800)
 
-    (setq tide-sync-request-timeout 5
-          tide-server-max-response-length 204800)
+  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+  (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
 
-    (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
-    (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
+  (defconst
+    nl-typescript-pretty-symbols-alist
+    '(("=>" . ?⇒)
+      ("<=" . ?≤)
+      (">=" . ?≥)
+      ("===" . ?≡)
+      ("!" . ?¬)
+      ("!=" . ?≠)
+      ("!==" . ?≢)
+      ("&&" . ?∧)
+      ("||" . ?∨)))
 
-    (defconst
-      nl-typescript-pretty-symbols-alist
-      '(("=>" . ?⇒)
-        ("<=" . ?≤)
-        (">=" . ?≥)
-        ("===" . ?≡)
-        ("!" . ?¬)
-        ("!=" . ?≠)
-        ("!==" . ?≢)
-        ("&&" . ?∧)
-        ("||" . ?∨)))
+  (defun nl-tide-mode-hook ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1)
+    (prettier-js-mode)
+    (my-common-prog-mode-settings)
+    (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
+          prettify-symbols-unprettify-at-point 'right-edge
+          company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
+    (setq-default typescript-indent-level 2))
 
-    (defun nl-tide-mode-hook ()
-      (interactive)
-      (tide-setup)
-      (flycheck-mode +1)
-      (setq flycheck-check-syntax-automatically '(save mode-enabled))
-      (eldoc-mode +1)
-      (tide-hl-identifier-mode +1)
-      (company-mode +1)
-      (prettier-js-mode)
-      (my-common-prog-mode-settings)
-      (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
-            prettify-symbols-unprettify-at-point 'right-edge
-            company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
-      (setq-default typescript-indent-level 2))
-
-    :hook ((typescript-mode . tide-setup)
-           (typescript-mode . tide-hl-identifier-mode)
-           (typescript-mode . nl-tide-mode-hook)
-           (typescript-mode . column-enforce-mode)
-           (typescript-mode . rainbow-delimiters-mode)))
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (typescript-mode . nl-tide-mode-hook)
+         (typescript-mode . column-enforce-mode)
+         (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
 
 #+RESULTS:
