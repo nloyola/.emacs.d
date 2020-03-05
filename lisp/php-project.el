@@ -36,30 +36,30 @@ The class name must have the postfix 'Spec' for this function to work."
   (let ((args (s-concat (file-name-directory (buffer-file-name)))))
     (phpunit-run args)))
 
-(defhydra hydra-nl-con-project (:hint nil)
-  "con project commands"
-  ("p" (lambda () (interactive) (helm-projectile-test-project (projectile-project-root))) "test project" :color blue)
-  ("x" xref-find-definitions "find definition" :color blue))
+(defun nl/counsel-ag-php ()
+  "Perform counsel-ag on the project's PHP files excluding spec files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "-G '((?!Test)).php$'"))
+
+(defun nl/counsel-ag-php-test ()
+  "Perform counsel-ag on the project's TypeScript spec files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "-G Test.php$"))
+
+(defhydra hydra-nl/php-search (:color blue)
+  ("p" nl/counsel-ag-php "PHP files" :column "Search")
+  ("s" nl/counsel-ag-php-test "PHP test specificaton files"))
+
+(defhydra hydra-nl-con-project (:color red :hint nil)
+  "PHP project commands"
+  ("a" hydra-nl-align/body "align" :color blue :column "PHP")
+  ("s" hydra-nl/php-search/body "search" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
-(key-chord-define-global "jc" '(lambda () (interactive)
-                                 (hydra-nl-con-project/body)))
-
-;; Before running phpunit, remove the logs/test.log file
-(defun nl/con-project-remove-test-log(orig-function args)
-  (let ((old-command (funcall orig-function args)))
-    ;;(message "---------> %s" old-command)
-    (concat "rm -rf logs/test.log && " (funcall orig-function args))))
-
-(defun nl/con-project-php-mode-hook ()
-  ;;(advice-remove 'phpunit-get-compile-command 'nl/con-project-remove-test-log)
-  (advice-add 'phpunit-get-compile-command :around #'nl/con-project-remove-test-log))
-
-;; Before running phpunit, remove the logs/test.log file
-(add-hook 'php-mode-hook 'nl/con-project-php-mode-hook)
+(key-chord-define-global "jc" '(lambda () (interactive) (hydra-nl-con-project/body)))
 
 (define-key php-mode-map (kbd "C-c , d") 'nl/phpunit-test-this-package)
 
 
-(provide 'con-project)
+(provide 'php-project)
 ;;; con-project.el ends here
