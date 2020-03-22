@@ -1005,12 +1005,17 @@ Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-t
 
 (setq org-capture-templates
       '(("t" "Todo" entry (file+headline "~/Dropbox/orgfiles/todo.org" "Tasks")
-             "* TODO %?\n  %i\n  %a")
+         "* TODO %?\n  %i\n  %a")
         ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
-             "* %? %^L %^g \n%T" :prepend t)
+         "* %? %^L %^g \n%T" :prepend t)
+        ("n" "Note" entry (file "~/Dropbox/orgfiles/notes.org")
+         "* NOTE %?\n%U" :empty-lines 1)
+        ("N" "Note with Clipboard" entry (file "~/Dropbox/orgfiles/notes.org")
+         "* NOTE %?\n%U\n   %c" :empty-lines 1)
         ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/journal.org")
              "* %?\nEntered on %U\n  %i\n  %a")))
 #+END_SRC
+
 
 *** Org activation bindings
 
@@ -1085,16 +1090,19 @@ good column number to do that.
    (java . t)
    (ruby . t)
    (scheme . t)
-   ;;(sh . t)
+   (shell . t)
+   (sql . t)
    (sqlite . t)
    (js . t)))
 
 (defun my-org-confirm-babel-evaluate (lang body)
   "Do not confirm evaluation for these languages."
   (not (or (string= lang "C")
+           (string= lang "sh")
            (string= lang "java")
            (string= lang "python")
            (string= lang "emacs-lisp")
+           (string= lang "sql")
            (string= lang "sqlite"))))
 (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
 #+END_SRC
@@ -1327,7 +1335,11 @@ Save command history between sessions (taken from EmacsWiki).
   (let ((cert-path "~/.ssh/id_dsa")
         (ssh-methods '("ssh" "sshx"))))
   (setq tramp-terminal-type "dumb"
-        tramp-shell-prompt-pattern "^[^$>\n]*[#$%>] *\\(\[[0-9;]*[a-zA-Z] *\\)*"))
+        tramp-shell-prompt-pattern "^[^$>\n]*[#$%>] *\\(\[[0-9;]*[a-zA-Z] *\\)*"
+        vc-ignore-dir-regexp
+        (format "\\(%s\\)\\|\\(%s\\)"
+                vc-ignore-dir-regexp
+                tramp-file-name-regexp)))
 #+END_SRC
 
 ** =windmove=
@@ -1365,6 +1377,7 @@ Trying out 2020-01-30
 
 #+BEGIN_SRC emacs-lisp
 (use-package leuven-theme
+  :disabled
   :config
   (load-theme 'leuven-dark t)
   :custom-face
@@ -1379,6 +1392,48 @@ Trying out 2020-01-30
    (org-block-end-line ((nil :overline nil :foreground "#ffff7f" :background "#25202a")))
    (show-paren-match ((nil :background "#ffad65"))))
 #+END_SRC
+** [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
+
+#+begin_src emacs-lisp
+(use-package doom-themes
+  :config
+  ;; Global settings (defaults)
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (load-theme 'doom-one t)
+
+  ;; Enable flashing mode-line on errors
+  (doom-themes-visual-bell-config)
+
+  ;; Enable custom neotree theme (all-the-icons must be installed!)
+  (doom-themes-neotree-config)
+  ;; or for treemacs users
+  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  (doom-themes-treemacs-config)
+
+  ;; Corrects (and improves) org-mode's native fontification.
+  (doom-themes-org-config))
+#+end_src
+
+Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/)
+
+#+begin_src emacs-lisp
+(defun ap/load-doom-theme (theme)
+  "Disable active themes and load a Doom theme."
+  (interactive (list (intern (completing-read "Theme: "
+                                              (->> (custom-available-themes)
+                                                   (-map #'symbol-name)
+                                                   (--select (string-prefix-p "doom-" it)))))))
+  (ap/switch-theme theme))
+
+(defun ap/switch-theme (theme)
+  "Disable active themes and load THEME."
+  (interactive (list (intern (completing-read "Theme: "
+                                              (->> (custom-available-themes)
+                                                   (-map #'symbol-name))))))
+  (mapc #'disable-theme custom-enabled-themes)
+  (load-theme theme 'no-confirm))
+#+end_src
 
 ** Past
 *** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
@@ -3158,12 +3213,17 @@ http://batsov.com/projectile/
   :diminish projectile-mode
   :commands projectile-global-mode
   :config
+  ;; tramp-fix: https://github.com/syl20bnr/spacemacs/issues/11381
+  (defadvice projectile-project-root (around ignore-remote first activate)
+    (unless (file-remote-p default-directory) ad-do-it))
+
   (setq projectile-indexing-method 'alien
         projectile-remember-window-configs nil
         projectile-switch-project-action 'projectile-dired
         projectile-completion-system 'default
         projectile-enable-caching nil
-        projectile-create-missing-test-files t)
+        projectile-create-missing-test-files t
+        projectile-mode-line "Projectile")
 
   (projectile-global-mode)
   (setq projectile-completion-system 'helm)
@@ -4104,83 +4164,81 @@ Coverts camel case words to uppercase with underscore as delimiters.
 Views the same file side by side:
 
 #+BEGIN_SRC emacs-lisp
-  (defun toggle-window-dedicated ()
-    "Control whether or not Emacs is allowed to display another
-    buffer in current window."
-    (interactive)
-    (message
-     (if (let (window (get-buffer-window (current-buffer)))
-           (set-window-dedicated-p window (not (window-dedicated-p window))))
-         "%s: Can't touch this!"
-       "%s is up for grabs.")
-     (current-buffer)))
+(defun toggle-window-dedicated ()
+  "Control whether or not Emacs is allowed to display another
+  buffer in current window."
+  (interactive)
+  (message
+   (if (let (window (get-buffer-window (current-buffer)))
+         (set-window-dedicated-p window (not (window-dedicated-p window))))
+       "%s: Can't touch this!"
+     "%s is up for grabs.")
+   (current-buffer)))
 
-  (global-set-key (kbd "C-c d") 'toggle-window-dedicated)
+(global-set-key (kbd "C-c d") 'toggle-window-dedicated)
 
-  ;; see https://www.reddit.com/r/emacs/comments/80pd2q/anyone_could_help_me_with_window_management/
-  ;; possible values are: display-buffer-same-window, display-buffer-pop-up-window, display-buffer-reuse-window
-  ;;
-  ;; Commented out since it is being configured in the "Side Windows" section now (2019-02-20)
-  ;;
-  ;; (add-to-list 'display-buffer-alist
-  ;;              '("\*xref\*" . (display-buffer-same-window)))
+;; see https://www.reddit.com/r/emacs/comments/80pd2q/anyone_could_help_me_with_window_management/
+;; possible values are: display-buffer-same-window, display-buffer-pop-up-window, display-buffer-reuse-window
+;;
+;; Commented out since it is being configured in the "Side Windows" section now (2019-02-20)
+;;
+;; (add-to-list 'display-buffer-alist
+;;              '("\*xref\*" . (display-buffer-same-window)))
 
-  (defun nl/frame-grow-horizontally ()
-    "Set the size and position of the Emacs window."
-    (interactive)
-    (let ((frame (selected-frame)))
-      (set-frame-size frame (* 2 (frame-width)) (frame-height)))
-    (split-window-right))
+(defun nl/frame-grow-horizontally ()
+  "Set the size and position of the Emacs window."
+  (interactive)
+  (let ((frame (selected-frame)))
+    (set-frame-size frame (* 2 (frame-width)) (frame-height)))
+  (split-window-right))
 
-  (defun nl/frame-shrink-horizontally ()
-    "Set the size and position of the Emacs window."
-    (interactive)
-    (let ((frame (selected-frame)))
-      (when (> (length (window-list)) 1)
-        (when (windmove-find-other-window 'right)
-          (windmove-right))
-        (delete-window))
-      (set-frame-size frame (/ (frame-width) 2) (frame-height))))
+(defun nl/frame-shrink-horizontally ()
+  "Set the size and position of the Emacs window."
+  (interactive)
+  (when (> (length (window-list)) 1)
+    (delete-other-windows))
+  (let ((frame (selected-frame)))
+    (set-frame-size frame (/ (frame-width) 2) (frame-height))))
 
-  (defun nl-frame-resize ()
-    "Resizes the frame based on its current width."
-    (interactive)
-    (if (<= (frame-width) 120)
-        (nl/frame-grow-horizontally)
-      (nl/frame-shrink-horizontally)))
+(defun nl-frame-resize ()
+  "Resizes the frame based on its current width."
+  (interactive)
+  (if (<= (frame-width) 120)
+      (nl/frame-grow-horizontally)
+    (nl/frame-shrink-horizontally)))
 
-  (global-set-key [f9] 'nl-frame-resize)
+(global-set-key [f9] 'nl-frame-resize)
 
-  (defun nl/split-view-same-file ()
-    (interactive)
-    (windmove-right)
-    (delete-window)
-    (split-window-right)
-    (windmove-right))
+(defun nl/split-view-same-file ()
+  (interactive)
+  (windmove-right)
+  (delete-window)
+  (split-window-right)
+  (windmove-right))
 
-  (global-set-key [S-f9] 'nl/split-view-same-file)
+(global-set-key [S-f9] 'nl/split-view-same-file)
 
-  (defun my--set-transparency (inc)
-    "Increase or decrease the selected frame transparency"
-    (let* ((alpha (frame-parameter (selected-frame) 'alpha))
-           (next-alpha (cond ((not alpha) 100)
-                             ((> (- alpha inc) 100) 100)
-                             ((< (- alpha inc) 0) 0)
-                             (t (- alpha inc)))))
-      (set-frame-parameter (selected-frame) 'alpha next-alpha)))
+(defun my--set-transparency (inc)
+  "Increase or decrease the selected frame transparency"
+  (let* ((alpha (frame-parameter (selected-frame) 'alpha))
+         (next-alpha (cond ((not alpha) 100)
+                           ((> (- alpha inc) 100) 100)
+                           ((< (- alpha inc) 0) 0)
+                           (t (- alpha inc)))))
+    (set-frame-parameter (selected-frame) 'alpha next-alpha)))
 
-  (defhydra hydra-transparency (:columns 2)
-    "
-    ALPHA : [ %(frame-parameter nil 'alpha) ]
-    "
-    ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
-    ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
-    ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
-    ("K" (lambda () (interactive) (my--set-transparency -10)) "-- less")
-    ("=" (lambda (value) (interactive "nTransparency Value 0 - 100 opaque:")
-           (set-frame-parameter (selected-frame) 'alpha value)) "Set to ?" :color blue))
+(defhydra hydra-transparency (:columns 2)
+  "
+  ALPHA : [ %(frame-parameter nil 'alpha) ]
+  "
+  ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
+  ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
+  ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
+  ("K" (lambda () (interactive) (my--set-transparency -10)) "-- less")
+  ("=" (lambda (value) (interactive "nTransparency Value 0 - 100 opaque:")
+         (set-frame-parameter (selected-frame) 'alpha value)) "Set to ?" :color blue))
 
-  (global-set-key (kbd "C-c t") 'hydra-transparency/body)
+(global-set-key (kbd "C-c t") 'hydra-transparency/body)
 #+END_SRC
 
 *** Font
@@ -4348,3 +4406,42 @@ Taken from: https://old.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_t
           (delete-char -1)))))
 (global-set-key [remap backward-kill-word] #'user/smarter-backward-kill-word)
 #+END_SRC
+** Quite Current Context
+
+From: https://with-emacs.com/posts/tips/quit-current-context/
+
+#+begin_src emacs-lisp
+(defun keyboard-quit-context+ ()
+  "Quit current context.
+
+This function is a combination of `keyboard-quit' and
+`keyboard-escape-quit' with some parts omitted and some custom
+behavior added."
+  (interactive)
+  (cond ((region-active-p)
+         ;; Avoid adding the region to the window selection.
+         (setq saved-region-selection nil)
+         (let (select-active-regions)
+           (deactivate-mark)))
+        ((eq last-command 'mode-exited) nil)
+        (current-prefix-arg
+         nil)
+        (defining-kbd-macro
+          (message
+           (substitute-command-keys
+            "Quit is ignored during macro defintion, use \\[kmacro-end-macro] if you want to stop macro definition"))
+          (cancel-kbd-macro-events))
+        ((active-minibuffer-window)
+         (when (get-buffer-window "*Completions*")
+           ;; hide completions first so point stays in active window when
+           ;; outside the minibuffer
+           (minibuffer-hide-completions))
+         (abort-recursive-edit))
+        (t
+         (when completion-in-region-mode
+           (completion-in-region-mode -1))
+         (let ((debug-on-quit nil))
+           (signal 'quit nil)))))
+
+(global-set-key [remap keyboard-quit] #'keyboard-quit-context+)
+#+end_src

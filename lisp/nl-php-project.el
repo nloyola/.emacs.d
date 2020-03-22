@@ -60,6 +60,5 @@ The class name must have the postfix 'Spec' for this function to work."
 
 (define-key php-mode-map (kbd "C-c , d") 'nl/phpunit-test-this-package)
 
-
-(provide 'php-project)
-;;; con-project.el ends here
+(provide 'nl-php-project)
+;;; nl-php-project.el ends here
