@@ -22,3 +22,4 @@ projectile.cache
 workspace/
 eclipse.jdt.ls/
 php-language-server/
+/lsp-cache/
