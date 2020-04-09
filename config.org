@@ -463,6 +463,7 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 
   (global-set-key (kbd "M-%")           'query-replace-regexp)
   ;;(global-set-key "\C-x\C-e"          'compile)
+  (global-set-key (kbd "C-S-s")         'isearch-forward)
   (global-set-key (kbd "C-x C-n")       'next-error)
   (global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
   (global-set-key (kbd "M-f")           'forward-to-word)
@@ -1371,27 +1372,9 @@ direction keys.
 
 * Themes
 ** Current
-*** [[https://github.com/fniessen/emacs-leuven-theme][emacs-leuven-theme]]
 
-Trying out 2020-01-30
+Using doom themes
 
-#+BEGIN_SRC emacs-lisp
-(use-package leuven-theme
-  :disabled
-  :config
-  (load-theme 'leuven-dark t)
-  :custom-face
-   (code-block ((nil :foreground "#ffff7f" :background "#25202a")))
-   (code-inline ((nil :foreground "#ff9bff" :background "#25202a")))
-   (dired-directory ((nil :background "#25202a")))
-   (dired-header ((nil :background "#25202a" :foreground "SteelBlue3")))
-   (flycheck-error ((nil :background "lawn green" :foreground "black")))
-   (flycheck-warning ((nil :background "yellow" :foreground "black")))
-   (org-block ((nil :foreground "#ffff7f" :background "#25202a" :extend t)))
-   (org-block-begin-line ((nil :underline nil :foreground "#ffff7f" :background "#25202a")))
-   (org-block-end-line ((nil :overline nil :foreground "#ffff7f" :background "#25202a")))
-   (show-paren-match ((nil :background "#ffad65"))))
-#+END_SRC
 ** [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
 
 #+begin_src emacs-lisp
@@ -1400,7 +1383,7 @@ Trying out 2020-01-30
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-one t)
+  (load-theme 'doom-outrun-electric t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1438,9 +1421,7 @@ Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/
 ** Past
 *** [[https://github.com/dracula/emacs/tree/62df5de68c73d34faaa0191a92ce3ebce589bf24][dracula-theme]]
 
-Trying out new theme: 2019-04-10
-
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package dracula-theme
   :disabled
   :config
@@ -1566,9 +1547,8 @@ buffer name is too hard to see,  set it to white instead.
 
 Tried out 2020-01-20
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package base16-theme
-  :disabled
   :config
     (load-theme 'base16-woodland t)
     ;;(load-theme 'base16-solarized-dark t)
@@ -1591,6 +1571,24 @@ Tried out 2020-01-20
      '(ediff-even-diff-C ((nil :background "#1f772c")))
      '(ediff-current-diff-C ((nil :background "#2b538a"))))
     (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
+#+END_SRC
+*** [[https://github.com/fniessen/emacs-leuven-theme][emacs-leuven-theme]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package leuven-theme
+  :config
+  (load-theme 'leuven-dark t)
+  :custom-face
+   (code-block ((nil :foreground "#ffff7f" :background "#25202a")))
+   (code-inline ((nil :foreground "#ff9bff" :background "#25202a")))
+   (dired-directory ((nil :background "#25202a")))
+   (dired-header ((nil :background "#25202a" :foreground "SteelBlue3")))
+   (flycheck-error ((nil :background "lawn green" :foreground "black")))
+   (flycheck-warning ((nil :background "yellow" :foreground "black")))
+   (org-block ((nil :foreground "#ffff7f" :background "#25202a" :extend t)))
+   (org-block-begin-line ((nil :underline nil :foreground "#ffff7f" :background "#25202a")))
+   (org-block-end-line ((nil :overline nil :foreground "#ffff7f" :background "#25202a")))
+   (show-paren-match ((nil :background "#ffad65"))))
 #+END_SRC
 
 * ELPA packages
@@ -2593,7 +2591,9 @@ short bindings with a common prefix - a Hydra.
       :init
       (setq key-chord-one-key-delay 0.16)
       :config (key-chord-mode 1))
-    (use-package posframe :pin melpa)
+    (use-package posframe :pin melpa
+      :init
+      (setq x-gtk-resize-child-frames 'resize-mode))
     :config
     (setq hydra-hint-display-type 'posframe)
     (defun nl/pull-window ()
