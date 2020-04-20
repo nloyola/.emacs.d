@@ -2,4 +2,4 @@
 # name: varlog
 # key: varlog
 # --
-$this->varLog("$1", \$$0);
+$this->varLog('$1', \$$0);
