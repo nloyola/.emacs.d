@@ -1383,7 +1383,7 @@ Using doom themes
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-outrun-electric t)
+  (load-theme 'doom-challenger-deep t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -4146,7 +4146,9 @@ at point as the default value for occur.
   (call-interactively 'occur))
 #+END_SRC
 
-** Camelcase to upper
+** Camelcase
+
+*** To Upper
 
 Coverts camel case words to uppercase with underscore as delimiters.
 
@@ -4156,6 +4158,32 @@ Coverts camel case words to uppercase with underscore as delimiters.
   (replace-regexp "\\([A-Z]\\)" "_\\1" nil (region-beginning)(region-end))
   (upcase-region (region-beginning)(region-end)))
 #+END_SRC
+
+*** To Snake Case
+
+- from [[https://stackoverflow.com/questions/9288181/converting-from-camelcase-to-in-emacs][Stack Overflow Question]]
+
+#+begin_src emacs-lisp
+(defun nl/toggle-camelcase-underscores ()
+  "Toggle between camelcase and underscore notation for the symbol at point."
+  (interactive)
+  (save-excursion
+    (let* ((bounds (bounds-of-thing-at-point 'symbol))
+           (start (car bounds))
+           (end (cdr bounds))
+           (currently-using-underscores-p (progn (goto-char start)
+                                                 (re-search-forward "_" end t))))
+      (if currently-using-underscores-p
+          (progn
+            (upcase-initials-region start end)
+            (replace-string "_" "" nil start end)
+            (downcase-region start (1+ start)))
+        (replace-regexp "\\([A-Z]\\)" "_\\1" nil (1+ start) end)
+        (downcase-region start (cdr (bounds-of-thing-at-point 'symbol)))))))
+#+end_src
+
+#+RESULTS:
+: nl/toggle-camelcase-underscores
 
 ** Windows
 
