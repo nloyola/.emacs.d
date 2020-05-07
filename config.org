@@ -790,9 +790,10 @@ Prefer saving this file somewhere other than the default.
 
     (defun my-java-mode-hook ()
       (setq indent-tabs-mode nil)
+      (setq c-basic-offset 2)
       ;;(setq zeal-at-point-docset "java")
       ;;(eclim-mode t)
-      (add-hook 'java-mode-hook #'yas-minor-mode))
+      )
 
     :hook ((c-mode-common . my-c-mode-common-hook)
            (java-mode . my-java-mode-hook)))
@@ -1383,7 +1384,7 @@ Using doom themes
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-challenger-deep t)
+  (load-theme 'doom-gruvbox t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1808,6 +1809,8 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
     (dap-mode t)
     (dap-ui-mode t)
     (require 'dap-java))
+
+(use-package dap-java :after (lsp-java))
 #+END_SRC
 
 ** [[https://github.com/patrickt/emacs][deadgrep]]
@@ -1849,8 +1852,6 @@ Provides a simple UI for customizing dired mode to use different faces and color
   :load-path "~/src/github/elisp/diredful"
   :config (diredful-mode 1))
 #+END_SRC
-
-
 ** [[https://github.com/Fuco1/dired-hacks][dired-narrow]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2486,6 +2487,12 @@ instead of ~find-file-other-window~.
     (helm-gtags-auto-update t))
 #+END_SRC
 
+** [[https://github.com/emacs-lsp/helm-lsp][helm-lsp]]
+
+#+begin_src emacs-lisp
+(use-package helm-lsp)
+#+end_src
+
 ** [[https://github.com/bbatsov/projectile][helm-projectile]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2964,8 +2971,8 @@ Add filler lorem ipsum text to Emacs.
 
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-java
-  :defer 3
-  :init (add-hook 'java-mode-hook 'lsp))
+  ;; :hook (java-mode-hook . lsp))
+  :config (add-hook 'java-mode-hook 'lsp))
 #+END_SRC
 
 ** [[https://github.com/emacs-lsp-legacy/lsp-php][lsp-php]]
@@ -2998,6 +3005,16 @@ Disabled since lsp-mode is being used. 2019-08-21
   :demand t
   :hook (scala-mode . lsp))
 #+END_SRC
+
+** [[https://github.com/immerrr/lua-mode/tree/658bf8f6c2bdcfe41cd14f5fb651563b41d0fbaa][lua-mode]]
+
+#+begin_src emacs-lisp
+(use-package lua-mode
+  :mode "\\.lua"
+  :hook
+  (lua-mode . company-mode)
+  :interpreter ("lua" . lua-mode))
+#+end_src
 
 ** [[https://github.com/joddie/macrostep][macrostep]]
 
@@ -3256,7 +3273,7 @@ http://batsov.com/projectile/
         compilation-error-regexp-alist-alist)
   (push 'php-error-regexp compilation-error-regexp-alist)
   :custom
-  (phpunit-arg "--stderr"))
+  (phpunit-arg "--stderr --debug"))
 #+END_SRC
 
 ** [[https://github.com/google/protobuf][protobuf]]
@@ -3722,7 +3739,6 @@ think of it as both something that augments and replaces the standard
         (cons 'typescript-tslint compilation-error-regexp-alist))
 
   :config
-  (message "===================> here")
   (setq tide-sync-request-timeout 5
         tide-server-max-response-length 204800)
 
@@ -3764,6 +3780,102 @@ think of it as both something that augments and replaces the standard
 #+END_SRC
 
 #+RESULTS:
+
+
+** [[https://github.com/Alexander-Miller/treemacs][treemacs]]
+
+#+begin_src emacs-lisp
+(use-package treemacs
+  :ensure t
+  :defer t
+  :init
+  (with-eval-after-load 'winum
+    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
+  :config
+  (progn
+    (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+          treemacs-deferred-git-apply-delay      0.5
+          treemacs-directory-name-transformer    #'identity
+          treemacs-display-in-side-window        t
+          treemacs-eldoc-display                 t
+          treemacs-file-event-delay              5000
+          treemacs-file-extension-regex          treemacs-last-period-regex-value
+          treemacs-file-follow-delay             0.2
+          treemacs-file-name-transformer         #'identity
+          treemacs-follow-after-init             t
+          treemacs-git-command-pipe              ""
+          treemacs-goto-tag-strategy             'refetch-index
+          treemacs-indentation                   2
+          treemacs-indentation-string            " "
+          treemacs-is-never-other-window         nil
+          treemacs-max-git-entries               5000
+          treemacs-missing-project-action        'ask
+          treemacs-move-forward-on-expand        nil
+          treemacs-no-png-images                 nil
+          treemacs-no-delete-other-windows       t
+          treemacs-project-follow-cleanup        nil
+          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+          treemacs-position                      'left
+          treemacs-recenter-distance             0.1
+          treemacs-recenter-after-file-follow    nil
+          treemacs-recenter-after-tag-follow     nil
+          treemacs-recenter-after-project-jump   'always
+          treemacs-recenter-after-project-expand 'on-distance
+          treemacs-show-cursor                   nil
+          treemacs-show-hidden-files             t
+          treemacs-silent-filewatch              nil
+          treemacs-silent-refresh                nil
+          treemacs-sorting                       'alphabetic-asc
+          treemacs-space-between-root-nodes      t
+          treemacs-tag-follow-cleanup            t
+          treemacs-tag-follow-delay              1.5
+          treemacs-user-mode-line-format         nil
+          treemacs-width                         35)
+
+    ;; The default width and height of the icons is 22 pixels. If you are
+    ;; using a Hi-DPI display, uncomment this to double the icon size.
+    ;;(treemacs-resize-icons 44)
+
+    (treemacs-follow-mode t)
+    (treemacs-filewatch-mode t)
+    (treemacs-fringe-indicator-mode t)
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null treemacs-python-executable)))
+      (`(t . t)
+       (treemacs-git-mode 'deferred))
+      (`(t . _)
+       (treemacs-git-mode 'simple))))
+  :bind
+  (:map global-map
+        ("M-0"       . treemacs-select-window)
+        ("C-x t 1"   . treemacs-delete-other-windows)
+        ("C-x t t"   . treemacs)
+        ("C-x t B"   . treemacs-bookmark)
+        ("C-x t C-t" . treemacs-find-file)
+        ("C-x t M-t" . treemacs-find-tag)))
+
+(use-package treemacs-evil
+  :after treemacs evil
+  :ensure t)
+
+(use-package treemacs-projectile
+  :after treemacs projectile
+  :ensure t)
+
+(use-package treemacs-icons-dired
+  :after treemacs dired
+  :ensure t
+  :config (treemacs-icons-dired-mode))
+
+(use-package treemacs-magit
+  :after treemacs magit
+  :ensure t)
+
+(use-package treemacs-persp
+  :after treemacs persp-mode
+  :ensure t
+  :config (treemacs-set-scope-type 'Perspectives))
+#+end_src
 
 ** [[https://melpa.org/#/transpose-frame][transpose-frame]]
 
@@ -4434,7 +4546,7 @@ Taken from: https://old.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_t
           (delete-char -1)))))
 (global-set-key [remap backward-kill-word] #'user/smarter-backward-kill-word)
 #+END_SRC
-** Quite Current Context
+** Quit Current Context
 
 From: https://with-emacs.com/posts/tips/quit-current-context/
 
@@ -4472,4 +4584,11 @@ behavior added."
            (signal 'quit nil)))))
 
 (global-set-key [remap keyboard-quit] #'keyboard-quit-context+)
+#+end_src
+
+** helm-treemacs-icons
+
+#+begin_src emacs-lisp
+(require 'helm-treemacs-icons)
+(helm-treemacs-icons-enable)
 #+end_src
