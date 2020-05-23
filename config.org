@@ -441,44 +441,56 @@ each time.
 (setq hi-lock-auto-select-face t)
 #+END_SRC
 
+** History
+
+#+begin_src emacs-lisp
+(setq history-delete-duplicates t)
+#+end_src
+
 ** Key bindings
 
 http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 
 #+BEGIN_SRC emacs-lisp
-  (defun nl/kill-this-buffer ()
-    "Kill the current buffer."
-    (interactive)
-    (kill-buffer (current-buffer)))
+(defun nl/kill-this-buffer ()
+  "Kill the current buffer."
+  (interactive)
+  (kill-buffer (current-buffer)))
 
-  (defun nl/helm-compile ()
-    "Use Helm to choose a compile command."
-    (interactive)
-    (let ((selected-command
-           (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
-      ;; move this command to the front of the history
-      (setq compile-history (remove selected-command compile-history))
-      (add-to-list 'compile-history selected-command)
-      (compile selected-command)))
+(defun nl/helm-compile ()
+  "Use Helm to choose a compile command."
+  (interactive)
+  (let ((selected-command
+         (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
+    ;; move this command to the front of the history
+    (setq compile-history (remove selected-command compile-history))
+    (add-to-list 'compile-history selected-command)
+    (compile selected-command)))
 
-  (global-set-key (kbd "M-%")           'query-replace-regexp)
-  ;;(global-set-key "\C-x\C-e"          'compile)
-  (global-set-key (kbd "C-S-s")         'isearch-forward)
-  (global-set-key (kbd "C-x C-n")       'next-error)
-  (global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
-  (global-set-key (kbd "M-f")           'forward-to-word)
-  (global-set-key (kbd "M-B")           'backward-to-word)
+(defun nl/counsel-git-files ()
+  (interactive)
+  (let ((counsel-fzf-cmd "git ls-files | fzf -f \"%s\""))
+    (counsel-fzf)))
 
-  (global-set-key (kbd "<f1>")          'indent-for-tab-command)
-  (global-set-key (kbd "S-<f1>")        'indent-region)
-  (global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))
-  (global-set-key (kbd "S-<f2>")        '(lambda () (interactive) (revert-buffer t t)))
-  (global-set-key (kbd "S-<f3>")        'helm-projectile-rg)
-  (global-set-key (kbd "M-S-<f3>")      'counsel-rg)
-  (global-set-key [f5]                  'nl/helm-compile)
-  (global-set-key (kbd "S-<f5>")        'toggle-truncate-lines)
-  (global-set-key (kbd "S-<f11>")       'eval-region)
-  (global-set-key (kbd "C-S-<f11>")     'align-regexp)
+(global-set-key (kbd "M-%")           'query-replace-regexp)
+;;(global-set-key "\C-x\C-e"          'compile)
+(global-set-key (kbd "C-S-s")         'isearch-forward)
+(global-set-key (kbd "C-x C-n")       'next-error)
+(global-set-key (kbd "C-x k")         'nl/kill-this-buffer)
+(global-set-key (kbd "M-f")           'forward-to-word)
+(global-set-key (kbd "M-B")           'backward-to-word)
+
+(global-set-key (kbd "<f1>")          'indent-for-tab-command)
+(global-set-key (kbd "S-<f1>")        'indent-region)
+(global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))
+(global-set-key (kbd "S-<f2>")        '(lambda () (interactive) (revert-buffer t t)))
+(global-set-key (kbd "S-<f3>")        'helm-projectile-rg)
+(global-set-key (kbd "M-S-<f3>")      'counsel-rg)
+(global-set-key [f5]                  'nl/helm-compile)
+(global-set-key (kbd "S-<f5>")        'toggle-truncate-lines)
+(global-set-key (kbd "S-<f11>")       'eval-region)
+(global-set-key (kbd "C-S-<f11>")     'align-regexp)
+(global-set-key (kbd "C-c o")         'nl/counsel-git-files)
 #+END_SRC
 
 #+RESULTS:
@@ -1384,7 +1396,7 @@ Using doom themes
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-gruvbox t)
+  (load-theme 'doom-rouge t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1805,12 +1817,11 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 #+BEGIN_SRC elisp
   (use-package dap-mode
     :after lsp-mode
+    ;;:hook (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
     :config
     (dap-mode t)
     (dap-ui-mode t)
     (require 'dap-java))
-
-(use-package dap-java :after (lsp-java))
 #+END_SRC
 
 ** [[https://github.com/patrickt/emacs][deadgrep]]
@@ -1922,6 +1933,16 @@ indexes (TAGS) or persistent background processes.
   (global-set-key [remap kill-ring-save] #'easy-kill)
   (global-set-key [remap mark-sexp] #'easy-mark))
 #+END_SRC
+
+
+** [[https://github.com/editorconfig/editorconfig-emacs][editor-config]]
+
+#+begin_src emacs-lisp
+(use-package editorconfig
+  :ensure t
+  :config
+  (editorconfig-mode 1))
+#+end_src
 
 ** [[https://github.com/joaotavora/eglot][eglot]]
 
@@ -2114,6 +2135,15 @@ this code.
   (eyebrowse-mode t))
 #+END_SRC
 
+** [[https://github.com/lastquestion/explain-pause-mode][explain-pause-mode]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package explain-pause-mode
+  :load-path "~/src/github/elisp/explain-pause-mode"
+  :config
+  (explain-pause-mode t))
+#+END_SRC
+
 ** [[http://www.emacswiki.org/emacs/fic-mode.el][fic-mode]]
 
 Show FIXME/TODO/BUG/KLUDGE in special face only in comments and
@@ -2199,13 +2229,21 @@ On the fly markdown preview.
 
 ** [[https://github.com/waymondo/frog-jump-buffer][frog-jump-buffer]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package frog-jump-buffer
   :load-path "~/src/github/elisp/frog-jump-buffer"
   :bind
   ("C-x C-b" . frog-jump-buffer)
   :commands frog-jump-buffer)
 #+END_SRC
+
+** [[https://github.com/bling/fzf.el][fzf]]
+
+This package uses ido-mode which I don't want to install.
+
+#+begin_src emacs-lisp :tangle no
+(use-package fzf)
+#+end_src
 
 ** [[https://github.com/leoliu/ggtags][ggtags]]
 
@@ -2598,9 +2636,6 @@ short bindings with a common prefix - a Hydra.
       :init
       (setq key-chord-one-key-delay 0.16)
       :config (key-chord-mode 1))
-    (use-package posframe :pin melpa
-      :init
-      (setq x-gtk-resize-child-frames 'resize-mode))
     :config
     (setq hydra-hint-display-type 'posframe)
     (defun nl/pull-window ()
@@ -2770,6 +2805,20 @@ When using =counsel-ag=:
 - use ~C-x C-s~ to save the changes, or
 - use ~C-c C-k~ to abort all changes
 
+** [[https://github.com/tumashu/ivy-posframe][ivy-posframe]]
+
+#+begin_src emacs-lisp
+(use-package ivy-posframe
+  :config
+  (setq ivy-posframe-display-functions-alist
+        '((swiper          . ivy-posframe-display-at-point)
+          (complete-symbol . ivy-posframe-display-at-point)
+          (counsel-fzf     . ivy-posframe-display-at-point)
+          (counsel-M-x     . ivy-posframe-display-at-window-bottom-left)
+          (t               . ivy-posframe-display)))
+  (ivy-posframe-mode 1))
+#+end_src
+
 ** [[https://github.com/mooz/js2-mode][js2-mode]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2932,8 +2981,9 @@ Add filler lorem ipsum text to Emacs.
 (use-package lsp-mode
   :pin melpa
   :custom
+  (setq lsp-diagnostic-package :none)
+  (lsp-ui-flycheck-enable nil)
   (lsp-enable-snippet t)
-  (lsp-prefer-flymake nil)
   (lsp-enable-file-watchers nil)
   ;;(setq lsp-response-timeout 25)
   :hook
@@ -2941,19 +2991,21 @@ Add filler lorem ipsum text to Emacs.
   (php-mode . lsp)
   :config
   (setq lsp-prefer-capf t
-        lsp-idle-delay 0.5))
+        lsp-idle-delay 0.5)
+  :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
   :custom
   (lsp-ui-sideline-enable t)
   :config
-  (setq lsp-ui-doc-enable nil)
+  (lsp-ui-doc-enable nil)
   (define-key lsp-ui-mode-map
     [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
   (define-key lsp-ui-mode-map
     [remap xref-find-references] #'lsp-ui-peek-find-references)
   :hook
-  (lsp-mode . lsp-ui-mode))
+  (lsp-mode . lsp-ui-mode)
+  :commands lsp-ui-mode)
 
 ;;(use-package company-lsp
 ;;  :after company
@@ -3013,6 +3065,8 @@ Disabled since lsp-mode is being used. 2019-08-21
   :mode "\\.lua"
   :hook
   (lua-mode . company-mode)
+  :config
+  (setq lua-indent-level 2)
   :interpreter ("lua" . lua-mode))
 #+end_src
 
@@ -3207,6 +3261,7 @@ checker is loaded.
 
         :custom
         (php-mode-coding-style (quote nl/php))
+        (php-mode-lineup-cascaded-calls t)
         :hook (php-mode . nl/php-mode-hook))
 #+END_SRC
 
@@ -3290,6 +3345,15 @@ http://batsov.com/projectile/
                              (c-add-style "my-style" my-protobuf-style t)
                              (subword-mode 1))))
 #+END_SRC
+
+** [[https://github.com/tumashu/posframe][posframe]]
+
+#+begin_src emacs-lisp
+(use-package posframe
+  :pin melpa
+  :init
+  (setq x-gtk-resize-child-frames 'resize-mode))
+#+end_src
 
 ** [[https://github.com/milkypostman/powerline][powerline]]
 
