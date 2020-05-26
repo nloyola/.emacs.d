@@ -488,6 +488,7 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 (global-set-key (kbd "M-S-<f3>")      'counsel-rg)
 (global-set-key [f5]                  'nl/helm-compile)
 (global-set-key (kbd "S-<f5>")        'toggle-truncate-lines)
+(global-set-key (kbd "<f8>")          'window-toggle-side-windows)
 (global-set-key (kbd "S-<f11>")       'eval-region)
 (global-set-key (kbd "C-S-<f11>")     'align-regexp)
 (global-set-key (kbd "C-c o")         'nl/counsel-git-files)
@@ -652,13 +653,19 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
   (add-to-list 'display-buffer-alist
                '("\\(?:\\*\\(?:grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\|\\*Flycheck.*\\)\\)"
                  display-buffer-in-side-window
-                 (side . bottom) (slot . -1) (preserve-size . (nil . t)) (window-height . 0.15)
+                 (window-height . 0.15)
+                 (side . bottom)
+                 (slot . -1) ;; left side
+                 (preserve-size . (nil . t))
                  ,nl/side-window-parameters))
 
   (add-to-list 'display-buffer-alist
-               '("\\*\\(?:shell\\|compilation\\|ng-compile\\|ng-test\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
+               '("\\*\\(?:[Hh]elp\\|Backtrace\\|Warnings\\|Compile-Log\\|shell\\|compilation\\|ng-compile\\|ng-test\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
                  display-buffer-in-side-window
-                 (side . bottom) (slot . 1) (preserve-size . (nil . t)) (window-height . 0.2)
+                 (window-height . 0.2)
+                 (side . bottom)
+                 (slot . 1) ;; right side
+                 (preserve-size . (nil . t))
                  ,nl/side-window-parameters))
 #+END_SRC
 
@@ -848,12 +855,13 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
     (setq dired-listing-switches "-aBhl --group-directories-first")
     ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
     (put 'dired-find-alternate-file 'disabled nil)
-    :hook
-    (dired-mode . (lambda ()
+    :hook ((dired-mode . dired-hide-details-mode)
+           (dired-mode . hl-line-mode)
+           (dired-mode . (lambda ()
                     (local-set-key (kbd "<mouse-2>") #'dired-find-alternate-file)
                     ;;(local-set-key (kbd "RET") #'dired-find-alternate-file)
                     (local-set-key (kbd "^")
-                                   (lambda () (interactive) (find-alternate-file ".."))))))
+                                   (lambda () (interactive) (find-alternate-file "..")))))))
 #+END_SRC
 
 ** =ediff=
@@ -1356,6 +1364,20 @@ Save command history between sessions (taken from EmacsWiki).
                 tramp-file-name-regexp)))
 #+END_SRC
 
+** =vc=
+
+#+begin_src emacs-lisp
+(use-package vc
+  :config
+  (setq vc-find-revision-no-save t))
+
+(use-package vc-git
+  :ensure nil
+  :config
+  (setq vc-git-diff-switches "--patch-with-stat")
+  (setq vc-git-print-log-follow t))
+#+end_src
+
 ** =windmove=
 
 =windmove= provides useful commands for moving window focus by
@@ -1373,7 +1395,8 @@ configuration change. Redo the changes using ~C-c right
 direction keys.
 
 #+BEGIN_SRC emacs-lisp
-(winner-mode t)
+(use-package winner
+  :hook (after-init . winner-mode))
 #+END_SRC
 
 ** =whitespace=
@@ -4655,4 +4678,70 @@ behavior added."
 #+begin_src emacs-lisp
 (require 'helm-treemacs-icons)
 (helm-treemacs-icons-enable)
+#+end_src
+
+** [[https://protesilaos.com/dotemacs/][Protesilaos Stavrou]]
+
+Prot's config has a lot of nice things.
+
+#+begin_src emacs-lisp
+(use-package emacs
+  :commands (prot/window-dired-vc-root-left
+             prot/make-frame-floating-with-current-buffer
+             prot/display-buffer-at-bottom)
+  :config
+  (defun prot/window-dired-vc-root-left ()
+    "Open root directory of current version-controlled repository
+or the present working directory with `dired' and bespoke window
+parameters.  This is meant as a proof-of-concept function,
+illustrating how to leverage window rules to display a buffer,
+plus a few concomitant extras."
+    (interactive)
+    (let ((dir (if (eq (vc-root-dir) nil)
+                   (dired-noselect default-directory)
+                 (dired-noselect (vc-root-dir)))))
+      (display-buffer-in-side-window
+       dir `((side . left)
+             (slot . -1)
+             (window-width . 0.16)
+             (window-parameters . ((no-other-window . t)
+                                   (no-delete-other-windows . t)
+                                   (mode-line-format . (" "
+                                                        mode-line-buffer-identification))))))
+      (with-current-buffer dir
+        (rename-buffer "*Dired-Side*")
+        (setq-local window-size-fixed 'width)))
+    (with-eval-after-load 'ace-window
+      (when (boundp 'aw-ignored-buffers)
+        (add-to-list 'aw-ignored-buffers "*Dired-Side*"))))
+
+  (defun prot/make-frame-floating-with-current-buffer ()
+    "Display the current buffer in a new floating frame.
+
+This passes certain parameters to the newly created frame:
+
+- use a different name than the default;
+- use a graphical frame;
+- do not display the minibuffer.
+
+The name is meant to be used by the external rules of my tiling
+window manager (BSPWM) to present the frame in a floating state."
+    (interactive)
+    (make-frame '((name . "my_float_window")
+                  (window-system . x)
+                  (minibuffer . nil))))
+
+  (defun prot/display-buffer-at-bottom ()
+    "Move the current buffer to the bottom of the frame.  This is
+useful to take a buffer out of a side window.
+
+The window parameters of this function are provided mostly for
+didactic purposes."
+    (interactive)
+    (let ((buffer (current-buffer)))
+      (with-current-buffer buffer
+        (delete-window)
+        (display-buffer-at-bottom
+         buffer `((window-parameters . ((mode-line-format . (" "
+                                                             mode-line-buffer-identification))))))))))
 #+end_src
