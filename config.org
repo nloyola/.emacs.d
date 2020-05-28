@@ -55,14 +55,31 @@ customize settings in [[file:init.el][init.el]].
 * Font
 ** Linux
 
+*** Fira Code
+
+#+BEGIN_SRC emacs-lisp
+(set-face-font 'default "Fira Code-12")
+(set-face-font 'italic "Ubuntu Mono-14")
+(set-face-font 'bold-italic "Ubuntu Mono-14")
+(set-face-font 'fixed-pitch-serif "Ubuntu Mono")
+
+(use-package fira-code-mode
+  :load-path "~/.emacs.d/lisp"
+  :hook prog-mode)
+#+END_SRC
+
+*** Fira Mono
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(set-face-font 'default "Fira Mono Medium-14")
+#+END_SRC
+
 *** Input font Installation
 
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
 
 #+BEGIN_SRC sh :tangle no
-mv Input-Font.zip ~/.fonts
-cd ~/.fonts
-unzip Input-Font.zip
+sudo apt-get install fonts-firacode
 #+END_SRC
 
 **** Emacs config
@@ -99,21 +116,6 @@ unzip symbola.zip
 #+BEGIN_SRC emacs-lisp :tangle no
 (set-fontset-font "fontset-default" nil
                   (font-spec :size 20 :name "Symbola"))
-#+END_SRC
-
-*** Fira Code
-
-#+BEGIN_SRC emacs-lisp
-  (set-face-font 'default "Fira Code Medium-12")
-
-  (use-package fira-code-mode
-    :load-path "~/.emacs.d/lisp")
-#+END_SRC
-
-*** Fira Mono
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(set-face-font 'default "Fira Mono Medium-14")
 #+END_SRC
 
 ** OSX
@@ -228,7 +230,10 @@ Delete the region when typing, just like as we expect nowadays.
 Highlight matching delimiters.
 
 #+BEGIN_SRC emacs-lisp
+(setq show-paren-style 'parenthesis)
 (show-paren-mode t)
+(custom-set-faces
+ '(show-paren-match ((t (:background "#6b6b6b" :box nil)))))
 #+END_SRC
 
 Highlight matches in query-replace mode.
@@ -1187,7 +1192,6 @@ comments.
     (push '(">=" . ?≥) prettify-symbols-alist)
     (push '("<=" . ?≤) prettify-symbols-alist)
     (push '("->" . ?→) prettify-symbols-alist)
-    (fira-code-mode)
     (yas-minor-mode))
 
   (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
@@ -1419,7 +1423,7 @@ Using doom themes
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-rouge t)
+  (load-theme 'doom-acario-dark t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
