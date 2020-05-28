@@ -24,3 +24,4 @@ eclipse.jdt.ls/
 php-language-server/
 /lsp-cache/
 /.cache/
+/.dap-breakpoints
