@@ -59,8 +59,8 @@ customize settings in [[file:init.el][init.el]].
 
 #+BEGIN_SRC emacs-lisp
 (set-face-font 'default "Fira Code-12")
-(set-face-font 'italic "Ubuntu Mono-14")
-(set-face-font 'bold-italic "Ubuntu Mono-14")
+(set-face-font 'italic "Ubuntu Mono-16")
+(set-face-font 'bold-italic "Ubuntu Mono-16")
 (set-face-font 'fixed-pitch-serif "Ubuntu Mono")
 
 (use-package fira-code-mode
@@ -294,35 +294,11 @@ Set environment variable for shells.
 (setenv "PAGER" "cat")
 #+END_SRC
 
-Do not ask me to save files before compiling, or kill a previous
-compilation. Also scroll to the end of the compilation buffer when it
-is opened.
-
-#+BEGIN_SRC emacs-lisp
-(setq compilation-ask-about-save nil
-      compilation-always-kill t
-      compilation-scroll-output t)
-#+END_SRC
-
-Enable ANSI colors for compilation buffers.
-
-#+BEGIN_SRC emacs-lisp
-;;(require 'ansi-color)
-(defun colorize-compilation-buffer ()
-  (let ((inhibit-read-only t))
-    (ansi-color-apply-on-region (point-min) (point-max))))
-(add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
-#+END_SRC
-
 Configure =next-buffer= and =previous-buffer= to only visit file
 buffers (has to be called for each frame):
 
 #+BEGIN_SRC emacs-lisp
 (set-frame-parameter (selected-frame) 'buffer-predicate #'buffer-file-name)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp
-(add-hook 'shell-mode-hook 'ansi-color-for-comint-mode-on)
 #+END_SRC
 
 These are taken from
@@ -514,18 +490,12 @@ Recently, line numbering has been really slow. Disabling for now.
 Emacs 26 added ~global-display-line-numbers-mode~:
 
 #+BEGIN_SRC emacs-lisp
-  (dolist (mode-hook '(text-mode-hook prog-mode-hook))
-    (when (version<= "26.0.50" emacs-version)
-      (add-hook mode-hook 'display-line-numbers-mode)))
+(dolist (mode-hook '(text-mode-hook prog-mode-hook))
+  (when (version<= "26.0.50" emacs-version)
+    (add-hook mode-hook 'display-line-numbers-mode)))
 #+END_SRC
 
 ** Mode line
-
-Display the column number in the mode line.
-
-#+BEGIN_SRC emacs-lisp
-(column-number-mode t)
-#+END_SRC
 
 Use the directory name to make buffer names unique.
 
@@ -533,74 +503,11 @@ Use the directory name to make buffer names unique.
 (setq uniquify-buffer-name-style 'forward)
 #+END_SRC
 
-Do not show these modes in the mode line.
-
-#+BEGIN_SRC emacs-lisp
-(diminish 'visual-line-mode)
-(diminish 'abbrev-mode)
-#+END_SRC
 ** Remove trailing whitespace
 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+END_SRC
-
-** Shell
-
-#+BEGIN_SRC emacs-lisp
-(defvar my-term-shell "/bin/zsh")
-(defadvice ansi-term (before force-bash)
-  (interactive (list my-term-shell)))
-(ad-activate 'ansi-term)
-
-(defun my-term-use-utf8 ()
-  (set-buffer-process-coding-system 'utf-8-unix 'utf-8-unix))
-(add-hook 'term-exec-hook 'my-term-use-utf8)
-
-(defun my-term-paste (&optional string)
-  (interactive)
-  (process-send-string
-   (get-buffer-process (current-buffer))
-   (if string string (current-kill 0))))
-
-(defun my-term-hook ()
-  (goto-address-mode)
-  (define-key term-raw-map "\C-y" 'my-term-paste)
-  (let ((base03  "#002b36")
-        (base02  "#073642")
-        (base01  "#586e75")
-        (base00  "#657b83")
-        (base0   "#839496")
-        (base1   "#93a1a1")
-        (base2   "#eee8d5")
-        (base3   "#fdf6e3")
-        (yellow  "#b58900")
-        (orange  "#cb4b16")
-        (red     "#dc322f")
-        (magenta "#d33682")
-        (violet  "#6c71c4")
-        (blue    "#268bd2")
-        (cyan    "#2aa198")
-        (green   "#859900"))
-    (setq ansi-term-color-vector
-          (vconcat `(unspecified ,base02 ,red ,green ,yellow ,blue
-                                 ,magenta ,cyan ,base2)))
-    (my-term-use-utf8)
-    ))
-
-(add-hook 'term-exec-hook 'my-term-hook)
-#+END_SRC
-
-Use the whole window when opening up a shell (default behaviour is to
-split the window).
-
-Commented out since it is being configured in the "Side Windows"
-section now (2019-02-20)
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(add-to-list 'display-buffer-alist '("*shell*" display-buffer-same-window))
-#+END_SRC
-
 ** Tags
 
 Case sensitive tags search:
@@ -751,6 +658,12 @@ Prefer saving this file somewhere other than the default.
 
 ** =compile=
 
+Do not ask me to save files before compiling, or kill a previous
+compilation. Also scroll to the end of the compilation buffer when it
+is opened.
+
+Enable ANSI colors for compilation buffers.
+
 #+BEGIN_SRC emacs-lisp
 (use-package compile
   ;;:bind (("C-c c" . compile)
@@ -771,6 +684,15 @@ Prefer saving this file somewhere other than the default.
     (ansi-color-process-output nil)
     (set (make-local-variable 'comint-last-output-start)
          (point-marker)))
+
+  ;; (defun colorize-compilation-buffer ()
+  ;;   (let ((inhibit-read-only t))
+  ;;     (ansi-color-apply-on-region (point-min) (point-max))))
+  ;; (add-hook 'compilation-filter-hook 'colorize-compilation-buffer)
+  :config
+  (setq compilation-ask-about-save nil
+        compilation-always-kill t
+        compilation-scroll-output t)
 
   :hook (compilation-filter . compilation-ansi-color-process-output))
 #+END_SRC
@@ -1171,6 +1093,7 @@ comments.
     "Enables settings common between programming language modes."
     (nl/setup-indent 2) ; indent 2 spaces width
     (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
+    (subword-mode 1)
     ;;
     ;; Set tab and CR/LF keys to call their corresponding more-general
     ;; functions.  This needs to be here to override the settings of some modes
@@ -1265,9 +1188,21 @@ Remember position in a file.
 ** =shell=
 
 #+BEGIN_SRC emacs-lisp
-(bind-key "C-x m" 'shell)
-(bind-key "C-x M" 'ansi-term)
+(use-package shell
+  :bind (("C-x m" . shell)
+         ("C-x M" . ansi-term))
+  :hook (shell-mode . 'ansi-color-for-comint-mode-on))
 #+END_SRC
+
+** =simple=
+
+#+begin_src emacs-lisp :tangle no
+(use-package simple
+  :diminish visual-line-mode
+  :config
+  ;; Display the column number in the mode line.
+  (column-number-mode t))
+#+end_src
 
 ** =sql=
 
@@ -1276,80 +1211,78 @@ This configuration allows me to connect to predefined MySQL servers.
 Save command history between sessions (taken from EmacsWiki).
 
 #+BEGIN_SRC emacs-lisp
-    (use-package sql
-      :preface
-      (require 'epa-file)
-      (epa-file-enable)
+(use-package sql
+  :preface
+  (require 'epa-file)
+  (epa-file-enable)
 
-      (setq sql-connection-alist
-            '((localhost.dev (sql-product 'mysql)
-                             (sql-port 3306)
-                             (sql-server "localhost")
-                             (sql-user "root")
-                             (sql-database "mysql"))))
+  (setq sql-connection-alist
+        '((localhost.dev (sql-product 'mysql)
+                         (sql-port 3306)
+                         (sql-server "localhost")
+                         (sql-user "root")
+                         (sql-database "mysql"))))
 
-      (defun nl/sql-connect (product connection)
-        "Connects to a database server of type PRODUCT using the CONNECTION type."
-        (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
+  (defun nl/sql-connect (product connection)
+    "Connects to a database server of type PRODUCT using the CONNECTION type."
+    (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
 
-        ;; update the password to the sql-connection-alist
-        (let ((connection-info (assoc connection sql-connection-alist))
-              (sql-password (car (last (assoc connection nl-sql-passwords)))))
-          (delete sql-password connection-info)
-          (nconc connection-info `((sql-password ,sql-password)))
-          (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
-          (add-to-list 'sql-connection-alist connection-info))
+    ;; update the password to the sql-connection-alist
+    (let ((connection-info (assoc connection sql-connection-alist))
+          (sql-password (car (last (assoc connection nl-sql-passwords)))))
+      (delete sql-password connection-info)
+      (nconc connection-info `((sql-password ,sql-password)))
+      (setq sql-connection-alist (assq-delete-all connection sql-connection-alist))
+      (add-to-list 'sql-connection-alist connection-info))
 
-        ;; connect to database
-        (setq sql-product product)
-        (if current-prefix-arg
-            (sql-connect connection connection)
-          (sql-connect connection)))
+    ;; connect to database
+    (setq sql-product product)
+    (if current-prefix-arg
+        (sql-connect connection connection)
+      (sql-connect connection)))
 
-      (defun nl/sql-localhost-dev ()
-        "Connects to the MySQL server running on machine 'localhost'."
-        (nl/sql-connect 'mysql 'localhost.dev))
+  (defun nl/sql-localhost-dev ()
+    "Connects to the MySQL server running on machine 'localhost'."
+    (nl/sql-connect 'mysql 'localhost.dev))
 
-      (defun nl/sql-obelix-dev ()
-        "Connects to the MySQL server running on machine 'obelix'."
-        (nl/sql-connect 'mysql 'obelix.dev))
+  (defun nl/sql-obelix-dev ()
+    "Connects to the MySQL server running on machine 'obelix'."
+    (nl/sql-connect 'mysql 'obelix.dev))
 
-      (defvar nl/sql-servers-list
-        '(("localhost dev" nl/sql-localhost-dev)
-          ;;("Obelix Dev" nl/sql-obelix-dev)
-          )
-        "A list of server name and the function to connect.")
+  (defvar nl/sql-servers-list
+    '(("localhost dev" nl/sql-localhost-dev)
+      ;;("Obelix Dev" nl/sql-obelix-dev)
+      )
+    "A list of server name and the function to connect.")
 
-      (defun nl/sql-connect-server (func)
-        "Connect to the input server using nl/sql-servers-list and FUNC."
-        (interactive
-         (helm-comp-read "Select server: " nl/sql-servers-list))
-        (funcall func))
+  (defun nl/sql-connect-server (func)
+    "Connect to the input server using nl/sql-servers-list and FUNC."
+    (interactive
+     (helm-comp-read "Select server: " nl/sql-servers-list))
+    (funcall func))
 
-      (defun my-sql-save-history-hook ()
-        (let ((lval 'sql-input-ring-file-name)
-              (rval 'sql-product))
-          (if (symbol-value rval)
-              (let ((filename
-                     (concat "~/.emacs.d/sql/"
-                             (symbol-name (symbol-value rval))
-                             "-history.sql")))
-                (set (make-local-variable lval) filename))
-            (error
-             (format "SQL history will not be saved because %s is nil"
-                     (symbol-name rval))))))
+  (defun my-sql-save-history-hook ()
+    (let ((lval 'sql-input-ring-file-name)
+          (rval 'sql-product))
+      (if (symbol-value rval)
+          (let ((filename
+                 (concat "~/.emacs.d/sql/"
+                         (symbol-name (symbol-value rval))
+                         "-history.sql")))
+            (set (make-local-variable lval) filename))
+        (error
+         (format "SQL history will not be saved because %s is nil"
+                 (symbol-name rval))))))
 
-      :config
-      (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
+  :config
+  (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
 #+END_SRC
 
 ** =subword-mode=
 
 #+BEGIN_SRC emacs-lisp
 (use-package subword
-  :diminish subword-mode
-  :config
-  (add-hook 'prog-mode-hook 'subword-mode))
+  :diminish subword-mode)
 #+END_SRC
 
 ** =tramp=
@@ -1367,6 +1300,12 @@ Save command history between sessions (taken from EmacsWiki).
                 vc-ignore-dir-regexp
                 tramp-file-name-regexp)))
 #+END_SRC
+** =term=
+
+#+begin_src emacs-lisp
+(use-package term
+  :bind (("C-x M" . ansi-term)))
+#+end_src
 
 ** =vc=
 
@@ -1664,7 +1603,7 @@ Use silver surfer to search.
 #+BEGIN_SRC emacs-lisp
 (use-package all-the-icons-dired
     ;; M-x all-the-icons-install-fonts
-    :commands (all-the-icons-dired-mode))
+    :hook (dired-mode . all-the-icons-dired-mode))
 #+END_SRC
 
 ** [[https://github.com/syohex/emacs-anzu][anzu]]
@@ -1947,7 +1886,7 @@ indexes (TAGS) or persistent background processes.
          ("M-g j" . dumb-jump-go)
          ("M-g x" . dumb-jump-go-prefer-external)
          ("M-g z" . dumb-jump-go-prefer-external-other-window))
-  :config (setq dumb-jump-selector 'helm
+  :config (setq dumb-jump-selector 'ivy
                 dumb-jump-prefer-searcher 'ag))
 #+END_SRC
 
@@ -1960,7 +1899,6 @@ indexes (TAGS) or persistent background processes.
   (global-set-key [remap kill-ring-save] #'easy-kill)
   (global-set-key [remap mark-sexp] #'easy-mark))
 #+END_SRC
-
 
 ** [[https://github.com/editorconfig/editorconfig-emacs][editor-config]]
 
@@ -2354,6 +2292,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
    (use-package helm
      ;;:load-path "~/src/github/elisp/helm"
+     :pin melpa
      :commands (helm-config helm-files helm-grep)
      :diminish helm-mode
      :init
@@ -2484,6 +2423,7 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm-ag
+  :pin melpa
   :bind (:map helm-ag-mode-map
               ("C-<return>" . nl/jump-other-window))
   :custom
@@ -2600,7 +2540,10 @@ instead of ~find-file-other-window~.
 
 ** [[https://github.com/brotzeitmacher/helm-xref][helm-xref]]
 
-#+BEGIN_SRC emacs-lisp
+No longer using this since most development is now using lsp -
+2020-05-29
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package helm-xref
   :init
   (require 'helm-xref)
@@ -2654,90 +2597,114 @@ This package can be used to tie related commands into a family of
 short bindings with a common prefix - a Hydra.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package hydra
-    :pin melpa
+(use-package hydra
+  :pin melpa
+  :init
+  (use-package cl-lib)
+  (use-package lv)
+  (use-package key-chord
     :init
-    (use-package cl-lib)
-    (use-package lv)
-    (use-package key-chord
-      :init
-      (setq key-chord-one-key-delay 0.16)
-      :config (key-chord-mode 1))
-    :config
-    (setq hydra-hint-display-type 'posframe)
-    (defun nl/pull-window ()
-      "Pull a window to the window the point is at"
-      (interactive)
-      (aw--push-window (selected-window))
-      (ace-swap-window)
-      (aw-flip-window))
+    (setq key-chord-one-key-delay 0.16)
+    :config (key-chord-mode 1))
+  :config
+  (setq hydra-hint-display-type 'posframe)
+  (defun nl/pull-window ()
+    "Pull a window to the window the point is at"
+    (interactive)
+    (aw--push-window (selected-window))
+    (ace-swap-window)
+    (aw-flip-window))
 
-    (defun nl/open-buffer-in-other-window ()
-      "Open buffer in another window."
-      (interactive)
-      (let ((pt (point))
-            (buf (current-buffer))
-            (window (ace-select-window)))
-        (set-window-buffer window buf)
-        (goto-char pt)
-        (recenter-top-bottom 'top)))
+  (defun nl/open-buffer-in-other-window ()
+    "Open buffer in another window."
+    (interactive)
+    (let ((pt (point))
+          (buf (current-buffer))
+          (window (ace-select-window)))
+      (set-window-buffer window buf)
+      (goto-char pt)
+      (recenter-top-bottom 'top)))
 
-    ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
+  ;; http://oremacs.com/2015/01/29/more-hydra-goodness/
 
-    (defun hydra-universal-argument (arg)
-      (interactive "P")
-      (setq prefix-arg (if (consp arg)
-                           (list (* 4 (car arg)))
-                         (if (eq arg '-)
-                             (list -4)
-                           '(4)))))
+  (defun hydra-universal-argument (arg)
+    (interactive "P")
+    (setq prefix-arg (if (consp arg)
+                         (list (* 4 (car arg)))
+                       (if (eq arg '-)
+                           (list -4)
+                         '(4)))))
 
-    (defhydra hydra-window (:color red :hint nil)
-      ("h" windmove-left)
-      ("j" windmove-down)
-      ("k" windmove-up)
-      ("l" windmove-right)
-      ("|" (progn (split-window-right) (windmove-right)))
-      ("_" (progn (split-window-below) (windmove-down)))
-      ("v" split-window-right)
-      ("x" split-window-below)
-      ("u" winner-undo)
-      ("r" winner-redo) ;;Fixme, not working?
-      ("a" ace-window :exit t)
-      ("f" new-frame :exit t)
-      ("o" nl/open-buffer-in-other-window :exit t)
-      ("p" nl/pull-window :exit t)
-      ("s" ace-swap-window :exit t)
-      ("da" ace-delete-window)
-      ("dw" delete-window)
-      ("db" kill-this-buffer)
-      ("df" delete-frame :exit t)
-      ("q" nil)
-      ;;("i" ace-maximize-window "ace-one" :color blue)
-      ("m" headlong-bookmark-jump))
+  (defhydra hydra-window (:color red :hint nil)
+    ("h" windmove-left)
+    ("j" windmove-down)
+    ("k" windmove-up)
+    ("l" windmove-right)
+    ("|" (progn (split-window-right) (windmove-right)))
+    ("_" (progn (split-window-below) (windmove-down)))
+    ("v" split-window-right)
+    ("x" split-window-below)
+    ("u" winner-undo)
+    ("r" winner-redo) ;;Fixme, not working?
+    ("a" ace-window :exit t)
+    ("f" new-frame :exit t)
+    ("o" nl/open-buffer-in-other-window :exit t)
+    ("p" nl/pull-window :exit t)
+    ("s" ace-swap-window :exit t)
+    ("da" ace-delete-window)
+    ("dw" delete-window)
+    ("db" kill-this-buffer)
+    ("df" delete-frame :exit t)
+    ("q" nil)
+    ;;("i" ace-maximize-window "ace-one" :color blue)
+    ("m" headlong-bookmark-jump))
 
-    (key-chord-define-global "yy" 'hydra-window/body)
+  (key-chord-define-global "yy" 'hydra-window/body)
 
-    (defhydra hydra-buffer (:color blue :columns 3)
-      ("n" next-buffer "next" :color red)
-      ("b" helm-mini "switch")
-      ("B" ibuffer "ibuffer")
-      ("p" previous-buffer "prev" :color red)
-      ("C-b" buffer-menu "buffer menu")
-      ("d" kill-this-buffer "delete" :color red)
-      ;; don't come back to previous buffer after delete
-      ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
-      ("s" save-buffer "save" :color red))
+  (defhydra hydra-buffer (:color blue :columns 3)
+    ("n" next-buffer "next" :color red)
+    ("b" helm-mini "switch")
+    ("B" ibuffer "ibuffer")
+    ("p" previous-buffer "prev" :color red)
+    ("C-b" buffer-menu "buffer menu")
+    ("d" kill-this-buffer "delete" :color red)
+    ;; don't come back to previous buffer after delete
+    ("D" (progn (kill-this-buffer) (next-buffer)) "Delete" :color red)
+    ("s" save-buffer "save" :color red))
 
-    (key-chord-define-global "zz" 'hydra-buffer/body)
+  (key-chord-define-global "zz" 'hydra-buffer/body)
 
-    (defhydra hydra-goto-line (goto-map "")
-      "goto-line"
-      ("g" goto-line "go")
-      ("m" set-mark-command "mark" :bind nil)
-      ("q" nil "quit"))
+  (defhydra hydra-goto-line (goto-map "")
+    "goto-line"
+    ("g" goto-line "go")
+    ("m" set-mark-command "mark" :bind nil)
+    ("q" nil "quit"))
 
-    (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body))
+  (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body)
+
+(defhydra hydra-windows-nav (:color red)
+  ("s" shrink-window-horizontally "shrink horizontally" :column "Sizing")
+  ("e" enlarge-window-horizontally "enlarge horizontally")
+  ("b" balance-windows "balance window height")
+  ("m" maximize-window "maximize current window")
+  ("M" minimize-window "minimize current window")
+
+  ("h" split-window-below "split horizontally" :column "Split management")
+  ("v" split-window-right "split vertically")
+  ("d" delete-window "delete current window")
+  ("x" delete-other-windows "delete-other-windows")
+
+
+  ("z" ace-window "ace window" :color blue :column "Navigation")
+  ("h" windmove-left "← window")
+  ("j" windmove-down "↓ window")
+  ("k" windmove-up "↑ window")
+  ("l" windmove-right "→ window")
+  ("r" toggle-window-split "rotate windows") ; Located in utility functions
+  ("q" nil "quit menu" :color blue :column nil))
+
+  (global-set-key (kbd "C-c w") 'hydra-windows-nav/body))
+
 #+END_SRC
 
 #+RESULTS:
@@ -3002,6 +2969,13 @@ Add filler lorem ipsum text to Emacs.
 (use-package lorem-ipsum)
 #+END_SRC
 
+** [[https://github.com/emacs-lsp/lsp-metals][lsp-metals]]
+
+#+begin_src emacs-lisp
+(use-package lsp-metals
+  :hook (scala-mode . lsp))
+#+end_src
+
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
 
 #+BEGIN_SRC emacs-lisp
@@ -3022,17 +2996,21 @@ Add filler lorem ipsum text to Emacs.
   :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
+  :load-path "~/src/github/elisp/lsp-ui"
   :custom
   (lsp-ui-sideline-enable t)
-  :config
   (lsp-ui-doc-enable nil)
-  (define-key lsp-ui-mode-map
-    [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
-  (define-key lsp-ui-mode-map
-    [remap xref-find-references] #'lsp-ui-peek-find-references)
+  (lsp-ui-peek-enable nil)
+  :bind (:map lsp-ui-mode-map
+              ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
+              ([remap xref-find-references] . lsp-ui-peek-find-references)
+              ([f10] . lsp-ui-sideline-toggle-symbols-info))
+  :custom-face
+  (lsp-ui-peek-peek ((nil :background "#2b538a")))
+  :config
+  (setq lsp-ui-peek-always-show nil)
   :hook
-  (lsp-mode . lsp-ui-mode)
-  :commands lsp-ui-mode)
+  (lsp-mode . lsp-ui-mode))
 
 ;;(use-package company-lsp
 ;;  :after company
@@ -3473,7 +3451,9 @@ to overwrite.
 
 ** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
-#+BEGIN_SRC emacs-lisp
+No longer used since Scala Metals is now being used.
+
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package sbt-mode
     ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
     :commands (sbt-start sbt-command)
@@ -3871,7 +3851,6 @@ think of it as both something that augments and replaces the standard
 #+END_SRC
 
 #+RESULTS:
-
 
 ** [[https://github.com/Alexander-Miller/treemacs][treemacs]]
 
@@ -4748,4 +4727,36 @@ didactic purposes."
         (display-buffer-at-bottom
          buffer `((window-parameters . ((mode-line-format . (" "
                                                              mode-line-buffer-identification))))))))))
+#+end_src
+
+
+** From [[https://azzamsa.com/blog/scripts-el/#change-selected-region-to-snake-case][Useful Emacs Lisp Scripts]]
+
+#+begin_src emacs-lisp
+(defun to-snake-case (start end)
+  "Change selected text to snake case format"
+  (interactive "r")
+  (if (use-region-p)
+      (let ((camel-case-str (buffer-substring start end)))
+        (delete-region start end)
+        (insert (s-snake-case camel-case-str)))
+    (message "No region selected")))
+
+(defun play-reminder-sound ()
+  (interactive)
+  (start-process "" nil "mpv" "/usr/share/sounds/freedesktop/stereo/suspend-error.oga"))
+
+(defun remind-me ()
+  "Notify with a sound after certain time"
+  (interactive)
+  (let ((time (read-string "Time (min|sec): " "10 min")))
+    (message "I will remind you after %s" time)
+    (run-at-time time nil #'play-reminder-sound)))
+
+(defun light-set-value ()
+  "Set light value directly inside Emacs"
+  (interactive)
+  (let* ((current-value (s-trim (shell-command-to-string "light -G")))
+         (light-value (read-string "Set Value: " current-value)))
+    (start-process "" nil "light" "-S" light-value)))
 #+end_src
