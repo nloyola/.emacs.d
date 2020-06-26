@@ -1,0 +1,8 @@
+# -*- mode: snippet; eval: (setq require-final-newline nil) -*-
+# name: szvm
+# key: szvm
+# --
+match {
+  case scalaz.Success() =>
+  case scalaz.Failure(err) => Error(err.list.toList.mkString(",")).invalidNec
+}
