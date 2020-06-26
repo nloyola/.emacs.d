@@ -91,7 +91,7 @@
 (defun nl/scala-bloop-test-command (command)
   "Run the compile COMMAND at the project's root directory."
   (interactive)
-  (nl/scala-bloop-command (format "test --reporter scalac %s root-test" command)))
+  (nl/scala-bloop-command (format "test --reporter scalac %s bbweb-test" command)))
 
 (defun nl/scalatest-test-this-package ()
   "For the class the cursor is in, run the scalatest test suite.
@@ -102,7 +102,7 @@ The class name must have the postfix 'Spec' for this function to work."
 (defun nl/scalatest-test-project ()
   "Run the scalatest test suite."
   (interactive)
-  (nl/scala-bloop-command "test --reporter scalac root-test"))
+  (nl/scala-bloop-command "test --reporter scalac bbweb-test"))
 
 (defun nl/scalatest-test-only-this-class ()
   "For the class the cursor is in, run the scalatest test suite.
@@ -115,7 +115,7 @@ The class name must have the postfix 'Spec' for this function to work."
 The class name must have the postfix 'Spec' for this function to work."
   (interactive)
   ;;(message (format "testOnly *.%s -- -z \"%s\"" (nl/scalstest-find-suite-name) (nl/scalstest-find-scalatest-behaviour)))
-  (nl/scala-bloop-command (format "test --reporter scalac -o \\*.%s root-test -- -z \"%s\"" (nl/scalstest-find-suite-class-name) (nl/scalstest-find-scalatest-behaviour))))
+  (nl/scala-bloop-command (format "test --reporter scalac -o \\*.%s bbweb-test -- -z \"%s\"" (nl/scalstest-find-suite-class-name) (nl/scalstest-find-scalatest-behaviour))))
 
 (defun nl/scalatest-find-file ()
   "From a scalatest failure backtrace, opens the file under the cursor at the line specified."
