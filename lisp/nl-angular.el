@@ -86,6 +86,11 @@
   (interactive)
   (counsel-ag "" (projectile-project-root) "-G .html$"))
 
+(defun nl/counsel-ag-css ()
+  "Perform counsel-ag on the project's CSS files."
+  (interactive)
+  (counsel-ag "" (projectile-project-root) "-G .s\\?css$"))
+
 (defun ts-spec-filename-p (filename)
   "Return TRUE if FILENAME is a match for a TypseScript spec."
   (string-match "\.spec\.ts$" filename))
@@ -214,7 +219,8 @@
 (defhydra hydra-nl/angular-search (:color blue)
   ("f" nl/counsel-ag-ts "TypeScript files" :column "Search")
   ("s" nl/counsel-ag-ts-spec "TypeScript test specificaton files")
-  ("h" nl/counsel-ag-html "HTML files"))
+  ("h" nl/counsel-ag-html "HTML files")
+  ("c" nl/counsel-ag-css "CSS files"))
 
 (defhydra hydra-nl/angular-project (:color red :hint nil)
   ("j" hydra-nl/angular-jump-to-file/body "Jump to file" :color blue :column "Angular")
