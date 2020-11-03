@@ -1918,98 +1918,12 @@ indexes (TAGS) or persistent background processes.
   (add-hook 'typescript-mode-hook 'eglot-ensure))
 #+END_SRC
 
-** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package ensime
-  :commands ensime ensime-mode))
-#+END_SRC
-
-** [[https://github.com/emacs-eclim/emacs-eclim][emacs-eclim]]
-
-Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
-can be downloaded from [[http://eclim.org/install.html][here]].
-
-2019-03-10 tyring out
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package eclim
-    ;; :load-path "~/src/github/elisp/emacs-eclim"
-    :diminish eclim-mode
-    :preface
-    (defun nl/restart-eclim (workspace-dir)
-      "Restarts the eclim server.  If it is currently active, the server is stopped first."
-      (interactive (list (read-directory-name "Workspace directory: "
-                                              eclimd-default-workspace nil t eclimd-default-workspace)))
-      (if (get-buffer "*eclimd*") (stop-eclimd))
-      (message "workspace dir: %s" workspace-dir)
-      (cd-absolute workspace-dir)
-      (eclimd-start workspace-dir)
-      (switch-to-buffer "*eclimd*"))
-
-    (defun nl/gradle-javadoc ()
-      "Uses gradle to build the Javadoc for the project."
-      (interactive)
-      (let* ((current-directory default-directory))
-        (setq default-directory (locate-dominating-file default-directory "build.gradle"))
-        (compile "gradle -q --console=plain javadoc")
-        (setq default-directory current-directory)))
-
-    :init (use-package cl)
-    :config
-    (use-package company-emacs-eclim
-      :commands company-emacs-eclim-setup)
-
-    (use-package eclimd
-      ;;:load-path "~/src/github/elisp/emacs-eclim"
-      :preface
-      ;;(setq eclimd-autostart t)
-      )
-
-    (setq eclim-print-debug-messages t)
-    ;;eclim-nailgun-port 9092
-    ;;eclim-eclimrc "~/.eclimrc"
-    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
-      (if (file-accessible-directory-p eclipse-dir)
-          (progn
-            (add-to-list 'eclim-eclipse-dirs eclipse-dir)
-            (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
-                  eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
-                  ))))
-    (company-emacs-eclim-setup)
-    (global-company-mode t)
-    (setq eclim-auto-save t
-          eclimd-wait-for-process nil
-          ;;eclimd-default-workspace "~/workspace/"
-          help-at-pt-display-when-idle t
-          help-at-pt-timer-delay 0.1
-
-          )
-    ;; Call the help framework with the settings above & activate eclim-mode
-    (help-at-pt-set-timer)
-
-    ;; keep consistent which other auto-complete backend.
-    (custom-set-faces
-     '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
-     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
-#+END_SRC
-
 ** [[https://github.com/syohex/emacs-git-gutter][emacs-git-gutter]]
 
 #+BEGIN_SRC emacs-lisp
 (use-package git-gutter
   :diminish git-gutter-mode
   :hook (prog-mode . git-gutter-mode))
-#+END_SRC
-
-** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package gradle-mode
-  :disabled
-  :diminish gradle-mode
-  :init
-    (gradle-mode 1))
 #+END_SRC
 
 ** [[https://github.com/lbolla/emacs-flycheck-flow][emacs-flycheck-flow]]
@@ -2220,13 +2134,6 @@ Updte tags on command line with ~global -u~.
   :commands ggtags-mode)
 #+END_SRC
 
-** [[https://gitlab.com/pidu/git-timemachine][git-timemachine]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package git-timemachine
-  :commands git-timemachine)
-#+END_SRC
-
 ** [[https://github.com/camdez/goto-last-change.el][goto-last-change]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2282,290 +2189,6 @@ Guide the following key bindings automatically and dynamically.
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (use-package headlong)
-#+END_SRC
-
-** [[https://github.com/emacs-helm/helm][helm]]
-*** Helm Config
-
-GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm
-  ;;:load-path "~/src/github/elisp/helm"
-  :pin melpa
-  :commands (helm-config helm-files helm-grep)
-  :diminish helm-mode
-  :init
-  ;; must set before helm-config, otherwise helm uses the default
-  ;; prefix "C-x c", which is inconvenient because you can
-  ;; accidentially press "C-x C-c"
-  (setq ;;helm-M-x-fuzzy-match                  t
-        ;;helm-bookmark-show-location           t
-        ;;helm-buffers-fuzzy-matching           t
-        ;;helm-completion-in-region-fuzzy-match t
-        ;;helm-file-cache-fuzzy-match           t
-        ;;helm-imenu-fuzzy-match                t
-        ;;helm-mode-fuzzy-match                 t
-        ;;helm-locate-fuzzy-match               t
-        ;;helm-quick-update                     t
-        ;;helm-recentf-fuzzy-match              t
-        ;;helm-semantic-fuzzy-match             t
-
-        ;;
-        ;;
-        ;;
-        helm-command-prefix-key "C-c h"
-        helm-split-window-in-side-p t           ; open helm buffer inside current window,
-        ;; not occupy whole other window
-        helm-ff-newfile-prompt-p nil
-        helm-scroll-amount 4                    ; scroll 4 lines other window using
-        ;; M-<next>/M-<prior>
-        ;;helm-quick-update t                     ; do not display invisible candidates
-        ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
-        ;; updating in delayed sources.
-        ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
-        ;; updating candidate buffer
-        helm-ff-search-library-in-sexp t        ; search for library in `require` and
-        ;; `declare-function` sexp.
-
-        ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
-        ;;                                    '(picture-mode artist-mode))
-        ;; limit the number of displayed canidates
-        ;;helm-candidate-number-limit 100
-        ;; show all candidates when set to 0
-        ;;helm-M-x-requires-pattern 0
-        helm-ff-file-name-history-use-recentf t
-        ;; move to end or beginning of source when reaching top or bottom of source.
-        helm-move-to-line-cycle-in-source t
-        ;; Needed in helm-buffers-list
-        ;;ido-use-virtual-buffers t
-        ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
-        ;;helm-buffers-fuzzy-matching t
-        ;; truncate long lines
-        ;;helm-truncate-lines t
-        helm-autoresize-min-height 30
-        helm-autoresize-max-height 30
-        helm-display-header-line nil
-        helm-buffer-max-length 45
-        helm-yas-display-key-on-candidate t
-        helm-grep-ag-command "rg --color=always --colors 'match:fg:black' --colors 'match:bg:yellow' --smart-case --no-heading --line-number %s %s %s"
-        helm-grep-ag-pipe-cmd-switches '("--colors 'match:fg:black'" "--colors 'match:bg:yellow'")
-        helm-mini-default-sources '(helm-source-buffers-list
-                                    helm-source-recentf
-                                    helm-source-bookmarks
-                                    helm-source-buffer-not-found))
-
-  ;; Save current position to mark ring when jumping to a different place
-  (helm-mode)
-  (helm-autoresize-mode 1)
-  :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
-  :bind (("M-x" . helm-M-x)
-         ("M-y" . helm-show-kill-ring)
-         ("C-x b" . helm-mini)
-         ("C-x C-f" . helm-find-files)
-         ("C-`" . helm-resume)))
-
-(defun nl/helm-eval-expression ()
-  (interactive)
-  (let ((selected-expression
-         (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
-    ;;(message "selected: %s" selected-expression)
-    (eval-expression (car (read-from-string selected-expression)))))
-
-(defun nl/helm-async-shell-command ()
-  (interactive)
-  (let ((selected-command
-         (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
-    (async-shell-command selected-command)))
-#+END_SRC
-
-*** Helm Key bindings
-
-#+BEGIN_SRC emacs-lisp
-(with-eval-after-load 'helm-files
-  ;; rebind tab to do persistent action
-  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
-  ;; make TAB works in terminal
-  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
-  ;; list actions using C-z
-  (define-key helm-map (kbd "C-z")  'helm-select-action)
-  (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
-  (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
-  (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
-#+END_SRC
-
-*** Helm Window config
-
-(NOT WORKING) So that helm windows shows at the bottom.
-
-- from http://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
-- see also http://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(with-eval-after-load 'helm
-  (cond (window-system
-         (add-to-list 'display-buffer-alist
-                      `("^\\*[Hh]elm"
-                        (display-buffer-in-side-window)
-                        (inhibit-same-window . nil)
-                        (reusable-frames . visible)
-                        (side            . bottom)
-                        (slot            . -1)
-                        (window-height   . 0.15)))
-         )))
-#+END_SRC
-
-*** Helm Other
-
-Highlighting of token matches is a tad slow, let's speed it up.
-
-#+BEGIN_SRC emacs-lisp
-(setq helm-mp-highlight-delay 0.3)
-#+END_SRC
-
-I don't know why, but helm tries doing window management.  Please
-stop:
-
-#+BEGIN_SRC emacs-lisp
-(setq helm-display-function 'pop-to-buffer)
-#+END_SRC
-
-** [[https://github.com/syohex/emacs-helm-ag][helm-ag]]
-
-Define my own function for ~C-o~ key mapping. Uses ~ace-select-window~
-instead of ~find-file-other-window~.
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm-ag
-  :pin melpa
-  :bind (:map helm-ag-mode-map
-              ("C-<return>" . nl/jump-other-window))
-  :custom
-  ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
-  (helm-ag-use-temp-buffer nil)
-  :preface
-  (defun nl/ace-find-file (filename)
-    (setq helm-ag--last-default-directory default-directory)
-    ;; use ace-select-window if there are more than 2 windows in the frame
-    (let ((path (concat helm-ag--last-default-directory filename)))
-      (if (> (length (window-list)) 2)
-          (ace-select-window)
-        (other-window 1))
-      (find-file path)))
-
-  (defun nl/jump-other-window ()
-    (interactive)
-    (let ((line (helm-current-line-contents)))
-      (helm-ag--find-file-action line 'nl/ace-find-file helm-ag--search-this-file-p)))
-  :commands helm-ag)
-#+END_SRC
-
-** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm-c-yasnippet
-  :commands helm-yas-complete
-  ;;:init (use-package yasnippet)
-  :bind ("C-c y" . helm-yas-complete))
-#+END_SRC
-
-** [[https://github.com/lerouxrgd/helm-fd][helm-fd]]
-
-2020-02-03 Disabled for now since it causes problems with Helm.
-
-#+begin_src emacs-lisp
-(use-package helm-fd
-  :after helm
-  :disabled
-  :custom
-  (helm-fd-cmd "fdfind")
-  :bind (:map helm-map
-              ("/" . helm-fd)))
-#+end_src
-
-** [[https://github.com/PythonNut/helm-flx][helm-flx]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package helm-flx
-  :after helm
-  :commands helm-flx-mode
-  :config
-    (helm-flx-mode +1)
-    (setq helm-flx-for-helm-find-files t ;; t by default
-          helm-flx-for-helm-locate t))
-#+END_SRC
-
-** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package helm-gtags
-    :commands (helm-gtags-mode)
-    :bind (("M-." . helm-gtags-find-tag)
-           ("M-," . helm-gtags-find-rtag))
-    :custom
-    (helm-gtags-path-style 'relative)
-    (helm-gtags-ignore-case t)
-    (helm-gtags-auto-update t))
-#+END_SRC
-
-** [[https://github.com/emacs-lsp/helm-lsp][helm-lsp]]
-
-#+begin_src emacs-lisp
-(use-package helm-lsp)
-#+end_src
-
-** [[https://github.com/bbatsov/projectile][helm-projectile]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm-projectile
-  :config
-  (helm-projectile-on)
-  ;;(setq compilation-read-command t)
-  ) ; do prompt for a compilation command
-#+END_SRC
-
-** [[https://github.com/cosmicexplorer/helm-rg][helm-rg]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package helm-rg)
-#+END_SRC
-
-** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package helm-swoop
-  :bind (("M-i" . helm-swoop))
-  :config
-    ;; When doing isearch, hand the word over to helm-swoop
-    (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-    ;; From helm-swoop to helm-multi-swoop-all
-    (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-    ;; Move up and down like isearch
-    (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
-    (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
-    (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
-    (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
-    ;; Save buffer when helm-multi-swoop-edit complete
-    (setq helm-multi-swoop-edit-save t
-          ;; If this value is t, split window inside the current window
-          helm-swoop-split-with-multiple-windows nil
-          ;; Optional face for line numbers
-          ;; Face name is `helm-swoop-line-number-face`
-          helm-swoop-use-line-number-face t))
-#+END_SRC
-
-** [[https://github.com/brotzeitmacher/helm-xref][helm-xref]]
-
-No longer using this since most development is now using lsp -
-2020-05-29
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package helm-xref
-  :init
-  (require 'helm-xref)
-  :config
-  ;;(setq xref-show-xrefs-function 'helm-xref-show-xrefs)
-)
 #+END_SRC
 
 ** [[https://github.com/DarthFennec/highlight-indent-guides][highlight-indent-guides]]
@@ -2829,137 +2452,6 @@ When using =counsel-ag=:
   (ivy-posframe-mode 1))
 #+end_src
 
-** [[https://github.com/mooz/js2-mode][js2-mode]]
-
-#+BEGIN_SRC emacs-lisp
-    (use-package js2-mode
-      :mode "\\.js\\'"
-      :bind (("C-c s j" . nl/counsel-ag-js))
-      :preface
-      (defun js-filename-p (filename)
-        (string-match "\.js$" filename))
-
-      (defun nl/counsel-ag-js ()
-        "Perform counsel-ag on the project's JavaScript files."
-        (interactive)
-        (counsel-ag "" (projectile-project-root) "--js"))
-
-      (defun nl/counsel-ag-js-spec ()
-        "Perform counsel-ag on the project's JavaScript files."
-        (interactive)
-        (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
-
-      (defun nl/webpack-find-file ()
-        "From a webpack failure backtrace, opens the file under the cursor at the line specified."
-        (interactive)
-        (let (p1 p2 err-line filename file-with-proj-path)
-          (save-some-buffers t)
-          (setq p1 (line-beginning-position) )
-          (setq p2 (line-end-position) )
-          (setq err-line (buffer-substring-no-properties p1 p2))
-          (save-match-data ; is usually a good idea
-            (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
-                 (setq filename (match-string 2 err-line))))
-          (message "filename: %s" (expand-file-name filename (projectile-project-root)))
-          (ace-select-window)
-          (find-file (expand-file-name filename (projectile-project-root)))
-          (goto-char (point-min))))
-
-      (defun nl/webpack-find-next-error ()
-        "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
-        (interactive)
-        (next-line)
-        (while (re-search-forward "^ERROR" nil t)
-          (goto-char (match-beginning 0))
-          (recenter 0)
-          (nl/webpack-find-file)))
-
-      :init
-      (setq js2-global-externs '("define"
-                                 "jasmine"
-                                 "describe"
-                                 "fdescribe"
-                                 "fail"
-                                 "beforeEach"
-                                 "afterEach"
-                                 "inject"
-                                 "expect"
-                                 "spyOn"
-                                 "it"
-                                 "fit"
-                                 "xdescribe"
-                                 "xit"))
-      :config
-      (setq javascript-common-imenu-regex-list
-            '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
-              ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
-              ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
-              ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
-              ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
-              ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
-              ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
-              ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
-              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
-              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
-              ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
-              ))
-
-      ;; js-mode imenu enhancement
-      ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
-      (defun nl-js-imenu-make-index ()
-        (save-excursion
-          (imenu--generic-function javascript-common-imenu-regex-list)))
-
-      (defun nl/javascript-mode-hook ()
-        (nl/setup-indent 2) ; indent 2 spaces width
-        (setq comment-multi-line t
-              mode-name "JS2")
-        (define-key js-mode-map [remap indent-new-comment-line]
-          'c-indent-new-comment-line)
-        (setq indent-tabs-mode nil)
-        (setq imenu-create-index-function 'nl-js-imenu-make-index)
-        (prettier-js-mode)
-        (flycheck-mode t))
-
-      ;;(eval-after-load 'js2-mode
-      ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
-
-      ;;(setq ac-js2-evaluate-calls t)
-
-      (setq-default js2-mode-show-parse-errors t)
-      (setq-default js2-strict-missing-semi-warning t)
-      (setq-default js2-strict-trailing-comma-warning t)
-
-      :custom
-      (js2-basic-offset 2)
-      (js2-bounce-indent-p nil)
-      (js2-highlight-level 3)
-      :hook ((js2-mode . fic-mode)
-             ;;(js2-mode-hook  . ac-js2-mode)
-             (js2-mode . nl/javascript-mode-hook)
-             (js2-mode . my-common-prog-mode-settings)))
-#+END_SRC
-
-** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package js2-refactor
-  :after js2-mode
-  :diminish js2-refactor-mode
-  :hook (js-mode . js2-refactor-mode)
-  :config
-  (js2r-add-keybindings-with-prefix "C-c C-m"))
-#+END_SRC
-
 ** [[https://github.com/tonini/karma.el][karma]]
 
 Disabled since Jest is being used. 2019-10-11
@@ -2970,13 +2462,6 @@ Disabled since Jest is being used. 2019-10-11
   :commands karma-mode)
 #+END_SRC
 
-** [[https://github.com/purcell/less-css-mode][less-css-mode]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package less-css-mode
-  :commands less-css-mode)
-#+END_SRC
-
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
 
 Add filler lorem ipsum text to Emacs.
@@ -2984,13 +2469,6 @@ Add filler lorem ipsum text to Emacs.
 #+BEGIN_SRC emacs-lisp
 (use-package lorem-ipsum)
 #+END_SRC
-
-** [[https://github.com/emacs-lsp/lsp-metals][lsp-metals]]
-
-#+begin_src emacs-lisp
-(use-package lsp-metals
-  :hook (scala-mode . lsp))
-#+end_src
 
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
 
@@ -3039,57 +2517,6 @@ Add filler lorem ipsum text to Emacs.
 ;;          company-lsp-cache-candidates nil))
 #+END_SRC
 
-** [[https://github.com/emacs-lsp/lsp-java][lsp-java]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package lsp-java
-  ;; :hook (java-mode-hook . lsp))
-  :config (add-hook 'java-mode-hook 'lsp))
-#+END_SRC
-
-** [[https://github.com/emacs-lsp-legacy/lsp-php][lsp-php]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package lsp-php
-    :disabled
-    ;; :defer 3
-    ;; :custom
-    ;;  ;; Run php-language server with a different php interpreter and from a different location.
-    ;;  (lsp-php-server-install-dir "~/.emacs.d/php-language-server")
-    ;;  (lsp-php-language-server-command
-    ;;    (list "/usr/bin/php" (expand-file-name "vendor/bin/php-language-server.php" lsp-php-server-install-dir)))
-    ;;  ;; Hide noisy messages when opening a large project
-    ;;  (lsp-php-show-file-parse-notifications nil)
-    ;;  ;; Composer.json detection after Projectile.
-    ;;  (lsp-php-workspace-root-detectors (quote (lsp-php-root-projectile lsp-php-root-composer-json "index.php" "robots.txt")))
-    :hook (php-mode . lsp))
-#+END_SRC
-
-** [[https://github.com/rossabaker/lsp-scala][lsp-scala]]
-
-Scala support for lsp-mode.
-
-Disabled since lsp-mode is being used. 2019-08-21
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package lsp-scala
-  :after (lsp scala-mode)
-  :demand t
-  :hook (scala-mode . lsp))
-#+END_SRC
-
-** [[https://github.com/immerrr/lua-mode/tree/658bf8f6c2bdcfe41cd14f5fb651563b41d0fbaa][lua-mode]]
-
-#+begin_src emacs-lisp
-(use-package lua-mode
-  :mode "\\.lua"
-  :hook
-  (lua-mode . company-mode)
-  :config
-  (setq lua-indent-level 2)
-  :interpreter ("lua" . lua-mode))
-#+end_src
-
 ** [[https://github.com/joddie/macrostep][macrostep]]
 
 Macrostep allows you to see what Elisp macros expand to. Learned about
@@ -3097,47 +2524,6 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
 
 #+BEGIN_SRC emacs-lisp
 (use-package macrostep)
-#+END_SRC
-
-** [[https://github.com/magit/magit][magit]]
-
-A great interface for git projects. It's much more pleasant to use than the git interface on the
-command line. Use an easy keybinding to access magit.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package magit
-    :bind (("C-x g" . magit-status))
-    :config
-    (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
-    (setq-default vc-handled-backends '(Git))
-    (setq magit-push-always-verify nil
-
-          ;; only use A and B in Ediff
-          magit-ediff-dwim-show-on-hunks t))
-#+END_SRC
-
-*** Fullscreen magit
-
-#+BEGIN_QUOTE
-The following code makes magit-status run alone in the frame, and then restores the old window
-configuration when you quit out of magit.
-
-No more juggling windows after commiting. It's magit bliss.
-#+END_QUOTE
-[[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
-
-#+BEGIN_SRC emacs-lisp
-;; full screen magit-status
-(defadvice magit-status (around magit-fullscreen activate)
-  (window-configuration-to-register :magit-fullscreen)
-  ad-do-it
-  (delete-other-windows))
-
-(defun magit-quit-session ()
-  "Restores the previous window configuration and kills the magit buffer"
-  (interactive)
-  (kill-buffer)
-  (jump-to-register :magit-fullscreen))
 #+END_SRC
 
 ** [[https://github.com/defunkt/markdown-mode][markdown-mode]]
@@ -3151,45 +2537,6 @@ No more juggling windows after commiting. It's magit bliss.
   :hook (markdown-mode . (lambda () (auto-fill-mode -1)))
   :init
   (setq markdown-command "pandoc"))
-#+END_SRC
-
-** [[https://github.com/emacsfodder/move-text][move-text]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package move-text
-  :bind (("C-S-<up>" . move-text-up)
-         ("C-S-<down>" . move-text-down)))
-#+END_SRC
-
-** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
-
-Sometimes you end up with cursors outside of your view. You can scroll
-the screen to center on each cursor with ~C-v~ and ~M-v~.
-
-#+BEGIN_SRC emacs-lisp
-  (use-package multiple-cursors
-    :after selected
-    :defer 5
-    :bind (("C-S-c C-S-c" . mc/edit-lines)
-           ("C->"         . mc/mark-next-like-this)
-           ("C-<"         . mc/mark-previous-like-this)
-           ("C-M->"       . mc/unmark-next-like-this)
-           ("C-M-<"       . mc/unmark-previous-like-this)
-           ("C-c C-<"     . mc/mark-all-like-this)
-           ("C-!"         . mc/mark-next-symbol-like-this)
-           ("C-x C-m"     . mc/mark-all-dwim))
-    :bind (:map selected-keymap
-                ("C-'" . mc/edit-lines)
-                ("."   . mc/mark-next-like-this)
-                ("<"   . mc/unmark-next-like-this)
-                ("C->" . mc/skip-to-next-like-this)
-                (","   . mc/mark-previous-like-this)
-                (">"   . mc/unmark-previous-like-this)
-                ("C-<" . mc/skip-to-previous-like-this)
-                ("y"   . mc/mark-next-symbol-like-this)
-                ("Y"   . mc/mark-previous-symbol-like-this)
-                ("w"   . mc/mark-next-word-like-this)
-                ("W"   . mc/mark-previous-word-like-this)))
 #+END_SRC
 
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
@@ -3246,59 +2593,6 @@ This package provides tagged workspaces.
   :config (persp-mode))
 #+END_SRC
 
-** [[https://github.com/ejmr/php-mode][php-mode]]
-
-Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~nl/php-checker~
-checker is loaded.
-
-#+BEGIN_SRC emacs-lisp
-      (use-package php-mode
-        :mode "\\.php[345]?\\'"
-        :preface
-        ;; this style is based on the symfony2 style
-        (c-add-style
-         "nl/php"
-         '("php"
-           (c-basic-offset . 2)
-           (indent-tabs-mode . nil)
-           (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-           (c-indent-comments-syntactically-p . t)
-           (fill-column . 78)
-           (require-final-newline . t)))
-        :init
-        (defun nl/php-mode-hook ()
-          "My PHP mode configuration."
-          (flycheck-mode t)
-          (setq c-basic-offset 2)
-          ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
-          (php-set-style "nl/php"))
-
-        (flycheck-define-checker nl/php-checker
-          "A PHP syntax checker using the PHP command line interpreter.
-          See URL http://php.net/manual/en/features.commandline.php."
-          :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-                    "-d" "log_errors=0" source)
-          :error-patterns
-          ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-                  (message) " in " (file-name) " on line " line line-end))
-          :modes (php-mode web-mode))
-
-        (eval-after-load 'flycheck
-          '(add-to-list 'flycheck-checkers 'nl/php-checker))
-
-        :custom
-        (php-mode-coding-style (quote nl/php))
-        (php-mode-lineup-cascaded-calls t)
-        :hook (php-mode . nl/php-mode-hook))
-#+END_SRC
-
-** [[https://github.com/prettier/prettier-emacs][prettier-js]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package prettier-js
-  :after typescript-mode)
-#+END_SRC
-
 ** [[https://github.com/bbatsov/projectile][projectile]]
 
 #+BEGIN_QUOTE
@@ -3331,31 +2625,6 @@ http://batsov.com/projectile/
   (def-projectile-commander-method ?d
     "Open project root in dired."
     (projectile-dired)))
-#+END_SRC
-
-** [[https://github.com/nlamirault/phpunit.el][php-unit]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package phpunit
-  :after (php-mode)
-  :bind (:map php-mode-map
-              ("C-c , t" . phpunit-current-test)
-              ("C-c , c" . phpunit-current-class)
-              ("C-c , p" . phpunit-current-project))
-  :init
-  (push `(php-error-regexp
-          ,(rx line-start
-               (zero-or-more "Trace:" space)
-               "#" (one-or-more digit)
-               (zero-or-more space)
-               (group-n 1 (one-or-more (not (in space "(" "\n"))))
-               "(" (group-n 2 (one-or-more digit))
-               (zero-or-more not-newline))
-          1 2)
-        compilation-error-regexp-alist-alist)
-  (push 'php-error-regexp compilation-error-regexp-alist)
-  :custom
-  (phpunit-arg "--stderr --debug"))
 #+END_SRC
 
 ** [[https://github.com/google/protobuf][protobuf]]
@@ -3408,14 +2677,6 @@ http://batsov.com/projectile/
     (add-to-list 'purpose-user-mode-purposes '(scala-mode . scala))
     (add-to-list 'purpose-user-mode-purposes '(sbt-mode . scala))
     (purpose-compile-user-configuration))
-#+END_SRC
-
-** [[https://melpa.org/#/python-mode][python-mode]]
-
-Integrates with IPython.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package python-mode
 #+END_SRC
 
 ** revive
@@ -3471,118 +2732,6 @@ to overwrite.
 (use-package ripgrep)
 #+END_SRC
 
-** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
-
-No longer used since Scala Metals is now being used.
-
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package sbt-mode
-    ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
-    :commands (sbt-start sbt-command)
-    :preface
-    (defun nl-sbt-mode-hook ()
-      ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
-      ;; be skipped. 1 = skip info 2 = skip info and warnings.
-      (setq compilation-skip-threshold 1)
-
-      ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
-      (local-set-key (kbd "C-a") 'comint-bol)
-
-      ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
-      ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
-      (local-set-key (kbd "M-RET") 'comint-accumulate))
-
-
-    (defun nl-sbt-command ()
-      (interactive)
-      (setq completing-read-function 'completing-read-default)
-      (call-interactively 'sbt-command)
-      (setq completing-read-function 'ivy-completing-read))
-
-    ;; Ivy and =sbt-command= do not behave well together right now, define
-    ;; our own wrapper function.
-    ;; --testing--
-    (defun sbt-command-ivy ()
-      "Send a command to the sbt process of the current buffer's sbt project.
-  Prompts for the command to send when in interactive mode. You can
-  use tab completion.
-
-  This command does the following:
-    - displays the buffer moving focus to it if focus is t
-    - erases the buffer
-    - forgets about compilation errors
-
-  The command is most usefull for running a compilation command
-  that outputs errors."
-      (interactive)
-      (setq sbt:command-history-temp
-            (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
-      (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
-                #'sbt:get-sbt-completions-for-command
-                :action #'sbt:command
-                :history 'sbt:command-history-temp
-                :preselect (sbt:get-previous-command)
-                :dynamic-collection t))
-
-    ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
-    (setq sbt:program-options '("-Djline.terminal=auto"))
-
-    :hook (sbt-mode . nl-sbt-mode-hook)
-    :config
-
-    ;; set this regex so that it knows about Play Framework SBT prompt
-    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-          sbt:ansi-support t
-          sbt:scroll-to-bottom-on-output nil)
-    (setenv "EMACS" "true"))
-#+END_SRC
-
-** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
-
-#+BEGIN_SRC emacs-lisp
-    (use-package scala-mode
-      ;;:load-path "~/src/github/elisp/emacs-scala-mode"
-      :mode "\\.s\\(cala\\|bt\\)$"
-      :interpreter ("scala" . scala-mode)
-      :preface
-      (defun nl-scala-mode-hook ()
-        (yas-minor-mode)
-        ;; sbt-find-definitions is a command that tries to find (with grep)
-        ;; the definition of the thing at point.
-        ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
-
-        (setq-default indent-tabs-mode nil)
-        (setq compilation-ask-about-save nil
-              prettify-symbols-alist scala-prettify-symbols-alist
-              prettify-symbols-unprettify-at-point 'right-edge)
-        (my-common-prog-mode-settings)
-        (prettify-symbols-mode))
-
-      (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
-
-      (defun nl/counsel-ag-scala ()
-        "Perform counsel-ag on the project's Scala files."
-        (interactive)
-        (counsel-ag "" (projectile-project-root) "--scala"))
-      (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
-
-      :config
-      ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-      ;; allows using SPACE when in the minibuffer
-      (substitute-key-definition
-       'minibuffer-complete-word
-       'self-insert-command
-       minibuffer-local-completion-map)
-
-      (setq scala-indent:indent-value-expression t
-            scala-indent:align-parameters t
-            scala-indent:align-forms t
-            scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-            scala-indent:use-javadoc-style t)
-      :hook ((scala-mode . nl-scala-mode-hook)
-             (scala-mode . fic-mode)))
-#+END_SRC
-
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
@@ -3630,19 +2779,6 @@ Declarative popup window rules.
           shackle-default-rule '(:select t)
           shackle-inhibit-window-quit-on-same-windows t)
     (shackle-mode))
-#+END_SRC
-
-** [[https://github.com/slime/slime][slime]]
-
-#+BEGIN_QUOTE
-SLIME is the Superior Lisp Interaction Mode for Emacs.
-#+END_QUOTE
-
-#+BEGIN_SRC emacs-lisp
-(use-package slime
-  :config
-  (setq inferior-lisp-program "/home/nelson/apps/clozureCL/ccl/lx86cl64")
-  (setq slime-contribs '(slime-fancy)))
 #+END_SRC
 
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
@@ -3746,134 +2882,6 @@ think of it as both something that augments and replaces the standard
   :diminish super-save-mode
   :config (super-save-mode +1))
 #+END_SRC
-
-** [[https://github.com/ternjs/tern][tern]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package tern
-  :commands tern-mode
-  :load-path "~/src/github/elisp/tern/emacs"
-  :diminish tern-mode
-  :hook (js2-mode . tern-mode))
-
-(use-package company-tern
-  :init (add-to-list 'company-backends 'company-tern))
-#+END_SRC
-
-** [[https://github.com/ananthakumaran/tide][tide]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package tide
-  :after (typescript-mode company flycheck)
-  :bind (:map tide-mode-map
-              ("C-c C-t f" . tide-fix)
-              ("C-c C-t n" . tide-nav)
-              ("C-c C-t o" . tide-organize-imports)
-              ("C-c C-t r" . tide-rename-symbol)
-              ("C-c C-t x" . tide-references))
-  :init
-  (use-package typescript-mode)
-  ;; when buiding with Angular CLI, the first error always contains "ERROR in"
-  ;;
-  ;; adjusting this regexp makes 'next-error' work in compilation mode
-  ;;
-  (push `(typescript-tsc-error-regexp
-          ,(rx line-start
-               (zero-or-more "[tsl]")
-               (zero-or-more space)
-               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-               (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
-               (in ":" "(") (group-n 2 (one-or-more digit))
-               (in ":" ",") (group-n 3 (one-or-more digit))
-               (zero-or-more not-newline))
-          1 2 3 2)
-        compilation-error-regexp-alist-alist)
-
-  (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
-
-  (push `(angular-html-error-regexp
-          ,(rx line-start
-               (zero-or-more space)
-               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-               (group-n 1 (one-or-more (not (in space ":" "\n"))))
-               (syntax open-parenthesis)
-               (group-n 2 (one-or-more digit))
-               "," (group-n 3 (one-or-more digit))
-               (syntax close-parenthesis) ":")
-          1 2 3 2)
-        compilation-error-regexp-alist-alist)
-
-  (push 'angular-html-error-regexp compilation-error-regexp-alist)
-
-  ;; (add-to-list 'compilation-error-regexp-alist-alist
-  ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
-
-  (push `(node-error-regexp
-          ,(rx line-start
-               (zero-or-more (not (in "\n")))
-               (one-or-more "at" (one-or-more space))
-               (zero-or-more (not (in "(")))
-               (zero-or-more "(")
-               (group-n 1 (one-or-more (not (in space ":" "\n"))))
-               ":" (group-n 2 (one-or-more digit))
-               ":" (group-n 3 (one-or-more digit))
-               (zero-or-more not-newline))
-          1 2 3 2)
-        compilation-error-regexp-alist-alist)
-
-  (push 'node-error-regexp compilation-error-regexp-alist)
-
-  (add-to-list 'compilation-error-regexp-alist-alist
-               '(typescript-tslint
-                 "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
-                 2 3 4 1))
-
-  (setq compilation-error-regexp-alist
-        (cons 'typescript-tslint compilation-error-regexp-alist))
-
-  :config
-  (setq tide-sync-request-timeout 5
-        tide-server-max-response-length 204800)
-
-  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
-  (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
-
-  (defconst
-    nl-typescript-pretty-symbols-alist
-    '(("=>" . ?⇒)
-      ("<=" . ?≤)
-      (">=" . ?≥)
-      ("===" . ?≡)
-      ("!" . ?¬)
-      ("!=" . ?≠)
-      ("!==" . ?≢)
-      ("&&" . ?∧)
-      ("||" . ?∨)))
-
-  (defun nl-tide-mode-hook ()
-    (interactive)
-    (tide-setup)
-    (flycheck-mode +1)
-    (setq flycheck-check-syntax-automatically '(save mode-enabled))
-    (eldoc-mode +1)
-    (tide-hl-identifier-mode +1)
-    (company-mode +1)
-    (prettier-js-mode)
-    (my-common-prog-mode-settings)
-    (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
-          prettify-symbols-unprettify-at-point 'right-edge
-          company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
-    (setq-default typescript-indent-level 2))
-
-  :hook ((typescript-mode . tide-setup)
-         (typescript-mode . tide-hl-identifier-mode)
-         (typescript-mode . nl-tide-mode-hook)
-         (typescript-mode . column-enforce-mode)
-         (typescript-mode . rainbow-delimiters-mode)))
-#+END_SRC
-
-#+RESULTS:
-: tide-references
 
 ** [[https://github.com/Alexander-Miller/treemacs][treemacs]]
 
@@ -4185,6 +3193,972 @@ Ztree is a project dedicated to implementation of several text-tree applications
 (use-package zzz-to-char
   :bind ("M-z" . zzz-up-to-char))
 #+END_SRC
+
+
+** Text Editing
+*** [[https://github.com/emacsfodder/move-text][move-text]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package move-text
+  :bind (("C-S-<up>" . move-text-up)
+         ("C-S-<down>" . move-text-down)))
+#+END_SRC
+*** [[https://github.com/magnars/multiple-cursors.el][multiple-cursors]]
+
+Sometimes you end up with cursors outside of your view. You can scroll
+the screen to center on each cursor with ~C-v~ and ~M-v~.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package multiple-cursors
+    :after selected
+    :defer 5
+    :bind (("C-S-c C-S-c" . mc/edit-lines)
+           ("C->"         . mc/mark-next-like-this)
+           ("C-<"         . mc/mark-previous-like-this)
+           ("C-M->"       . mc/unmark-next-like-this)
+           ("C-M-<"       . mc/unmark-previous-like-this)
+           ("C-c C-<"     . mc/mark-all-like-this)
+           ("C-!"         . mc/mark-next-symbol-like-this)
+           ("C-x C-m"     . mc/mark-all-dwim))
+    :bind (:map selected-keymap
+                ("C-'" . mc/edit-lines)
+                ("."   . mc/mark-next-like-this)
+                ("<"   . mc/unmark-next-like-this)
+                ("C->" . mc/skip-to-next-like-this)
+                (","   . mc/mark-previous-like-this)
+                (">"   . mc/unmark-previous-like-this)
+                ("C-<" . mc/skip-to-previous-like-this)
+                ("y"   . mc/mark-next-symbol-like-this)
+                ("Y"   . mc/mark-previous-symbol-like-this)
+                ("w"   . mc/mark-next-word-like-this)
+                ("W"   . mc/mark-previous-word-like-this)))
+#+END_SRC
+
+** Git
+*** [[https://github.com/magit/magit][magit]]
+
+A great interface for git projects. It's much more pleasant to use than the git interface on the
+command line. Use an easy keybinding to access magit.
+
+#+BEGIN_SRC emacs-lisp
+  (use-package magit
+    :bind (("C-x g" . magit-status))
+    :config
+    (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
+    (setq-default vc-handled-backends '(Git))
+    (setq magit-push-always-verify nil
+
+          ;; only use A and B in Ediff
+          magit-ediff-dwim-show-on-hunks t))
+#+END_SRC
+
+**** Fullscreen magit
+
+#+BEGIN_QUOTE
+The following code makes magit-status run alone in the frame, and then restores the old window
+configuration when you quit out of magit.
+
+No more juggling windows after commiting. It's magit bliss.
+#+END_QUOTE
+[[http://whattheemacsd.com/setup-magit.el-01.html][Source: Magnar Sveen]]
+
+#+BEGIN_SRC emacs-lisp
+;; full screen magit-status
+(defadvice magit-status (around magit-fullscreen activate)
+  (window-configuration-to-register :magit-fullscreen)
+  ad-do-it
+  (delete-other-windows))
+
+(defun magit-quit-session ()
+  "Restores the previous window configuration and kills the magit buffer"
+  (interactive)
+  (kill-buffer)
+  (jump-to-register :magit-fullscreen))
+#+END_SRC
+*** [[https://gitlab.com/pidu/git-timemachine][git-timemachine]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package git-timemachine
+  :commands git-timemachine)
+#+END_SRC
+
+** Helm
+*** [[https://github.com/emacs-helm/helm][helm]]
+**** Helm Config
+
+GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm
+  ;;:load-path "~/src/github/elisp/helm"
+  :pin melpa
+  :commands (helm-config helm-files helm-grep)
+  :diminish helm-mode
+  :init
+  ;; must set before helm-config, otherwise helm uses the default
+  ;; prefix "C-x c", which is inconvenient because you can
+  ;; accidentially press "C-x C-c"
+  (setq ;;helm-M-x-fuzzy-match                  t
+        ;;helm-bookmark-show-location           t
+        ;;helm-buffers-fuzzy-matching           t
+        ;;helm-completion-in-region-fuzzy-match t
+        ;;helm-file-cache-fuzzy-match           t
+        ;;helm-imenu-fuzzy-match                t
+        ;;helm-mode-fuzzy-match                 t
+        ;;helm-locate-fuzzy-match               t
+        ;;helm-quick-update                     t
+        ;;helm-recentf-fuzzy-match              t
+        ;;helm-semantic-fuzzy-match             t
+
+        ;;
+        ;;
+        ;;
+        helm-command-prefix-key "C-c h"
+        helm-split-window-in-side-p t           ; open helm buffer inside current window,
+        ;; not occupy whole other window
+        helm-ff-newfile-prompt-p nil
+        helm-scroll-amount 4                    ; scroll 4 lines other window using
+        ;; M-<next>/M-<prior>
+        ;;helm-quick-update t                     ; do not display invisible candidates
+        ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
+        ;; updating in delayed sources.
+        ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
+        ;; updating candidate buffer
+        helm-ff-search-library-in-sexp t        ; search for library in `require` and
+        ;; `declare-function` sexp.
+
+        ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
+        ;;                                    '(picture-mode artist-mode))
+        ;; limit the number of displayed canidates
+        ;;helm-candidate-number-limit 100
+        ;; show all candidates when set to 0
+        ;;helm-M-x-requires-pattern 0
+        helm-ff-file-name-history-use-recentf t
+        ;; move to end or beginning of source when reaching top or bottom of source.
+        helm-move-to-line-cycle-in-source t
+        ;; Needed in helm-buffers-list
+        ;;ido-use-virtual-buffers t
+        ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
+        ;;helm-buffers-fuzzy-matching t
+        ;; truncate long lines
+        ;;helm-truncate-lines t
+        helm-autoresize-min-height 30
+        helm-autoresize-max-height 30
+        helm-display-header-line nil
+        helm-buffer-max-length 45
+        helm-yas-display-key-on-candidate t
+        helm-grep-ag-command "rg --color=always --colors 'match:fg:black' --colors 'match:bg:yellow' --smart-case --no-heading --line-number %s %s %s"
+        helm-grep-ag-pipe-cmd-switches '("--colors 'match:fg:black'" "--colors 'match:bg:yellow'")
+        helm-mini-default-sources '(helm-source-buffers-list
+                                    helm-source-recentf
+                                    helm-source-bookmarks
+                                    helm-source-buffer-not-found))
+
+  ;; Save current position to mark ring when jumping to a different place
+  (helm-mode)
+  (helm-autoresize-mode 1)
+  :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
+  :bind (("M-x" . helm-M-x)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x b" . helm-mini)
+         ("C-x C-f" . helm-find-files)
+         ("C-`" . helm-resume)))
+
+(defun nl/helm-eval-expression ()
+  (interactive)
+  (let ((selected-expression
+         (helm-comp-read "Select an eval expression: " read-expression-history :buffer "Helm eval expressions")))
+    ;;(message "selected: %s" selected-expression)
+    (eval-expression (car (read-from-string selected-expression)))))
+
+(defun nl/helm-async-shell-command ()
+  (interactive)
+  (let ((selected-command
+         (helm-comp-read "Select a shell command: " shell-command-history :buffer "Helm shell commands")))
+    (async-shell-command selected-command)))
+#+END_SRC
+
+**** Helm Key bindings
+
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'helm-files
+  ;; rebind tab to do persistent action
+  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
+  ;; make TAB works in terminal
+  (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
+  ;; list actions using C-z
+  (define-key helm-map (kbd "C-z")  'helm-select-action)
+  (define-key helm-grep-mode-map (kbd "<return>")  'helm-grep-mode-jump-other-window)
+  (define-key helm-grep-mode-map (kbd "n")  'helm-grep-mode-jump-other-window-forward)
+  (define-key helm-grep-mode-map (kbd "p")  'helm-grep-mode-jump-other-window-backward))
+#+END_SRC
+
+**** Helm Window config
+
+(NOT WORKING) So that helm windows shows at the bottom.
+
+- from http://www.reddit.com/r/emacs/comments/345vtl/make_helm_window_at_the_bottom_without_using_any/
+- see also http://www.lunaryorn.com/2015/04/29/the-power-of-display-buffer-alist.html
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(with-eval-after-load 'helm
+  (cond (window-system
+         (add-to-list 'display-buffer-alist
+                      `("^\\*[Hh]elm"
+                        (display-buffer-in-side-window)
+                        (inhibit-same-window . nil)
+                        (reusable-frames . visible)
+                        (side            . bottom)
+                        (slot            . -1)
+                        (window-height   . 0.15)))
+         )))
+#+END_SRC
+
+**** Helm Other
+
+Highlighting of token matches is a tad slow, let's speed it up.
+
+#+BEGIN_SRC emacs-lisp
+(setq helm-mp-highlight-delay 0.3)
+#+END_SRC
+
+I don't know why, but helm tries doing window management.  Please
+stop:
+
+#+BEGIN_SRC emacs-lisp
+(setq helm-display-function 'pop-to-buffer)
+#+END_SRC
+
+*** [[https://github.com/syohex/emacs-helm-ag][helm-ag]]
+
+Define my own function for ~C-o~ key mapping. Uses ~ace-select-window~
+instead of ~find-file-other-window~.
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-ag
+  :pin melpa
+  :bind (:map helm-ag-mode-map
+              ("C-<return>" . nl/jump-other-window))
+  :custom
+  ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
+  (helm-ag-use-temp-buffer nil)
+  :preface
+  (defun nl/ace-find-file (filename)
+    (setq helm-ag--last-default-directory default-directory)
+    ;; use ace-select-window if there are more than 2 windows in the frame
+    (let ((path (concat helm-ag--last-default-directory filename)))
+      (if (> (length (window-list)) 2)
+          (ace-select-window)
+        (other-window 1))
+      (find-file path)))
+
+  (defun nl/jump-other-window ()
+    (interactive)
+    (let ((line (helm-current-line-contents)))
+      (helm-ag--find-file-action line 'nl/ace-find-file helm-ag--search-this-file-p)))
+  :commands helm-ag)
+#+END_SRC
+
+*** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-c-yasnippet
+  :commands helm-yas-complete
+  ;;:init (use-package yasnippet)
+  :bind ("C-c y" . helm-yas-complete))
+#+END_SRC
+
+*** [[https://github.com/lerouxrgd/helm-fd][helm-fd]]
+
+2020-02-03 Disabled for now since it causes problems with Helm.
+
+#+begin_src emacs-lisp
+(use-package helm-fd
+  :after helm
+  :disabled
+  :custom
+  (helm-fd-cmd "fdfind")
+  :bind (:map helm-map
+              ("/" . helm-fd)))
+#+end_src
+
+*** [[https://github.com/PythonNut/helm-flx][helm-flx]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package helm-flx
+  :after helm
+  :commands helm-flx-mode
+  :config
+    (helm-flx-mode +1)
+    (setq helm-flx-for-helm-find-files t ;; t by default
+          helm-flx-for-helm-locate t))
+#+END_SRC
+
+*** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package helm-gtags
+    :commands (helm-gtags-mode)
+    :bind (("M-." . helm-gtags-find-tag)
+           ("M-," . helm-gtags-find-rtag))
+    :custom
+    (helm-gtags-path-style 'relative)
+    (helm-gtags-ignore-case t)
+    (helm-gtags-auto-update t))
+#+END_SRC
+
+*** [[https://github.com/emacs-lsp/helm-lsp][helm-lsp]]
+
+#+begin_src emacs-lisp
+(use-package helm-lsp)
+#+end_src
+
+*** [[https://github.com/bbatsov/projectile][helm-projectile]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-projectile
+  :config
+  (helm-projectile-on)
+  ;;(setq compilation-read-command t)
+  ) ; do prompt for a compilation command
+#+END_SRC
+
+*** [[https://github.com/cosmicexplorer/helm-rg][helm-rg]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package helm-rg)
+#+END_SRC
+
+*** [[https://github.com/ShingoFukuyama/helm-swoop][helm-swoop]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package helm-swoop
+  :bind (("M-i" . helm-swoop))
+  :config
+    ;; When doing isearch, hand the word over to helm-swoop
+    (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+    ;; From helm-swoop to helm-multi-swoop-all
+    (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+    ;; Move up and down like isearch
+    (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
+    (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
+    (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
+    (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
+    ;; Save buffer when helm-multi-swoop-edit complete
+    (setq helm-multi-swoop-edit-save t
+          ;; If this value is t, split window inside the current window
+          helm-swoop-split-with-multiple-windows nil
+          ;; Optional face for line numbers
+          ;; Face name is `helm-swoop-line-number-face`
+          helm-swoop-use-line-number-face t))
+#+END_SRC
+
+*** [[https://github.com/brotzeitmacher/helm-xref][helm-xref]]
+
+No longer using this since most development is now using lsp -
+2020-05-29
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package helm-xref
+  :init
+  (require 'helm-xref)
+  :config
+  ;;(setq xref-show-xrefs-function 'helm-xref-show-xrefs)
+)
+#+END_SRC
+
+** Programming Languages
+*** CSS
+**** [[https://github.com/purcell/less-css-mode][less-css-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package less-css-mode
+  :commands less-css-mode)
+#+END_SRC
+
+*** Java
+**** [[https://github.com/emacs-eclim/emacs-eclim][emacs-eclim]]
+
+Provides Emacs with some Eclipse features for Java development. Eclim has to be installed first and
+can be downloaded from [[http://eclim.org/install.html][here]].
+
+2019-03-10 tyring out
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package eclim
+    ;; :load-path "~/src/github/elisp/emacs-eclim"
+    :diminish eclim-mode
+    :preface
+    (defun nl/restart-eclim (workspace-dir)
+      "Restarts the eclim server.  If it is currently active, the server is stopped first."
+      (interactive (list (read-directory-name "Workspace directory: "
+                                              eclimd-default-workspace nil t eclimd-default-workspace)))
+      (if (get-buffer "*eclimd*") (stop-eclimd))
+      (message "workspace dir: %s" workspace-dir)
+      (cd-absolute workspace-dir)
+      (eclimd-start workspace-dir)
+      (switch-to-buffer "*eclimd*"))
+
+    (defun nl/gradle-javadoc ()
+      "Uses gradle to build the Javadoc for the project."
+      (interactive)
+      (let* ((current-directory default-directory))
+        (setq default-directory (locate-dominating-file default-directory "build.gradle"))
+        (compile "gradle -q --console=plain javadoc")
+        (setq default-directory current-directory)))
+
+    :init (use-package cl)
+    :config
+    (use-package company-emacs-eclim
+      :commands company-emacs-eclim-setup)
+
+    (use-package eclimd
+      ;;:load-path "~/src/github/elisp/emacs-eclim"
+      :preface
+      ;;(setq eclimd-autostart t)
+      )
+
+    (setq eclim-print-debug-messages t)
+    ;;eclim-nailgun-port 9092
+    ;;eclim-eclimrc "~/.eclimrc"
+    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
+      (if (file-accessible-directory-p eclipse-dir)
+          (progn
+            (add-to-list 'eclim-eclipse-dirs eclipse-dir)
+            (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
+                  eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
+                  ))))
+    (company-emacs-eclim-setup)
+    (global-company-mode t)
+    (setq eclim-auto-save t
+          eclimd-wait-for-process nil
+          ;;eclimd-default-workspace "~/workspace/"
+          help-at-pt-display-when-idle t
+          help-at-pt-timer-delay 0.1
+
+          )
+    ;; Call the help framework with the settings above & activate eclim-mode
+    (help-at-pt-set-timer)
+
+    ;; keep consistent which other auto-complete backend.
+    (custom-set-faces
+     '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
+     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
+#+END_SRC
+**** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package gradle-mode
+  :disabled
+  :diminish gradle-mode
+  :init
+    (gradle-mode 1))
+#+END_SRC
+
+**** [[https://github.com/emacs-lsp/lsp-java][lsp-java]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-java
+  ;; :hook (java-mode-hook . lsp))
+  :config (add-hook 'java-mode-hook 'lsp))
+#+END_SRC
+
+*** Javascript
+**** [[https://github.com/mooz/js2-mode][js2-mode]]
+
+#+BEGIN_SRC emacs-lisp
+    (use-package js2-mode
+      :mode "\\.js\\'"
+      :bind (("C-c s j" . nl/counsel-ag-js))
+      :preface
+      (defun js-filename-p (filename)
+        (string-match "\.js$" filename))
+
+      (defun nl/counsel-ag-js ()
+        "Perform counsel-ag on the project's JavaScript files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "--js"))
+
+      (defun nl/counsel-ag-js-spec ()
+        "Perform counsel-ag on the project's JavaScript files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
+
+      (defun nl/webpack-find-file ()
+        "From a webpack failure backtrace, opens the file under the cursor at the line specified."
+        (interactive)
+        (let (p1 p2 err-line filename file-with-proj-path)
+          (save-some-buffers t)
+          (setq p1 (line-beginning-position) )
+          (setq p2 (line-end-position) )
+          (setq err-line (buffer-substring-no-properties p1 p2))
+          (save-match-data ; is usually a good idea
+            (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
+                 (setq filename (match-string 2 err-line))))
+          (message "filename: %s" (expand-file-name filename (projectile-project-root)))
+          (ace-select-window)
+          (find-file (expand-file-name filename (projectile-project-root)))
+          (goto-char (point-min))))
+
+      (defun nl/webpack-find-next-error ()
+        "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
+        (interactive)
+        (next-line)
+        (while (re-search-forward "^ERROR" nil t)
+          (goto-char (match-beginning 0))
+          (recenter 0)
+          (nl/webpack-find-file)))
+
+      :init
+      (setq js2-global-externs '("define"
+                                 "jasmine"
+                                 "describe"
+                                 "fdescribe"
+                                 "fail"
+                                 "beforeEach"
+                                 "afterEach"
+                                 "inject"
+                                 "expect"
+                                 "spyOn"
+                                 "it"
+                                 "fit"
+                                 "xdescribe"
+                                 "xit"))
+      :config
+      (setq javascript-common-imenu-regex-list
+            '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+              ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+              ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+              ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+              ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+              ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+              ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+              ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
+              ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+              ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
+              ))
+
+      ;; js-mode imenu enhancement
+      ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+      (defun nl-js-imenu-make-index ()
+        (save-excursion
+          (imenu--generic-function javascript-common-imenu-regex-list)))
+
+      (defun nl/javascript-mode-hook ()
+        (nl/setup-indent 2) ; indent 2 spaces width
+        (setq comment-multi-line t
+              mode-name "JS2")
+        (define-key js-mode-map [remap indent-new-comment-line]
+          'c-indent-new-comment-line)
+        (setq indent-tabs-mode nil)
+        (setq imenu-create-index-function 'nl-js-imenu-make-index)
+        (prettier-js-mode)
+        (flycheck-mode t))
+
+      ;;(eval-after-load 'js2-mode
+      ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+
+      ;;(setq ac-js2-evaluate-calls t)
+
+      (setq-default js2-mode-show-parse-errors t)
+      (setq-default js2-strict-missing-semi-warning t)
+      (setq-default js2-strict-trailing-comma-warning t)
+
+      :custom
+      (js2-basic-offset 2)
+      (js2-bounce-indent-p nil)
+      (js2-highlight-level 3)
+      :hook ((js2-mode . fic-mode)
+             ;;(js2-mode-hook  . ac-js2-mode)
+             (js2-mode . nl/javascript-mode-hook)
+             (js2-mode . my-common-prog-mode-settings)))
+#+END_SRC
+**** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package js2-refactor
+  :after js2-mode
+  :diminish js2-refactor-mode
+  :hook (js-mode . js2-refactor-mode)
+  :config
+  (js2r-add-keybindings-with-prefix "C-c C-m"))
+#+END_SRC
+
+**** [[https://github.com/prettier/prettier-emacs][prettier-js]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package prettier-js
+  :after typescript-mode)
+#+END_SRC
+**** [[https://github.com/ternjs/tern][tern]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package tern
+  :commands tern-mode
+  :load-path "~/src/github/elisp/tern/emacs"
+  :diminish tern-mode
+  :hook (js2-mode . tern-mode))
+
+(use-package company-tern
+  :init (add-to-list 'company-backends 'company-tern))
+#+END_SRC
+
+*** Lisp
+**** [[https://github.com/slime/slime][slime]]
+
+#+BEGIN_QUOTE
+SLIME is the Superior Lisp Interaction Mode for Emacs.
+#+END_QUOTE
+
+#+BEGIN_SRC emacs-lisp
+(use-package slime
+  :config
+  (setq inferior-lisp-program "/home/nelson/apps/clozureCL/ccl/lx86cl64")
+  (setq slime-contribs '(slime-fancy)))
+#+END_SRC
+
+*** LUA
+**** [[https://github.com/immerrr/lua-mode/tree/658bf8f6c2bdcfe41cd14f5fb651563b41d0fbaa][lua-mode]]
+
+#+begin_src emacs-lisp
+(use-package lua-mode
+  :mode "\\.lua"
+  :hook
+  (lua-mode . company-mode)
+  :config
+  (setq lua-indent-level 2)
+  :interpreter ("lua" . lua-mode))
+#+end_src
+
+*** PHP
+**** [[https://github.com/ejmr/php-mode][php-mode]]
+
+Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-development-environment-in-emacs][here]], but had to change the way the ~nl/php-checker~
+checker is loaded.
+
+#+BEGIN_SRC emacs-lisp
+      (use-package php-mode
+        :mode "\\.php[345]?\\'"
+        :preface
+        ;; this style is based on the symfony2 style
+        (c-add-style
+         "nl/php"
+         '("php"
+           (c-basic-offset . 2)
+           (indent-tabs-mode . nil)
+           (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+           (c-indent-comments-syntactically-p . t)
+           (fill-column . 78)
+           (require-final-newline . t)))
+        :init
+        (defun nl/php-mode-hook ()
+          "My PHP mode configuration."
+          (flycheck-mode t)
+          (setq c-basic-offset 2)
+          ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
+          (php-set-style "nl/php"))
+
+        (flycheck-define-checker nl/php-checker
+          "A PHP syntax checker using the PHP command line interpreter.
+          See URL http://php.net/manual/en/features.commandline.php."
+          :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+                    "-d" "log_errors=0" source)
+          :error-patterns
+          ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+                  (message) " in " (file-name) " on line " line line-end))
+          :modes (php-mode web-mode))
+
+        (eval-after-load 'flycheck
+          '(add-to-list 'flycheck-checkers 'nl/php-checker))
+
+        :custom
+        (php-mode-coding-style (quote nl/php))
+        (php-mode-lineup-cascaded-calls t)
+        :hook (php-mode . nl/php-mode-hook))
+#+END_SRC
+**** [[https://github.com/nlamirault/phpunit.el][php-unit]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package phpunit
+  :after (php-mode)
+  :bind (:map php-mode-map
+              ("C-c , t" . phpunit-current-test)
+              ("C-c , c" . phpunit-current-class)
+              ("C-c , p" . phpunit-current-project))
+  :init
+  (push `(php-error-regexp
+          ,(rx line-start
+               (zero-or-more "Trace:" space)
+               "#" (one-or-more digit)
+               (zero-or-more space)
+               (group-n 1 (one-or-more (not (in space "(" "\n"))))
+               "(" (group-n 2 (one-or-more digit))
+               (zero-or-more not-newline))
+          1 2)
+        compilation-error-regexp-alist-alist)
+  (push 'php-error-regexp compilation-error-regexp-alist)
+  :custom
+  (phpunit-arg "--stderr --debug"))
+#+END_SRC
+
+*** Python
+**** [[https://melpa.org/#/python-mode][python-mode]]
+
+Integrates with IPython.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package python-mode
+#+END_SRC
+
+*** Scala
+**** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
+
+#+BEGIN_SRC emacs-lisp :tangle no
+(use-package ensime
+  :commands ensime ensime-mode))
+#+END_SRC
+**** [[https://github.com/emacs-lsp/lsp-metals][lsp-metals]]
+
+#+begin_src emacs-lisp
+(use-package lsp-metals
+  :hook (scala-mode . lsp))
+#+end_src
+
+**** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
+
+#+BEGIN_SRC emacs-lisp
+    (use-package scala-mode
+      ;;:load-path "~/src/github/elisp/emacs-scala-mode"
+      :mode "\\.s\\(cala\\|bt\\)$"
+      :interpreter ("scala" . scala-mode)
+      :preface
+      (defun nl-scala-mode-hook ()
+        (yas-minor-mode)
+        ;; sbt-find-definitions is a command that tries to find (with grep)
+        ;; the definition of the thing at point.
+        ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+
+        (setq-default indent-tabs-mode nil)
+        (setq compilation-ask-about-save nil
+              prettify-symbols-alist scala-prettify-symbols-alist
+              prettify-symbols-unprettify-at-point 'right-edge)
+        (my-common-prog-mode-settings)
+        (prettify-symbols-mode))
+
+      (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
+
+      (defun nl/counsel-ag-scala ()
+        "Perform counsel-ag on the project's Scala files."
+        (interactive)
+        (counsel-ag "" (projectile-project-root) "--scala"))
+      (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+
+      :config
+      ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+      ;; allows using SPACE when in the minibuffer
+      (substitute-key-definition
+       'minibuffer-complete-word
+       'self-insert-command
+       minibuffer-local-completion-map)
+
+      (setq scala-indent:indent-value-expression t
+            scala-indent:align-parameters t
+            scala-indent:align-forms t
+            scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+            scala-indent:use-javadoc-style t)
+      :hook ((scala-mode . nl-scala-mode-hook)
+             (scala-mode . fic-mode)))
+#+END_SRC
+**** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
+
+No longer used since Scala Metals is now being used.
+
+#+BEGIN_SRC emacs-lisp :tangle no
+  (use-package sbt-mode
+    ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
+    :commands (sbt-start sbt-command)
+    :preface
+    (defun nl-sbt-mode-hook ()
+      ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
+      ;; be skipped. 1 = skip info 2 = skip info and warnings.
+      (setq compilation-skip-threshold 1)
+
+      ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
+      (local-set-key (kbd "C-a") 'comint-bol)
+
+      ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
+      ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
+      (local-set-key (kbd "M-RET") 'comint-accumulate))
+
+
+    (defun nl-sbt-command ()
+      (interactive)
+      (setq completing-read-function 'completing-read-default)
+      (call-interactively 'sbt-command)
+      (setq completing-read-function 'ivy-completing-read))
+
+    ;; Ivy and =sbt-command= do not behave well together right now, define
+    ;; our own wrapper function.
+    ;; --testing--
+    (defun sbt-command-ivy ()
+      "Send a command to the sbt process of the current buffer's sbt project.
+  Prompts for the command to send when in interactive mode. You can
+  use tab completion.
+
+  This command does the following:
+    - displays the buffer moving focus to it if focus is t
+    - erases the buffer
+    - forgets about compilation errors
+
+  The command is most usefull for running a compilation command
+  that outputs errors."
+      (interactive)
+      (setq sbt:command-history-temp
+            (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
+      (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
+                #'sbt:get-sbt-completions-for-command
+                :action #'sbt:command
+                :history 'sbt:command-history-temp
+                :preselect (sbt:get-previous-command)
+                :dynamic-collection t))
+
+    ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
+    (setq sbt:program-options '("-Djline.terminal=auto"))
+
+    :hook (sbt-mode . nl-sbt-mode-hook)
+    :config
+
+    ;; set this regex so that it knows about Play Framework SBT prompt
+    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+          sbt:ansi-support t
+          sbt:scroll-to-bottom-on-output nil)
+    (setenv "EMACS" "true"))
+#+END_SRC
+*** TypeScript
+**** [[https://github.com/ananthakumaran/tide][tide]]
+
+#+BEGIN_SRC emacs-lisp
+(use-package tide
+  :after (typescript-mode company flycheck)
+  :bind (:map tide-mode-map
+              ("C-c C-t f" . tide-fix)
+              ("C-c C-t n" . tide-nav)
+              ("C-c C-t o" . tide-organize-imports)
+              ("C-c C-t r" . tide-rename-symbol)
+              ("C-c C-t x" . tide-references))
+  :init
+  (use-package typescript-mode)
+  ;; when buiding with Angular CLI, the first error always contains "ERROR in"
+  ;;
+  ;; adjusting this regexp makes 'next-error' work in compilation mode
+  ;;
+  (push `(typescript-tsc-error-regexp
+          ,(rx line-start
+               (zero-or-more "[tsl]")
+               (zero-or-more space)
+               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
+               (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
+               (in ":" "(") (group-n 2 (one-or-more digit))
+               (in ":" ",") (group-n 3 (one-or-more digit))
+               (zero-or-more not-newline))
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
+
+  (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
+
+  (push `(angular-html-error-regexp
+          ,(rx line-start
+               (zero-or-more space)
+               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
+               (group-n 1 (one-or-more (not (in space ":" "\n"))))
+               (syntax open-parenthesis)
+               (group-n 2 (one-or-more digit))
+               "," (group-n 3 (one-or-more digit))
+               (syntax close-parenthesis) ":")
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
+
+  (push 'angular-html-error-regexp compilation-error-regexp-alist)
+
+  ;; (add-to-list 'compilation-error-regexp-alist-alist
+  ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
+
+  (push `(node-error-regexp
+          ,(rx line-start
+               (zero-or-more (not (in "\n")))
+               (one-or-more "at" (one-or-more space))
+               (zero-or-more (not (in "(")))
+               (zero-or-more "(")
+               (group-n 1 (one-or-more (not (in space ":" "\n"))))
+               ":" (group-n 2 (one-or-more digit))
+               ":" (group-n 3 (one-or-more digit))
+               (zero-or-more not-newline))
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
+
+  (push 'node-error-regexp compilation-error-regexp-alist)
+
+  (add-to-list 'compilation-error-regexp-alist-alist
+               '(typescript-tslint
+                 "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
+                 2 3 4 1))
+
+  (setq compilation-error-regexp-alist
+        (cons 'typescript-tslint compilation-error-regexp-alist))
+
+  :config
+  (setq tide-sync-request-timeout 5
+        tide-server-max-response-length 204800)
+
+  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+  (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
+
+  (defconst
+    nl-typescript-pretty-symbols-alist
+    '(("=>" . ?⇒)
+      ("<=" . ?≤)
+      (">=" . ?≥)
+      ("===" . ?≡)
+      ("!" . ?¬)
+      ("!=" . ?≠)
+      ("!==" . ?≢)
+      ("&&" . ?∧)
+      ("||" . ?∨)))
+
+  (defun nl-tide-mode-hook ()
+    (interactive)
+    (tide-setup)
+    (flycheck-mode +1)
+    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+    (eldoc-mode +1)
+    (tide-hl-identifier-mode +1)
+    (company-mode +1)
+    (prettier-js-mode)
+    (my-common-prog-mode-settings)
+    (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
+          prettify-symbols-unprettify-at-point 'right-edge
+          company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
+    (setq-default typescript-indent-level 2))
+
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (typescript-mode . nl-tide-mode-hook)
+         (typescript-mode . column-enforce-mode)
+         (typescript-mode . rainbow-delimiters-mode)))
+#+END_SRC
+
+#+RESULTS:
+: tide-references
 
 * Computer-specific settings
 
