@@ -1077,49 +1077,49 @@ comments.
 ** =prog-mode=
 
 #+BEGIN_SRC emacs-lisp
-  (defun nl/indent-whole-buffer ()
-    (interactive)
-    (save-excursion
-      (indent-region (point-min) (point-max))))
+(defun nl/indent-whole-buffer ()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max))))
 
-  (defun nl/beginning-of-line-or-indentation ()
-    "move to beginning of line, or indentation"
-    (interactive)
-    (if (bolp)
-        (back-to-indentation)
-      (beginning-of-line)))
+(defun nl/beginning-of-line-or-indentation ()
+  "move to beginning of line, or indentation"
+  (interactive)
+  (if (bolp)
+      (back-to-indentation)
+    (beginning-of-line)))
 
-  (defun my-common-prog-mode-settings ()
-    "Enables settings common between programming language modes."
-    (nl/setup-indent 2) ; indent 2 spaces width
-    (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
-    (subword-mode 1)
-    ;;
-    ;; Set tab and CR/LF keys to call their corresponding more-general
-    ;; functions.  This needs to be here to override the settings of some modes
-    ;; (e.g. c++-mode changes the tab key to do a re-indent).
-    ;;
-    (local-set-key "\t" 'tab-to-tab-stop)
-    (local-set-key "\n" 'newline-and-indent)
-    (local-set-key "\r" 'newline-and-indent)
-    ;;
-    ;; Set paragraph/comment auto-formatting to wrap at column 100.
-    ;;
-    (set-fill-column 100)
-    ;;
-    ;; Set the comment column to zero so that lisp comment lines will act like
-    ;; C++ comments (i.e. line up with the code), and not automatically indent
-    ;; to column 50.
-    ;;
-    (setq comment-column 0)
-    (push '(">=" . ?≥) prettify-symbols-alist)
-    (push '("<=" . ?≤) prettify-symbols-alist)
-    (push '("->" . ?→) prettify-symbols-alist)
-    (yas-minor-mode))
+(defun my-common-prog-mode-settings ()
+  "Enables settings common between programming language modes."
+  (nl/setup-indent 2) ; indent 2 spaces width
+  (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
+  (subword-mode 1)
+  ;;
+  ;; Set tab and CR/LF keys to call their corresponding more-general
+  ;; functions.  This needs to be here to override the settings of some modes
+  ;; (e.g. c++-mode changes the tab key to do a re-indent).
+  ;;
+  (local-set-key "\t" 'tab-to-tab-stop)
+  (local-set-key "\n" 'newline-and-indent)
+  (local-set-key "\r" 'newline-and-indent)
+  ;;
+  ;; Set paragraph/comment auto-formatting to wrap at column 100.
+  ;;
+  (set-fill-column 100)
+  ;;
+  ;; Set the comment column to zero so that lisp comment lines will act like
+  ;; C++ comments (i.e. line up with the code), and not automatically indent
+  ;; to column 50.
+  ;;
+  (setq comment-column 0)
+  (push '(">=" . ?≥) prettify-symbols-alist)
+  (push '("<=" . ?≤) prettify-symbols-alist)
+  (push '("->" . ?→) prettify-symbols-alist)
+  (yas-minor-mode))
 
-  (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
-  (add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
-  (add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
+(add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
+(add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
+(add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
 #+END_SRC
 
 ** =re-builder=
@@ -2483,9 +2483,16 @@ Add filler lorem ipsum text to Emacs.
   :hook
   (scala-mode . lsp)
   (php-mode . lsp)
+  (python-mode . lsp)
   :config
   (setq lsp-prefer-capf t
-        lsp-idle-delay 0.5)
+        lsp-idle-delay 0.5
+        lsp-pyls-plugins-flake8-enabled t)
+  (lsp-register-custom-settings
+   '(("pyls.plugins.pyls_mypy.enabled" t t)
+     ("pyls.plugins.pyls_mypy.live_mode" nil t)
+     ("pyls.plugins.pyls_black.enabled" t t)
+     ("pyls.plugins.pyls_isort.enabled" t t)))
   :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
@@ -3282,8 +3289,7 @@ No more juggling windows after commiting. It's magit bliss.
   :commands git-timemachine)
 #+END_SRC
 
-** Helm
-*** [[https://github.com/emacs-helm/helm][helm]]
+** Helm*** [[https://github.com/emacs-helm/helm][helm]]
 **** Helm Config
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
@@ -3566,6 +3572,20 @@ No longer using this since most development is now using lsp -
   ;;(setq xref-show-xrefs-function 'helm-xref-show-xrefs)
 )
 #+END_SRC
+
+** Coding
+
+*** [[https://github.com/akicho8/string-inflection][string-inflection]]
+
+#+begin_src emacs-lisp
+(use-package string-inflection
+  :bind
+  (("C-c i" . string-inflection-cycle)
+   ("C-c C" . string-inflection-camelcase)
+   ("C-c L" . string-inflection-lower-camelcase)
+   ("C-c J" . string-inflection-java-style-cycle)
+   ))
+#+end_src
 
 ** Programming Languages
 *** CSS
@@ -3912,12 +3932,52 @@ checker is loaded.
 #+END_SRC
 
 *** Python
+
+https://www.mattduck.com/lsp-python-getting-started.html
+
+**** [[https://github.com/emacsorphanage/company-jedi][company-jedi]]
+
+#+begin_src emacs-lisp
+(use-package company-jedi
+    :after company
+    :config
+    (add-to-list 'company-backends #'company-jedi))
+#+end_src
+
+**** [[https://github.com/jorgenschaefer/elpy][elpy]]
+
+See here: https://medium.com/analytics-vidhya/managing-a-python-development-environment-in-emacs-43897fd48c6a
+
+#+begin_src emacs-lisp
+(use-package elpy
+  :bind
+  (:map elpy-mode-map
+        ("C-M-n" . elpy-nav-forward-block)
+        ("C-M-p" . elpy-nav-backward-block))
+  :hook ((elpy-mode . flycheck-mode)
+         (elpy-mode . (lambda ()
+                        (set (make-local-variable 'company-backends)
+                             '((elpy-company-backend :with company-yasnippet))))))
+  :init
+  (elpy-enable)
+  :config
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  ;; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
+  (setq elpy-shell-echo-output nil)
+  (setq elpy-rpc-python-command "python3")
+  (setq elpy-rpc-timeout 2)
+
+  (eval-after-load "elpy"
+    '(cl-dolist (key '("M-<up>" "M-<down>" "M-<left>" "M-<right>"))
+       (define-key elpy-mode-map (kbd key) nil))))
+#+end_src
+
 **** [[https://melpa.org/#/python-mode][python-mode]]
 
 Integrates with IPython.
 
 #+BEGIN_SRC emacs-lisp :tangle no
-  (use-package python-mode
+  (use-package python-mode)
 #+END_SRC
 
 *** Scala
