@@ -1363,12 +1363,16 @@ Using doom themes
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
   (load-theme 'doom-acario-dark t)
+  (with-eval-after-load 'markdown-mode
+    (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
+    (set-face-background 'markdown-code-face (doom-color 'brightblack)))
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
 
   ;; Enable custom neotree theme (all-the-icons must be installed!)
   (doom-themes-neotree-config)
+
   ;; or for treemacs users
   (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
   (doom-themes-treemacs-config)
@@ -1376,6 +1380,9 @@ Using doom themes
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 #+end_src
+
+#+RESULTS:
+: t
 
 Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/)
 
@@ -1857,6 +1864,13 @@ Provides a simple UI for customizing dired mode to use different faces and color
          (:default
           '(:family "Arial" :height 90)))))
 #+END_SRC
+
+** [[https://github.com/spotify/dockerfile-mode][dockerfile-mode]]
+
+#+begin_src emacs-lisp
+(use-package dockerfile-mode
+  :mode ("Dockerfile\\'" . dockerfile-mode))
+#+end_src
 
 ** [[https://github.com/seagle0128/doom-modeline][doom-modeline]]
 
