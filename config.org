@@ -1365,7 +1365,8 @@ Using doom themes
   (load-theme 'doom-acario-dark t)
   (with-eval-after-load 'markdown-mode
     (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
-    (set-face-background 'markdown-code-face (doom-color 'brightblack)))
+    (set-face-background 'markdown-code-face (doom-color 'brightblack))
+    (set-face-background 'org-block (doom-color 'brightblack)))
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1644,9 +1645,9 @@ A quick way to jump around text in buffers.
 
 ** [[https://github.com/Malabarba/beacon][beacon]]
 
-Never lose your cursor again
+Never lose your cursor again. Highlights the cursor.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package beacon
   :diminish beacon-mode
   :init
@@ -1864,6 +1865,16 @@ Provides a simple UI for customizing dired mode to use different faces and color
          (:default
           '(:family "Arial" :height 90)))))
 #+END_SRC
+** [[https://github.com/Silex/docker.el][docker]]
+
+#+begin_src emacs-lisp
+(use-package docker
+  :ensure t
+  :bind ("C-c d" . docker))
+#+end_src
+
+#+RESULTS:
+: docker
 
 ** [[https://github.com/spotify/dockerfile-mode][dockerfile-mode]]
 
@@ -4456,7 +4467,7 @@ Views the same file side by side:
      "%s is up for grabs.")
    (current-buffer)))
 
-(global-set-key (kbd "C-c d") 'toggle-window-dedicated)
+;; (global-set-key (kbd "C-c d") 'toggle-window-dedicated)
 
 ;; see https://www.reddit.com/r/emacs/comments/80pd2q/anyone_could_help_me_with_window_management/
 ;; possible values are: display-buffer-same-window, display-buffer-pop-up-window, display-buffer-reuse-window
