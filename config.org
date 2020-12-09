@@ -11,8 +11,7 @@ I've gotten ideas for this document from the following:
 - [[https://github.com/wasamasa/dotemacs/blob/master/init.org][Wasamasa]]
 - [[https://github.com/danielmai/.emacs.d][Daniel Mai]]'s configuration.
 
-This file is used to generate ~config.el~ using ~org-babel~ in
-~init.el~.
+This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 
 * Installing Emacs
 ** Ubuntu
@@ -23,7 +22,7 @@ tag. I used the instructions provided by Xah Lee given [[http://ergoemacs.org/em
 the following command has to be run.
 
 #+BEGIN_SRC sh
-./autogen.sh
+org./autogen.sh
 #+END_SRC
 
 Then to compile and install, do the following.
@@ -55,18 +54,24 @@ customize settings in [[file:init.el][init.el]].
 * Font
 ** Linux
 
-*** Fira Code
+*** Fixed width: Fira Code
 
-#+BEGIN_SRC emacs-lisp
-(set-face-font 'default "Fira Code-12")
+#+begin_src emacs-lisp
+(set-face-font 'default "Fira Code Retina-12")
+(set-face-font 'fixed-pitch "Fira Code Retina-12")
 (set-face-font 'italic "Ubuntu Mono-16")
 (set-face-font 'bold-italic "Ubuntu Mono-16")
-(set-face-font 'fixed-pitch-serif "Ubuntu Mono")
 
 (use-package fira-code-mode
   :load-path "~/.emacs.d/lisp"
   :hook prog-mode)
-#+END_SRC
+#+end_src
+
+*** Variable pitch
+
+#+begin_src emacs-lisp
+(set-face-font 'variable-pitch "Ubuntu-14")
+#+end_src
 
 *** Fira Mono
 
@@ -84,8 +89,7 @@ sudo apt-get install fonts-firacode
 
 **** Emacs config
 
-And here's how to tell Emacs to use this font. Copy the following line to your
-=~/.Xresources= file.
+And here's how to tell Emacs to use this font. Copy the following line to your =~/.Xresources= file.
 
 #+BEGIN_SRC sh :tangle no
 Emacs.font: Input Mono Condensed-9
@@ -617,12 +621,11 @@ A way to set up indentation for all programming modes. Taken from
 
 ** Emacs lisp
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src  emacs-lisp
 (setq emacs-lisp-mode-hook 'my-common-prog-mode-settings)
-#+END_SRC
+#+end_src
 
 * Packages bundled with Emacs
-
 ** =auto-revert=
 
 Revert file buffers updated outside of emacs, unless I've made changes to
@@ -956,56 +959,76 @@ ibuffer is the improved version of list-buffers.
 
 ** =org-mode=
 
-First some UI and editing tweaks.
-
-Changing the ellipsis idea comes from [[http://endlessparentheses.com/changing-the-org-mode-ellipsis.html][Artur Malabarba]].
-
 #+BEGIN_SRC emacs-lisp
-(setq org-ellipsis " ⤵"
-      org-catch-invisible-edits 'error
-      org-startup-indented t
-      org-cycle-include-plain-lists 'integrate
-      org-return-follows-link t
-      org-M-RET-may-split-line nil
-      org-src-fontify-natively t
-      org-src-preserve-indentation t
-      org-enforce-todo-dependencies t
-      org-enforce-todo-checkbox-dependencies t
-      ;; org-link-frame-setup '((file . find-file))
-      org-export-backends '(ascii html icalendar latex md)
-      org-log-into-drawer t)
+(defun nl/org-mode-setup ()
+  (org-indent-mode)
+  (variable-pitch-mode 1)
+  (auto-fill-mode 0)
+  (diminish org-indent-mode)
+  (define-key org-mode-map (kbd "C-c l") 'org-store-link)
+  (define-key org-mode-map (kbd "C-c a") 'org-agenda)
+  (define-key org-mode-map (kbd "M-<left>") nil)
+  (define-key org-mode-map (kbd "M-<right>") nil)
+  (define-key org-mode-map (kbd "M-<down>") nil)
+  (define-key org-mode-map (kbd "M-<up>") nil))
 
-(setq org-capture-templates
-      '(("t" "Todo" entry (file+headline "~/Dropbox/orgfiles/todo.org" "Tasks")
-         "* TODO %?\n  %i\n  %a")
-        ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
-         "* %? %^L %^g \n%T" :prepend t)
-        ("n" "Note" entry (file "~/Dropbox/orgfiles/notes.org")
-         "* NOTE %?\n%U" :empty-lines 1)
-        ("N" "Note with Clipboard" entry (file "~/Dropbox/orgfiles/notes.org")
-         "* NOTE %?\n%U\n   %c" :empty-lines 1)
-        ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/journal.org")
-             "* %?\nEntered on %U\n  %i\n  %a")))
-#+END_SRC
+(defun nl/org-mode-faces (font-height)
+  (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.05)
+                  (org-level-5 . 1.05)
+                  (org-level-6 . 1.05)
+                  (org-level-7 . 1.05)
+                  (org-level-8 . 1.05)))
+    (set-face-attribute (car face) nil :font "Ubuntu" :weight 'regular :height (cdr face)))
 
-
-*** Org activation bindings
-
-Set up some global key bindings that integrate with Org Mode features.
-Also, Unbind some keys (I prefer windmove).
-
-#+BEGIN_SRC emacs-lisp
+  ;; Make sure org-indent face is available
+  (require 'org-indent)
   (require 'org-tempo)
 
-  (defun nl/org-mode-hook ()
-    (define-key org-mode-map (kbd "C-c l") 'org-store-link)
-    (define-key org-mode-map (kbd "C-c a") 'org-agenda)
-    (define-key org-mode-map (kbd "M-<left>") nil)
-    (define-key org-mode-map (kbd "M-<right>") nil)
-    (define-key org-mode-map (kbd "M-<down>") nil)
-    (define-key org-mode-map (kbd "M-<up>") nil))
+  ;; Ensure that anything that should be fixed-pitch in Org files appears that way
+  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height font-height)
+  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch) :height font-height)
+  (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height font-height)
+  (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height font-height)
+  (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch) :height font-height)
+  (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch) :height font-height)
+  (set-face-attribute 'org-checkbox nil :inherit 'fixed-pitch :height font-height)
+  (set-face-attribute 'org-table nil :inherit 'fixed-pitch :height font-height)
+  (set-face-attribute 'org-formula  nil :inherit 'fixed-pitch :height font-height))
 
-  (add-hook 'org-mode-hook 'nl/org-mode-hook)
+(use-package org
+  :defer t
+  :hook (org-mode . nl/org-mode-setup)
+  :config
+  (setq org-ellipsis " ⤵"
+        org-hide-emphasis-markers t
+        org-catch-invisible-edits 'error
+        org-startup-indented t
+        org-cycle-include-plain-lists 'integrate
+        org-return-follows-link t
+        org-M-RET-may-split-line nil
+        org-src-fontify-natively t
+        org-src-preserve-indentation t
+        org-enforce-todo-dependencies t
+        org-enforce-todo-checkbox-dependencies t
+        ;; org-link-frame-setup '((file . find-file))
+        org-export-backends '(ascii html icalendar latex md)
+        org-log-into-drawer t)
+
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/Dropbox/orgfiles/todo.org" "Tasks")
+           "* TODO %?\n  %i\n  %a")
+          ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
+           "* %? %^L %^g \n%T" :prepend t)
+          ("n" "Note" entry (file "~/Dropbox/orgfiles/notes.org")
+           "* NOTE %?\n%U" :empty-lines 1)
+          ("N" "Note with Clipboard" entry (file "~/Dropbox/orgfiles/notes.org")
+           "* NOTE %?\n%U\n   %c" :empty-lines 1)
+          ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/journal.org")
+           "* %?\nEntered on %U\n  %i\n  %a")))
+  (nl/org-mode-faces 120))
 #+END_SRC
 
 *** Org agenda
@@ -1053,30 +1076,31 @@ good column number to do that.
 *** Org babel languages
 
 #+BEGIN_SRC emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (C . t)
-   (calc . t)
-   (latex . t)
-   (java . t)
-   (ruby . t)
-   (scheme . t)
-   (shell . t)
-   (sql . t)
-   (sqlite . t)
-   (js . t)))
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (C . t)
+     (calc . t)
+     (latex . t)
+     (java . t)
+     (ruby . t)
+     (scheme . t)
+     (shell . t)
+     (sql . t)
+     (sqlite . t)
+     (js . t)))
 
-(defun my-org-confirm-babel-evaluate (lang body)
-  "Do not confirm evaluation for these languages."
-  (not (or (string= lang "C")
-           (string= lang "sh")
-           (string= lang "java")
-           (string= lang "python")
-           (string= lang "emacs-lisp")
-           (string= lang "sql")
-           (string= lang "sqlite"))))
-(setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
+  (defun my-org-confirm-babel-evaluate (lang body)
+    "Do not confirm evaluation for these languages."
+    (not (or (string= lang "C")
+             (string= lang "sh")
+             (string= lang "java")
+             (string= lang "python")
+             (string= lang "emacs-lisp")
+             (string= lang "sql")
+             (string= lang "sqlite"))))
+  (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate))
 #+END_SRC
 
 *** Org babel/source blocks
@@ -1385,11 +1409,12 @@ Using doom themes
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-acario-dark t)
+  (load-theme 'doom-palenight t)
   (with-eval-after-load 'markdown-mode
     (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
     (set-face-background 'markdown-code-face (doom-color 'brightblack))
-    (set-face-background 'org-block (doom-color 'brightblack)))
+    ;;(set-face-background 'org-block (doom-color 'brightblack))
+    )
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1404,9 +1429,6 @@ Using doom themes
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 #+end_src
-
-#+RESULTS:
-: t
 
 Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/)
 
@@ -1988,7 +2010,15 @@ This package adds support for flow to flycheck.
 #+BEGIN_SRC emacs-lisp
 (use-package vterm
   :load-path "~/src/github/elisp/emacs-libvterm"
-  :commands vterm vterm-other-window)
+  :bind
+  (:map vterm-mode-map
+        ("M-<right>" . windmove-right)
+        ("M-<left>" . windmove-left)
+        ("M-<up>" . windmove-up)
+        ("M-<down>" . windmove-down))
+  :commands vterm vterm-other-window
+  :config
+  (setq vterm-max-scrollback 10000))
 #+END_SRC
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -2544,9 +2574,12 @@ Add filler lorem ipsum text to Emacs.
   :commands (lsp lsp-deferred))
 
 (use-package lsp-ui
-  :load-path "~/src/github/elisp/lsp-ui"
+  ;; :load-path "~/src/github/elisp/lsp-ui"
+  :hook
+  (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-show-hover nil)
   (lsp-ui-doc-enable nil)
   (lsp-ui-peek-enable nil)
   :bind (:map lsp-ui-mode-map
@@ -2556,9 +2589,7 @@ Add filler lorem ipsum text to Emacs.
   :custom-face
   (lsp-ui-peek-peek ((nil :background "#2b538a")))
   :config
-  (setq lsp-ui-peek-always-show nil)
-  :hook
-  (lsp-mode . lsp-ui-mode))
+  (setq lsp-ui-peek-always-show nil))
 
 ;;(use-package company-lsp
 ;;  :after company
@@ -2594,6 +2625,12 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
   (setq markdown-command "pandoc"))
 #+END_SRC
 
+** [[https://github.com/ancane/markdown-preview-mode][markdown-preview-mode]]
+
+#+begin_src emacs-lisp
+(use-package markdown-preview-mode)
+#+end_src
+
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
 
 Quick switching between buffers.
@@ -2623,7 +2660,7 @@ Show org-mode bullets as UTF-8 characters.
 
 #+BEGIN_SRC emacs-lisp
 (use-package org-bullets
-  :hook (org-mode . (lambda () (org-bullets-mode 1))))
+  :hook (org-mode . org-bullets-mode))
 #+END_SRC
 
 ** [[https://github.com/astahlman/ob-async][ob-async]]
@@ -3983,6 +4020,8 @@ checker is loaded.
 
 https://www.mattduck.com/lsp-python-getting-started.html
 
+pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_but_which_lsp_server/][lsp for python, sure. but which lsp server??]]
+
 **** [[https://github.com/emacsorphanage/company-jedi][company-jedi]]
 
 #+begin_src emacs-lisp
@@ -3994,7 +4033,7 @@ https://www.mattduck.com/lsp-python-getting-started.html
 
 **** [[https://github.com/jorgenschaefer/elpy][elpy]]
 
-See here: https://medium.com/analytics-vidhya/managing-a-python-development-environment-in-emacs-43897fd48c6a
+See [[https://medium.com/analytics-vidhya/managing-a-python-development-environment-in-emacs-43897fd48c6a][here]]
 
 #+begin_src emacs-lisp
 (use-package elpy
@@ -4018,6 +4057,15 @@ See here: https://medium.com/analytics-vidhya/managing-a-python-development-envi
   (eval-after-load "elpy"
     '(cl-dolist (key '("M-<up>" "M-<down>" "M-<left>" "M-<right>"))
        (define-key elpy-mode-map (kbd key) nil))))
+#+end_src
+
+
+**** [[https://github.com/jorgenschaefer/pyvenv/tree/0bf4b87068e9040fc99afa85af1992247dd7aacd][pyvenv]]
+
+#+begin_src emacs-lisp
+(use-package pyvenv
+  :config
+  (pyvenv-mode 1))
 #+end_src
 
 **** [[https://melpa.org/#/python-mode][python-mode]]
