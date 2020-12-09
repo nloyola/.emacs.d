@@ -811,7 +811,30 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
   :if window-system
   :init
   (add-hook 'after-init-hook 'server-start t)
-  (add-hook 'after-init-hook 'edit-server-start t))
+  (add-hook 'after-init-hook 'edit-server-start t)
+  :config
+  ;; from: https://github.com/daviwil/emacs-from-scratch/blob/d24357b488862223fecaebdad758b136b0ca96e7/show-notes/Emacs-Tips-08.org#configuring-the-ui-for-new-frames
+  (setq nl/default-font-size 120
+        nl/default-variable-font-size 140)
+
+  (defun efs/set-font-faces ()
+    (message "Setting faces!")
+    (set-face-attribute 'default nil :font "Fira Code Retina" :height nl/default-font-size)
+
+    ;; Set the fixed pitch face
+    (set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height nl/default-font-size)
+
+    ;; Set the variable pitch face
+    (set-face-attribute 'variable-pitch nil :font "Ubuntu" :height nl/default-variable-font-size :weight 'regular))
+
+  (if (daemonp)
+      (add-hook 'after-make-frame-functions
+                (lambda (frame)
+                  ;; (setq doom-modeline-icon t)
+                  (with-selected-frame frame
+                    (nl/set-font-faces))))
+    (efs/set-font-faces))
+  )
 #+END_SRC
 
 ** =flyspell=
