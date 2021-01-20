@@ -1,6 +1,9 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 #+STARTUP: overview
+#+INFOJS_OPT: view:t toc:t ltoc:t mouse:underline buttons:0 path:http://thomasf.github.io/solarized-css/org-info.min.js
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://thomasf.github.io/solarized-css/solarized-light.min.css" />
+#+OPTIONS: broken-links:t
 
 This configuration uses the [[https://github.com/jwiegley/use-package][use-package]] package from John Wiegley,
 which is a fantastic way to manage package configurations.
@@ -1054,9 +1057,6 @@ Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a
 
 Speed commands are a nice and quick way to perform certain actions
 while at the beginning of a heading. It's not activated by default.
-
-See the doc for speed keys by checking out [[elisp:(info%20"(org)%20speed%20keys")][the documentation for
-speed keys in Org mode]].
 
 #+BEGIN_SRC emacs-lisp
 (setq org-use-speed-commands t
@@ -2628,7 +2628,12 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
 ** [[https://github.com/ancane/markdown-preview-mode][markdown-preview-mode]]
 
 #+begin_src emacs-lisp
-(use-package markdown-preview-mode)
+(use-package markdown-preview-mode
+  :config
+  ;;(add-to-list 'markdown-preview-stylesheets
+  ;;             "https://raw.githubusercontent.com/richleland/pygments-css/master/emacs.css")
+  (setq markdown-preview-stylesheets (list
+        "http://thomasf.github.io/solarized-css/solarized-light.min.css")))
 #+end_src
 
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
@@ -2690,7 +2695,6 @@ This package provides tagged workspaces.
 #+BEGIN_QUOTE
 Project navigation and management library for Emacs.
 #+END_QUOTE
-http://batsov.com/projectile/
 
 
 #+BEGIN_SRC emacs-lisp
