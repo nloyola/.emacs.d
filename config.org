@@ -73,7 +73,7 @@ customize settings in [[file:init.el][init.el]].
 *** Variable pitch
 
 #+begin_src emacs-lisp
-(set-face-font 'variable-pitch "Ubuntu-14")
+(set-face-font 'variable-pitch "Ubuntu-16")
 #+end_src
 
 *** Fira Mono
@@ -846,13 +846,18 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 ** =flyspell=
 
 #+BEGIN_SRC emacs-lisp
-    (use-package flyspell
-      :diminish flyspell-mode
-      :hook ((prog-mode-hook . flyspell-prog-mode)
-             (text-mode-hook . flyspell-mode))
-      :config
-      ;; Sets flyspell correction to use two-finger mouse click
-      (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word))
+(use-package flyspell-popup)
+
+(use-package flyspell
+  :requires flyspell-popup
+  :diminish flyspell-mode
+  :hook ((prog-mode-hook . flyspell-prog-mode)
+         (text-mode-hook . flyspell-mode))
+  :bind (:map flyspell-mode-map
+              ("C-;" . flyspell-popup-correct))
+  :config
+  ;; Sets flyspell correction to use two-finger mouse click
+  (define-key flyspell-mouse-map [down-mouse-3] #'flyspell-correct-word))
 #+END_SRC
 
 ** =ispell=
@@ -887,15 +892,18 @@ Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-u
 (cond
  ((executable-find "aspell")
   ;; you may also need `ispell-extra-args'
-  (setq ispell-program-name "aspell"))
+  (setq ispell-program-name "aspell"
+        ispell-dictionary "en_CA"
+        ispell-local-dictionary "en_CA"))
  ((executable-find "hunspell")
   (setq ispell-program-name "hunspell")
 
   ;; Please note that `ispell-local-dictionary` itself will be passed to hunspell cli with "-d"
   ;; it's also used as the key to lookup ispell-local-dictionary-alist
   ;; if we use different dictionary
-  (setq ispell-local-dictionary "en_CA")
-  (setq ispell-local-dictionary-alist
+  (setq ispell-dictionary "en_CA"
+        ispell-local-dictionary "en_CA"
+        ispell-local-dictionary-alist
         '(("en_CA" "[[:alpha:]]" "[^[:alpha:]]" "[']" nil ("-d" "en_CA") nil utf-8))))
  (t (setq ispell-program-name nil)))
 
@@ -928,6 +936,7 @@ Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-u
 (defun text-mode-hook-setup ()
   ;; Turn off RUN-TOGETHER option when spell check text-mode
   (setq-local ispell-extra-args (flyspell-detect-ispell-args)))
+
 (add-hook 'text-mode-hook 'text-mode-hook-setup)
 #+END_SRC
 
@@ -965,7 +974,7 @@ ibuffer is the improved version of list-buffers.
 #+BEGIN_SRC emacs-lisp
 (defun nl/org-mode-setup ()
   (org-indent-mode)
-  (variable-pitch-mode 1)
+  (variable-pitch-mode)
   (auto-fill-mode 0)
   (diminish org-indent-mode)
   (define-key org-mode-map (kbd "C-c l") 'org-store-link)
@@ -1251,6 +1260,14 @@ Remember position in a file.
   (column-number-mode t))
 #+end_src
 
+** =smerge-mode=
+
+#+begin_src emacs-lisp
+(use-package smerge-mode
+  :config
+  (setq smerge-command-prefix "\C-cv"))
+#+end_src
+
 ** =sql=
 
 This configuration allows me to connect to predefined MySQL servers.
@@ -1409,7 +1426,7 @@ Using doom themes
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-palenight t)
+  (load-theme 'doom-oceanic-next t)
   (with-eval-after-load 'markdown-mode
     (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
     (set-face-background 'markdown-code-face (doom-color 'brightblack))
@@ -1758,37 +1775,37 @@ Disable for now since it is slow when editing Scala code.
 Complete anything.
 
 #+BEGIN_SRC emacs-lisp
-  (use-package company
-    :diminish company-mode
-    :bind (:map company-active-map
-                ("C-n" . company-select-next)
-                ("C-p" . company-select-previous))
-    ("M-/" . company-complete-common)
-    :preface
-    ;; enable yasnippet everywhere
-    (defvar company-mode/enable-yas t
-      "Enable yasnippet for all backends.")
+(use-package company
+  :diminish company-mode
+  :bind (:map company-active-map
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous)
+              ("M-/" . company-complete-common))
+  :preface
+  ;; enable yasnippet everywhere
+  (defvar company-mode/enable-yas t
+    "Enable yasnippet for all backends.")
 
-    (defun company-mode/backend-with-yas (backend)
-      (if (or
-           (not company-mode/enable-yas)
-           (and (listp backend) (member 'company-yasnippet backend)))
-          backend
-        (append (if (consp backend) backend (list backend))
-                '(:with company-yasnippet))))
-    :init (global-company-mode t)
-    :custom
-    (company-dabbrev-downcase nil "Don't downcase returned candidates.")
-    (company-show-numbers t "Numbers are helpful.")
-    (company-abort-manual-when-too-short t "Be less enthusiastic about completion.")
-    :config
-    ;; no delay no autocomplete
-    (setq company-idle-delay 0
-          company-minimum-prefix-length 4
-          company-tooltip-limit 20)
+  (defun company-mode/backend-with-yas (backend)
+    (if (or
+         (not company-mode/enable-yas)
+         (and (listp backend) (member 'company-yasnippet backend)))
+        backend
+      (append (if (consp backend) backend (list backend))
+              '(:with company-yasnippet))))
+  :init (global-company-mode t)
+  :custom
+  (company-dabbrev-downcase nil "Don't downcase returned candidates.")
+  (company-show-numbers t "Numbers are helpful.")
+  (company-abort-manual-when-too-short t "Be less enthusiastic about completion.")
+  :config
+  ;; no delay no autocomplete
+  (setq company-idle-delay 0
+        company-minimum-prefix-length 4
+        company-tooltip-limit 20)
 
-    (setq company-backends
-          (mapcar #'company-mode/backend-with-yas company-backends)))
+  (setq company-backends
+        (mapcar #'company-mode/backend-with-yas company-backends)))
 #+END_SRC
 
 ** [[https://github.com/TommyX12/company-tabnine][company-tabnine]]
@@ -2212,6 +2229,16 @@ Updte tags on command line with ~global -u~.
   :commands ggtags-mode)
 #+END_SRC
 
+
+** [[https://github.com/jimhourihan/glsl-mode][glsl-mode]]
+
+Emacs major mode for OpenGL shading language.
+
+#+begin_src emacs-lisp
+(use-package glsl-mode
+  :mode "\\.\\(vert\\|frag\\|glsl\\|geom\\)$")
+#+end_src
+
 ** [[https://github.com/camdez/goto-last-change.el][goto-last-change]]
 
 #+BEGIN_SRC emacs-lisp
@@ -2620,7 +2647,9 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.markdown\\'" . markdown-mode)
          ("\\.md\\'"       . markdown-mode))
-  :hook (markdown-mode . (lambda () (auto-fill-mode -1)))
+  :hook
+  (markdown-mode . (lambda () (auto-fill-mode -1)))
+  (markdown-mode . flyspell-mode)
   :init
   (setq markdown-command "pandoc"))
 #+END_SRC
@@ -2914,7 +2943,6 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 (use-package smartscan
   :config (global-smartscan-mode 1))
 #+END_SRC
-
 ** [[https://github.com/jbondeson/smooth-scrolling][smooth-scrolling]]
 
 #+BEGIN_SRC emacs-lisp
@@ -3378,7 +3406,8 @@ No more juggling windows after commiting. It's magit bliss.
   :commands git-timemachine)
 #+END_SRC
 
-** Helm*** [[https://github.com/emacs-helm/helm][helm]]
+** Helm
+*** [[https://github.com/emacs-helm/helm][helm]]
 **** Helm Config
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
@@ -4097,81 +4126,81 @@ Integrates with IPython.
 **** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
 
 #+BEGIN_SRC emacs-lisp
-    (use-package scala-mode
-      ;;:load-path "~/src/github/elisp/emacs-scala-mode"
-      :mode "\\.s\\(cala\\|bt\\)$"
-      :interpreter ("scala" . scala-mode)
-      :preface
-      (defun nl-scala-mode-hook ()
-        (yas-minor-mode)
-        ;; sbt-find-definitions is a command that tries to find (with grep)
-        ;; the definition of the thing at point.
-        ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
+(use-package scala-mode
+  ;;:load-path "~/src/github/elisp/emacs-scala-mode"
+  :mode "\\.s\\(cala\\|bt\\)$"
+  :interpreter ("scala" . scala-mode)
+  :preface
+  (defun nl-scala-mode-hook ()
+    (yas-minor-mode)
+    ;; sbt-find-definitions is a command that tries to find (with grep)
+    ;; the definition of the thing at point.
+    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
 
-        (setq-default indent-tabs-mode nil)
-        (setq compilation-ask-about-save nil
-              prettify-symbols-alist scala-prettify-symbols-alist
-              prettify-symbols-unprettify-at-point 'right-edge)
-        (my-common-prog-mode-settings)
-        (prettify-symbols-mode))
+    (setq-default indent-tabs-mode nil)
+    (setq compilation-ask-about-save nil
+          prettify-symbols-alist scala-prettify-symbols-alist
+          prettify-symbols-unprettify-at-point 'right-edge)
+    (my-common-prog-mode-settings)
+    (prettify-symbols-mode))
 
-      (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
+  (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 
-      (defun nl/counsel-ag-scala ()
-        "Perform counsel-ag on the project's Scala files."
-        (interactive)
-        (counsel-ag "" (projectile-project-root) "--scala"))
-      (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+  (defun nl/counsel-ag-scala ()
+    "Perform counsel-ag on the project's Scala files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "--scala"))
+  (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
 
-      :config
-      ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-      ;; allows using SPACE when in the minibuffer
-      (substitute-key-definition
-       'minibuffer-complete-word
-       'self-insert-command
-       minibuffer-local-completion-map)
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
 
-      (setq scala-indent:indent-value-expression t
-            scala-indent:align-parameters t
-            scala-indent:align-forms t
-            scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-            scala-indent:use-javadoc-style t)
-      :hook ((scala-mode . nl-scala-mode-hook)
-             (scala-mode . fic-mode)))
+  (setq scala-indent:indent-value-expression t
+        scala-indent:align-parameters t
+        scala-indent:align-forms t
+        scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+        scala-indent:use-javadoc-style t)
+  :hook ((scala-mode . nl-scala-mode-hook)
+         (scala-mode . fic-mode)))
 #+END_SRC
 **** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
 No longer used since Scala Metals is now being used.
 
-#+BEGIN_SRC emacs-lisp :tangle no
-  (use-package sbt-mode
-    ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
-    :commands (sbt-start sbt-command)
-    :preface
-    (defun nl-sbt-mode-hook ()
-      ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
-      ;; be skipped. 1 = skip info 2 = skip info and warnings.
-      (setq compilation-skip-threshold 1)
+#+BEGIN_SRC emacs-lisp
+(use-package sbt-mode
+  ;;:load-path "~/src/github/elisp/emacs-sbt-mode"
+  :commands (sbt-start sbt-command)
+  :preface
+  (defun nl-sbt-mode-hook ()
+    ;; compilation-skip-threshold tells the compilation minor-mode which type of compiler output can
+    ;; be skipped. 1 = skip info 2 = skip info and warnings.
+    (setq compilation-skip-threshold 1)
 
-      ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
-      (local-set-key (kbd "C-a") 'comint-bol)
+    ;; Bind C-a to 'comint-bol when in sbt-mode. This will move the cursor to just after prompt.
+    (local-set-key (kbd "C-a") 'comint-bol)
 
-      ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
-      ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
-      (local-set-key (kbd "M-RET") 'comint-accumulate))
+    ;; Bind M-RET to 'comint-accumulate. This will allows one to add more than one line to the scala
+    ;; console prompt before sending it for interpretation. It keeps the command history cleaner.
+    (local-set-key (kbd "M-RET") 'comint-accumulate))
 
 
-    (defun nl-sbt-command ()
-      (interactive)
-      (setq completing-read-function 'completing-read-default)
-      (call-interactively 'sbt-command)
-      (setq completing-read-function 'ivy-completing-read))
+  (defun nl-sbt-command ()
+    (interactive)
+    (setq completing-read-function 'completing-read-default)
+    (call-interactively 'sbt-command)
+    (setq completing-read-function 'ivy-completing-read))
 
-    ;; Ivy and =sbt-command= do not behave well together right now, define
-    ;; our own wrapper function.
-    ;; --testing--
-    (defun sbt-command-ivy ()
-      "Send a command to the sbt process of the current buffer's sbt project.
+  ;; Ivy and =sbt-command= do not behave well together right now, define
+  ;; our own wrapper function.
+  ;; --testing--
+  (defun sbt-command-ivy ()
+    "Send a command to the sbt process of the current buffer's sbt project.
   Prompts for the command to send when in interactive mode. You can
   use tab completion.
 
@@ -4182,27 +4211,27 @@ No longer used since Scala Metals is now being used.
 
   The command is most usefull for running a compilation command
   that outputs errors."
-      (interactive)
-      (setq sbt:command-history-temp
-            (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
-      (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
-                #'sbt:get-sbt-completions-for-command
-                :action #'sbt:command
-                :history 'sbt:command-history-temp
-                :preselect (sbt:get-previous-command)
-                :dynamic-collection t))
+    (interactive)
+    (setq sbt:command-history-temp
+          (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
+    (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
+              #'sbt:get-sbt-completions-for-command
+              :action #'sbt:command
+              :history 'sbt:command-history-temp
+              :preselect (sbt:get-previous-command)
+              :dynamic-collection t))
 
     ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
-    (setq sbt:program-options '("-Djline.terminal=auto"))
+  (setq sbt:program-options '("-Djline.terminal=auto"))
 
-    :hook (sbt-mode . nl-sbt-mode-hook)
-    :config
+  :hook (sbt-mode . nl-sbt-mode-hook)
+  :config
 
-    ;; set this regex so that it knows about Play Framework SBT prompt
-    (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
-          sbt:ansi-support t
-          sbt:scroll-to-bottom-on-output nil)
-    (setenv "EMACS" "true"))
+  ;; set this regex so that it knows about Play Framework SBT prompt
+  (setq sbt:sbt-prompt-regexp "^\\[[^]]+\\]\\s-*\\$\\s-*"
+        sbt:ansi-support t
+        sbt:scroll-to-bottom-on-output nil)
+  (setenv "EMACS" "true"))
 #+END_SRC
 *** TypeScript
 **** [[https://github.com/ananthakumaran/tide][tide]]
