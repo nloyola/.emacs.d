@@ -263,7 +263,7 @@
 
 (define-key typescript-mode-map (kbd "C-x '") 'recompile)
 
-(defun nl/prettier-on-project-files ()
+(defun nl/format-project-files ()
   (interactive)
   (let ((files (seq-filter 'angular-project-source-file-p (projectile-current-project-files))))
     (loop for file in files do
@@ -272,8 +272,16 @@
             (message "formatting: %s" file)
             (find-file file)
             (goto-char (point-min))
-            (prettier-js)
-            (save-buffer)))))
+            (let ((file-ext (file-name-extension buffer-file-name)))
+              (when (string= file-ext "ts")
+                (lsp-organize-imports)
+                ;; (lsp-format-buffer)
+                (prettier-js))
+
+              (when (string-match "\\(html\\|scss\\)$" file-ext)
+                (prettier-js))
+              (save-buffer))
+            ))))
 
 (provide 'nl-angular)
 ;;; nl-angular.el ends here

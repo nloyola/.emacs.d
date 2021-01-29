@@ -191,6 +191,7 @@ The class name must have the postfix 'Spec' for this function to work."
             (message "formatting: %s" file)
             (find-file file)
             (goto-char (point-min))
+            (lsp-organize-imports)
             (lsp-format-buffer)
             (save-buffer)))))
 
