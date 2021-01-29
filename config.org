@@ -698,7 +698,10 @@ Enable ANSI colors for compilation buffers.
   :config
   (setq compilation-ask-about-save nil
         compilation-always-kill t
-        compilation-scroll-output t)
+        compilation-scroll-output t
+
+        ;; so that next-error does not open a new window
+        split-width-threshold 200)
 
   :hook (compilation-filter . compilation-ansi-color-process-output))
 #+END_SRC
@@ -2586,6 +2589,7 @@ Add filler lorem ipsum text to Emacs.
   (lsp-enable-file-watchers nil)
   ;;(setq lsp-response-timeout 25)
   :hook
+  (typescript-mode . lsp)
   (scala-mode . lsp)
   (php-mode . lsp)
   (python-mode . lsp)
@@ -3936,7 +3940,8 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package prettier-js
-  :after typescript-mode)
+  :after typescript-mode
+  :hook ((typescript-mode . prettier-js-mode)))
 #+END_SRC
 **** [[https://github.com/ternjs/tern][tern]]
 
@@ -4234,9 +4239,13 @@ No longer used since Scala Metals is now being used.
   (setenv "EMACS" "true"))
 #+END_SRC
 *** TypeScript
+
+#+begin_src emacs-lisp
+(use-package typescript-mode)
+#+end_src
 **** [[https://github.com/ananthakumaran/tide][tide]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package tide
   :after (typescript-mode company flycheck)
   :bind (:map tide-mode-map
