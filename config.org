@@ -57,6 +57,8 @@ customize settings in [[file:init.el][init.el]].
 * Font
 ** Linux
 
+Also see: all-the-icons-dired package installation
+
 *** Fixed width: Fira Code
 
 #+begin_src emacs-lisp
@@ -2289,7 +2291,8 @@ Guide the following key bindings automatically and dynamically.
 (use-package guide-key
   :diminish guide-key-mode
   :config
-    (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h"))
+    (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h" "C-c l")
+          guide-key/recursive-key-sequence-flag t)
     (guide-key-mode 1))
 #+END_SRC
 
@@ -2584,6 +2587,7 @@ Add filler lorem ipsum text to Emacs.
 (use-package lsp-mode
   :pin melpa
   :custom
+  (lsp-keymap-prefix "C-c l")
   (lsp-ui-flycheck-enable nil)
   (lsp-enable-snippet t)
   (lsp-enable-file-watchers nil)
@@ -4156,6 +4160,21 @@ Integrates with IPython.
     (interactive)
     (counsel-ag "" (projectile-project-root) "--scala"))
   (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+
+  (push `(scala-error-regexp
+          ,(rx bol
+               "["
+               (any "E" "W")
+               "]"
+               (zero-or-more space)
+               (group-n 1 (one-or-more (not (in space ":" "\n"))))
+               ":" (group-n 2 (one-or-more digit))
+               ":" (group-n 3 (one-or-more digit))
+               ":")
+          1 2 3 2)
+        compilation-error-regexp-alist-alist)
+
+  (push 'scala-error-regexp compilation-error-regexp-alist)
 
   :config
   ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
