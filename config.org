@@ -2234,7 +2234,6 @@ Updte tags on command line with ~global -u~.
   :commands ggtags-mode)
 #+END_SRC
 
-
 ** [[https://github.com/jimhourihan/glsl-mode][glsl-mode]]
 
 Emacs major mode for OpenGL shading language.
@@ -2555,7 +2554,7 @@ When using =counsel-ag=:
 (use-package ivy-posframe
   :config
   (setq ivy-posframe-display-functions-alist
-        '((swiper          . ivy-posframe-display-at-point)
+        '((swiper          . ivy-posframe-display-at-window-bottom-left)
           (complete-symbol . ivy-posframe-display-at-point)
           (counsel-fzf     . ivy-posframe-display-at-point)
           (counsel-M-x     . ivy-posframe-display-at-window-bottom-left)
@@ -2714,6 +2713,12 @@ Show org-mode bullets as UTF-8 characters.
 #+begin_src emacs-lisp
 (use-package ob-async
   :after org)
+#+end_src
+
+** [[https://github.com/Silex/package-utils][package-utils]]
+
+#+begin_src  emacs-lisp
+(use-package package-utils)
 #+end_src
 
 ** [[https://github.com/politza/pdf-tools][pdf-tools]]
