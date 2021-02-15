@@ -185,7 +185,7 @@ The class name must have the postfix 'Spec' for this function to work."
 (defun nl/scalafmt-project-files ()
   (interactive)
   (let ((files (seq-filter 'scala-filename-p (projectile-current-project-files))))
-    (loop for file in files do
+    (cl-loop for file in files do
           (progn
             (setq default-directory (projectile-project-root))
             (message "formatting: %s" file)
