@@ -1810,40 +1810,26 @@ Complete anything.
               ("C-n" . company-select-next)
               ("C-p" . company-select-previous)
               ("M-/" . company-complete-common))
-  :preface
-  ;; enable yasnippet everywhere
-  (defvar company-mode/enable-yas t
-    "Enable yasnippet for all backends.")
-
-  (defun company-mode/backend-with-yas (backend)
-    (if (or
-         (not company-mode/enable-yas)
-         (and (listp backend) (member 'company-yasnippet backend)))
-        backend
-      (append (if (consp backend) backend (list backend))
-              '(:with company-yasnippet))))
   :init (global-company-mode t)
   :custom
   (company-dabbrev-downcase nil "Don't downcase returned candidates.")
   (company-show-numbers t "Numbers are helpful.")
   (company-abort-manual-when-too-short t "Be less enthusiastic about completion.")
   :custom-face
-  ;;(company-tooltip ((t (:family "IBM Plex Mono Medium" :height 120))))
+  (company-tooltip ((t (:family "IBM Plex Mono Medium" :height 120))))
   :config
-  ;; no delay no autocomplete
-  (setq company-idle-delay 0
+
+  (setq company-idle-delay 0              ;; no delay no autocomplete
         company-minimum-prefix-length 4
         company-tooltip-limit 20)
-
-  (setq company-backends
-        (mapcar #'company-mode/backend-with-yas company-backends)))
+  )
 #+END_SRC
 
 ** [[https://github.com/tumashu/company-posframe/][company-posframe]]
 
-test
+Removed due to not displaying properly with ~IBM Plex Mono~ font. 2021-02-16
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package company-posframe
   :custom-face
   (company-posframe-active-backend-name ((t (:family "Fira Code Retina"))))
