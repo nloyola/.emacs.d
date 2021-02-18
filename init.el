@@ -81,12 +81,14 @@
 (require 'package)
 (setq package-archives
       '(("gnu"     . "https://elpa.gnu.org/packages/")
+        ("org" . "https://orgmode.org/elpa/")
         ;; ("melpa-stable" . "https://stable.melpa.org/packages/")
         ;; ("marmalade"    . "https://marmalade-repo.org/packages/")
         ("melpa"        . "https://melpa.org/packages/"))
       package-archive-priorities
       '(;;("melpa-stable" . 10)
         ("gnu"       . 5)
+        ("org"       . 7)
         ;; ("marmalade" . 7)
         ("melpa"     . 10)))
 

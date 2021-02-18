@@ -982,6 +982,10 @@ ibuffer is the improved version of list-buffers.
 
 ** =org-mode=
 
+#+begin_src
+
+#+end_src
+
 #+BEGIN_SRC emacs-lisp :results silent
 (defun nl/org-mode-setup ()
   (org-indent-mode)
@@ -995,6 +999,8 @@ ibuffer is the improved version of list-buffers.
   (define-key org-mode-map (kbd "M-<down>") nil)
   (define-key org-mode-map (kbd "M-<up>") nil))
 
+;; (nl/org-mode-faces 120)
+
 (defun nl/org-mode-faces (font-height)
   (dolist (face '((org-level-1 . 1.2)
                   (org-level-2 . 1.1)
@@ -1004,14 +1010,14 @@ ibuffer is the improved version of list-buffers.
                   (org-level-6 . 1.05)
                   (org-level-7 . 1.05)
                   (org-level-8 . 1.05)))
-    (set-face-attribute (car face) nil :font "Ubuntu" :weight 'regular :height (cdr face)))
+    (set-face-attribute (car face) nil :font nl/gui-variable-font-name :weight 'regular :height (cdr face)))
 
   (require 'org-indent)
   (require 'org-tempo)
 
   ;; Ensure that anything that should be fixed-pitch in Org files appears that way
-  (set-face-attribute 'org-block nil :foreground nil :inherit 'fixed-pitch :height font-height)
-  (set-face-attribute 'org-code nil   :inherit '(shadow fixed-pitch) :height font-height)
+  (set-face-attribute 'org-block nil  :font nl/gui-fixed-font-name :height font-height :weight 'semi-bold)
+  (set-face-attribute 'org-code nil   :font nl/gui-fixed-font-name :height font-height :weight 'semi-bold)
   (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch) :height font-height)
   (set-face-attribute 'org-verbatim nil :inherit '(shadow fixed-pitch) :height font-height)
   (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch) :height font-height)
@@ -1021,6 +1027,7 @@ ibuffer is the improved version of list-buffers.
   (set-face-attribute 'org-formula  nil :inherit 'fixed-pitch :height font-height))
 
 (use-package org
+  :pin org
   :hook (org-mode . nl/org-mode-setup)
   :config
   (setq org-ellipsis " ⤵"
@@ -1032,6 +1039,7 @@ ibuffer is the improved version of list-buffers.
         org-M-RET-may-split-line nil
         org-src-fontify-natively t
         org-src-preserve-indentation t
+        org-edit-src-content-indentation 0
         org-enforce-todo-dependencies t
         org-enforce-todo-checkbox-dependencies t
         ;; org-link-frame-setup '((file . find-file))
@@ -1049,7 +1057,7 @@ ibuffer is the improved version of list-buffers.
            "* NOTE %?\n%U\n   %c" :empty-lines 1)
           ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a")))
-  (nl/org-mode-faces 120))
+  (nl/org-mode-faces (* 10 (string-to-number nl/gui-fixed-font-size-normal))))
 #+END_SRC
 
 *** Org agenda
@@ -1097,25 +1105,25 @@ good column number to do that.
 (with-eval-after-load 'org
   (org-babel-do-load-languages
    'org-babel-load-languages
-   '((python . t)
-     (C . t)
+   '((C . t)
      (calc . t)
+     (emacs-lisp . t)
      (latex . t)
      (java . t)
+     (js . t)
+     (python . t)
      (ruby . t)
-     (scheme . t)
      (shell . t)
      (sql . t)
-     (sqlite . t)
-     (js . t)))
+     (sqlite . t)))
 
   (defun my-org-confirm-babel-evaluate (lang body)
     "Do not confirm evaluation for these languages."
     (not (or (string= lang "C")
-             (string= lang "sh")
+             (string= lang "emacs-lisp")
              (string= lang "java")
              (string= lang "python")
-             (string= lang "emacs-lisp")
+             (string= lang "sh")
              (string= lang "sql")
              (string= lang "sqlite"))))
   (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate))
@@ -1138,6 +1146,18 @@ comments.
       org-src-strip-leading-and-trailing-blank-lines t
       org-src-tab-acts-natively t)
 #+END_SRC
+
+*** Structure templates
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  ;; This is needed as of Org 9.2
+  (require 'org-tempo)
+
+  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("py" . "src python")))
+#+end_src
 
 ** =prog-mode=
 
@@ -4812,10 +4832,6 @@ With a prefix argument P, isearch for the symbol at point."
     (query-replace-regexp word-at-point replace-with)))
 #+END_SRC
 
-# Local Variables:
-# org-src-preserve-indentation: nil
-# org-edit-src-content-indentation: 0
-# End:
 ** Strip HTML
 
 #+BEGIN_SRC emacs-lisp
@@ -5024,3 +5040,8 @@ didactic purposes."
          (light-value (read-string "Set Value: " current-value)))
     (start-process "" nil "light" "-S" light-value)))
 #+end_src
+
+# Local Variables:
+# org-src-preserve-indentation: nil
+# org-edit-src-content-indentation: 0
+# End:
