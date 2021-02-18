@@ -1,4 +1,3 @@
-
 #+TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 #+STARTUP: overview
@@ -8,12 +7,6 @@
 
 This configuration uses the [[https://github.com/jwiegley/use-package][use-package]] package from John Wiegley,
 which is a fantastic way to manage package configurations.
-
-I've gotten ideas for this document from the following:
-
-- [[http://pages.sachachua.com/.emacs.d/Sacha.html][Sacha Chua's site]]
-- [[https://github.com/wasamasa/dotemacs/blob/master/init.org][Wasamasa]]
-- [[https://github.com/danielmai/.emacs.d][Daniel Mai]]'s configuration.
 
 This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 
@@ -989,7 +982,7 @@ ibuffer is the improved version of list-buffers.
 
 ** =org-mode=
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (defun nl/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode)
@@ -1448,22 +1441,7 @@ Using doom themes
 
   ;;
   (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
-
-  (with-eval-after-load 'markdown-mode
-    (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
-    (set-face-background 'markdown-code-face (doom-color 'brightblack))
-    ;;(set-face-background 'org-block (doom-color 'brightblack))
-    (set-face-attribute 'markdown-header-face
-                        nil
-                        :font nl/gui-variable-font-name
-                        :weight 'bold
-                        :height (* 12 (string-to-number nl/gui-current-variable-font-size)))
-    (set-face-attribute 'markdown-link-face
-                        nil
-                        :font nl/gui-variable-font-name
-                        :weight 'bold
-                        :height (* 10 (string-to-number nl/gui-current-variable-font-size)))
-    )
+  (set-face-background 'region (doom-darken 'blue 0.2))
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1477,6 +1455,24 @@ Using doom themes
 
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
+
+
+
+(with-eval-after-load 'markdown-mode
+  (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
+  (set-face-background 'markdown-code-face (doom-color 'brightblack))
+  ;;(set-face-background 'org-block (doom-color 'brightblack))
+  (set-face-attribute 'markdown-header-face
+                      nil
+                      :font nl/gui-variable-font-name
+                      :weight 'bold
+                      :height (* 12 (string-to-number nl/gui-current-variable-font-size)))
+  (set-face-attribute 'markdown-link-face
+                      nil
+                      :font nl/gui-variable-font-name
+                      :weight 'bold
+                      :height (* 10 (string-to-number nl/gui-current-variable-font-size)))
+  )
 #+end_src
 
 Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/)
@@ -2172,8 +2168,9 @@ strings.
 
 Allow windmove to jump between frames.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (use-package framemove
+  :defer 0
   :load-path "lisp"
   :config
   (setq framemove-hook-into-windmove t))
@@ -2524,26 +2521,33 @@ Emacs package that provides visual version of align-regexp command.
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (use-package ivy
   :diminish (ivy-mode . "")
-  :bind
-  (:map ivy-mode-map
-   ("C-'" . ivy-avy))
+  :bind (("C-s" . swiper)
+         ("C-c C-r" . ivy-resume)
+         ("<f6>" . ivy-resume)
+         :map ivy-mode-map
+         ("C-'" . ivy-avy))
+  :custom-face
+  (ivy-current-match ((nil :background "#574a40")))
+  (ivy-minibuffer-match-face-2 ((nil :background "#574a40")))
+  (ivy-posframe-cursor ((nil :background "#be6119")))
   :config
   (ivy-mode 1)
   ;; add ‘recentf-mode’ and bookmarks to ‘ivy-switch-buffer’.
-  (setq ivy-use-virtual-buffers t
-        ivy-wrap t
-        ;; number of result lines to display
-        ivy-height 10
-        ;; does not count candidates
-        ivy-count-format ""
-        ;; no regexp by default
-        ivy-initial-inputs-alist nil)
+  (setq
+   ivy-use-virtual-buffers t
+   ivy-wrap t
+   ;; number of result lines to display
+   ivy-height 10
+   ;; does not count candidates
+   ivy-count-format ""
+   ;; no regexp by default
+   ivy-initial-inputs-alist nil
    ;; configure regexp engine.
-  (setq ivy-re-builders-alist ;; allow input not in order
-        '((t . ivy--regex-ignore-order))))
+   ivy-re-builders-alist ;; allow input not in order
+   '((t . ivy--regex-ignore-order))))
 
 (use-package ivy-hydra
   :after (ivy hydra))
@@ -2555,9 +2559,6 @@ This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Iv
 
 #+BEGIN_SRC emacs-lisp
   (use-package swiper
-    :bind (("C-c C-r" . ivy-resume)
-           ("C-s" . swiper)
-           ("<f6>" . ivy-resume))
     :config
     (setq ivy-initial-inputs-alist nil)
     (setq ivy-use-virtual-buffers t)
@@ -2581,7 +2582,7 @@ See this article for recentering: [[http://manuel-uberti.github.io/emacs/2016/05
 #+END_SRC
 
 When using =counsel-ag=:
-- use ~C-c C-o~ (=ivy-occur) to save results to a buffer,
+- use ~C-c C-o~ (=ivy-occur=) to save results to a buffer,
 - use ~C-x C-q~ (=ivy-wgrep-change-to-wgrep-mode=) to edit the buffer,
 - use ~C-x C-s~ to save the changes, or
 - use ~C-c C-k~ to abort all changes
@@ -2590,16 +2591,20 @@ When using =counsel-ag=:
 
 #+begin_src emacs-lisp :results silent
 (use-package ivy-posframe
+  :after ivy
+  :init (ivy-posframe-mode 1)
   :custom
   (ivy-posframe-font "Fira Code Retina")
+  :custom-face
+  ;;(ivy-posframe ((t :foreground "#ffffff" :background "#2d2e2e")))
   :config
   (setq ivy-posframe-display-functions-alist
-        '((swiper          . ivy-posframe-display-at-window-bottom-left)
+        '((swiper          . ivy-posframe-display-at-frame-bottom-window-center)
           (complete-symbol . ivy-posframe-display-at-point)
           (counsel-fzf     . ivy-posframe-display-at-point)
           (counsel-M-x     . ivy-posframe-display-at-window-bottom-left)
           (t               . ivy-posframe-display)))
-  (ivy-posframe-mode 1))
+  )
 #+end_src
 
 ** [[https://github.com/tonini/karma.el][karma]]
