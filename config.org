@@ -69,11 +69,11 @@ Also see: all-the-icons-dired package installation
 
 (defvar nl/gui-fixed-font-size-normal "12")
 
-(defvar nl/gui-fixed-font-size-large "20")
+(defvar nl/gui-fixed-font-size-large "22")
 
 (defvar nl/gui-variable-font-size-normal "16")
 
-(defvar nl/gui-variable-font-size-large "20")
+(defvar nl/gui-variable-font-size-large "22")
 
 (defvar nl/gui-current-fixed-font-size nl/gui-fixed-font-size-normal)
 
@@ -95,20 +95,22 @@ Also see: all-the-icons-dired package installation
   (nl/gui-font nl/gui-variable-font-name nl/gui-variable-font-size-large))
 
 ;; see: https://github.com/daviwil/emacs-from-scratch/blob/d24357b488862223fecaebdad758b136b0ca96e7/show-notes/Emacs-Tips-08.org#configuring-the-ui-for-new-frames
+(defun nl/set-fonts (frame)
+  "Set the desired fonts. FRAME can be nil."
+  (let ((fixed-font (nl/gui-fixed-font-normal)))
+    (set-face-font 'default fixed-font)
+    (set-face-font 'fixed-pitch fixed-font))
+  (set-face-font 'variable-pitch (nl/gui-variable-font-normal))
+
+  ;;(set-face-attribute 'default frame :font nl/gui-fixed-font-name)
+  (set-face-attribute 'italic frame :font nl/gui-fixed-font-name :weight 'normal :slant 'italic)
+  (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
+  (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic))
+
 (defun nl/after-make-frame (frame)
-  (with-selected-frame frame
-    (set-face-attribute 'default frame :font nl/gui-fixed-font-name)
-    (set-face-attribute 'italic frame :font nl/gui-fixed-font-name :weight 'normal :slant 'italic)
-    (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
-    (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic)
+    (nl/set-fonts frame))
 
-    ;;
-    (set-face-font 'default (nl/gui-fixed-font-normal))
-    (set-face-font 'fixed-pitch (nl/gui-fixed-font-normal))
-    (set-face-font 'variable-pitch (nl/gui-variable-font-normal))
-  ))
-
-(nl/after-make-frame (selected-frame))
+(nl/set-fonts nil)
 
 (use-package fira-code-mode
   :load-path "~/.emacs.d/lisp"
@@ -1026,7 +1028,6 @@ ibuffer is the improved version of list-buffers.
   (set-face-attribute 'org-formula  nil :inherit 'fixed-pitch :height font-height))
 
 (use-package org
-  :defer t
   :hook (org-mode . nl/org-mode-setup)
   :config
   (setq org-ellipsis " ⤵"
@@ -1223,10 +1224,11 @@ Prefer saving the history of opened files somewhere other than the default.
 #+BEGIN_SRC emacs-lisp
 (use-package recentf
   :init
-    (setq recentf-save-file "~/.emacs.d/etc/recentf")
+  (recentf-mode 1)
   :config
-    (recentf-mode 1)
-    (setq recentf-max-saved-items 100))
+  (setq
+   recentf-max-saved-items 100
+   recentf-save-file "~/.emacs.d/etc/recentf"))
 #+END_SRC
 
 ** =savehist=
@@ -1437,11 +1439,12 @@ Using doom themes
 
 #+begin_src emacs-lisp
 (use-package doom-themes
+  :init
+  (load-theme 'doom-molokai t)
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (load-theme 'doom-molokai t)
 
   ;;
   (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
@@ -2202,19 +2205,17 @@ Allow windmove to jump between frames.
 ** [[https://github.com/flycheck/flycheck-pos-tip][flycheck-pos-tip]]
 
 #+BEGIN_SRC emacs-lisp
-    (use-package flycheck-pos-tip
-      :after flycheck
-      :commands flycheck-pos-tip-mode
-      :init
-      (flycheck-pos-tip-mode)
-      :config
-      ;; (custom-set-faces
-      ;;  `(popup-face ((t (:inherit default :height 200))))
-      ;;  `(popup-tip-face ((t (:inherit default :height 200)))))
-      (setq flycheck-pos-tip-timeout 10
-            x-gtk-use-system-tooltips nil
-            pos-tip-foreground-color "tomato"
-            pos-tip-background-color "gray20"))
+(use-package flycheck-pos-tip
+  :after flycheck
+  :config
+  (flycheck-pos-tip-mode)
+  ;; (custom-set-faces
+  ;;  `(popup-face ((t (:inherit default :height 200))))
+  ;;  `(popup-tip-face ((t (:inherit default :height 200)))))
+  (setq flycheck-pos-tip-timeout 10
+        x-gtk-use-system-tooltips nil
+        pos-tip-foreground-color "tomato"
+        pos-tip-background-color "gray20"))
 #+END_SRC
 
 ** [[https://github.com/mola-T/flymd][flymd]]
@@ -2362,7 +2363,7 @@ So that hungry deletion can be used in all modes.
 #+BEGIN_SRC emacs-lisp
 (use-package hungry-delete
   :diminish hungry-delete-mode
-  :config
+  :init
   (global-hungry-delete-mode))
 #+END_SRC
 
@@ -2484,6 +2485,17 @@ short bindings with a common prefix - a Hydra.
   (global-set-key (kbd "C-c w") 'hydra-windows-nav/body))
 
 #+END_SRC
+
+** [[https://github.com/netguy204/imp.el][impatient-mode]]
+
+impatient-mode is a minor mode that publishes the live buffer through
+the local simple-httpd server under /imp/live/<buffer-name>/.
+
+Works slow, so disabling. 2021-02-17
+
+#+begin_src emacs-lisp :results silent :tangle no
+(use-package impatient-mode)
+#+end_src
 
 ** [[https://github.com/mkcms/interactive-align][ialign]]
 
@@ -2775,6 +2787,9 @@ Project navigation and management library for Emacs.
 (use-package projectile
   :diminish projectile-mode
   :commands projectile-global-mode
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :init (projectile-global-mode)
   :config
   ;; tramp-fix: https://github.com/syl20bnr/spacemacs/issues/11381
   (defadvice projectile-project-root (around ignore-remote first activate)
@@ -2914,9 +2929,8 @@ initial =*scratch*= buffer.
 
 ** [[https://github.com/Kungsgeten/selected.el][selected]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package selected
-  :demand t
   :diminish selected-minor-mode
   ;;:bind (:map selected-keymap
   ;;            ("M-%" . query-replace-regexp)
@@ -3057,7 +3071,6 @@ think of it as both something that augments and replaces the standard
 #+begin_src emacs-lisp
 (use-package treemacs
   :ensure t
-  :defer t
   :init
   (with-eval-after-load 'winum
     (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
@@ -3457,13 +3470,23 @@ No more juggling windows after commiting. It's magit bliss.
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
+TODO: See [[https://github.com/yusekiya/dotfiles/blob/master/.emacs.d/config/packages/my-helm-config.el][here]] for helm-config and bindings for helm-ag.
+
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   ;;:load-path "~/src/github/elisp/helm"
   :pin melpa
-  :commands (helm-config helm-files helm-grep)
   :diminish helm-mode
-  :init
+  :init (helm-mode)
+  :preface (require 'helm-config)
+  :commands (helm-config helm-files helm-grep)
+  :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
+  :bind (("M-x" . helm-M-x)
+         ("M-y" . helm-show-kill-ring)
+         ("C-x b" . helm-mini)
+         ("C-x C-f" . helm-find-files)
+         ("C-`" . helm-resume))
+  :config
   ;; must set before helm-config, otherwise helm uses the default
   ;; prefix "C-x c", which is inconvenient because you can
   ;; accidentially press "C-x C-c"
@@ -3479,8 +3502,6 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
         ;;helm-recentf-fuzzy-match              t
         ;;helm-semantic-fuzzy-match             t
 
-        ;;
-        ;;
         ;;
         helm-command-prefix-key "C-c h"
         helm-split-window-in-side-p t           ; open helm buffer inside current window,
@@ -3524,14 +3545,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
                                     helm-source-buffer-not-found))
 
   ;; Save current position to mark ring when jumping to a different place
-  (helm-mode)
-  (helm-autoresize-mode 1)
-  :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
-  :bind (("M-x" . helm-M-x)
-         ("M-y" . helm-show-kill-ring)
-         ("C-x b" . helm-mini)
-         ("C-x C-f" . helm-find-files)
-         ("C-`" . helm-resume)))
+  (helm-autoresize-mode 1))
 
 (defun nl/helm-eval-expression ()
   (interactive)
@@ -3588,14 +3602,16 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 Highlighting of token matches is a tad slow, let's speed it up.
 
 #+BEGIN_SRC emacs-lisp
-(setq helm-mp-highlight-delay 0.3)
+(with-eval-after-load 'helm
+  (setq helm-mp-highlight-delay 0.3))
 #+END_SRC
 
 I don't know why, but helm tries doing window management.  Please
 stop:
 
 #+BEGIN_SRC emacs-lisp
-(setq helm-display-function 'pop-to-buffer)
+(with-eval-after-load 'helm
+  (setq helm-display-function 'pop-to-buffer))
 #+END_SRC
 
 *** [[https://github.com/syohex/emacs-helm-ag][helm-ag]]
@@ -4031,44 +4047,43 @@ Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-dev
 checker is loaded.
 
 #+BEGIN_SRC emacs-lisp
-      (use-package php-mode
-        :mode "\\.php[345]?\\'"
-        :preface
-        ;; this style is based on the symfony2 style
-        (c-add-style
-         "nl/php"
-         '("php"
-           (c-basic-offset . 2)
-           (indent-tabs-mode . nil)
-           (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-           (c-indent-comments-syntactically-p . t)
-           (fill-column . 78)
-           (require-final-newline . t)))
-        :init
-        (defun nl/php-mode-hook ()
-          "My PHP mode configuration."
-          (flycheck-mode t)
-          (setq c-basic-offset 2)
-          ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
-          (php-set-style "nl/php"))
+(defun nl/php-mode-hook ()
+  "My PHP mode configuration."
+  (flycheck-mode t)
+  (setq c-basic-offset 2)
+  ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
+  (php-set-style "nl/php"))
 
-        (flycheck-define-checker nl/php-checker
-          "A PHP syntax checker using the PHP command line interpreter.
+  ;; this style is based on the symfony2 style
+  (c-add-style
+   "nl/php"
+   '("php"
+     (c-basic-offset . 2)
+     (indent-tabs-mode . nil)
+     (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+     (c-indent-comments-syntactically-p . t)
+     (fill-column . 78)
+     (require-final-newline . t)))
+
+(use-package php-mode
+  :mode "\\.php[345]?\\'"
+  :hook (php-mode . nl/php-mode-hook)
+  :custom
+  (php-mode-coding-style (quote nl/php))
+  (php-mode-lineup-cascaded-calls t))
+
+(flycheck-define-checker nl/php-checker
+  "A PHP syntax checker using the PHP command line interpreter.
           See URL http://php.net/manual/en/features.commandline.php."
-          :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-                    "-d" "log_errors=0" source)
-          :error-patterns
-          ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-                  (message) " in " (file-name) " on line " line line-end))
-          :modes (php-mode web-mode))
+  :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+            "-d" "log_errors=0" source)
+  :error-patterns
+  ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+          (message) " in " (file-name) " on line " line line-end))
+  :modes (php-mode web-mode))
 
-        (eval-after-load 'flycheck
-          '(add-to-list 'flycheck-checkers 'nl/php-checker))
-
-        :custom
-        (php-mode-coding-style (quote nl/php))
-        (php-mode-lineup-cascaded-calls t)
-        :hook (php-mode . nl/php-mode-hook))
+(eval-after-load 'flycheck
+  '(add-to-list 'flycheck-checkers 'nl/php-checker))
 #+END_SRC
 **** [[https://github.com/nlamirault/phpunit.el][php-unit]]
 
@@ -4114,30 +4129,29 @@ pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_bu
 
 See [[https://medium.com/analytics-vidhya/managing-a-python-development-environment-in-emacs-43897fd48c6a][here]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results silent
 (use-package elpy
   :bind
   (:map elpy-mode-map
         ("C-M-n" . elpy-nav-forward-block)
-        ("C-M-p" . elpy-nav-backward-block))
+        ("C-M-p" . elpy-nav-backward-block)
+        ("M-<up>" . nil)
+        ("M-<down>" . nil)
+        ("M-<left>" . nil)
+        ("M-<right>" . nil))
   :hook ((elpy-mode . flycheck-mode)
          (elpy-mode . (lambda ()
                         (set (make-local-variable 'company-backends)
                              '((elpy-company-backend :with company-yasnippet))))))
-  :init
-  (elpy-enable)
   :config
   (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
   ;; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
   (setq elpy-shell-echo-output nil)
   (setq elpy-rpc-python-command "python3")
-  (setq elpy-rpc-timeout 2)
+  (setq elpy-rpc-timeout 2))
 
-  (eval-after-load "elpy"
-    '(cl-dolist (key '("M-<up>" "M-<down>" "M-<left>" "M-<right>"))
-       (define-key elpy-mode-map (kbd key) nil))))
+(with-eval-after-load 'python (elpy-enable))
 #+end_src
-
 
 **** [[https://github.com/jorgenschaefer/pyvenv/tree/0bf4b87068e9040fc99afa85af1992247dd7aacd][pyvenv]]
 
@@ -4156,12 +4170,6 @@ Integrates with IPython.
 #+END_SRC
 
 *** Scala
-**** [[https://github.com/ensime/ensime-emacs][ensime-emacs]]
-
-#+BEGIN_SRC emacs-lisp :tangle no
-(use-package ensime
-  :commands ensime ensime-mode))
-#+END_SRC
 **** [[https://github.com/emacs-lsp/lsp-metals][lsp-metals]]
 
 #+begin_src emacs-lisp
@@ -4176,6 +4184,8 @@ Integrates with IPython.
   ;;:load-path "~/src/github/elisp/emacs-scala-mode"
   :mode "\\.s\\(cala\\|bt\\)$"
   :interpreter ("scala" . scala-mode)
+  :hook ((scala-mode . nl-scala-mode-hook)
+         (scala-mode . fic-mode))
   :preface
   (defun nl-scala-mode-hook ()
     (yas-minor-mode)
@@ -4197,6 +4207,19 @@ Integrates with IPython.
     (interactive)
     (counsel-ag "" (projectile-project-root) "--scala"))
   (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+
+  (setq scala-indent:indent-value-expression t
+        scala-indent:align-parameters t
+        scala-indent:align-forms t
+        scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
+        scala-indent:use-javadoc-style t)
 
   (push `(scala-error-regexp
           ,(rx bol
@@ -4211,23 +4234,7 @@ Integrates with IPython.
           1 2 3 2)
         compilation-error-regexp-alist-alist)
 
-  (push 'scala-error-regexp compilation-error-regexp-alist)
-
-  :config
-  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-  ;; allows using SPACE when in the minibuffer
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map)
-
-  (setq scala-indent:indent-value-expression t
-        scala-indent:align-parameters t
-        scala-indent:align-forms t
-        scala-indent:default-run-on-strategy '2 ;; scala-indent:reluctant-strategy
-        scala-indent:use-javadoc-style t)
-  :hook ((scala-mode . nl-scala-mode-hook)
-         (scala-mode . fic-mode)))
+  (push 'scala-error-regexp compilation-error-regexp-alist))
 #+END_SRC
 **** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
@@ -4910,8 +4917,9 @@ behavior added."
 ** helm-treemacs-icons
 
 #+begin_src emacs-lisp
-(require 'helm-treemacs-icons)
-(helm-treemacs-icons-enable)
+(with-eval-after-load 'ace-window
+  (require 'helm-treemacs-icons)
+  (helm-treemacs-icons-enable))
 #+end_src
 
 ** [[https://protesilaos.com/dotemacs/][Protesilaos Stavrou]]
