@@ -7,9 +7,7 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'sbt-mode))
-
-(defvar scala-mode-map)
+  (require 'scala-mode))
 
 (defconst scalatest-class-package-regexp
   (rx line-start
@@ -176,12 +174,6 @@ The class name must have the postfix 'Spec' for this function to work."
 (define-key scala-mode-map (kbd "<backtab>") 'scala-indent:indent-with-reluctant-strategy)
 (define-key scala-mode-map (kbd "M-j") 'scala-mode-newline-comments)
 
-(defun nl/scala-project-hook ()
-  (lsp-ui-mode -1)
-  (add-hook 'before-save-hook 'lsp-format-buffer nil 'local))
-
-(add-hook 'scala-mode-hook #'nl/scala-project-hook)
-
 (defun nl/scalafmt-project-files ()
   (interactive)
   (let ((files (seq-filter 'scala-filename-p (projectile-current-project-files))))
@@ -197,7 +189,6 @@ The class name must have the postfix 'Spec' for this function to work."
 
 
 (provide 'nl-scala-project)
-;;; bbweb-project.el ends here
 
 ;; Local Variables:
 ;; flycheck-disabled-checkers: (emacs-lisp-checkdoc)

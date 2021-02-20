@@ -57,19 +57,15 @@ Also see: all-the-icons-dired package installation
 ;; (defvar nl/gui-fixed-font-name "Fira Code Retina")
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono")
 (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
+(defvar nl/gui-variable-font-name "Noto Sans Medium")
 
-(defvar nl/gui-variable-font-name "Ubuntu")
+(defconst nl/gui-fixed-font-size-normal "12")
+(defconst nl/gui-fixed-font-size-large "22")
 
-(defvar nl/gui-fixed-font-size-normal "12")
-
-(defvar nl/gui-fixed-font-size-large "22")
-
-(defvar nl/gui-variable-font-size-normal "16")
-
-(defvar nl/gui-variable-font-size-large "22")
+(defconst nl/gui-variable-font-size-normal "16")
+(defconst nl/gui-variable-font-size-large "22")
 
 (defvar nl/gui-current-fixed-font-size nl/gui-fixed-font-size-normal)
-
 (defvar nl/gui-current-variable-font-size nl/gui-variable-font-size-normal)
 
 (defun nl/gui-font (font-name font-size)
@@ -89,7 +85,7 @@ Also see: all-the-icons-dired package installation
 
 ;; see: https://github.com/daviwil/emacs-from-scratch/blob/d24357b488862223fecaebdad758b136b0ca96e7/show-notes/Emacs-Tips-08.org#configuring-the-ui-for-new-frames
 (defun nl/set-fonts (frame)
-  "Set the desired fonts. FRAME can be nil."
+  "Set the desired fonts for a frame. FRAME can be nil."
   (let ((fixed-font (nl/gui-fixed-font-normal)))
     (set-face-font 'default fixed-font)
     (set-face-font 'fixed-pitch fixed-font))
@@ -545,6 +541,7 @@ Use the directory name to make buffer names unique.
 #+BEGIN_SRC emacs-lisp
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+END_SRC
+
 ** Tags
 
 Case sensitive tags search:
@@ -1236,12 +1233,10 @@ Prefer saving the history of opened files somewhere other than the default.
 
 #+BEGIN_SRC emacs-lisp
 (use-package recentf
-  :init
-  (recentf-mode 1)
-  :config
-  (setq
-   recentf-max-saved-items 100
-   recentf-save-file "~/.emacs.d/etc/recentf"))
+  :init (recentf-mode 1)
+  :custom
+  (recentf-save-file "~/.emacs.d/etc/recentf")
+  (recentf-max-saved-items 100))
 #+END_SRC
 
 ** =savehist=
@@ -2181,7 +2176,8 @@ strings.
            (java-mode   . fic-mode)
            (vala-mode   . fic-mode)
            (python-mode . fic-mode)
-           (php-mode    . fic-mode)))
+           (php-mode    . fic-mode)
+           (scala-mode  . fic-mode)))
 #+END_SRC
 
 ** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
@@ -2650,37 +2646,40 @@ Add filler lorem ipsum text to Emacs.
 #+BEGIN_SRC emacs-lisp
 (use-package lsp-mode
   :pin melpa
+  :commands (lsp lsp-deferred)
+  :hook
+  (typescript-mode . lsp)
+  (scala-mode . lsp)
+  (php-mode . lsp)
+  (python-mode . lsp)
   :custom
   (lsp-keymap-prefix "C-c l")
   (lsp-ui-flycheck-enable nil)
   (lsp-enable-snippet t)
   (lsp-enable-file-watchers nil)
   ;;(setq lsp-response-timeout 25)
-  :hook
-  (typescript-mode . lsp)
-  (scala-mode . lsp)
-  (php-mode . lsp)
-  (python-mode . lsp)
   :config
   (setq lsp-prefer-capf t
         lsp-idle-delay 0.5
         lsp-pyls-plugins-flake8-enabled t)
+  (setq lsp-clients-angular-language-server-command
+        '("node"
+          "/home/nelson/.nvm/versions/node/v14.4.0/lib/node_modules/@angular/language-server"
+          "--ngProbeLocations"
+          "/home/nelson/.nvm/versions/node/v14.4.0/lib/node_modules"
+          "--tsProbeLocations"
+          "/home/nelson/.nvm/versions/node/v14.4.0/lib/node_modules"
+          "--stdio"))
   (lsp-register-custom-settings
    '(("pyls.plugins.pyls_mypy.enabled" t t)
      ("pyls.plugins.pyls_mypy.live_mode" nil t)
      ("pyls.plugins.pyls_black.enabled" t t)
-     ("pyls.plugins.pyls_isort.enabled" t t)))
-  :commands (lsp lsp-deferred))
+     ("pyls.plugins.pyls_isort.enabled" t t))))
 
 (use-package lsp-ui
   ;; :load-path "~/src/github/elisp/lsp-ui"
   :hook
   (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-sideline-enable t)
-  (lsp-ui-sideline-show-hover nil)
-  (lsp-ui-doc-enable nil)
-  (lsp-ui-peek-enable nil)
   :bind (:map lsp-ui-mode-map
               ([remap xref-find-definitions] . lsp-ui-peek-find-definitions)
               ([remap xref-find-references] . lsp-ui-peek-find-references)
@@ -2688,18 +2687,11 @@ Add filler lorem ipsum text to Emacs.
   :custom-face
   (lsp-ui-peek-peek ((nil :background "#2b538a")))
   :config
-  (setq lsp-ui-peek-always-show nil))
-
-;;(use-package company-lsp
-;;  :after company
-;;  :init
-;;  (add-to-list 'company-backends #'company-lsp)
-;;  :custom
-;;  (company-lsp-cache-candidates 'auto)
-;;  :config
-;;  (setq company-transformers nil
-;;          company-lsp-async t
-;;          company-lsp-cache-candidates nil))
+  (setq lsp-ui-peek-always-show nil):custom
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-doc-enable nil)
+  (lsp-ui-peek-enable nil))
 #+END_SRC
 
 ** [[https://github.com/joddie/macrostep][macrostep]]
@@ -2811,7 +2803,6 @@ Project navigation and management library for Emacs.
 #+BEGIN_SRC emacs-lisp
 (use-package projectile
   :diminish projectile-mode
-  :commands projectile-global-mode
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init (projectile-global-mode)
@@ -2823,13 +2814,11 @@ Project navigation and management library for Emacs.
   (setq projectile-indexing-method 'alien
         projectile-remember-window-configs nil
         projectile-switch-project-action 'projectile-dired
-        projectile-completion-system 'default
+        projectile-completion-system 'helm
         projectile-enable-caching nil
         projectile-create-missing-test-files t
         projectile-mode-line "Projectile")
 
-  (projectile-global-mode)
-  (setq projectile-completion-system 'helm)
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
   (def-projectile-commander-method ?d
@@ -2954,10 +2943,10 @@ initial =*scratch*= buffer.
 
 ** [[https://github.com/Kungsgeten/selected.el][selected]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+BEGIN_SRC emacs-lisp
 (use-package selected
   :diminish selected-minor-mode
-  ;;:bind (:map selected-keymap
+  ;; :bind (:map selected-keymap
   ;;            ("M-%" . query-replace-regexp)
   ;;            ("C-[" . align-entire)
   ;;            ("C-f" . fill-region)
@@ -2966,8 +2955,7 @@ initial =*scratch*= buffer.
   ;;            ("C-r" . reverse-region)
   ;;            ("C-s" . sort-lines)
   ;;            ("C-u" . upcase-region))
-  :config
-  (selected-global-mode 1))
+  :init (selected-global-mode 1))
 #+END_SRC
 
 ** [[https://github.com/wasamasa/shackle][shackle]]
@@ -2993,30 +2981,27 @@ Declarative popup window rules.
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
 
 #+BEGIN_SRC emacs-lisp
-    (use-package smartparens
-      :diminish smartparens-mode
-      :config
-      (require 'smartparens-config)
-      ;; https://github.com/Fuco1/smartparens/issues/783
-      (setq sp-escape-quotes-after-insert nil)
-      (smartparens-global-mode t)
+(use-package smartparens
+  :diminish smartparens-mode
+  :init (smartparens-global-mode t)
+  :config
+  (require 'smartparens-config)
+  ;; https://github.com/Fuco1/smartparens/issues/783
+  (setq sp-escape-quotes-after-insert nil)
 
-      (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
-      (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
-      (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
+  ;; Set up some pairings for org mode markup. These pairings won't
+  ;; activate by default; they'll only apply for wrapping regions.        
+  (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
+  (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
+  (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
 
-      ;; https://emacs.stackexchange.com/questions/26912/smartparens-do-not-insert-parenthesis-pair-when-point-is-at-the-beginning-of-wo
-      (sp-pair "{" nil :unless '(sp-point-before-word-p))
-      (sp-pair "(" nil :unless '(sp-point-before-word-p))
-      (sp-pair "[" nil :unless '(sp-point-before-word-p))
+  ;; https://emacs.stackexchange.com/questions/26912/smartparens-do-not-insert-parenthesis-pair-when-point-is-at-the-beginning-of-wo
+  (sp-pair "{" nil :unless '(sp-point-before-word-p))
+  (sp-pair "(" nil :unless '(sp-point-before-word-p))
+  (sp-pair "[" nil :unless '(sp-point-before-word-p))
 
-      (sp-local-pair 'typescript-mode "\<" "\>"))
+  (sp-local-pair 'typescript-mode "\<" "\>"))
 #+END_SRC
-
-*** Smartparens org mode
-
-Set up some pairings for org mode markup. These pairings won't
-activate by default; they'll only apply for wrapping regions.
 
 ** [[https://github.com/mickeynp/smart-scan][smart-scan]]
 
@@ -3025,7 +3010,7 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
 #+BEGIN_SRC emacs-lisp
 (use-package smartscan
-  :config (global-smartscan-mode 1))
+  :init (global-smartscan-mode 1))
 #+END_SRC
 ** [[https://github.com/jbondeson/smooth-scrolling][smooth-scrolling]]
 
@@ -3293,6 +3278,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
     :mode (("\\.html?\\'" . web-mode)
            ("\\.json\\'" . web-mode))
     :bind ("C-c s h" . nl/counsel-ag-html)
+    :hook (web-mode  . nl/web-mode-hook)
     :preface
     (defun html-filename-p (filename)
       (string-match "\.html$" filename))
@@ -3319,9 +3305,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
             ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
 
     (flycheck-add-mode 'javascript-eslint 'web-mode)
-    (flycheck-add-mode 'typescript-tslint 'web-mode)
-
-    :hook (web-mode  . nl/web-mode-hook))
+    (flycheck-add-mode 'typescript-tslint 'web-mode))
 #+END_SRC
 
 ** [[https://github.com/mhayashi1120/Emacs-wgrep][wgrep]]
@@ -3418,7 +3402,6 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
 #+BEGIN_SRC emacs-lisp
   (use-package multiple-cursors
     :after selected
-    :defer 5
     :bind (("C-S-c C-S-c" . mc/edit-lines)
            ("C->"         . mc/mark-next-like-this)
            ("C-<"         . mc/mark-previous-like-this)
@@ -3647,11 +3630,9 @@ instead of ~find-file-other-window~.
 #+BEGIN_SRC emacs-lisp
 (use-package helm-ag
   :pin melpa
+  :commands helm-ag
   :bind (:map helm-ag-mode-map
               ("C-<return>" . nl/jump-other-window))
-  :custom
-  ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
-  (helm-ag-use-temp-buffer nil)
   :preface
   (defun nl/ace-find-file (filename)
     (setq helm-ag--last-default-directory default-directory)
@@ -3666,7 +3647,10 @@ instead of ~find-file-other-window~.
     (interactive)
     (let ((line (helm-current-line-contents)))
       (helm-ag--find-file-action line 'nl/ace-find-file helm-ag--search-this-file-p)))
-  :commands helm-ag)
+  :custom
+  ;;(helm-ag-use-temp-buffer nil) ; setting to 't' does not work with js2-mode
+  (helm-ag-use-temp-buffer nil)
+  )
 #+END_SRC
 
 *** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
@@ -3727,10 +3711,10 @@ instead of ~find-file-other-window~.
 
 #+BEGIN_SRC emacs-lisp
 (use-package helm-projectile
-  :config
-  (helm-projectile-on)
-  ;;(setq compilation-read-command t)
-  ) ; do prompt for a compilation command
+  :after helm
+  :init (helm-projectile-on)
+  ;;(setq compilation-read-command t)  ; do prompt for a compilation command
+  )
 #+END_SRC
 
 *** [[https://github.com/cosmicexplorer/helm-rg][helm-rg]]
@@ -4022,7 +4006,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 
 #+BEGIN_SRC emacs-lisp
 (use-package prettier-js
-  :after typescript-mode
+  :after (typescript-mode web-mode js-mode)
   :hook ((typescript-mode . prettier-js-mode)))
 #+END_SRC
 **** [[https://github.com/ternjs/tern][tern]]
@@ -4198,8 +4182,7 @@ Integrates with IPython.
 **** [[https://github.com/emacs-lsp/lsp-metals][lsp-metals]]
 
 #+begin_src emacs-lisp
-(use-package lsp-metals
-  :hook (scala-mode . lsp))
+(use-package lsp-metals)
 #+end_src
 
 **** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
@@ -4209,10 +4192,10 @@ Integrates with IPython.
   ;;:load-path "~/src/github/elisp/emacs-scala-mode"
   :mode "\\.s\\(cala\\|bt\\)$"
   :interpreter ("scala" . scala-mode)
-  :hook ((scala-mode . nl-scala-mode-hook)
-         (scala-mode . fic-mode))
+  :hook ((scala-mode . nl/scala-mode-hook)
+         (before-save . lsp-format-buffer))
   :preface
-  (defun nl-scala-mode-hook ()
+  (defun nl/scala-mode-hook ()
     (yas-minor-mode)
     ;; sbt-find-definitions is a command that tries to find (with grep)
     ;; the definition of the thing at point.
@@ -4442,9 +4425,6 @@ No longer used since Scala Metals is now being used.
          (typescript-mode . column-enforce-mode)
          (typescript-mode . rainbow-delimiters-mode)))
 #+END_SRC
-
-#+RESULTS:
-: tide-references
 
 * Computer-specific settings
 
