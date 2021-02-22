@@ -102,8 +102,7 @@ Also see: all-the-icons-dired package installation
 (nl/set-fonts nil)
 
 (use-package fira-code-mode
-  :load-path "~/.emacs.d/lisp"
-  :hook prog-mode)
+  :init (global-fira-code-mode))
 
 (add-hook 'after-make-frame-functions 'nl/after-make-frame t)
 #+end_src
@@ -2805,7 +2804,7 @@ Project navigation and management library for Emacs.
   :diminish projectile-mode
   :bind-keymap
   ("C-c p" . projectile-command-map)
-  :init (projectile-global-mode)
+  :init (projectile-mode +1)
   :config
   ;; tramp-fix: https://github.com/syl20bnr/spacemacs/issues/11381
   (defadvice projectile-project-root (around ignore-remote first activate)
@@ -2818,8 +2817,6 @@ Project navigation and management library for Emacs.
         projectile-enable-caching nil
         projectile-create-missing-test-files t
         projectile-mode-line "Projectile")
-
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
   (def-projectile-commander-method ?d
     "Open project root in dired."
@@ -3478,16 +3475,13 @@ No more juggling windows after commiting. It's magit bliss.
 
 GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
-TODO: See [[https://github.com/yusekiya/dotfiles/blob/master/.emacs.d/config/packages/my-helm-config.el][here]] for helm-config and bindings for helm-ag.
-
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   ;;:load-path "~/src/github/elisp/helm"
+  :demand t        
   :pin melpa
   :diminish helm-mode
-  :init (helm-mode)
   :preface (require 'helm-config)
-  :commands (helm-config helm-files helm-grep)
   :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
@@ -3511,7 +3505,6 @@ TODO: See [[https://github.com/yusekiya/dotfiles/blob/master/.emacs.d/config/pac
         ;;helm-semantic-fuzzy-match             t
 
         ;;
-        helm-command-prefix-key "C-c h"
         helm-split-window-in-side-p t           ; open helm buffer inside current window,
         ;; not occupy whole other window
         helm-ff-newfile-prompt-p nil
@@ -3553,7 +3546,8 @@ TODO: See [[https://github.com/yusekiya/dotfiles/blob/master/.emacs.d/config/pac
                                     helm-source-buffer-not-found))
 
   ;; Save current position to mark ring when jumping to a different place
-  (helm-autoresize-mode 1))
+  (helm-autoresize-mode 1)
+  (helm-mode 1))
 
 (defun nl/helm-eval-expression ()
   (interactive)
@@ -3780,8 +3774,9 @@ No longer using this since most development is now using lsp -
 **** [[https://github.com/purcell/less-css-mode][less-css-mode]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package less-css-mode
-  :commands less-css-mode)
+(use-package sass-mode
+  :mode "\\.scss$"
+  :hook (sass-mode . prettier-js-mode))
 #+END_SRC
 
 *** Java
