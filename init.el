@@ -55,41 +55,20 @@
 ;; - not working really
 ;;(setq projectile-mode-line "Projectile")
 
-;; A secure Emacs environment
-;;
-;; see https://glyph.twistedmatrix.com/2015/11/editor-malware.html
-(require 'cl)
-(setq tls-checktrust t)
-
-(setq python (executable-find "python"))
-
-(let ((trustfile
-       (replace-regexp-in-string
-        "\\\\" "/"
-        (replace-regexp-in-string
-         "\n" ""
-         (shell-command-to-string (concat python " -m certifi"))))))
-  (setq tls-program
-        (list
-         (format "gnutls-cli%s --x509cafile %s -p %%p %%h"
-                 (if (eq window-system 'w32) ".exe" "") trustfile)))
-  (setq gnutls-verify-error t)
-  (setq gnutls-trustfiles (list trustfile)))
-
 ;;; Set up package
-(setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3")
 (require 'package)
-(setq package-archives
-      '(("gnu"     . "https://elpa.gnu.org/packages/")
-        ("org" . "https://orgmode.org/elpa/")
-        ;; ("melpa-stable" . "https://stable.melpa.org/packages/")
-        ;; ("marmalade"    . "https://marmalade-repo.org/packages/")
-        ("melpa"        . "https://melpa.org/packages/"))
-      package-archive-priorities
+
+(unless (assoc-default "melpa" package-archives)
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
+
+(unless (assoc-default "org" package-archives)
+  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
+
+(setq package-archive-priorities
       '(;;("melpa-stable" . 10)
+        ;; ("marmalade" . 7)
         ("gnu"       . 5)
         ("org"       . 7)
-        ;; ("marmalade" . 7)
         ("melpa"     . 10)))
 
 (package-initialize)
@@ -101,7 +80,7 @@
 ;;; Bootstrap use-package
 (setq-default use-package-always-ensure t         ; Auto-download package if not exists
               use-package-always-defer t          ; Always defer load package to speed up startup time
-              use-package-expand-minimally nil      ; make the expanded code as minimal as possible
+              use-package-expand-minimally nil    ; make the expanded code as minimal as possible
               use-package-enable-imenu-support t) ; Let imenu finds use-package definitions
 
 ;; use only for debugging startup time
@@ -125,7 +104,7 @@
 (setq use-package-verbose nil)
 
 (use-package pl
-  :load-path "~/src/github/elisp/emacs-pl"
+  :load-path "~/.emacs.d/lisp"
   :commands pl-parse
   )
 

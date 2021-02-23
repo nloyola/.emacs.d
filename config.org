@@ -55,9 +55,12 @@ Also see: all-the-icons-dired package installation
 
 #+begin_src  emacs-lisp :results silent
 ;; (defvar nl/gui-fixed-font-name "Fira Code Retina")
-;; (defvar nl/gui-fixed-font-name "IBM Plex Mono")
-(defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
-(defvar nl/gui-variable-font-name "Noto Sans Medium")
+
+;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
+;; (defvar nl/gui-variable-font-name "DejaVu Sans")
+
+(defvar nl/gui-fixed-font-name "Go Mono")
+(defvar nl/gui-variable-font-name "Go")
 
 (defconst nl/gui-fixed-font-size-normal "12")
 (defconst nl/gui-fixed-font-size-large "22")
@@ -102,7 +105,8 @@ Also see: all-the-icons-dired package installation
 (nl/set-fonts nil)
 
 (use-package fira-code-mode
-  :init (global-fira-code-mode))
+  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
+  :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
 
 (add-hook 'after-make-frame-functions 'nl/after-make-frame t)
 #+end_src
@@ -339,7 +343,7 @@ https://github.com/patrickt/emacs/blob/master/init.el:
 #+BEGIN_SRC emacs-lisp
 (setq
   kill-whole-line t                      ; Lets C-k delete the whole line
-  default-directory "~/src/"             ; My code lives here
+  ;;default-directory "~/src/"             ; My code lives here
   enable-recursive-minibuffers t         ; don't freak out if I use the minibuffer twice
   sentence-end-double-space nil          ; are you kidding me
   confirm-kill-processes nil             ; don't when quitting
@@ -565,6 +569,53 @@ possible.
 
 #+BEGIN_SRC emacs-lisp
 (setq load-prefer-newer t)
+#+END_SRC
+
+** =prog-mode=
+
+#+BEGIN_SRC emacs-lisp
+(defun nl/indent-whole-buffer ()
+  (interactive)
+  (save-excursion
+    (indent-region (point-min) (point-max))))
+
+(defun nl/beginning-of-line-or-indentation ()
+  "move to beginning of line, or indentation"
+  (interactive)
+  (if (bolp)
+      (back-to-indentation)
+    (beginning-of-line)))
+
+(defun my-common-prog-mode-settings ()
+  "Enables settings common between programming language modes."
+  (nl/setup-indent 2) ; indent 2 spaces width
+  (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
+  (subword-mode 1)
+  ;;
+  ;; Set tab and CR/LF keys to call their corresponding more-general
+  ;; functions.  This needs to be here to override the settings of some modes
+  ;; (e.g. c++-mode changes the tab key to do a re-indent).
+  ;;
+  (local-set-key "\t" 'tab-to-tab-stop)
+  (local-set-key "\n" 'newline-and-indent)
+  (local-set-key "\r" 'newline-and-indent)
+  ;;
+  ;; Set paragraph/comment auto-formatting to wrap at column 100.
+  ;;
+  (set-fill-column 100)
+  ;;
+  ;; Set the comment column to zero so that lisp comment lines will act like
+  ;; C++ comments (i.e. line up with the code), and not automatically indent
+  ;; to column 50.
+  ;;
+  (setq comment-column 0)
+  (push '(">=" . ?≥) prettify-symbols-alist)
+  (push '("<=" . ?≤) prettify-symbols-alist)
+  (push '("->" . ?→) prettify-symbols-alist))
+
+(add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
+(add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
+(add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
 #+END_SRC
 
 ** Set default browser
@@ -873,7 +924,7 @@ Find aspell and hunspell automatically.
 
 Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-up-in-emacs.html
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 ;; if (aspell installed) { use aspell}
 ;; else if (hunspell installed) { use hunspell }
 ;; whatever spell checker I use, I always use English dictionary
@@ -1154,55 +1205,6 @@ comments.
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("py" . "src python")))
 #+end_src
-
-** =prog-mode=
-
-#+BEGIN_SRC emacs-lisp
-(defun nl/indent-whole-buffer ()
-  (interactive)
-  (save-excursion
-    (indent-region (point-min) (point-max))))
-
-(defun nl/beginning-of-line-or-indentation ()
-  "move to beginning of line, or indentation"
-  (interactive)
-  (if (bolp)
-      (back-to-indentation)
-    (beginning-of-line)))
-
-(defun my-common-prog-mode-settings ()
-  "Enables settings common between programming language modes."
-  (nl/setup-indent 2) ; indent 2 spaces width
-  (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
-  (subword-mode 1)
-  ;;
-  ;; Set tab and CR/LF keys to call their corresponding more-general
-  ;; functions.  This needs to be here to override the settings of some modes
-  ;; (e.g. c++-mode changes the tab key to do a re-indent).
-  ;;
-  (local-set-key "\t" 'tab-to-tab-stop)
-  (local-set-key "\n" 'newline-and-indent)
-  (local-set-key "\r" 'newline-and-indent)
-  ;;
-  ;; Set paragraph/comment auto-formatting to wrap at column 100.
-  ;;
-  (set-fill-column 100)
-  ;;
-  ;; Set the comment column to zero so that lisp comment lines will act like
-  ;; C++ comments (i.e. line up with the code), and not automatically indent
-  ;; to column 50.
-  ;;
-  (setq comment-column 0)
-  (push '(">=" . ?≥) prettify-symbols-alist)
-  (push '("<=" . ?≤) prettify-symbols-alist)
-  (push '("->" . ?→) prettify-symbols-alist)
-  (yas-minor-mode))
-
-(add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
-(add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
-(add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
-#+END_SRC
-
 ** =re-builder=
 
 Interactive preview for RE construction.
@@ -1298,9 +1300,25 @@ This configuration allows me to connect to predefined MySQL servers.
 
 Save command history between sessions (taken from EmacsWiki).
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :results silent
 (use-package sql
+  :commands (nl/sql-connect-server)
+  :hook
+  (sql-interactive-mode . my-sql-save-history-hook)
   :preface
+  (defun my-sql-save-history-hook ()
+    (let ((lval 'sql-input-ring-file-name)
+          (rval 'sql-product))
+      (if (symbol-value rval)
+          (let ((filename
+                 (concat "~/.emacs.d/sql/"
+                         (symbol-name (symbol-value rval))
+                         "-history.sql")))
+            (set (make-local-variable lval) filename))
+        (error
+         (format "SQL history will not be saved because %s is nil"
+                 (symbol-name rval))))))
+  :config
   (require 'epa-file)
   (epa-file-enable)
 
@@ -1347,23 +1365,7 @@ Save command history between sessions (taken from EmacsWiki).
     "Connect to the input server using nl/sql-servers-list and FUNC."
     (interactive
      (helm-comp-read "Select server: " nl/sql-servers-list))
-    (funcall func))
-
-  (defun my-sql-save-history-hook ()
-    (let ((lval 'sql-input-ring-file-name)
-          (rval 'sql-product))
-      (if (symbol-value rval)
-          (let ((filename
-                 (concat "~/.emacs.d/sql/"
-                         (symbol-name (symbol-value rval))
-                         "-history.sql")))
-            (set (make-local-variable lval) filename))
-        (error
-         (format "SQL history will not be saved because %s is nil"
-                 (symbol-name rval))))))
-
-  :config
-  (add-hook 'sql-interactive-mode-hook 'my-sql-save-history-hook))
+    (funcall func)))
 #+END_SRC
 
 ** =subword-mode=
@@ -1446,12 +1448,13 @@ Using doom themes
 
 #+begin_src emacs-lisp
 (use-package doom-themes
-  :init
-  (load-theme 'doom-molokai t)
+  :demand
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
+
+  (load-theme 'doom-molokai t)
 
   ;;
   (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
@@ -1460,17 +1463,13 @@ Using doom themes
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
 
-  ;; Enable custom neotree theme (all-the-icons must be installed!)
-  (doom-themes-neotree-config)
-
   ;; or for treemacs users
-  (setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
+  ;;(setq doom-themes-treemacs-theme "doom-colors") ; use the colorful treemacs theme
   (doom-themes-treemacs-config)
 
   ;; Corrects (and improves) org-mode's native fontification.
-  (doom-themes-org-config))
-
-
+  (doom-themes-org-config)
+  )
 
 (with-eval-after-load 'markdown-mode
   (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
@@ -1869,7 +1868,7 @@ Removed due to not displaying properly with ~IBM Plex Mono~ font. 2021-02-16
 #+END_SRC
 ** [[https://github.com/twada/coverlay.el][coverlay.el]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package coverlay
     :disabled
     :load-path "~/src/github/elisp/coverlay.el"
@@ -1940,7 +1939,6 @@ Provides a simple UI for customizing dired mode to use different faces and color
 
 #+BEGIN_SRC emacs-lisp
 (use-package diredful
-  :load-path "~/src/github/elisp/diredful"
   :config (diredful-mode 1))
 #+END_SRC
 ** [[https://github.com/Fuco1/dired-hacks][dired-narrow]]
@@ -1992,14 +1990,14 @@ Provides a simple UI for customizing dired mode to use different faces and color
 ** [[https://github.com/seagle0128/doom-modeline][doom-modeline]]
 
 #+BEGIN_SRC emacs-lisp
-  (use-package doom-modeline
-    :config
-    (custom-set-faces
-     '(doom-modeline-project-parent-dir ((t (:foreground "#0f3b82")))))
-    (setq doom-modeline-buffer-file-name-style 'buffer-name
-          doom-modeline-height 20
-          doom-modeline-bar-width 3)
-    :hook (after-init . doom-modeline-mode))
+(use-package doom-modeline
+  :config
+  (custom-set-faces
+   '(doom-modeline-project-parent-dir ((t (:foreground "#0f3b82")))))
+  (setq doom-modeline-buffer-file-name-style 'buffer-name
+        doom-modeline-height 20
+        doom-modeline-bar-width 3)
+  :hook (after-init . doom-modeline-mode))
 #+END_SRC
 
 ** [[https://github.com/jacktasia/dumb-jump/blob/master/README.md][dumb-jump]]
@@ -2069,17 +2067,19 @@ This package adds support for flow to flycheck.
 ** [[https://github.com/akermu/emacs-libvterm][emacs-libvterm]]
 
 #+BEGIN_SRC emacs-lisp
-(use-package vterm
-  :load-path "~/src/github/elisp/emacs-libvterm"
-  :bind
-  (:map vterm-mode-map
-        ("M-<right>" . windmove-right)
-        ("M-<left>" . windmove-left)
-        ("M-<up>" . windmove-up)
-        ("M-<down>" . windmove-down))
-  :commands vterm vterm-other-window
-  :config
-  (setq vterm-max-scrollback 10000))
+(when (file-directory-p "~/src/github/elisp/emacs-libvterm")
+  (use-package vterm
+    :load-path "~/src/github/elisp/emacs-libvterm"
+    :bind
+    (:map vterm-mode-map
+          ("M-<right>" . windmove-right)
+          ("M-<left>" . windmove-left)
+          ("M-<up>" . windmove-up)
+          ("M-<down>" . windmove-down))
+    :commands vterm vterm-other-window
+    :config
+    (setq vterm-max-scrollback 10000)))
+
 #+END_SRC
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -2093,7 +2093,7 @@ This package adds support for flow to flycheck.
 
 ** [[https://github.com/abingham/emacs-ycmd][emacs-ycmd]]
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
   (use-package ycmd
     :disabled
     :preface
@@ -2513,7 +2513,9 @@ Works slow, so disabling. 2021-02-17
 
 Emacs package that provides visual version of align-regexp command.
 
-#+BEGIN_SRC emacs-lisp
+Have never used it: disabling. 2021-02-23
+
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package ialign
   :bind ("C-x l" . ialign))
 #+END_SRC
@@ -2987,7 +2989,7 @@ Declarative popup window rules.
   (setq sp-escape-quotes-after-insert nil)
 
   ;; Set up some pairings for org mode markup. These pairings won't
-  ;; activate by default; they'll only apply for wrapping regions.        
+  ;; activate by default; they'll only apply for wrapping regions.
   (sp-local-pair 'org-mode "~" "~" :actions '(wrap))
   (sp-local-pair 'org-mode "/" "/" :actions '(wrap))
   (sp-local-pair 'org-mode "*" "*" :actions '(wrap))
@@ -3257,13 +3259,14 @@ idle time.
 Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippets][Andrea Crotti's collection]].
 
 #+BEGIN_SRC emacs-lisp
-  (use-package yasnippet
-    :diminish yas-minor-mode
-    ;;:init
-    ;;(yas-global-mode 1)
-    :config
-    (use-package yasnippet-snippets)
-    (yas-reload-all))
+(use-package yasnippet
+  :diminish yas-minor-mode
+  :hook (prog-mode . yas-minor-mode)
+  ;;:init
+  ;;(yas-global-mode 1)
+  :config
+  (use-package yasnippet-snippets)
+  (yas-reload-all))
 #+END_SRC
 
 *** [[https://github.com/AndreaCrotti/yasnippet-snippets][yasnippet-snippets]]
@@ -3478,7 +3481,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 #+BEGIN_SRC emacs-lisp
 (use-package helm
   ;;:load-path "~/src/github/elisp/helm"
-  :demand t        
+  :demand t
   :pin melpa
   :diminish helm-mode
   :preface (require 'helm-config)
@@ -3770,15 +3773,6 @@ No longer using this since most development is now using lsp -
 #+end_src
 
 ** Programming Languages
-*** CSS
-**** [[https://github.com/purcell/less-css-mode][less-css-mode]]
-
-#+BEGIN_SRC emacs-lisp
-(use-package sass-mode
-  :mode "\\.scss$"
-  :hook (sass-mode . prettier-js-mode))
-#+END_SRC
-
 *** Java
 **** [[https://github.com/emacs-eclim/emacs-eclim][emacs-eclim]]
 
@@ -4055,7 +4049,6 @@ checker is loaded.
   "My PHP mode configuration."
   (flycheck-mode t)
   (setq c-basic-offset 2)
-  ;;(message "-----------------> php mode here: c-basic-offset: %d" c-basic-offset)
   (php-set-style "nl/php"))
 
   ;; this style is based on the symfony2 style
@@ -4078,7 +4071,7 @@ checker is loaded.
 
 (flycheck-define-checker nl/php-checker
   "A PHP syntax checker using the PHP command line interpreter.
-          See URL http://php.net/manual/en/features.commandline.php."
+     See URL http://php.net/manual/en/features.commandline.php."
   :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
             "-d" "log_errors=0" source)
   :error-patterns
@@ -4089,6 +4082,7 @@ checker is loaded.
 (eval-after-load 'flycheck
   '(add-to-list 'flycheck-checkers 'nl/php-checker))
 #+END_SRC
+
 **** [[https://github.com/nlamirault/phpunit.el][php-unit]]
 
 #+BEGIN_SRC emacs-lisp
@@ -4113,7 +4107,6 @@ checker is loaded.
   :custom
   (phpunit-arg "--stderr --debug"))
 #+END_SRC
-
 *** Python
 
 https://www.mattduck.com/lsp-python-getting-started.html
@@ -4187,8 +4180,8 @@ Integrates with IPython.
   ;;:load-path "~/src/github/elisp/emacs-scala-mode"
   :mode "\\.s\\(cala\\|bt\\)$"
   :interpreter ("scala" . scala-mode)
-  :hook ((scala-mode . nl/scala-mode-hook)
-         (before-save . lsp-format-buffer))
+  :hook ((scala-mode . nl/scala-mode-hook))
+         ;;(before-save . lsp-format-buffer))
   :preface
   (defun nl/scala-mode-hook ()
     (yas-minor-mode)
@@ -4311,7 +4304,7 @@ No longer used since Scala Metals is now being used.
 #+end_src
 **** [[https://github.com/ananthakumaran/tide][tide]]
 
-#+BEGIN_SRC emacs-lisp :tangle no
+#+begin_src emacs-lisp :tangle no
 (use-package tide
   :after (typescript-mode company flycheck)
   :bind (:map tide-mode-map
@@ -4419,30 +4412,30 @@ No longer used since Scala Metals is now being used.
          (typescript-mode . nl-tide-mode-hook)
          (typescript-mode . column-enforce-mode)
          (typescript-mode . rainbow-delimiters-mode)))
-#+END_SRC
+#+end_src
 
 * Computer-specific settings
 
 Load some computer-specific settings, such as the name and and email address. The way the settings
 are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's]] config.
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp :results silent
 (defvar nl/user-settings-dir nil
   "The directory with user-specific Emacs settings for this
   user.")
 
 ;; Settings for currently logged in user
 (require 's)
-(setq nl/user-settings-dir
-      (concat user-emacs-directory
-              "users/"
-              (s-trim (shell-command-to-string "hostname -s"))))
-(add-to-list 'load-path nl/user-settings-dir)
+(let ((user-dir (concat user-emacs-directory "users")))
+  (when (file-directory-p user-dir)
+    (setq nl/user-settings-dir
+          (concat user-dir "/" (s-trim (shell-command-to-string "hostname -s"))))
+    (add-to-list 'load-path nl/user-settings-dir)))
 
 ;; Load settings specific for the current user
 (when (file-exists-p nl/user-settings-dir)
   (mapc 'load (directory-files nl/user-settings-dir nil "^[^#].*el$")))
-#+END_SRC
+#+end_src
 
 * Misc
 ** Constants
@@ -4494,7 +4487,7 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
 (key-chord-define-global "aa" 'hydra-nl-align/body)
 #+END_SRC
 
-** Font size
+** Font sizes
 
 Using this hydra instead of method below, which is tangled out.
 
