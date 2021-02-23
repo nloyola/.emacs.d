@@ -4175,20 +4175,16 @@ Integrates with IPython.
 
 **** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp :results silent
 (use-package scala-mode
   ;;:load-path "~/src/github/elisp/emacs-scala-mode"
   :mode "\\.s\\(cala\\|bt\\)$"
   :interpreter ("scala" . scala-mode)
-  :hook ((scala-mode . nl/scala-mode-hook))
-         ;;(before-save . lsp-format-buffer))
+  :hook ((scala-mode . nl/scala-mode-hook)
+         (before-save . nl/scala-before-save))
   :preface
   (defun nl/scala-mode-hook ()
     (yas-minor-mode)
-    ;; sbt-find-definitions is a command that tries to find (with grep)
-    ;; the definition of the thing at point.
-    ;;(local-set-key (kbd "M-.") 'sbt-find-definitions)
-
     (setq-default indent-tabs-mode nil)
     (setq compilation-ask-about-save nil
           prettify-symbols-alist scala-prettify-symbols-alist
@@ -4196,21 +4192,19 @@ Integrates with IPython.
     (my-common-prog-mode-settings)
     (prettify-symbols-mode))
 
+  (defun nl/scala-before-save ()
+    (when (eq major-mode 'scala-mode)
+      (lsp-format-buffer)))
+
   (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 
   (defun nl/counsel-ag-scala ()
     "Perform counsel-ag on the project's Scala files."
     (interactive)
     (counsel-ag "" (projectile-project-root) "--scala"))
+
   (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
   :config
-  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
-  ;; allows using SPACE when in the minibuffer
-  (substitute-key-definition
-   'minibuffer-complete-word
-   'self-insert-command
-   minibuffer-local-completion-map)
-
   (setq scala-indent:indent-value-expression t
         scala-indent:align-parameters t
         scala-indent:align-forms t
@@ -4231,7 +4225,8 @@ Integrates with IPython.
         compilation-error-regexp-alist-alist)
 
   (push 'scala-error-regexp compilation-error-regexp-alist))
-#+END_SRC
+#+end_src
+
 **** [[https://github.com/ensime/emacs-sbt-mode][sbt-mode]]
 
 No longer used since Scala Metals is now being used.
