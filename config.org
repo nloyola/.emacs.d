@@ -4313,21 +4313,11 @@ No longer used since Scala Metals is now being used.
 *** TypeScript
 
 #+begin_src emacs-lisp
-(use-package typescript-mode)
-#+end_src
-**** [[https://github.com/ananthakumaran/tide][tide]]
-
-#+begin_src emacs-lisp :tangle no
-(use-package tide
-  :after (typescript-mode company flycheck)
-  :bind (:map tide-mode-map
-              ("C-c C-t f" . tide-fix)
-              ("C-c C-t n" . tide-nav)
-              ("C-c C-t o" . tide-organize-imports)
-              ("C-c C-t r" . tide-rename-symbol)
-              ("C-c C-t x" . tide-references))
-  :init
-  (use-package typescript-mode)
+(use-package typescript-mode
+  :hook
+  (typescript-mode . column-enforce-mode)
+  (typescript-mode . rainbow-delimiters-mode)
+  :config
   ;; when buiding with Angular CLI, the first error always contains "ERROR in"
   ;;
   ;; adjusting this regexp makes 'next-error' work in compilation mode
@@ -4386,13 +4376,6 @@ No longer used since Scala Metals is now being used.
   (setq compilation-error-regexp-alist
         (cons 'typescript-tslint compilation-error-regexp-alist))
 
-  :config
-  (setq tide-sync-request-timeout 5
-        tide-server-max-response-length 204800)
-
-  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
-  (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
-
   (defconst
     nl-typescript-prettify-symbols-alist
     '(("=>" . ?⇒)
@@ -4404,6 +4387,31 @@ No longer used since Scala Metals is now being used.
       ("!==" . ?≢)
       ("&&" . ?∧)
       ("||" . ?∨)))
+
+  (setq prettify-symbols-alist nl-typescript-prettify-symbols-alist))
+#+end_src
+**** [[https://github.com/ananthakumaran/tide][tide]]
+
+#+begin_src emacs-lisp :tangle no
+(use-package tide
+  :after (typescript-mode company flycheck)
+  :bind (:map tide-mode-map
+              ("C-c C-t f" . tide-fix)
+              ("C-c C-t n" . tide-nav)
+              ("C-c C-t o" . tide-organize-imports)
+              ("C-c C-t r" . tide-rename-symbol)
+              ("C-c C-t x" . tide-references))
+  :init
+  (use-package typescript-mode)
+
+  :config
+  (setq tide-sync-request-timeout 5
+        tide-server-max-response-length 204800)
+
+  (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
+  (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
+
+
 
   (defun nl-tide-mode-hook ()
     (interactive)
