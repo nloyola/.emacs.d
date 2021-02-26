@@ -97,18 +97,20 @@ Also see: all-the-icons-dired package installation
   ;;(set-face-attribute 'default frame :font nl/gui-fixed-font-name)
   (set-face-attribute 'italic frame :font nl/gui-fixed-font-name :weight 'normal :slant 'italic)
   (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
-  (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic))
+  (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic)
+  (set-fontset-font "fontset-default" nil
+                    (font-spec :size 20 :name "Fira Code Retina")))
 
 (defun nl/after-make-frame (frame)
     (nl/set-fonts frame))
 
+(add-hook 'after-make-frame-functions 'nl/after-make-frame t)
+
 (nl/set-fonts nil)
 
-(use-package fira-code-mode
-  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
-  :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
-
-(add-hook 'after-make-frame-functions 'nl/after-make-frame t)
+;; (use-package fira-code-mode
+;;   :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
+;;   :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
 #+end_src
 
 *** Input font Installation
@@ -573,7 +575,7 @@ possible.
 
 ** =prog-mode=
 
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
 (defun nl/indent-whole-buffer ()
   (interactive)
   (save-excursion
@@ -616,7 +618,7 @@ possible.
 (add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
 (add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
 (add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
-#+END_SRC
+#+end_src
 
 ** Set default browser
 
@@ -2384,7 +2386,7 @@ So that hungry deletion can be used in all modes.
 This package can be used to tie related commands into a family of
 short bindings with a common prefix - a Hydra.
 
-#+BEGIN_SRC emacs-lisp :results silent
+#+begin_src emacs-lisp :results silent
 (use-package hydra
   :pin melpa
   :init
@@ -2398,7 +2400,8 @@ short bindings with a common prefix - a Hydra.
   (hydra-hint-display-type 'posframe)
   :config
   ;;(setq hydra-posframe-show-params (plist-put hydra-posframe-show-params :font "Fira Code Retina"))
-  (setq hydra-posframe-show-params (plist-put hydra-posframe-show-params :font "IBM Plex Mono"))
+  (setq hydra-posframe-show-params
+        (plist-put hydra-posframe-show-params :font nl/gui-fixed-font-name))
   (defun nl/pull-window ()
     "Pull a window to the window the point is at"
     (interactive)
@@ -2495,8 +2498,7 @@ short bindings with a common prefix - a Hydra.
   ("q" nil "quit menu" :color blue :column nil))
 
   (global-set-key (kbd "C-c w") 'hydra-windows-nav/body))
-
-#+END_SRC
+#+end_src
 
 ** [[https://github.com/netguy204/imp.el][impatient-mode]]
 
@@ -3484,13 +3486,13 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
   :demand t
   :pin melpa
   :diminish helm-mode
-  :preface (require 'helm-config)
   :hook (helm-goto-line-before . helm-save-current-pos-to-mark-ring)
   :bind (("M-x" . helm-M-x)
          ("M-y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
          ("C-x C-f" . helm-find-files)
          ("C-`" . helm-resume))
+  :preface (require 'helm-config)
   :config
   ;; must set before helm-config, otherwise helm uses the default
   ;; prefix "C-x c", which is inconvenient because you can
@@ -4166,6 +4168,23 @@ Integrates with IPython.
   (use-package python-mode)
 #+END_SRC
 
+*** Rust
+
+#+begin_src emacs-lisp
+(use-package rust-mode
+  :mode "\\.rs$"
+  :hook
+  (rust-mode . lsp)
+  (rust-mode . my-common-prog-mode-settings)
+  :interpreter ("rust" . rust-mode)
+  :config
+  (setq rust-format-on-save t))
+
+(use-package flycheck-rust
+  :after rust-mode
+  :hook (flycheck-mode . flycheck-rust-setup))
+#+end_src
+
 *** Scala
 **** [[https://github.com/emacs-lsp/lsp-metals][lsp-metals]]
 
@@ -4180,15 +4199,18 @@ Integrates with IPython.
   ;;:load-path "~/src/github/elisp/emacs-scala-mode"
   :mode "\\.s\\(cala\\|bt\\)$"
   :interpreter ("scala" . scala-mode)
-  :hook ((scala-mode . nl/scala-mode-hook)
-         (before-save . nl/scala-before-save))
+  :hook
+  (scala-mode . nl/scala-mode-hook)
+  (before-save . nl/scala-before-save)
+  :custom
+  ;;(prettify-symbols-unprettify-at-point 'right-edge)
+  (prettify-symbols-unprettify-at-point nil)
   :preface
   (defun nl/scala-mode-hook ()
     (yas-minor-mode)
     (setq-default indent-tabs-mode nil)
     (setq compilation-ask-about-save nil
-          prettify-symbols-alist scala-prettify-symbols-alist
-          prettify-symbols-unprettify-at-point 'right-edge)
+          prettify-symbols-alist scala-prettify-symbols-alist)
     (my-common-prog-mode-settings)
     (prettify-symbols-mode))
 
@@ -4376,7 +4398,7 @@ No longer used since Scala Metals is now being used.
   (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
 
   (defconst
-    nl-typescript-pretty-symbols-alist
+    nl-typescript-prettify-symbols-alist
     '(("=>" . ?⇒)
       ("<=" . ?≤)
       (">=" . ?≥)
@@ -4397,7 +4419,7 @@ No longer used since Scala Metals is now being used.
     (company-mode +1)
     (prettier-js-mode)
     (my-common-prog-mode-settings)
-    (setq prettify-symbols-alist nl-typescript-pretty-symbols-alist
+    (setq prettify-symbols-alist nl-typescript-prettify-symbols-alist
           prettify-symbols-unprettify-at-point 'right-edge
           company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
     (setq-default typescript-indent-level 2))
