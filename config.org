@@ -107,10 +107,16 @@ Also see: all-the-icons-dired package installation
 (add-hook 'after-make-frame-functions 'nl/after-make-frame t)
 
 (nl/set-fonts nil)
+#+end_src
 
-;; (use-package fira-code-mode
-;;   :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
-;;   :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
+*** Ligatures
+
+Does not really work when not using Fira Code fonts.
+
+#+begin_src emacs-lisp :tangle no
+(use-package fira-code-mode
+  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
+  :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
 #+end_src
 
 *** Input font Installation
@@ -284,13 +290,6 @@ Use visual line mode to display long lines.
 
 #+BEGIN_SRC emacs-lisp
 (global-visual-line-mode -1)
-#+END_SRC
-
-Replace the standard text representation of various identifiers/symbols
-with a (arguably) more aesthetically pleasing representation.
-
-#+BEGIN_SRC emacs-lisp
-(global-prettify-symbols-mode +1)
 #+END_SRC
 
 Make completion buffers disappear after 10 seconds.
@@ -1031,10 +1030,6 @@ ibuffer is the improved version of list-buffers.
 
 ** =org-mode=
 
-#+begin_src
-
-#+end_src
-
 #+BEGIN_SRC emacs-lisp :results silent
 (defun nl/org-mode-setup ()
   (org-indent-mode)
@@ -1051,6 +1046,7 @@ ibuffer is the improved version of list-buffers.
 ;; (nl/org-mode-faces 120)
 
 (defun nl/org-mode-faces (font-height)
+  (require 'org)
   (dolist (face '((org-level-1 . 1.2)
                   (org-level-2 . 1.1)
                   (org-level-3 . 1.05)
@@ -4204,7 +4200,7 @@ Integrates with IPython.
   (before-save . nl/scala-before-save)
   :custom
   ;;(prettify-symbols-unprettify-at-point 'right-edge)
-  (prettify-symbols-unprettify-at-point nil)
+  (prettify-symbols-unprettify-at-point t)
   :preface
   (defun nl/scala-mode-hook ()
     (yas-minor-mode)
