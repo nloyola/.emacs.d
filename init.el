@@ -172,6 +172,18 @@ See http://emacsninja.com/posts/failing-gracefully.html"
 (load-config-org)
 ;;; Finalization
 
+;; Loading "config.org" with org-babel-load-file is slower than paring out all the emacs-lisp blocks.
+;; See load-config-org.
+;;
+;;(org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
+
 (let ((elapsed (float-time (time-subtract (current-time)
                                           emacs-start-time))))
   (message "Loading %s...done (%.3fs)" load-file-name elapsed))
+
+(defun nl/show-messages-on-startup ()
+  "Show the *Messages* buffer after starting Emacs."
+  (setq initial-buffer-choice (lambda () (get-buffer "*Messages*"))))
+
+
+;; (nl/show-messages-on-startup)

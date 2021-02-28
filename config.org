@@ -51,6 +51,8 @@ customize settings in [[file:init.el][init.el]].
 * Font
 ** Linux
 
+*** My Font Config
+
 Also see: all-the-icons-dired package installation
 
 #+begin_src  emacs-lisp :results silent
@@ -86,6 +88,11 @@ Also see: all-the-icons-dired package installation
 (defun nl/gui-variable-font-large ()
   (nl/gui-font nl/gui-variable-font-name nl/gui-variable-font-size-large))
 
+#+end_src
+
+*** Assigning frame fonts
+
+#+begin_src emacs-lisp
 ;; see: https://github.com/daviwil/emacs-from-scratch/blob/d24357b488862223fecaebdad758b136b0ca96e7/show-notes/Emacs-Tips-08.org#configuring-the-ui-for-new-frames
 (defun nl/set-fonts (frame)
   "Set the desired fonts for a frame. FRAME can be nil."
@@ -121,6 +128,8 @@ Does not really work when not using Fira Code fonts.
 
 *** Input font Installation
 
+Not used since using Googles' Go fonts. 2021-02-27
+
 [[http://input.fontbureau.com/download/][Input Font]]: Install it on Ubuntu as follows:
 
 #+begin_src sh :tangle no
@@ -148,6 +157,8 @@ Using Fira Code now. See below.
 #+end_src
 
 *** Symbola
+
+Not used since using Googles' Go fonts. 2021-02-27
 
 download from here: [[https://fonts2u.com/symbola.font][Symbola font]]
 
@@ -181,167 +192,98 @@ using the following:
 (put 'narrow-to-region 'disabled nil)
 (put 'dired-find-alternate-file 'disabled nil)
 (put 'erase-buffer 'disabled nil)
-#+end_src
 
-Sentences end with a single space.
-
-#+begin_src emacs-lisp
+;; Sentences end with a single space.
 (setq sentence-end-double-space nil)
-#+end_src
 
-Set the default major mode to =text-mode=. By default it's =fundamental= mode which is
-not what we want. Also, use =text-mode= for the scratch buffer.
+;; Set the default major mode to =text-mode=. By default it's =fundamental= mode which is
+;; not what we want. Also, use =text-mode= for the scratch buffer.
 
-#+begin_src emacs-lisp
 (setq default-major-mode 'text-mode
       initial-major-mode 'text-mode)
-#+end_src
 
-Don't scroll to middle of the page. Also, scroll line by line, without
-scrolloff and try to keep point at the same visual place when
-scrolling by page.
-
-#+begin_src emacs-lisp
+;; Don't scroll to middle of the page. Also, scroll line by line, without
+;; scrolloff and try to keep point at the same visual place when
+;; scrolling by page.
 (setq-default scroll-up-aggressively 0.01 scroll-down-aggressively 0.01)
 (setq redisplay-dont-pause t
       scroll-step 1
       scroll-margin 3
       scroll-conservatively 10
       scroll-preserve-screen-position t)
-#+end_src
 
-Level of decoration {1 - 3}, t = max.
-
-#+begin_src emacs-lisp
+;; Level of decoration {1 - 3}, t = max.
 (setq font-lock-maximum-decoration t)
-#+end_src
 
-For symlinks, automatically follow the link and visit the real file instead.
-
-#+begin_src emacs-lisp
+;; For symlinks, automatically follow the link and visit the real file instead.
 (setq vc-follow-symlinks nil)
-#+end_src
 
-Make searches case insensitive.
-
-#+begin_src emacs-lisp
+;; Make searches case insensitive.
 (setq-default case-fold-search t)
-#+end_src
 
-Autosave files are created between saves after a sufficient timeout in
-the current directory for crash detection, they begin and end with
-=#=.  Change this location to the emacs directory.
+;; Autosave files are created between saves after a sufficient timeout in
+;; the current directory for crash detection, they begin and end with
+;; =#=.  Change this location to the emacs directory.
+(setq auto-save-list-file-prefix "~/.emacs.d/autosave/"
+      auto-save-file-name-transforms `((".*" "~/.emacs.d/autosave/" t)))
 
-#+begin_src emacs-lisp
-(setq auto-save-list-file-prefix "~/.emacs.d/autosave/")
-(setq auto-save-file-name-transforms `((".*" "~/.emacs.d/autosave/" t)))
-#+end_src
-
-Set line wrap at column 100.
-
-#+begin_src emacs-lisp
+;;Set line wrap at column 100.
 (setq fill-column 100)
-#+end_src
 
-Replace =yes or no= prompt with =y or n= prompt.
-
-#+begin_src emacs-lisp
+;; Replace =yes or no= prompt with =y or n= prompt.
 (fset 'yes-or-no-p 'y-or-n-p)
-#+end_src
 
-Use UTF-8 everywhere.
-
-#+begin_src emacs-lisp
+;; Use UTF-8 everywhere.
 (setq locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
-#+end_src
 
-Use spaces instead of tabs.
-
-#+begin_src emacs-lisp
+;; Use spaces instead of tabs.
 (setq-default indent-tabs-mode nil)
-#+end_src
 
-Delete the region when typing, just like as we expect nowadays.
-
-#+begin_src emacs-lisp
+;; Delete the region when typing, just like as we expect nowadays.
 (delete-selection-mode t)
-#+end_src
 
-Highlight matching delimiters.
-
-#+begin_src emacs-lisp
+;; Highlight matching delimiters.
 (setq show-paren-style 'parenthesis)
 (show-paren-mode t)
 (custom-set-faces
  '(show-paren-match ((t (:background "#6b6b6b" :box nil)))))
-#+end_src
 
-Highlight matches in query-replace mode.
-
-#+begin_src emacs-lisp
+;; Highlight matches in query-replace mode.
 (setq query-replace-highlight t)
-#+end_src
 
-Use visual line mode to display long lines.
-
-#+begin_src emacs-lisp
+;; Use visual line mode to display long lines.
 (global-visual-line-mode -1)
-#+end_src
 
-Make completion buffers disappear after 10 seconds.
-
-#+begin_src emacs-lisp
+;; Make completion buffers disappear after 10 seconds.
 (add-hook 'completion-setup-hook
           (lambda () (run-at-time 10 nil
                                   (lambda () (delete-windows-on "*Completions*")))))
-#+end_src
-
-Revert these files without asking.
-
-#+begin_src emacs-lisp
+;;Revert these files without asking.
 (setq revert-without-query '(".*"))
-#+end_src
 
-Default command when using ~grep~.
-
-#+begin_src emacs-lisp
+;; Default command when using ~grep~.
 (setq grep-command "grep -nH -r --include=\\* -e  .")
-#+end_src
 
-Middle-clicking is nice to paste, however it should not adjust point
-and paste at the then adjusted point.
-
-#+begin_src emacs-lisp
+;; Middle-clicking is nice to paste, however it should not adjust point
+;; and paste at the then adjusted point.
 (setq mouse-yank-at-point t)
-#+end_src
 
-Save clipboard data of other programs in the kill ring when possible.
-
-#+begin_src emacs-lisp
+;; Save clipboard data of other programs in the kill ring when possible.
 (setq save-interprogram-paste-before-kill t)
-#+end_src
 
-Set environment variable for shells.
-
-#+begin_src emacs-lisp
+;; Set environment variable for shells.
 (setenv "PAGER" "cat")
-#+end_src
 
-Configure =next-buffer= and =previous-buffer= to only visit file
-buffers (has to be called for each frame):
-
-#+begin_src emacs-lisp
+;; Configure =next-buffer= and =previous-buffer= to only visit file
+;; buffers (has to be called for each frame):
 (set-frame-parameter (selected-frame) 'buffer-predicate #'buffer-file-name)
-#+end_src
 
-These are taken from
-https://github.com/patrickt/emacs/blob/master/init.el:
-
-#+begin_src emacs-lisp
+;; These are taken from
+;; https://github.com/patrickt/emacs/blob/master/init.el:
 (setq
   kill-whole-line t                      ; Lets C-k delete the whole line
   ;;default-directory "~/src/"             ; My code lives here
@@ -356,113 +298,64 @@ https://github.com/patrickt/emacs/blob/master/init.el:
   cursor-in-non-selected-windows nil)
 
 (unbind-key "C-z")     ;; I never want to suspend the frame
-#+end_src
 
-** Cursor Movement
-
-#+begin_src emacs-lisp
+;; Cursor Movement
 (setq auto-window-vscroll nil)
-#+end_src
 
-** Disabled features
-
-Turn off auto-save.
-
-#+begin_src emacs-lisp
+;; Turn off auto-save.
 (setq auto-save-default nil)
-#+end_src
 
-Don't make any backup files.
-
-#+begin_src emacs-lisp
+;; Don't make any backup files.
 (setq make-backup-files nil)
-#+end_src
 
-Get rid of the menu bar. Tool bar and scroll bars are disabled in
-~init.el~..
-
-#+begin_src emacs-lisp
+;; Get rid of the menu bar. Tool bar and scroll bars are disabled in
+;; ~init.el~..
 (when (fboundp 'menu-bar-mode) (menu-bar-mode -1))
-#+end_src
 
-Turn off the blinking cursor.
-
-#+begin_src emacs-lisp
+;; Turn off the blinking cursor.
 (blink-cursor-mode -1)
-#+end_src
 
-Don't use dialog boxes
-
-#+begin_src emacs-lisp
+;; Don't use dialog boxes
 (setq use-dialog-box nil)
-#+end_src
 
-Don't want an audible bell.
-
-#+begin_src emacs-lisp
+;; Don't want an audible bell.
 (setq visible-bell t)
-#+end_src
 
-** Frame Title
-
-Display the running program and the selected buffer in the frame title.
-
-#+begin_src emacs-lisp
+;; Display the running program and the selected buffer in the frame title.
 (setq frame-title-format
       '("" invocation-name ": " (:eval (replace-regexp-in-string
                                         "^ +" "" (buffer-name)))))
-#+end_src
-
-** End of file
-
-Don't add new lines past end of file, and indicate unused lines at the
-end of the window with a small image in the left fringe.
-
-#+begin_src emacs-lisp
+;; Don't add new lines past end of file, and indicate unused lines at the
+;; end of the window with a small image in the left fringe.
 (setq next-line-add-newlines nil)
 (setq-default indicate-empty-lines t)
-#+end_src
 
-Add =\n= to end of file if required.
-
-#+begin_src emacs-lisp
+;; Add =\n= to end of file if required.
 (setq require-final-newline t)
-#+end_src
 
-** Eshell
-
-#+begin_src emacs-lisp
+;; Eshell
 (setq eshell-history-size 100000)
-#+end_src
 
-** Follow Buffer
+;; Follow Buffer
 
-#+begin_src elisp
 (add-to-list 'auto-mode-alist '("\\.log\\'" . auto-revert-mode))
-#+end_src
 
-** Garbage collection
-
-Don’t compact font caches during GC.
-
-#+begin_src emacs-lisp
+;; Don’t compact font caches during GC.
 (setq inhibit-compacting-font-caches t)
-#+end_src
 
-** Hi Lock
-
-Automatically cycle through the highlighting faces listed in
-~hi-lock-face-defaults~ instead of bothering the user to pick a face
-each time.
-
-#+begin_src emacs-lisp
+;; Automatically cycle through the highlighting faces listed in
+;; ~hi-lock-face-defaults~ instead of bothering the user to pick a face
+;; each time.
 (setq hi-lock-auto-select-face t)
-#+end_src
 
-** History
-
-#+begin_src emacs-lisp
+;; History
 (setq history-delete-duplicates t)
+
+;; Use the directory name to make buffer names unique.
+(setq uniquify-buffer-name-style 'forward)
+
+;; Remove trailing whitespace
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+end_src
 
 ** Key bindings
@@ -512,9 +405,6 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 (global-set-key (kbd "C-c o")         'nl/counsel-git-files)
 #+end_src
 
-#+RESULTS:
-: align-regexp
-
 ** Line numbers.
 
 Recently, line numbering has been really slow. Disabling for now.
@@ -532,19 +422,6 @@ Emacs 26 added ~global-display-line-numbers-mode~:
     (add-hook mode-hook 'display-line-numbers-mode)))
 #+end_src
 
-** Mode line
-
-Use the directory name to make buffer names unique.
-
-#+begin_src emacs-lisp
-(setq uniquify-buffer-name-style 'forward)
-#+end_src
-
-** Remove trailing whitespace
-
-#+begin_src emacs-lisp
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-#+end_src
 
 ** Tags
 
@@ -556,7 +433,9 @@ Case sensitive tags search:
 
 ** Text mode
 
-#+begin_src emacs-lisp
+Don't like this: disabling. 2021-02-28
+
+#+begin_src emacs-lisp :tangle no
 (setq text-mode-hook
       '(lambda ()
          (turn-on-auto-fill)))            ; Enable automatic line wrapping
@@ -587,7 +466,7 @@ possible.
       (back-to-indentation)
     (beginning-of-line)))
 
-(defun my-common-prog-mode-settings ()
+(defun nl/common-prog-mode-settings ()
   "Enables settings common between programming language modes."
   (nl/setup-indent 2) ; indent 2 spaces width
   (local-set-key (kbd "<home>") 'nl/beginning-of-line-or-indentation)
@@ -612,11 +491,12 @@ possible.
   (setq comment-column 0)
   (push '(">=" . ?≥) prettify-symbols-alist)
   (push '("<=" . ?≤) prettify-symbols-alist)
-  (push '("->" . ?→) prettify-symbols-alist))
+  (push '("->" . ?→) prettify-symbols-alist)
+  (smartparens-mode))
 
-(add-hook 'makefile-mode-hook 'my-common-prog-mode-settings)
-(add-hook 'sh-mode-hook       'my-common-prog-mode-settings)
-(add-hook 'prog-mode-hook     'my-common-prog-mode-settings)
+(add-hook 'makefile-mode-hook 'nl/common-prog-mode-settings)
+(add-hook 'sh-mode-hook       'nl/common-prog-mode-settings)
+(add-hook 'prog-mode-hook     'nl/common-prog-mode-settings)
 #+end_src
 
 ** Set default browser
@@ -703,7 +583,7 @@ A way to set up indentation for all programming modes. Taken from
 ** Emacs lisp
 
 #+begin_src  emacs-lisp
-(setq emacs-lisp-mode-hook 'my-common-prog-mode-settings)
+(setq emacs-lisp-mode-hook 'nl/common-prog-mode-settings)
 #+end_src
 
 * Packages bundled with Emacs
@@ -713,12 +593,14 @@ Revert file buffers updated outside of emacs, unless I've made changes to
 the buffer which I haven't saved.
 
 #+begin_src emacs-lisp
-(eval-after-load 'auto-revert-mode
-  '(diminish 'auto-revert-mode))
-(global-auto-revert-mode 1)
-(add-hook 'dired-mode-hook 'auto-revert-mode)
-(setq global-auto-revert-non-file-buffers t
-      auto-revert-verbose nil)
+(use-package autorevert
+  :diminish auto-revert-mode
+  :hook (dired-mode . auto-revert-mode)
+  :config
+  (setq global-auto-revert-non-file-buffers t
+        auto-revert-verbose nil)
+  (global-auto-revert-mode 1))
+
 #+end_src
 
 ** =ansi-color=
@@ -805,14 +687,14 @@ Enable ANSI colors for compilation buffers.
       "Nelson programming style.")
 
     ;; Customizations for all of c-mode, c++-mode, and objc-mode
-    (defun my-c-mode-common-hook ()
+    (defun nl/c-mode-common-hook ()
       ;; add my personal style and set it for the current buffer
       (c-add-style "NELSON-c-mode" nelson-c-style t)
       ;; offset customizations not in nelson-c-style
       (c-set-offset 'member-init-intro '++)
       ;; other customizations
       ;;(c-toggle-auto-state 1) ;; Turn on auto newline
-      (my-common-prog-mode-settings)
+      (nl/common-prog-mode-settings)
       ;; makes the underscore part of a word in C and C++ modes
       (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
       (modify-syntax-entry ?_ "w" c-mode-syntax-table)
@@ -821,15 +703,15 @@ Enable ANSI colors for compilation buffers.
           (ggtags-mode 1)))
       )
 
-    (defun my-java-mode-hook ()
+    (defun nl/java-mode-hook ()
       (setq indent-tabs-mode nil)
       (setq c-basic-offset 2)
       ;;(setq zeal-at-point-docset "java")
       ;;(eclim-mode t)
       )
 
-    :hook ((c-mode-common . my-c-mode-common-hook)
-           (java-mode . my-java-mode-hook)))
+    :hook ((c-mode-common . nl/c-mode-common-hook)
+           (java-mode . nl/java-mode-hook)))
 #+end_src
 
 ** =cperl-mode=
@@ -837,11 +719,11 @@ Enable ANSI colors for compilation buffers.
 #+begin_src emacs-lisp
 (use-package cperl-mode
   :preface
-  (defun my-cperl-setup ()
+  (defun nl/cperl-setup ()
     (cperl-set-style "C++")
-    (my-common-prog-mode-settings))
+    (nl/common-prog-mode-settings))
 
-  :hook (cperl-mode . my-cperl-setup))
+  :hook (cperl-mode . nl/cperl-setup))
 #+end_src
 
 ** =desktop.el=
@@ -972,7 +854,7 @@ Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-u
 ;; Hack ispell-local-dictionary-alist instead.
 (setq-default ispell-extra-args (flyspell-detect-ispell-args t))
 ;; (setq ispell-cmd-args (flyspell-detect-ispell-args))
-(defadvice ispell-word (around my-ispell-word activate)
+(defadvice ispell-word (around nl/ispell-word activate)
   (let ((old-ispell-extra-args ispell-extra-args))
     (ispell-kill-ispell t)
     (setq ispell-extra-args (flyspell-detect-ispell-args))
@@ -981,7 +863,7 @@ Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-u
     (ispell-kill-ispell t)
     ))
 
-(defadvice flyspell-auto-correct-word (around my-flyspell-auto-correct-word activate)
+(defadvice flyspell-auto-correct-word (around nl/flyspell-auto-correct-word activate)
   (let ((old-ispell-extra-args ispell-extra-args))
     (ispell-kill-ispell t)
     ;; use emacs original arguments
@@ -1162,7 +1044,7 @@ good column number to do that.
      (sql . t)
      (sqlite . t)))
 
-  (defun my-org-confirm-babel-evaluate (lang body)
+  (defun nl/org-confirm-babel-evaluate (lang body)
     "Do not confirm evaluation for these languages."
     (not (or (string= lang "C")
              (string= lang "emacs-lisp")
@@ -1171,7 +1053,7 @@ good column number to do that.
              (string= lang "sh")
              (string= lang "sql")
              (string= lang "sqlite"))))
-  (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate))
+  (setq org-confirm-babel-evaluate 'nl/org-confirm-babel-evaluate))
 #+end_src
 
 *** Org babel/source blocks
@@ -1255,14 +1137,13 @@ save file and history length first. Also save search entries.
 Remember position in a file.
 
 #+begin_src emacs-lisp
-    (use-package saveplace
-      :init
-      (save-place-mode 1)
-      :config
-      (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
-            save-place-forget-unreadable-files nil
-            save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
-      (setq-default save-place t))
+(use-package saveplace
+  :config
+  (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
+        save-place-forget-unreadable-files nil
+        save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
+  ;; activate it for all buffers
+  (setq-default save-place t))
 #+end_src
 
 ** =shell=
@@ -1302,9 +1183,9 @@ Save command history between sessions (taken from EmacsWiki).
 (use-package sql
   :commands (nl/sql-connect-server)
   :hook
-  (sql-interactive-mode . my-sql-save-history-hook)
+  (sql-interactive-mode . nl/sql-save-history-hook)
   :preface
-  (defun my-sql-save-history-hook ()
+  (defun nl/sql-save-history-hook ()
     (let ((lval 'sql-input-ring-file-name)
           (rval 'sql-product))
       (if (symbol-value rval)
@@ -1329,7 +1210,7 @@ Save command history between sessions (taken from EmacsWiki).
 
   (defun nl/sql-connect (product connection)
     "Connects to a database server of type PRODUCT using the CONNECTION type."
-    (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
+    (require 'nl-passwords (concat user-emacs-directory "nl/password.el.gpg"))
 
     ;; update the password to the sql-connection-alist
     (let ((connection-info (assoc connection sql-connection-alist))
@@ -1427,7 +1308,9 @@ direction keys.
 
 #+begin_src emacs-lisp
 (use-package winner
-  :hook (after-init . winner-mode))
+  :demand t
+  :config
+  (winner-mode))
 #+end_src
 
 ** =whitespace=
@@ -2236,11 +2119,11 @@ On the fly markdown preview.
     (use-package flymd
       :commands (flymd-flyit)
       :preface
-      (defun my-flymd-browser-function (url)
+      (defun nl/flymd-browser-function (url)
         (let ((browse-url-browser-function 'browse-url-firefox))
           (browse-url url)))
       :config
-      (setq flymd-browser-open-function 'my-flymd-browser-function))
+      (setq flymd-browser-open-function 'nl/flymd-browser-function))
 #+end_src
 
 ** [[https://github.com/waymondo/frog-jump-buffer][frog-jump-buffer]]
@@ -2830,11 +2713,11 @@ Project navigation and management library for Emacs.
 #+begin_src emacs-lisp :tangle no
   (use-package protobuf-mode
     :config
-    (defconst my-protobuf-style
+    (defconst nl/protobuf-style
       '((c-basic-offset . 2)
         (indent-tabs-mode . nil)))
     :hook (protobuf-mode . (lambda ()
-                             (c-add-style "my-style" my-protobuf-style t)
+                             (c-add-style "nl/style" nl/protobuf-style t)
                              (subword-mode 1))))
 #+end_src
 
@@ -2980,7 +2863,6 @@ Declarative popup window rules.
 #+begin_src emacs-lisp
 (use-package smartparens
   :diminish smartparens-mode
-  :init (smartparens-global-mode t)
   :config
   (require 'smartparens-config)
   ;; https://github.com/Fuco1/smartparens/issues/783
@@ -3002,13 +2884,16 @@ Declarative popup window rules.
 
 ** [[https://github.com/mickeynp/smart-scan][smart-scan]]
 
+Not really using this: disabling. 2021-02-28
+
 Quickly jumps between other symbols found at point in Emacs.
 http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package smartscan
   :init (global-smartscan-mode 1))
 #+end_src
+
 ** [[https://github.com/jbondeson/smooth-scrolling][smooth-scrolling]]
 
 #+begin_src emacs-lisp
@@ -3077,64 +2962,6 @@ think of it as both something that augments and replaces the standard
 
 #+begin_src emacs-lisp
 (use-package treemacs
-  :ensure t
-  :init
-  (with-eval-after-load 'winum
-    (define-key winum-keymap (kbd "M-0") #'treemacs-select-window))
-  :config
-  (progn
-    (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
-          treemacs-deferred-git-apply-delay      0.5
-          treemacs-directory-name-transformer    #'identity
-          treemacs-display-in-side-window        t
-          treemacs-eldoc-display                 t
-          treemacs-file-event-delay              5000
-          treemacs-file-extension-regex          treemacs-last-period-regex-value
-          treemacs-file-follow-delay             0.2
-          treemacs-file-name-transformer         #'identity
-          treemacs-follow-after-init             t
-          treemacs-git-command-pipe              ""
-          treemacs-goto-tag-strategy             'refetch-index
-          treemacs-indentation                   2
-          treemacs-indentation-string            " "
-          treemacs-is-never-other-window         nil
-          treemacs-max-git-entries               5000
-          treemacs-missing-project-action        'ask
-          treemacs-move-forward-on-expand        nil
-          treemacs-no-png-images                 nil
-          treemacs-no-delete-other-windows       t
-          treemacs-project-follow-cleanup        nil
-          treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
-          treemacs-position                      'left
-          treemacs-recenter-distance             0.1
-          treemacs-recenter-after-file-follow    nil
-          treemacs-recenter-after-tag-follow     nil
-          treemacs-recenter-after-project-jump   'always
-          treemacs-recenter-after-project-expand 'on-distance
-          treemacs-show-cursor                   nil
-          treemacs-show-hidden-files             t
-          treemacs-silent-filewatch              nil
-          treemacs-silent-refresh                nil
-          treemacs-sorting                       'alphabetic-asc
-          treemacs-space-between-root-nodes      t
-          treemacs-tag-follow-cleanup            t
-          treemacs-tag-follow-delay              1.5
-          treemacs-user-mode-line-format         nil
-          treemacs-width                         35)
-
-    ;; The default width and height of the icons is 22 pixels. If you are
-    ;; using a Hi-DPI display, uncomment this to double the icon size.
-    ;;(treemacs-resize-icons 44)
-
-    (treemacs-follow-mode t)
-    (treemacs-filewatch-mode t)
-    (treemacs-fringe-indicator-mode t)
-    (pcase (cons (not (null (executable-find "git")))
-                 (not (null treemacs-python-executable)))
-      (`(t . t)
-       (treemacs-git-mode 'deferred))
-      (`(t . _)
-       (treemacs-git-mode 'simple))))
   :bind
   (:map global-map
         ("M-0"       . treemacs-select-window)
@@ -3142,11 +2969,61 @@ think of it as both something that augments and replaces the standard
         ("C-x t t"   . treemacs)
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag)))
+        ("C-x t M-t" . treemacs-find-tag))
+  :config
+  (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
+        treemacs-deferred-git-apply-delay      0.5
+        treemacs-directory-name-transformer    #'identity
+        treemacs-display-in-side-window        t
+        treemacs-eldoc-display                 t
+        treemacs-file-event-delay              5000
+        treemacs-file-extension-regex          treemacs-last-period-regex-value
+        treemacs-file-follow-delay             0.2
+        treemacs-file-name-transformer         #'identity
+        treemacs-follow-after-init             t
+        treemacs-git-command-pipe              ""
+        treemacs-goto-tag-strategy             'refetch-index
+        treemacs-indentation                   2
+        treemacs-indentation-string            " "
+        treemacs-is-never-other-window         nil
+        treemacs-max-git-entries               5000
+        treemacs-missing-project-action        'ask
+        treemacs-move-forward-on-expand        nil
+        treemacs-no-png-images                 nil
+        treemacs-no-delete-other-windows       t
+        treemacs-project-follow-cleanup        nil
+        treemacs-persist-file                  (expand-file-name ".cache/treemacs-persist" user-emacs-directory)
+        treemacs-position                      'left
+        treemacs-recenter-distance             0.1
+        treemacs-recenter-after-file-follow    nil
+        treemacs-recenter-after-tag-follow     nil
+        treemacs-recenter-after-project-jump   'always
+        treemacs-recenter-after-project-expand 'on-distance
+        treemacs-show-cursor                   nil
+        treemacs-show-hidden-files             t
+        treemacs-silent-filewatch              nil
+        treemacs-silent-refresh                nil
+        treemacs-sorting                       'alphabetic-asc
+        treemacs-space-between-root-nodes      t
+        treemacs-tag-follow-cleanup            t
+        treemacs-tag-follow-delay              1.5
+        treemacs-user-mode-line-format         nil
+        treemacs-width                         35)
 
-(use-package treemacs-evil
-  :after treemacs evil
-  :ensure t)
+  ;; The default width and height of the icons is 22 pixels. If you are
+  ;; using a Hi-DPI display, uncomment this to double the icon size.
+  ;;(treemacs-resize-icons 44)
+
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t)
+  (treemacs-fringe-indicator-mode t)
+  (pcase (cons (not (null (executable-find "git")))
+               (not (null treemacs-python-executable)))
+    (`(t . t)
+     (treemacs-git-mode 'deferred))
+    (`(t . _)
+     (treemacs-git-mode 'simple)))
+  )
 
 (use-package treemacs-projectile
   :after treemacs projectile
@@ -3976,7 +3853,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
       :hook ((js2-mode . fic-mode)
              ;;(js2-mode-hook  . ac-js2-mode)
              (js2-mode . nl/javascript-mode-hook)
-             (js2-mode . my-common-prog-mode-settings)))
+             (js2-mode . nl/common-prog-mode-settings)))
 #+end_src
 **** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
 
@@ -4171,7 +4048,7 @@ Integrates with IPython.
   :mode "\\.rs$"
   :hook
   (rust-mode . lsp)
-  (rust-mode . my-common-prog-mode-settings)
+  (rust-mode . nl/common-prog-mode-settings)
   :interpreter ("rust" . rust-mode)
   :config
   (setq rust-format-on-save t))
@@ -4207,7 +4084,7 @@ Integrates with IPython.
     (setq-default indent-tabs-mode nil)
     (setq compilation-ask-about-save nil
           prettify-symbols-alist scala-prettify-symbols-alist)
-    (my-common-prog-mode-settings)
+    (nl/common-prog-mode-settings)
     (prettify-symbols-mode))
 
   (defun nl/scala-before-save ()
@@ -4422,7 +4299,7 @@ No longer used since Scala Metals is now being used.
     (tide-hl-identifier-mode +1)
     (company-mode +1)
     (prettier-js-mode)
-    (my-common-prog-mode-settings)
+    (nl/common-prog-mode-settings)
     (setq prettify-symbols-alist nl-typescript-prettify-symbols-alist
           prettify-symbols-unprettify-at-point 'right-edge
           company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
@@ -4527,23 +4404,23 @@ buffer.  Here's a hack using ~set-frame-font~ and altering the font
 size only:
 
 #+begin_src emacs-lisp :tangle no
-(defun my-alter-frame-font-size (fn)
+(defun nl/alter-frame-font-size (fn)
   (let* ((current-font-name (frame-parameter nil 'font))
          (decomposed-font-name (x-decompose-font-name current-font-name))
          (font-size (string-to-int (aref decomposed-font-name 5))))
     (aset decomposed-font-name 5 (int-to-string (funcall fn font-size)))
     (set-frame-font (x-compose-font-name decomposed-font-name))))
 
-(defun my-inc-frame-font-size ()
+(defun nl/inc-frame-font-size ()
   (interactive)
-  (my-alter-frame-font-size '1+))
+  (nl/alter-frame-font-size '1+))
 
-(defun my-dec-frame-font-size ()
+(defun nl/dec-frame-font-size ()
   (interactive)
-  (my-alter-frame-font-size '1-))
+  (nl/alter-frame-font-size '1-))
 
-(global-set-key (kbd "C-+") 'my-inc-frame-font-size)
-(global-set-key (kbd "C--") 'my-dec-frame-font-size)
+(global-set-key (kbd "C-+") 'nl/inc-frame-font-size)
+(global-set-key (kbd "C--") 'nl/dec-frame-font-size)
 #+end_src
 
 ** Date and time stamps
@@ -4700,7 +4577,7 @@ Views the same file side by side:
 
 (global-set-key [S-f9] 'nl/split-view-same-file)
 
-(defun my--set-transparency (inc)
+(defun nl/-set-transparency (inc)
   "Increase or decrease the selected frame transparency"
   (let* ((alpha (frame-parameter (selected-frame) 'alpha))
          (next-alpha (cond ((not alpha) 100)
@@ -4713,10 +4590,10 @@ Views the same file side by side:
   "
   ALPHA : [ %(frame-parameter nil 'alpha) ]
   "
-  ("j" (lambda () (interactive) (my--set-transparency +1)) "+ more")
-  ("k" (lambda () (interactive) (my--set-transparency -1)) "- less")
-  ("J" (lambda () (interactive) (my--set-transparency +10)) "++ more")
-  ("K" (lambda () (interactive) (my--set-transparency -10)) "-- less")
+  ("j" (lambda () (interactive) (nl/-set-transparency +1)) "+ more")
+  ("k" (lambda () (interactive) (nl/-set-transparency -1)) "- less")
+  ("J" (lambda () (interactive) (nl/-set-transparency +10)) "++ more")
+  ("K" (lambda () (interactive) (nl/-set-transparency -10)) "-- less")
   ("=" (lambda (value) (interactive "nTransparency Value 0 - 100 opaque:")
          (set-frame-parameter (selected-frame) 'alpha value)) "Set to ?" :color blue))
 
