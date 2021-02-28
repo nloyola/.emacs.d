@@ -417,7 +417,7 @@ Recently, line numbering has been really slow. Disabling for now.
 Emacs 26 added ~global-display-line-numbers-mode~:
 
 #+begin_src emacs-lisp
-(dolist (mode-hook '(text-mode-hook prog-mode-hook))
+(dolist (mode-hook '(prog-mode-hook))
   (when (version<= "26.0.50" emacs-version)
     (add-hook mode-hook 'display-line-numbers-mode)))
 #+end_src
@@ -4189,7 +4189,7 @@ No longer used since Scala Metals is now being used.
 #+end_src
 *** TypeScript
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results silent
 (use-package typescript-mode
   :hook
   (typescript-mode . column-enforce-mode)
@@ -4199,19 +4199,19 @@ No longer used since Scala Metals is now being used.
   ;;
   ;; adjusting this regexp makes 'next-error' work in compilation mode
   ;;
-  (push `(typescript-tsc-error-regexp
-          ,(rx line-start
-               (zero-or-more "[tsl]")
-               (zero-or-more space)
-               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-               (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
-               (in ":" "(") (group-n 2 (one-or-more digit))
-               (in ":" ",") (group-n 3 (one-or-more digit))
-               (zero-or-more not-newline))
-          1 2 3 2)
-        compilation-error-regexp-alist-alist)
+  ;; (push `(typescript-tsc-error-regexp
+  ;;         ,(rx line-start
+  ;;              (zero-or-more "[tsl]")
+  ;;              (zero-or-more space)
+  ;;              (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
+  ;;              (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
+  ;;              (in ":" "(") (group-n 2 (one-or-more digit))
+  ;;              (in ":" ",") (group-n 3 (one-or-more digit))
+  ;;              (zero-or-more not-newline))
+  ;;         1 2 3 2)
+  ;;       compilation-error-regexp-alist-alist)
 
-  (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
+  ;; (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
 
   (push `(angular-html-error-regexp
           ,(rx line-start
@@ -4247,7 +4247,7 @@ No longer used since Scala Metals is now being used.
 
   (add-to-list 'compilation-error-regexp-alist-alist
                '(typescript-tslint
-                 "^\\(?:\\(ERROR\\|WARNING\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
+                 "^\\(?:\\(Error\\|Warning\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
                  2 3 4 1))
 
   (setq compilation-error-regexp-alist
