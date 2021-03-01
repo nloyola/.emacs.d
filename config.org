@@ -4,6 +4,7 @@
 #+INFOJS_OPT: view:t toc:t ltoc:t mouse:underline buttons:0 path:http://thomasf.github.io/solarized-css/org-info.min.js
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://thomasf.github.io/solarized-css/solarized-light.min.css" />
 #+OPTIONS: broken-links:t
+#+PROPERTY: header-args  :results silent
 
 This configuration uses the [[https://github.com/jwiegley/use-package][use-package]] package from John Wiegley,
 which is a fantastic way to manage package configurations.
@@ -50,12 +51,11 @@ customize settings in [[file:init.el][init.el]].
 
 * Font
 ** Linux
-
 *** My Font Config
 
 Also see: all-the-icons-dired package installation
 
-#+begin_src  emacs-lisp :results silent
+#+begin_src  emacs-lisp
 ;; (defvar nl/gui-fixed-font-name "Fira Code Retina")
 
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
@@ -87,7 +87,6 @@ Also see: all-the-icons-dired package installation
 
 (defun nl/gui-variable-font-large ()
   (nl/gui-font nl/gui-variable-font-name nl/gui-variable-font-size-large))
-
 #+end_src
 
 *** Assigning frame fonts
@@ -180,7 +179,6 @@ unzip symbola.zip
 #+end_src
 
 * Sane defaults
-
 ** General
 
 Some commands are disabled by default. They are enabled in our config
@@ -245,12 +243,6 @@ using the following:
 
 ;; Delete the region when typing, just like as we expect nowadays.
 (delete-selection-mode t)
-
-;; Highlight matching delimiters.
-(setq show-paren-style 'parenthesis)
-(show-paren-mode t)
-(custom-set-faces
- '(show-paren-match ((t (:background "#6b6b6b" :box nil)))))
 
 ;; Highlight matches in query-replace mode.
 (setq query-replace-highlight t)
@@ -421,7 +413,6 @@ Emacs 26 added ~global-display-line-numbers-mode~:
   (when (version<= "26.0.50" emacs-version)
     (add-hook mode-hook 'display-line-numbers-mode)))
 #+end_src
-
 
 ** Tags
 
@@ -785,7 +776,7 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 ** =flyspell=
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package flyspell-correct)
 
 (use-package flyspell
@@ -912,7 +903,7 @@ ibuffer is the improved version of list-buffers.
 
 ** =org-mode=
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (defun nl/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode)
@@ -956,6 +947,8 @@ ibuffer is the improved version of list-buffers.
 (use-package org
   :pin org
   :hook (org-mode . nl/org-mode-setup)
+  :custom-face
+  (org-table ((t :foreground "#91b831")))
   :config
   (setq org-ellipsis " ⤵"
         org-hide-emphasis-markers t
@@ -1085,6 +1078,18 @@ comments.
   (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
   (add-to-list 'org-structure-template-alist '("py" . "src python")))
 #+end_src
+** =paren=
+
+#+begin_src emacs-lisp
+(use-package paren
+  :hook
+  (prog-mode . (lambda () (show-paren-mode t)))
+  :custom-face
+  (show-paren-match ((t (:background "#def" :box nil))))
+  :custom
+  (show-paren-style 'parenthesis))
+#+end_src
+
 ** =re-builder=
 
 Interactive preview for RE construction.
@@ -1179,7 +1184,7 @@ This configuration allows me to connect to predefined MySQL servers.
 
 Save command history between sessions (taken from EmacsWiki).
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package sql
   :commands (nl/sql-connect-server)
   :hook
@@ -1419,23 +1424,23 @@ Trying out Bubbleberry theme: 2019-02-25
 Switched to Dracula theme: 2019-04-10
 
 #+begin_src emacs-lisp :tangle no
-  (use-package bubbleberry-theme
-    :config
-    (load-theme 'bubbleberry t)
-    ;; default region color is too hard to see on my display
-    (custom-set-faces
-     '(region ((t (:background "#0f3b82"))))
-     '(font-lock-warning-face ((t (:background "#0f3b82"))))
-     '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-     '(ediff-odd-diff-A ((nil :background "#862b27")))
-     '(ediff-even-diff-A ((nil :background "#1f772c")))
-     '(ediff-current-diff-A ((nil :background "#2b538a")))
-     '(ediff-odd-diff-B ((nil :background "#862b27")))
-     '(ediff-even-diff-B ((nil :background "#1f772c")))
-     '(ediff-current-diff-B ((nil :background "#2b538a")))
-     '(ediff-odd-diff-C ((nil :background "#862b27")))
-     '(ediff-even-diff-C ((nil :background "#1f772c")))
-     '(ediff-current-diff-C ((nil :background "#2b538a")))))
+(use-package bubbleberry-theme
+  :custom-face
+   ;; default region color is too hard to see on my display
+  (region ((t (:background "#0f3b82"))))
+  (font-lock-warning-face ((t (:background "#0f3b82"))))
+  (font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+  (ediff-odd-diff-A ((nil :background "#862b27")))
+  (ediff-even-diff-A ((nil :background "#1f772c")))
+  (ediff-current-diff-A ((nil :background "#2b538a")))
+  (ediff-odd-diff-B ((nil :background "#862b27")))
+  (ediff-even-diff-B ((nil :background "#1f772c")))
+  (ediff-current-diff-B ((nil :background "#2b538a")))
+  (ediff-odd-diff-C ((nil :background "#862b27")))
+  (ediff-even-diff-C ((nil :background "#1f772c")))
+  (ediff-current-diff-C ((nil :background "#2b538a"))))
+  :config
+  (load-theme 'bubbleberry t))
 #+end_src
 
 *** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
@@ -1490,25 +1495,24 @@ TextMate like theme.
 Tried out new theme: 2019-08-04
 
 #+begin_src emacs-lisp :tangle no
-  (use-package suscolors-theme
-    :config
-    (load-theme 'suscolors t)
-    ;; default region color is too hard to see on my display
-    (custom-set-faces
-     ;; '(region ((t (:background "#0f3b82"))))
-     ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
-     ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-     '(vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
+(use-package suscolors-theme
+  :custom-face
+   ;; '(region ((t (:background "#0f3b82"))))
+   ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
+   ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+  (vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
 
-     '(ediff-odd-diff-A ((nil :background "#862b27")))
-     '(ediff-even-diff-A ((nil :background "#1f772c")))
-     '(ediff-current-diff-A ((nil :background "#2b538a")))
-     '(ediff-odd-diff-B ((nil :background "#862b27")))
-     '(ediff-even-diff-B ((nil :background "#1f772c")))
-     '(ediff-current-diff-B ((nil :background "#2b538a")))
-     '(ediff-odd-diff-C ((nil :background "#862b27")))
-     '(ediff-even-diff-C ((nil :background "#1f772c")))
-     '(ediff-current-diff-C ((nil :background "#2b538a")))))
+  (ediff-odd-diff-A ((nil :background "#862b27")))
+  (ediff-even-diff-A ((nil :background "#1f772c")))
+  (ediff-current-diff-A ((nil :background "#2b538a")))
+  (ediff-odd-diff-B ((nil :background "#862b27")))
+  (ediff-even-diff-B ((nil :background "#1f772c")))
+  (ediff-current-diff-B ((nil :background "#2b538a")))
+  (ediff-odd-diff-C ((nil :background "#862b27")))
+  (ediff-even-diff-C ((nil :background "#1f772c")))
+  (ediff-current-diff-C ((nil :background "#2b538a"))))
+  :config
+  (load-theme 'suscolors t))
 #+end_src
 
 *** [[https://github.com/belak/base16-emacs][base16-emacs]]
@@ -1520,28 +1524,29 @@ Tried out 2020-01-20
 
 #+begin_src emacs-lisp :tangle no
 (use-package base16-theme
-  :config
-    (load-theme 'base16-woodland t)
-    ;;(load-theme 'base16-solarized-dark t)
-    ;;(load-theme 'base16-oceanicnext t)
-    ;;(load-theme 'base16-google-dark t)
-    ;;(load-theme 'base16-nord t)
-    (custom-set-faces
-     ;; '(region ((t (:background "#0f3b82"))))
-     ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
-     ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-     '(vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
+  :custom-face
+  ;; (region ((t (:background "#0f3b82"))))
+  ;; (font-lock-warning-face ((t (:background "#0f3b82"))))
+  ;; (font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+  (mode-line-buffer-id ((t :foreground "white")))
+  (vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
 
-     '(ediff-odd-diff-A ((nil :background "#862b27")))
-     '(ediff-even-diff-A ((nil :background "#1f772c")))
-     '(ediff-current-diff-A ((nil :background "#2b538a")))
-     '(ediff-odd-diff-B ((nil :background "#862b27")))
-     '(ediff-even-diff-B ((nil :background "#1f772c")))
-     '(ediff-current-diff-B ((nil :background "#2b538a")))
-     '(ediff-odd-diff-C ((nil :background "#862b27")))
-     '(ediff-even-diff-C ((nil :background "#1f772c")))
-     '(ediff-current-diff-C ((nil :background "#2b538a"))))
-    (set-face-attribute 'mode-line-buffer-id nil :foreground "white"))
+  (ediff-odd-diff-A ((nil :background "#862b27")))
+  (ediff-even-diff-A ((nil :background "#1f772c")))
+  (ediff-current-diff-A ((nil :background "#2b538a")))
+  (ediff-odd-diff-B ((nil :background "#862b27")))
+  (ediff-even-diff-B ((nil :background "#1f772c")))
+  (ediff-current-diff-B ((nil :background "#2b538a")))
+  (ediff-odd-diff-C ((nil :background "#862b27")))
+  (ediff-even-diff-C ((nil :background "#1f772c")))
+  (ediff-current-diff-C ((nil :background "#2b538a")))
+  :config
+  (load-theme 'base16-woodland t)
+  ;;(load-theme 'base16-solarized-dark t)
+  ;;(load-theme 'base16-oceanicnext t)
+  ;;(load-theme 'base16-google-dark t)
+  ;;(load-theme 'base16-nord t)
+  )
 #+end_src
 *** [[https://github.com/fniessen/emacs-leuven-theme][emacs-leuven-theme]]
 
@@ -1696,7 +1701,7 @@ Disable for now since it is slow when editing Scala code.
 
 Complete anything.
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package company
   :diminish company-mode
   :bind (:map company-active-map
@@ -1872,13 +1877,13 @@ Provides a simple UI for customizing dired mode to use different faces and color
 
 #+begin_src emacs-lisp
 (use-package doom-modeline
+  :hook (after-init . doom-modeline-mode)
+  :custom-face
+  (doom-modeline-project-parent-dir ((t (:foreground "#0f3b82"))))
   :config
-  (custom-set-faces
-   '(doom-modeline-project-parent-dir ((t (:foreground "#0f3b82")))))
   (setq doom-modeline-buffer-file-name-style 'buffer-name
         doom-modeline-height 20
-        doom-modeline-bar-width 3)
-  :hook (after-init . doom-modeline-mode))
+        doom-modeline-bar-width 3))
 #+end_src
 
 ** [[https://github.com/jacktasia/dumb-jump/blob/master/README.md][dumb-jump]]
@@ -2064,7 +2069,7 @@ strings.
 
 Allow windmove to jump between frames.
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package framemove
   :defer 0
   :load-path "lisp"
@@ -2100,11 +2105,11 @@ Allow windmove to jump between frames.
 #+begin_src emacs-lisp
 (use-package flycheck-pos-tip
   :after flycheck
+  :custom-face
+  ;;  (popup-face ((t (:inherit default :height 200))))
+  ;;  (popup-tip-face ((t (:inherit default :height 200)))))
   :config
   (flycheck-pos-tip-mode)
-  ;; (custom-set-faces
-  ;;  `(popup-face ((t (:inherit default :height 200))))
-  ;;  `(popup-tip-face ((t (:inherit default :height 200)))))
   (setq flycheck-pos-tip-timeout 10
         x-gtk-use-system-tooltips nil
         pos-tip-foreground-color "tomato"
@@ -2265,7 +2270,7 @@ So that hungry deletion can be used in all modes.
 This package can be used to tie related commands into a family of
 short bindings with a common prefix - a Hydra.
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package hydra
   :pin melpa
   :init
@@ -2386,7 +2391,7 @@ the local simple-httpd server under /imp/live/<buffer-name>/.
 
 Works slow, so disabling. 2021-02-17
 
-#+begin_src emacs-lisp :results silent :tangle no
+#+begin_src emacs-lisp  :tangle no
 (use-package impatient-mode)
 #+end_src
 
@@ -2419,7 +2424,7 @@ Have never used it: disabling. 2021-02-23
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package ivy
   :diminish (ivy-mode . "")
   :bind (("C-s" . swiper)
@@ -2487,7 +2492,7 @@ When using =counsel-ag=:
 
 ** [[https://github.com/tumashu/ivy-posframe][ivy-posframe]]
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package ivy-posframe
   :after ivy
   :init (ivy-posframe-mode 1)
@@ -2733,18 +2738,18 @@ Project navigation and management library for Emacs.
 ** [[https://github.com/milkypostman/powerline][powerline]]
 
 #+begin_src emacs-lisp :tangle no
-  (use-package powerline
-    :config
-    (setq powerline-arrow-shape 'arrow14)
-    (setq powerline-default-separator-dir '(right . left))
+(use-package powerline
+  :custom-face
+  (mode-line ((t (:foreground "#030303" :background "#6b6b6b" :box nil))))
+  (mode-line-inactive ((t (:foreground "#f9f9f9" :background "#6b6b6b" :box nil))))
 
-    (custom-set-faces
-     '(mode-line ((t (:foreground "#030303" :background "#6b6b6b" :box nil))))
-     '(mode-line-inactive ((t (:foreground "#f9f9f9" :background "#6b6b6b" :box nil)))))
+  :config
+  (setq powerline-arrow-shape 'arrow14)
+  (setq powerline-default-separator-dir '(right . left))
 
-    (setq powerline-color1 "#49483E")
-    (setq powerline-color2 "#333333")
-    (powerline-default-theme))
+  (setq powerline-color1 "#49483E")
+  (setq powerline-color2 "#333333")
+  (powerline-default-theme))
 #+end_src
 
 ** [[https://github.com/bmag/helm-purpose][purpose]]
@@ -3657,65 +3662,64 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 2019-03-10 tyring out
 
 #+begin_src emacs-lisp :tangle no
-  (use-package eclim
-    ;; :load-path "~/src/github/elisp/emacs-eclim"
-    :diminish eclim-mode
+(use-package eclim
+  ;; :load-path "~/src/github/elisp/emacs-eclim"
+  :diminish eclim-mode
+  :custom-face
+  ;; keep consistent which other auto-complete backend.
+  (ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
+  (ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
+  :preface
+  (defun nl/restart-eclim (workspace-dir)
+    "Restarts the eclim server.  If it is currently active, the server is stopped first."
+    (interactive (list (read-directory-name "Workspace directory: "
+                                            eclimd-default-workspace nil t eclimd-default-workspace)))
+    (if (get-buffer "*eclimd*") (stop-eclimd))
+    (message "workspace dir: %s" workspace-dir)
+    (cd-absolute workspace-dir)
+    (eclimd-start workspace-dir)
+    (switch-to-buffer "*eclimd*"))
+
+  (defun nl/gradle-javadoc ()
+    "Uses gradle to build the Javadoc for the project."
+    (interactive)
+    (let* ((current-directory default-directory))
+      (setq default-directory (locate-dominating-file default-directory "build.gradle"))
+      (compile "gradle -q --console=plain javadoc")
+      (setq default-directory current-directory)))
+
+  :init (use-package cl)
+  :config
+  (use-package company-emacs-eclim
+    :commands company-emacs-eclim-setup)
+
+  (use-package eclimd
+    ;;:load-path "~/src/github/elisp/emacs-eclim"
     :preface
-    (defun nl/restart-eclim (workspace-dir)
-      "Restarts the eclim server.  If it is currently active, the server is stopped first."
-      (interactive (list (read-directory-name "Workspace directory: "
-                                              eclimd-default-workspace nil t eclimd-default-workspace)))
-      (if (get-buffer "*eclimd*") (stop-eclimd))
-      (message "workspace dir: %s" workspace-dir)
-      (cd-absolute workspace-dir)
-      (eclimd-start workspace-dir)
-      (switch-to-buffer "*eclimd*"))
+    ;;(setq eclimd-autostart t)
+    )
 
-    (defun nl/gradle-javadoc ()
-      "Uses gradle to build the Javadoc for the project."
-      (interactive)
-      (let* ((current-directory default-directory))
-        (setq default-directory (locate-dominating-file default-directory "build.gradle"))
-        (compile "gradle -q --console=plain javadoc")
-        (setq default-directory current-directory)))
+  (setq eclim-print-debug-messages t)
+  ;;eclim-nailgun-port 9092
+  ;;eclim-eclimrc "~/.eclimrc"
+  (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
+    (if (file-accessible-directory-p eclipse-dir)
+        (progn
+          (add-to-list 'eclim-eclipse-dirs eclipse-dir)
+          (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
+                eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
+                ))))
+  (company-emacs-eclim-setup)
+  (global-company-mode t)
+  (setq eclim-auto-save t
+        eclimd-wait-for-process nil
+        ;;eclimd-default-workspace "~/workspace/"
+        help-at-pt-display-when-idle t
+        help-at-pt-timer-delay 0.1
 
-    :init (use-package cl)
-    :config
-    (use-package company-emacs-eclim
-      :commands company-emacs-eclim-setup)
-
-    (use-package eclimd
-      ;;:load-path "~/src/github/elisp/emacs-eclim"
-      :preface
-      ;;(setq eclimd-autostart t)
-      )
-
-    (setq eclim-print-debug-messages t)
-    ;;eclim-nailgun-port 9092
-    ;;eclim-eclimrc "~/.eclimrc"
-    (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
-      (if (file-accessible-directory-p eclipse-dir)
-          (progn
-            (add-to-list 'eclim-eclipse-dirs eclipse-dir)
-            (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
-                  eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
-                  ))))
-    (company-emacs-eclim-setup)
-    (global-company-mode t)
-    (setq eclim-auto-save t
-          eclimd-wait-for-process nil
-          ;;eclimd-default-workspace "~/workspace/"
-          help-at-pt-display-when-idle t
-          help-at-pt-timer-delay 0.1
-
-          )
-    ;; Call the help framework with the settings above & activate eclim-mode
-    (help-at-pt-set-timer)
-
-    ;; keep consistent which other auto-complete backend.
-    (custom-set-faces
-     '(ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
-     '(ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face))))))
+        )
+  ;; Call the help framework with the settings above & activate eclim-mode
+  (help-at-pt-set-timer))
 #+end_src
 **** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
 
@@ -4001,7 +4005,7 @@ pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_bu
 
 See [[https://medium.com/analytics-vidhya/managing-a-python-development-environment-in-emacs-43897fd48c6a][here]]
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package elpy
   :bind
   (:map elpy-mode-map
@@ -4067,7 +4071,7 @@ Integrates with IPython.
 
 **** [[https://github.com/ensime/emacs-scala-mode/tree/master][scala-mode]]
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package scala-mode
   ;;:load-path "~/src/github/elisp/emacs-scala-mode"
   :mode "\\.s\\(cala\\|bt\\)$"
@@ -4189,7 +4193,7 @@ No longer used since Scala Metals is now being used.
 #+end_src
 *** TypeScript
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (use-package typescript-mode
   :hook
   (typescript-mode . column-enforce-mode)
@@ -4317,7 +4321,7 @@ No longer used since Scala Metals is now being used.
 Load some computer-specific settings, such as the name and and email address. The way the settings
 are loaded is based off of [[https://github.com/magnars/.emacs.d][Magnar Sveen's]] config.
 
-#+begin_src emacs-lisp :results silent
+#+begin_src emacs-lisp
 (defvar nl/user-settings-dir nil
   "The directory with user-specific Emacs settings for this
   user.")
