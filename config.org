@@ -15,12 +15,12 @@ This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 ** Ubuntu
 
 I've installed Emacs from source
-(=git://git.savannah.gnu.org/emacs.git=) and used the =emacs-24.5=
-tag. I used the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]], but first
-the following command has to be run.
+(=git://git.savannah.gnu.org/emacs.git=). I used the instructions
+provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]]. But first, the following command has to
+be run.
 
 #+begin_src sh
-org./autogen.sh
+./autogen.sh
 #+end_src
 
 Then to compile and install, do the following.
@@ -181,6 +181,22 @@ unzip symbola.zip
 * Sane defaults
 ** General
 
+#+begin_src emacs-lisp
+(use-package emacs
+  :hook
+  ;; Make completion buffers disappear after 15 seconds.
+  (completion-setup . (lambda ()
+                        (run-at-time 15 nil
+                                     (lambda ()
+                                       (delete-windows-on "*Completions*")))))
+
+  ;; Remove trailing whitespace
+  (before-save . delete-trailing-whitespace)
+  :bind
+  ("C-z" . nil)     ;; I never want to suspend the frame
+  )
+#+end_src
+
 Some commands are disabled by default. They are enabled in our config
 using the following:
 
@@ -250,15 +266,8 @@ using the following:
 ;; Use visual line mode to display long lines.
 (global-visual-line-mode -1)
 
-;; Make completion buffers disappear after 10 seconds.
-(add-hook 'completion-setup-hook
-          (lambda () (run-at-time 10 nil
-                                  (lambda () (delete-windows-on "*Completions*")))))
 ;;Revert these files without asking.
 (setq revert-without-query '(".*"))
-
-;; Default command when using ~grep~.
-(setq grep-command "grep -nH -r --include=\\* -e  .")
 
 ;; Middle-clicking is nice to paste, however it should not adjust point
 ;; and paste at the then adjusted point.
@@ -288,8 +297,6 @@ using the following:
   cursor-type 'box
   indent-tabs-mode nil
   cursor-in-non-selected-windows nil)
-
-(unbind-key "C-z")     ;; I never want to suspend the frame
 
 ;; Cursor Movement
 (setq auto-window-vscroll nil)
@@ -345,9 +352,6 @@ using the following:
 
 ;; Use the directory name to make buffer names unique.
 (setq uniquify-buffer-name-style 'forward)
-
-;; Remove trailing whitespace
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
 #+end_src
 
 ** Key bindings
@@ -900,7 +904,6 @@ ibuffer is the improved version of list-buffers.
 
     :hook (ibuffer-mode . (lambda() (ibuffer-switch-to-saved-filter-groups "home"))))
 #+end_src
-
 ** =org-mode=
 
 #+begin_src emacs-lisp
