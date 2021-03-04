@@ -108,7 +108,7 @@ Also see: all-the-icons-dired package installation
                     (font-spec :size 20 :name "Fira Code Retina")))
 
 (defun nl/after-make-frame (frame)
-    (nl/set-fonts frame))
+  (nl/set-fonts frame))
 
 (add-hook 'after-make-frame-functions 'nl/after-make-frame t)
 
@@ -286,17 +286,17 @@ using the following:
 ;; These are taken from
 ;; https://github.com/patrickt/emacs/blob/master/init.el:
 (setq
-  kill-whole-line t                      ; Lets C-k delete the whole line
-  ;;default-directory "~/src/"             ; My code lives here
-  enable-recursive-minibuffers t         ; don't freak out if I use the minibuffer twice
-  sentence-end-double-space nil          ; are you kidding me
-  confirm-kill-processes nil             ; don't when quitting
-  )
+ kill-whole-line t                      ; Lets C-k delete the whole line
+ ;;default-directory "~/src/"             ; My code lives here
+ enable-recursive-minibuffers t         ; don't freak out if I use the minibuffer twice
+ sentence-end-double-space nil          ; are you kidding me
+ confirm-kill-processes nil             ; don't when quitting
+ )
 
 (setq-default
-  cursor-type 'box
-  indent-tabs-mode nil
-  cursor-in-non-selected-windows nil)
+ cursor-type 'box
+ indent-tabs-mode nil
+ cursor-in-non-selected-windows nil)
 
 ;; Cursor Movement
 (setq auto-window-vscroll nil)
@@ -498,9 +498,9 @@ possible.
 
 #+begin_src emacs-lisp
 (when (equal system-type 'gnu/linux)
-    (setq browse-url-browser-function 'browse-url-generic
-          browse-url-generic-program "/usr/bin/brave-browser"
-          browse-url-generic-args '("--force-device-scale-factor=1.4")))
+  (setq browse-url-browser-function 'browse-url-generic
+        browse-url-generic-program "/usr/bin/brave-browser"
+        browse-url-generic-args '("--force-device-scale-factor=1.4")))
 (setenv "BROWSER" "google-chrome")
 #+end_src
 
@@ -509,36 +509,36 @@ possible.
 https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side-Windows
 
 #+begin_src emacs-lisp
-  (defvar nl/side-window-parameters
-    '(window-parameters . ((no-other-window . nil)
-                           (no-delete-other-windows . t))))
+(defvar nl/side-window-parameters
+  '(window-parameters . ((no-other-window . nil)
+                         (no-delete-other-windows . t))))
 
-  (setq fit-window-to-buffer-horizontally t)
-  (setq window-resize-pixelwise t)
+(setq fit-window-to-buffer-horizontally t)
+(setq window-resize-pixelwise t)
 
-  ;; (setq display-buffer-alist '())
+;; (setq display-buffer-alist '())
 
-  ;; (defun nl/display-buffer-debug(buf-name action)
-  ;;   (message "%s" buf-name)
-  ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
+;; (defun nl/display-buffer-debug(buf-name action)
+;;   (message "%s" buf-name)
+;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
 
-  (add-to-list 'display-buffer-alist
-               '("\\(?:\\*\\(?:grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\|\\*Flycheck.*\\)\\)"
-                 display-buffer-in-side-window
-                 (window-height . 0.15)
-                 (side . bottom)
-                 (slot . -1) ;; left side
-                 (preserve-size . (nil . t))
-                 ,nl/side-window-parameters))
+(add-to-list 'display-buffer-alist
+             '("\\(?:\\*\\(?:grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\|\\*Flycheck.*\\)\\)"
+               display-buffer-in-side-window
+               (window-height . 0.15)
+               (side . bottom)
+               (slot . -1) ;; left side
+               (preserve-size . (nil . t))
+               ,nl/side-window-parameters))
 
-  (add-to-list 'display-buffer-alist
-               '("\\*\\(?:[Hh]elp\\|Backtrace\\|Warnings\\|Compile-Log\\|shell\\|compilation\\|ng-compile\\|ng-test\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
-                 display-buffer-in-side-window
-                 (window-height . 0.2)
-                 (side . bottom)
-                 (slot . 1) ;; right side
-                 (preserve-size . (nil . t))
-                 ,nl/side-window-parameters))
+(add-to-list 'display-buffer-alist
+             '("\\*\\(?:[Hh]elp\\|Backtrace\\|Warnings\\|Compile-Log\\|shell\\|compilation\\|ng-compile\\|ng-test\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
+               display-buffer-in-side-window
+               (window-height . 0.2)
+               (side . bottom)
+               (slot . 1) ;; right side
+               (preserve-size . (nil . t))
+               ,nl/side-window-parameters))
 #+end_src
 
 ** Unicode
@@ -664,49 +664,49 @@ Enable ANSI colors for compilation buffers.
 ** =cc-mode=
 
 #+begin_src emacs-lisp
-  (use-package cc-mode
-    :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
-           ("\\.m\\'"                   . c-mode)
-           ("\\.mm\\'"                  . c++-mode)
-           ("\\.java\\'"                . java-mode))
-    :preface
-    (defconst nelson-c-style
-      '((c-tab-always-indent . t)
-        (c-set-style "K&R")
-        (c-offsets-alist . ((statement-block-intro . +)
-                            (substatement-open     . 0)
-                            (label                 . 0)
-                            (case-label            . +)
-                            (statement-cont        . +)
-                            (innamespace           . 0))))
-      "Nelson programming style.")
+(use-package cc-mode
+  :mode (("\\.h\\(h?\\|xx\\|pp\\)\\'" . c++-mode)
+         ("\\.m\\'"                   . c-mode)
+         ("\\.mm\\'"                  . c++-mode)
+         ("\\.java\\'"                . java-mode))
+  :preface
+  (defconst nelson-c-style
+    '((c-tab-always-indent . t)
+      (c-set-style "K&R")
+      (c-offsets-alist . ((statement-block-intro . +)
+                          (substatement-open     . 0)
+                          (label                 . 0)
+                          (case-label            . +)
+                          (statement-cont        . +)
+                          (innamespace           . 0))))
+    "Nelson programming style.")
 
-    ;; Customizations for all of c-mode, c++-mode, and objc-mode
-    (defun nl/c-mode-common-hook ()
-      ;; add my personal style and set it for the current buffer
-      (c-add-style "NELSON-c-mode" nelson-c-style t)
-      ;; offset customizations not in nelson-c-style
-      (c-set-offset 'member-init-intro '++)
-      ;; other customizations
-      ;;(c-toggle-auto-state 1) ;; Turn on auto newline
-      (nl/common-prog-mode-settings)
-      ;; makes the underscore part of a word in C and C++ modes
-      (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
-      (modify-syntax-entry ?_ "w" c-mode-syntax-table)
-      (lambda ()
-        (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
-          (ggtags-mode 1)))
-      )
+  ;; Customizations for all of c-mode, c++-mode, and objc-mode
+  (defun nl/c-mode-common-hook ()
+    ;; add my personal style and set it for the current buffer
+    (c-add-style "NELSON-c-mode" nelson-c-style t)
+    ;; offset customizations not in nelson-c-style
+    (c-set-offset 'member-init-intro '++)
+    ;; other customizations
+    ;;(c-toggle-auto-state 1) ;; Turn on auto newline
+    (nl/common-prog-mode-settings)
+    ;; makes the underscore part of a word in C and C++ modes
+    (modify-syntax-entry ?_ "w" c++-mode-syntax-table)
+    (modify-syntax-entry ?_ "w" c-mode-syntax-table)
+    (lambda ()
+      (when (derived-mode-p 'c-mode 'c++-mode 'java-mode)
+        (ggtags-mode 1)))
+    )
 
-    (defun nl/java-mode-hook ()
-      (setq indent-tabs-mode nil)
-      (setq c-basic-offset 2)
-      ;;(setq zeal-at-point-docset "java")
-      ;;(eclim-mode t)
-      )
+  (defun nl/java-mode-hook ()
+    (setq indent-tabs-mode nil)
+    (setq c-basic-offset 2)
+    ;;(setq zeal-at-point-docset "java")
+    ;;(eclim-mode t)
+    )
 
-    :hook ((c-mode-common . nl/c-mode-common-hook)
-           (java-mode . nl/java-mode-hook)))
+  :hook ((c-mode-common . nl/c-mode-common-hook)
+         (java-mode . nl/java-mode-hook)))
 #+end_src
 
 ** =cperl-mode=
@@ -733,26 +733,26 @@ Make dired show directories first. Dired buffers should auto revert
 and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.el-01.html][Magnars Sveen]]).
 
 #+begin_src emacs-lisp
-  (use-package dired
-    :ensure nil
-    :custom
-    (dired-recursive-copies 'always)
-    ;; Auto refresh Dired, but be quiet about it
-    (global-auto-revert-non-file-buffers t)
-    ;; Move files to trash when deleting
-    (delete-by-moving-to-trash t)
-    (dired-dwim-target t)
-    :config
-    (setq dired-listing-switches "-aBhl --group-directories-first")
-    ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
-    (put 'dired-find-alternate-file 'disabled nil)
-    :hook ((dired-mode . dired-hide-details-mode)
-           (dired-mode . hl-line-mode)
-           (dired-mode . (lambda ()
-                    (local-set-key (kbd "<mouse-2>") #'dired-find-alternate-file)
-                    ;;(local-set-key (kbd "RET") #'dired-find-alternate-file)
-                    (local-set-key (kbd "^")
-                                   (lambda () (interactive) (find-alternate-file "..")))))))
+(use-package dired
+  :ensure nil
+  :custom
+  (dired-recursive-copies 'always)
+  ;; Auto refresh Dired, but be quiet about it
+  (global-auto-revert-non-file-buffers t)
+  ;; Move files to trash when deleting
+  (delete-by-moving-to-trash t)
+  (dired-dwim-target t)
+  :config
+  (setq dired-listing-switches "-aBhl --group-directories-first")
+  ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
+  (put 'dired-find-alternate-file 'disabled nil)
+  :hook ((dired-mode . dired-hide-details-mode)
+         (dired-mode . hl-line-mode)
+         (dired-mode . (lambda ()
+                         (local-set-key (kbd "<mouse-2>") #'dired-find-alternate-file)
+                         ;;(local-set-key (kbd "RET") #'dired-find-alternate-file)
+                         (local-set-key (kbd "^")
+                                        (lambda () (interactive) (find-alternate-file "..")))))))
 #+end_src
 
 ** =ediff=
@@ -881,28 +881,28 @@ Taken from here: http://blog.binchen.org/posts/what-s-the-best-spell-check-set-u
 ibuffer is the improved version of list-buffers.
 
 #+begin_src emacs-lisp
-  (use-package ibuffer
-    :preface
-    (setq ibuffer-show-empty-filter-groups nil
-          ibuffer-saved-filter-groups
-          '(("home"
-             ("emacs-config" (filename . ".emacs.d"))
-             ("org" (or (mode . org-mode)
-                        (filename . "OrgMode")))
-             ("dired" (mode . dired-mode))
-             ("scala" (mode . scala-mode))
-             ("JS" (mode . js2-mode))
-             ("html" (mode . web-mode))
-             ("php" (mode . php-mode))
-             ("code" (filename . "src"))
-             ("Magit" (name . "\*magit"))
-             ("Helm" (name . "\*helm"))
-             ("Help" (or (name . "\*Help\*")
-                         (name . "\*Apropos\*")
-                         (name . "\*info\*"))))))
-    (defalias 'list-buffers 'ibuffer)
+(use-package ibuffer
+  :preface
+  (setq ibuffer-show-empty-filter-groups nil
+        ibuffer-saved-filter-groups
+        '(("home"
+           ("emacs-config" (filename . ".emacs.d"))
+           ("org" (or (mode . org-mode)
+                      (filename . "OrgMode")))
+           ("dired" (mode . dired-mode))
+           ("scala" (mode . scala-mode))
+           ("JS" (mode . js2-mode))
+           ("html" (mode . web-mode))
+           ("php" (mode . php-mode))
+           ("code" (filename . "src"))
+           ("Magit" (name . "\*magit"))
+           ("Helm" (name . "\*helm"))
+           ("Help" (or (name . "\*Help\*")
+                       (name . "\*Apropos\*")
+                       (name . "\*info\*"))))))
+  (defalias 'list-buffers 'ibuffer)
 
-    :hook (ibuffer-mode . (lambda() (ibuffer-switch-to-saved-filter-groups "home"))))
+  :hook (ibuffer-mode . (lambda() (ibuffer-switch-to-saved-filter-groups "home"))))
 #+end_src
 ** =org-mode=
 
@@ -1407,18 +1407,18 @@ Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/
   (load-theme 'dracula t)
   ;; default region color is too hard to see on my display
   :custom-face
-   ;; (region ((t (:background "#0f3b82"))))
-   (font-lock-warning-face ((t (:background "#0f3b82"))))
-   (font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
-   (ediff-odd-diff-A ((nil :background "#862b27")))
-   (ediff-even-diff-A ((nil :background "#1f772c")))
-   (ediff-current-diff-A ((nil :background "#2b538a")))
-   (ediff-odd-diff-B ((nil :background "#862b27")))
-   (ediff-even-diff-B ((nil :background "#1f772c")))
-   (ediff-current-diff-B ((nil :background "#2b538a")))
-   (ediff-odd-diff-C ((nil :background "#862b27")))
-   (ediff-even-diff-C ((nil :background "#1f772c")))
-   (ediff-current-diff-C ((nil :background "#2b538a"))))
+  ;; (region ((t (:background "#0f3b82"))))
+  (font-lock-warning-face ((t (:background "#0f3b82"))))
+  (font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+  (ediff-odd-diff-A ((nil :background "#862b27")))
+  (ediff-even-diff-A ((nil :background "#1f772c")))
+  (ediff-current-diff-A ((nil :background "#2b538a")))
+  (ediff-odd-diff-B ((nil :background "#862b27")))
+  (ediff-even-diff-B ((nil :background "#1f772c")))
+  (ediff-current-diff-B ((nil :background "#2b538a")))
+  (ediff-odd-diff-C ((nil :background "#862b27")))
+  (ediff-even-diff-C ((nil :background "#1f772c")))
+  (ediff-current-diff-C ((nil :background "#2b538a"))))
 #+end_src
 
 *** [[https://github.com/emacsfodder/emacs-bubbleberry-theme][bubbleberry-theme]]
@@ -1429,7 +1429,7 @@ Switched to Dracula theme: 2019-04-10
 #+begin_src emacs-lisp :tangle no
 (use-package bubbleberry-theme
   :custom-face
-   ;; default region color is too hard to see on my display
+  ;; default region color is too hard to see on my display
   (region ((t (:background "#0f3b82"))))
   (font-lock-warning-face ((t (:background "#0f3b82"))))
   (font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
@@ -1442,8 +1442,8 @@ Switched to Dracula theme: 2019-04-10
   (ediff-odd-diff-C ((nil :background "#862b27")))
   (ediff-even-diff-C ((nil :background "#1f772c")))
   (ediff-current-diff-C ((nil :background "#2b538a"))))
-  :config
-  (load-theme 'bubbleberry t))
+:config
+(load-theme 'bubbleberry t))
 #+end_src
 
 *** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
@@ -1472,17 +1472,17 @@ TextMate like theme.
 #+begin_src emacs-lisp :tangle no
 (use-package monokai-theme
   :config
-    (load-theme 'monokai t)
-    (setq frame-background-mode `dark)
-    (setq monokai-use-variable-pitch nil))
+  (load-theme 'monokai t)
+  (setq frame-background-mode `dark)
+  (setq monokai-use-variable-pitch nil))
 #+end_src
 
 *** [[https://emacsthemes.com/themes/paganini-theme.html][paganini-theme]]
 
 #+begin_src emacs-lisp :tangle no
-  (use-package paganini-theme
-    :config
-    (load-theme 'paganini t))
+(use-package paganini-theme
+  :config
+  (load-theme 'paganini t))
 #+end_src
 
 *** [[https://github.com/bbatsov/solarized-emacs][solarized-emacs]]
@@ -1490,7 +1490,7 @@ TextMate like theme.
 #+begin_src emacs-lisp :tangle no
 (use-package solarized-theme
   :config
-    (load-theme 'solarized-dark t))
+  (load-theme 'solarized-dark t))
 #+end_src
 
 *** [[https://github.com/TheSuspiciousWombat/SusColors-emacs][suscolors]]
@@ -1500,9 +1500,9 @@ Tried out new theme: 2019-08-04
 #+begin_src emacs-lisp :tangle no
 (use-package suscolors-theme
   :custom-face
-   ;; '(region ((t (:background "#0f3b82"))))
-   ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
-   ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
+  ;; '(region ((t (:background "#0f3b82"))))
+  ;; '(font-lock-warning-face ((t (:background "#0f3b82"))))
+  ;; '(font-lock-negation-char-face ((nil :foreground "red" :background "#0f3b82")))
   (vterm-color-black ((t (:foreground "#000000" :background "#777777"))))
 
   (ediff-odd-diff-A ((nil :background "#862b27")))
@@ -1514,8 +1514,8 @@ Tried out new theme: 2019-08-04
   (ediff-odd-diff-C ((nil :background "#862b27")))
   (ediff-even-diff-C ((nil :background "#1f772c")))
   (ediff-current-diff-C ((nil :background "#2b538a"))))
-  :config
-  (load-theme 'suscolors t))
+:config
+(load-theme 'suscolors t))
 #+end_src
 
 *** [[https://github.com/belak/base16-emacs][base16-emacs]]
@@ -1558,16 +1558,16 @@ Tried out 2020-01-20
   :config
   (load-theme 'leuven-dark t)
   :custom-face
-   (code-block ((nil :foreground "#ffff7f" :background "#25202a")))
-   (code-inline ((nil :foreground "#ff9bff" :background "#25202a")))
-   (dired-directory ((nil :background "#25202a")))
-   (dired-header ((nil :background "#25202a" :foreground "SteelBlue3")))
-   (flycheck-error ((nil :background "lawn green" :foreground "black")))
-   (flycheck-warning ((nil :background "yellow" :foreground "black")))
-   (org-block ((nil :foreground "#ffff7f" :background "#25202a" :extend t)))
-   (org-block-begin-line ((nil :underline nil :foreground "#ffff7f" :background "#25202a")))
-   (org-block-end-line ((nil :overline nil :foreground "#ffff7f" :background "#25202a")))
-   (show-paren-match ((nil :background "#ffad65"))))
+  (code-block ((nil :foreground "#ffff7f" :background "#25202a")))
+  (code-inline ((nil :foreground "#ff9bff" :background "#25202a")))
+  (dired-directory ((nil :background "#25202a")))
+  (dired-header ((nil :background "#25202a" :foreground "SteelBlue3")))
+  (flycheck-error ((nil :background "lawn green" :foreground "black")))
+  (flycheck-warning ((nil :background "yellow" :foreground "black")))
+  (org-block ((nil :foreground "#ffff7f" :background "#25202a" :extend t)))
+  (org-block-begin-line ((nil :underline nil :foreground "#ffff7f" :background "#25202a")))
+  (org-block-end-line ((nil :overline nil :foreground "#ffff7f" :background "#25202a")))
+  (show-paren-match ((nil :background "#ffad65"))))
 #+end_src
 
 * ELPA packages
@@ -1582,9 +1582,9 @@ buffer navigation, but applies it to windows. The default keys are
 what I have them set to (with respect to Dvorak, of course).
 
 #+begin_src emacs-lisp
-  (use-package ace-window
-    :config
-    (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+(use-package ace-window
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
 #+end_src
 
 #+RESULTS:
@@ -1602,26 +1602,26 @@ Use silver surfer to search.
 
 #+begin_src emacs-lisp
 (use-package all-the-icons-dired
-    ;; M-x all-the-icons-install-fonts
-    :hook (dired-mode . all-the-icons-dired-mode))
+  ;; M-x all-the-icons-install-fonts
+  :hook (dired-mode . all-the-icons-dired-mode))
 #+end_src
 
 ** [[https://github.com/syohex/emacs-anzu][anzu]]
 
 #+begin_src emacs-lisp
-  (use-package anzu
-    :bind
-    (([remap query-replace] . anzu-query-replace)
-     ([remap query-replace-regexp] . anzu-query-replace-regexp))
-    :custom
-    (anzu-mode-lighter "")
-    (anzu-deactivate-region t)
-    (anzu-search-threshold 1000)
-    (anzu-replace-threshold 50)
-    (anzu-replace-to-string-separator " => ")
-    :config
-    (global-anzu-mode +1)
-    (set-face-attribute 'anzu-mode-line nil :foreground "yellow" :weight 'bold))
+(use-package anzu
+  :bind
+  (([remap query-replace] . anzu-query-replace)
+   ([remap query-replace-regexp] . anzu-query-replace-regexp))
+  :custom
+  (anzu-mode-lighter "")
+  (anzu-deactivate-region t)
+  (anzu-search-threshold 1000)
+  (anzu-replace-threshold 50)
+  (anzu-replace-to-string-separator " => ")
+  :config
+  (global-anzu-mode +1)
+  (set-face-attribute 'anzu-mode-line nil :foreground "yellow" :weight 'bold))
 #+end_src
 
 ** [[https://github.com/abo-abo/avy][avy]]
@@ -1629,10 +1629,10 @@ Use silver surfer to search.
 A quick way to jump around text in buffers.
 
 #+begin_src emacs-lisp
-  (use-package avy
-    :bind
-    (("C-c SPC" . avy-goto-char-timer)
-     ("C-'" . avy-goto-char)))
+(use-package avy
+  :bind
+  (("C-c SPC" . avy-goto-char-timer)
+   ("C-'" . avy-goto-char)))
 #+end_src
 
 ** [[https://github.com/Malabarba/beacon][beacon]]
@@ -1687,9 +1687,9 @@ Disable for now since it is slow when editing Scala code.
 (use-package color-identifiers-mode
   :diminish color-identifiers-mode
   :config
-    (add-hook 'after-init-hook 'global-color-identifiers-mode)
-    (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
-    (set-face-attribute 'font-lock-comment-face nil :slant 'italic))
+  (add-hook 'after-init-hook 'global-color-identifiers-mode)
+  (set-face-attribute 'font-lock-comment-delimiter-face nil :slant 'italic)
+  (set-face-attribute 'font-lock-comment-face nil :slant 'italic))
 #+end_src
 ** [[https://github.com/jordonbiondo/column-enforce-mode][column-enforce-mode]]
 
@@ -1743,28 +1743,28 @@ Removed due to not displaying properly with ~IBM Plex Mono~ font. 2021-02-16
 ** [[https://github.com/TommyX12/company-tabnine][company-tabnine]]
 
 #+begin_src emacs-lisp :tangle no
-  (use-package company-tabnine
-    :after company
-    :config
-    (add-to-list 'company-backends #'company-tabnine)
-    ;; Use the tab-and-go frontend.
-    ;; Allows TAB to select and complete at the same time.
-    (company-tng-configure-default)
-    (setq company-frontends
-          '(company-tng-frontend
-            company-pseudo-tooltip-frontend
-            company-echo-metadata-frontend)))
+(use-package company-tabnine
+  :after company
+  :config
+  (add-to-list 'company-backends #'company-tabnine)
+  ;; Use the tab-and-go frontend.
+  ;; Allows TAB to select and complete at the same time.
+  (company-tng-configure-default)
+  (setq company-frontends
+        '(company-tng-frontend
+          company-pseudo-tooltip-frontend
+          company-echo-metadata-frontend)))
 #+end_src
 ** [[https://github.com/twada/coverlay.el][coverlay.el]]
 
 #+begin_src emacs-lisp :tangle no
-  (use-package coverlay
-    :disabled
-    :load-path "~/src/github/elisp/coverlay.el"
-    :custom
-     (coverlay:untested-line-background-color "#862b27")
-     (coverlay:tested-line-background-color "#1f772c")
-     (coverlay:mark-tested-lines nil))
+(use-package coverlay
+  :disabled
+  :load-path "~/src/github/elisp/coverlay.el"
+  :custom
+  (coverlay:untested-line-background-color "#862b27")
+  (coverlay:tested-line-background-color "#1f772c")
+  (coverlay:mark-tested-lines nil))
 #+end_src
 
 ** [[https://github.com/emacsmirror/emacswiki.org/blob/master/cursor-chg.el][cursor-chg]]
@@ -1783,13 +1783,13 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 ** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
 
 #+begin_src elisp
-  (use-package dap-mode
-    :after lsp-mode
-    ;;:hook (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
-    :config
-    (dap-mode t)
-    (dap-ui-mode t)
-    (require 'dap-java))
+(use-package dap-mode
+  :after lsp-mode
+  ;;:hook (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
+  :config
+  (dap-mode t)
+  (dap-ui-mode t)
+  (require 'dap-java))
 #+end_src
 
 ** [[https://github.com/patrickt/emacs][deadgrep]]
@@ -1983,29 +1983,29 @@ This package adds support for flow to flycheck.
 ** [[https://github.com/abingham/emacs-ycmd][emacs-ycmd]]
 
 #+begin_src emacs-lisp :tangle no
-  (use-package ycmd
-    :disabled
-    :preface
-    (setq ycmd-startup-timeout 10)
-    (defun ycmd-setup-completion-at-point-function ()
-      "Setup `completion-at-point-functions' for `ycmd-mode'."
-      (add-hook 'completion-at-point-functions
-                #'ycmd-complete-at-point nil :local))
+(use-package ycmd
+  :disabled
+  :preface
+  (setq ycmd-startup-timeout 10)
+  (defun ycmd-setup-completion-at-point-function ()
+    "Setup `completion-at-point-functions' for `ycmd-mode'."
+    (add-hook 'completion-at-point-functions
+              #'ycmd-complete-at-point nil :local))
 
+  :config
+  (set-variable 'ycmd-server-command `("python" ,(file-truename "~/src/github/devtools/ycmd/ycmd")))
+  ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
+
+  (use-package company-ycmd
     :config
-    (set-variable 'ycmd-server-command `("python" ,(file-truename "~/src/github/devtools/ycmd/ycmd")))
-    ;;(set-variable 'ycmd-global-config (expand-file-name "~/path/to/ycmd/ycm_conf.py"))
-
-    (use-package company-ycmd
-      :config
-      (company-ycmd-setup))
-    (use-package flycheck-ycmd
-      :config
-      (flycheck-ycmd-setup))
-    (use-package ycmd-eldoc
-      :hook (ycmd-mode . ycmd-eldoc-setup))
-    :hook ((js2-mode  .ycmd-mode)
-           ( ycmd-mod-hook . ycmd-setup-completion-at-point-function)))
+    (company-ycmd-setup))
+  (use-package flycheck-ycmd
+    :config
+    (flycheck-ycmd-setup))
+  (use-package ycmd-eldoc
+    :hook (ycmd-mode . ycmd-eldoc-setup))
+  :hook ((js2-mode  .ycmd-mode)
+         ( ycmd-mod-hook . ycmd-setup-completion-at-point-function)))
 #+end_src
 
 ** [[https://melpa.org/#/etags-select][etags-select]]
@@ -2026,12 +2026,12 @@ this code.
 ** [[https://github.com/magnars/expand-region.el][expand-region]]
 
 #+begin_src emacs-lisp
-  (use-package expand-region
-    ;; :load-path (lambda () (expand-file-name "~/src/github/elisp/expand-region.el"))
-    :bind ("C-=" . er/expand-region)
-    :config
-    (setq expand-region-smart-cursor t
-          er/enable-subword-mode? nil))
+(use-package expand-region
+  ;; :load-path (lambda () (expand-file-name "~/src/github/elisp/expand-region.el"))
+  :bind ("C-=" . er/expand-region)
+  :config
+  (setq expand-region-smart-cursor t
+        er/enable-subword-mode? nil))
 #+end_src
 
 ** [[https://github.com/wasamasa/eyebrowse][eyebrowse]]
@@ -2057,15 +2057,15 @@ Show FIXME/TODO/BUG/KLUDGE in special face only in comments and
 strings.
 
 #+begin_src emacs-lisp
-  (use-package fic-mode
-    :commands fic-mode
-    :hook ((c++-mode    . fic-mode)
-           (c-mode      . fic-mode)
-           (java-mode   . fic-mode)
-           (vala-mode   . fic-mode)
-           (python-mode . fic-mode)
-           (php-mode    . fic-mode)
-           (scala-mode  . fic-mode)))
+(use-package fic-mode
+  :commands fic-mode
+  :hook ((c++-mode    . fic-mode)
+         (c-mode      . fic-mode)
+         (java-mode   . fic-mode)
+         (vala-mode   . fic-mode)
+         (python-mode . fic-mode)
+         (php-mode    . fic-mode)
+         (scala-mode  . fic-mode)))
 #+end_src
 
 ** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
@@ -2096,7 +2096,7 @@ Allow windmove to jump between frames.
                         '(javascript-jshint)))
 
   (setq flycheck-checkers (append flycheck-checkers
-                                 '(javascript-eslint)))
+                                  '(javascript-eslint)))
   ;; use eslint with web-mode for jsx files
   (flycheck-add-mode 'javascript-eslint 'web-mode)
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
@@ -2124,14 +2124,14 @@ Allow windmove to jump between frames.
 On the fly markdown preview.
 
 #+begin_src emacs-lisp
-    (use-package flymd
-      :commands (flymd-flyit)
-      :preface
-      (defun nl/flymd-browser-function (url)
-        (let ((browse-url-browser-function 'browse-url-firefox))
-          (browse-url url)))
-      :config
-      (setq flymd-browser-open-function 'nl/flymd-browser-function))
+(use-package flymd
+  :commands (flymd-flyit)
+  :preface
+  (defun nl/flymd-browser-function (url)
+    (let ((browse-url-browser-function 'browse-url-firefox))
+      (browse-url url)))
+  :config
+  (setq flymd-browser-open-function 'nl/flymd-browser-function))
 #+end_src
 
 ** [[https://github.com/waymondo/frog-jump-buffer][frog-jump-buffer]]
@@ -2218,9 +2218,9 @@ Guide the following key bindings automatically and dynamically.
 (use-package guide-key
   :diminish guide-key-mode
   :config
-    (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h" "C-c l")
-          guide-key/recursive-key-sequence-flag t)
-    (guide-key-mode 1))
+  (setq guide-key/guide-key-sequence '("C-x r" "C-c p" "C-h" "C-c h" "C-c l")
+        guide-key/recursive-key-sequence-flag t)
+  (guide-key-mode 1))
 #+end_src
 
 ** [[https://github.com/abo-abo/headlong][headlong]]
@@ -2250,11 +2250,11 @@ Not used for now since it breaks ERC font lock.
 #+begin_src emacs-lisp :tangle no
 (use-package hl-anything
   :config
-    (hl-highlight-mode 1)
-    ;; (hl-setup-default-advices nil)
-    ;; (hl-setup-customizable-advices nil)
-    ;; (remove-hook 'kill-emacs-hook 'hl-save-highlights)
-    )
+  (hl-highlight-mode 1)
+  ;; (hl-setup-default-advices nil)
+  ;; (hl-setup-customizable-advices nil)
+  ;; (remove-hook 'kill-emacs-hook 'hl-save-highlights)
+  )
 #+end_src
 
 ** [[https://github.com/nflath/hungry-delete][hungry-delete]]
@@ -2363,26 +2363,26 @@ short bindings with a common prefix - a Hydra.
 
   (global-set-key (kbd "M-g M-g") 'hydra-goto-line/body)
 
-(defhydra hydra-windows-nav (:color red)
-  ("s" shrink-window-horizontally "shrink horizontally" :column "Sizing")
-  ("e" enlarge-window-horizontally "enlarge horizontally")
-  ("b" balance-windows "balance window height")
-  ("m" maximize-window "maximize current window")
-  ("M" minimize-window "minimize current window")
+  (defhydra hydra-windows-nav (:color red)
+    ("s" shrink-window-horizontally "shrink horizontally" :column "Sizing")
+    ("e" enlarge-window-horizontally "enlarge horizontally")
+    ("b" balance-windows "balance window height")
+    ("m" maximize-window "maximize current window")
+    ("M" minimize-window "minimize current window")
 
-  ("h" split-window-below "split horizontally" :column "Split management")
-  ("v" split-window-right "split vertically")
-  ("d" delete-window "delete current window")
-  ("x" delete-other-windows "delete-other-windows")
+    ("h" split-window-below "split horizontally" :column "Split management")
+    ("v" split-window-right "split vertically")
+    ("d" delete-window "delete current window")
+    ("x" delete-other-windows "delete-other-windows")
 
 
-  ("z" ace-window "ace window" :color blue :column "Navigation")
-  ("h" windmove-left "← window")
-  ("j" windmove-down "↓ window")
-  ("k" windmove-up "↑ window")
-  ("l" windmove-right "→ window")
-  ("r" toggle-window-split "rotate windows") ; Located in utility functions
-  ("q" nil "quit menu" :color blue :column nil))
+    ("z" ace-window "ace window" :color blue :column "Navigation")
+    ("h" windmove-left "← window")
+    ("j" windmove-down "↓ window")
+    ("k" windmove-up "↑ window")
+    ("l" windmove-right "→ window")
+    ("r" toggle-window-split "rotate windows") ; Located in utility functions
+    ("q" nil "quit menu" :color blue :column nil))
 
   (global-set-key (kbd "C-c w") 'hydra-windows-nav/body))
 #+end_src
@@ -2412,17 +2412,17 @@ Have never used it: disabling. 2021-02-23
 ** [[https://github.com/purcell/ibuffer-projectile][ibuffer-projectile]]
 
 #+begin_src emacs-lisp
-  (use-package ibuffer-projectile
-      :after (ibuffer projectile)
-      :config
-      (defun nl/ibuffer-customization ()
-        "My customization for `ibuffer'."
-        ;; ibuffer-projectile setup
-        (ibuffer-projectile-set-filter-groups)
-        (unless (eq ibuffer-sorting-mode 'alphabetic)
-          (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
-          (ibuffer-do-sort-by-major-mode)))  ; then do major-mode sort
-      :hook (ibuffer-mode . nl/ibuffer-customization))
+(use-package ibuffer-projectile
+  :after (ibuffer projectile)
+  :config
+  (defun nl/ibuffer-customization ()
+    "My customization for `ibuffer'."
+    ;; ibuffer-projectile setup
+    (ibuffer-projectile-set-filter-groups)
+    (unless (eq ibuffer-sorting-mode 'alphabetic)
+      (ibuffer-do-sort-by-alphabetic) ; first do alphabetic sort
+      (ibuffer-do-sort-by-major-mode)))  ; then do major-mode sort
+  :hook (ibuffer-mode . nl/ibuffer-customization))
 #+end_src
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
@@ -2464,11 +2464,11 @@ Have never used it: disabling. 2021-02-23
 This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Ivy 0.8.0 is out]]
 
 #+begin_src emacs-lisp
-  (use-package swiper
-    :config
-    (setq ivy-initial-inputs-alist nil)
-    (setq ivy-use-virtual-buffers t)
-    (setq swiper-action-recenter t))
+(use-package swiper
+  :config
+  (setq ivy-initial-inputs-alist nil)
+  (setq ivy-use-virtual-buffers t)
+  (setq swiper-action-recenter t))
 #+end_src
 
 Also, install counsel:
@@ -2620,7 +2620,7 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
   ;;(add-to-list 'markdown-preview-stylesheets
   ;;             "https://raw.githubusercontent.com/richleland/pygments-css/master/emacs.css")
   (setq markdown-preview-stylesheets (list
-        "http://thomasf.github.io/solarized-css/solarized-light.min.css")))
+                                      "http://thomasf.github.io/solarized-css/solarized-light.min.css")))
 #+end_src
 
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
@@ -2719,14 +2719,14 @@ Project navigation and management library for Emacs.
 2019-09-20 This package does not work with Emacs 27
 
 #+begin_src emacs-lisp :tangle no
-  (use-package protobuf-mode
-    :config
-    (defconst nl/protobuf-style
-      '((c-basic-offset . 2)
-        (indent-tabs-mode . nil)))
-    :hook (protobuf-mode . (lambda ()
-                             (c-add-style "nl/style" nl/protobuf-style t)
-                             (subword-mode 1))))
+(use-package protobuf-mode
+  :config
+  (defconst nl/protobuf-style
+    '((c-basic-offset . 2)
+      (indent-tabs-mode . nil)))
+  :hook (protobuf-mode . (lambda ()
+                           (c-add-style "nl/style" nl/protobuf-style t)
+                           (subword-mode 1))))
 #+end_src
 
 ** [[https://github.com/tumashu/posframe][posframe]]
@@ -2761,9 +2761,9 @@ Project navigation and management library for Emacs.
 (use-package window-purpose
   :commands purpose-mode
   :config
-    (add-to-list 'purpose-user-mode-purposes '(scala-mode . scala))
-    (add-to-list 'purpose-user-mode-purposes '(sbt-mode . scala))
-    (purpose-compile-user-configuration))
+  (add-to-list 'purpose-user-mode-purposes '(scala-mode . scala))
+  (add-to-list 'purpose-user-mode-purposes '(sbt-mode . scala))
+  (purpose-compile-user-configuration))
 #+end_src
 
 ** revive
@@ -2777,12 +2777,12 @@ This package was removed from Melpa on 2017-07-31 due to the author not wanting 
 specify a lincence.
 
 #+begin_src emacs-lisp
-  (use-package revive
-    :load-path "lisp"
-    :init
-    (autoload 'save-current-configuration "revive" "Save status" t)
-    (autoload 'resume "revive" "Resume Emacs" t)
-    (autoload 'wipe "revive" "Wipe Emacs" t))
+(use-package revive
+  :load-path "lisp"
+  :init
+  (autoload 'save-current-configuration "revive" "Save status" t)
+  (autoload 'resume "revive" "Resume Emacs" t)
+  (autoload 'wipe "revive" "Wipe Emacs" t))
 #+end_src
 
 ** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
@@ -2810,7 +2810,7 @@ to overwrite.
   (define-key region-bindings-mode-map "m" 'mc/mark-more-like-this-extended)
   (define-key region-bindings-mode-map "q" 'anzu-query-replace-regexp)
   ;;(define-key region-bindings-mode-map "w" 'whole-line-or-region-kill-ring-save)
-)
+  )
 #+end_src
 
 ** [[https://github.com/nlamirault/ripgrep.el][ripgrep]]
@@ -2853,17 +2853,17 @@ Declarative popup window rules.
 #+END_QUOTE
 
 #+begin_src emacs-lisp :tangle no
-  (use-package shackle
-    :config
-    (setq shackle-rules
-          '(("*Help*" :align t :ratio 0.4 :select t)
-            ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
-            ("\\*sbt\\*.*" :regexp t :other t)
-            ;;(compilation-mode :popup t)
-            (("*shell*" "*eshell*") :popup t))
-          shackle-default-rule '(:select t)
-          shackle-inhibit-window-quit-on-same-windows t)
-    (shackle-mode))
+(use-package shackle
+  :config
+  (setq shackle-rules
+        '(("*Help*" :align t :ratio 0.4 :select t)
+          ("\\`\\*[Hh]elm.*?\\*\\'" :regexp t :align 'bottom :ratio 0.4)
+          ("\\*sbt\\*.*" :regexp t :other t)
+          ;;(compilation-mode :popup t)
+          (("*shell*" "*eshell*") :popup t))
+        shackle-default-rule '(:select t)
+        shackle-inhibit-window-quit-on-same-windows t)
+  (shackle-mode))
 #+end_src
 
 ** [[https://github.com/Fuco1/smartparens][smartparens]]
@@ -2912,43 +2912,43 @@ http://www.masteringemacs.org/article/smart-scan-jump-symbols-buffer
 ** [[https://github.com/TheBB/spaceline][spaceline]]
 
 #+begin_src emacs-lisp :tangle no
-    (use-package spaceline-config
-      :after spaceline
-      :init
-      (require 'spaceline-config)
-      (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
-      (setq-default powerline-default-separator 'wave
-                    powerline-height 26
-                    spaceline-separator-dir-left '(left . left)
-                    spaceline-separator-dir-right '(right . right))
-      :config
-      (spaceline-helm-mode 1)
-      (spaceline-toggle-version-control-on)
+(use-package spaceline-config
+  :after spaceline
+  :init
+  (require 'spaceline-config)
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+  (setq-default powerline-default-separator 'wave
+                powerline-height 26
+                spaceline-separator-dir-left '(left . left)
+                spaceline-separator-dir-right '(right . right))
+  :config
+  (spaceline-helm-mode 1)
+  (spaceline-toggle-version-control-on)
 
-      (spaceline-compile
-        ;; left side
-        '(((projectile-root buffer-modified) :face 'avy-lead-face-1 :priority 100)
-          ((remote-host buffer-id) :face 'avy-lead-face-0 :priority 100)
-          ((line column) :separator ":" :face default-face :priority 100)
-          (anzu :priority 95)
-          auto-compile
-          (process :when active)
-          (minor-modes :when active
-                       :priority 9)
-          (org-clock :when active))
-        ;; right side
-        '(which-function
-          (selection-info :priority 95)
-          input-method
-          (version-control :when active :priority 78)
-          ((flycheck-error flycheck-warning flycheck-info) :when active :priority 89)
-          (major-mode :priority 79)
-          (minor-mode :priority 79 :face other-face)
-          (global :when active)
-          (buffer-position :priority 99)
-          (hud :priority 99)))
+  (spaceline-compile
+   ;; left side
+   '(((projectile-root buffer-modified) :face 'avy-lead-face-1 :priority 100)
+     ((remote-host buffer-id) :face 'avy-lead-face-0 :priority 100)
+     ((line column) :separator ":" :face default-face :priority 100)
+     (anzu :priority 95)
+     auto-compile
+     (process :when active)
+     (minor-modes :when active
+                  :priority 9)
+     (org-clock :when active))
+   ;; right side
+   '(which-function
+     (selection-info :priority 95)
+     input-method
+     (version-control :when active :priority 78)
+     ((flycheck-error flycheck-warning flycheck-info) :when active :priority 89)
+     (major-mode :priority 79)
+     (minor-mode :priority 79 :face other-face)
+     (global :when active)
+     (buffer-position :priority 99)
+     (hud :priority 99)))
 
-      (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
+  (setq-default mode-line-format '("%e" (:eval (spaceline-ml-main)))))
 #+end_src
 
 ** [[https://github.com/bbatsov/super-save][super-save]]
@@ -3084,8 +3084,8 @@ forward and backward to the next bookmark.
 #+begin_src emacs-lisp
 (use-package bm
   :bind ("C-<f4>" . bm-toggle)
-        ("A-<f4>" . bm-next)
-        ("S-<f4>" . bm-previous))
+  ("A-<f4>" . bm-next)
+  ("S-<f4>" . bm-previous))
 #+end_src
 
 ** [[https://github.com/benma/visual-regexp.el][visual-regexp]]
@@ -3108,7 +3108,7 @@ and other goodies!).
          ("C-M-s" . vr/isearch-forward)))
 
 (defun nl/query-replace-regexp-history-clear ()
-    "Using visual-regexp functions and query-replace-regexp in
+  "Using visual-regexp functions and query-replace-regexp in
 the same session fails if there are invalid history characters in
 the history (visual-regexp uses PCRE regexes). This function
 clears the history."
@@ -3157,38 +3157,38 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 ** [[https://github.com/fxbois/web-mode][web-mode]]
 
 #+begin_src emacs-lisp
-  (use-package web-mode
-    :mode (("\\.html?\\'" . web-mode)
-           ("\\.json\\'" . web-mode))
-    :bind ("C-c s h" . nl/counsel-ag-html)
-    :hook (web-mode  . nl/web-mode-hook)
-    :preface
-    (defun html-filename-p (filename)
-      (string-match "\.html$" filename))
+(use-package web-mode
+  :mode (("\\.html?\\'" . web-mode)
+         ("\\.json\\'" . web-mode))
+  :bind ("C-c s h" . nl/counsel-ag-html)
+  :hook (web-mode  . nl/web-mode-hook)
+  :preface
+  (defun html-filename-p (filename)
+    (string-match "\.html$" filename))
 
-    (defun nl/counsel-ag-html ()
-      "Perform counsel-ag on the project's HTML files."
-      (interactive)
-      (counsel-ag "" (projectile-project-root) "--html"))
+  (defun nl/counsel-ag-html ()
+    "Perform counsel-ag on the project's HTML files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "--html"))
 
-    (defun nl/web-mode-hook ()
-      "Hooks for Web mode."
-      (setq web-mode-markup-indent-offset 2)
-      (prettier-js-mode)
-      (yas-minor-mode))
+  (defun nl/web-mode-hook ()
+    "Hooks for Web mode."
+    (setq web-mode-markup-indent-offset 2)
+    (prettier-js-mode)
+    (yas-minor-mode))
 
-    :config
-    (setq web-mode-markup-indent-offset 2
-          web-mode-css-indent-offset 2
-          web-mode-code-indent-offset 2
-          web-mode-enable-auto-closing t
-          web-mode-enable-auto-quoting t
-          web-mode-ac-sources-alist
-          '(("css" . (ac-source-css-property))
-            ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
+  :config
+  (setq web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-code-indent-offset 2
+        web-mode-enable-auto-closing t
+        web-mode-enable-auto-quoting t
+        web-mode-ac-sources-alist
+        '(("css" . (ac-source-css-property))
+          ("html" . (ac-source-words-in-buffer ac-source-abbrev))))
 
-    (flycheck-add-mode 'javascript-eslint 'web-mode)
-    (flycheck-add-mode 'typescript-tslint 'web-mode))
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
+  (flycheck-add-mode 'typescript-tslint 'web-mode))
 #+end_src
 
 ** [[https://github.com/mhayashi1120/Emacs-wgrep][wgrep]]
@@ -3283,28 +3283,28 @@ Sometimes you end up with cursors outside of your view. You can scroll
 the screen to center on each cursor with ~C-v~ and ~M-v~.
 
 #+begin_src emacs-lisp
-  (use-package multiple-cursors
-    :after selected
-    :bind (("C-S-c C-S-c" . mc/edit-lines)
-           ("C->"         . mc/mark-next-like-this)
-           ("C-<"         . mc/mark-previous-like-this)
-           ("C-M->"       . mc/unmark-next-like-this)
-           ("C-M-<"       . mc/unmark-previous-like-this)
-           ("C-c C-<"     . mc/mark-all-like-this)
-           ("C-!"         . mc/mark-next-symbol-like-this)
-           ("C-x C-m"     . mc/mark-all-dwim))
-    :bind (:map selected-keymap
-                ("C-'" . mc/edit-lines)
-                ("."   . mc/mark-next-like-this)
-                ("<"   . mc/unmark-next-like-this)
-                ("C->" . mc/skip-to-next-like-this)
-                (","   . mc/mark-previous-like-this)
-                (">"   . mc/unmark-previous-like-this)
-                ("C-<" . mc/skip-to-previous-like-this)
-                ("y"   . mc/mark-next-symbol-like-this)
-                ("Y"   . mc/mark-previous-symbol-like-this)
-                ("w"   . mc/mark-next-word-like-this)
-                ("W"   . mc/mark-previous-word-like-this)))
+(use-package multiple-cursors
+  :after selected
+  :bind (("C-S-c C-S-c" . mc/edit-lines)
+         ("C->"         . mc/mark-next-like-this)
+         ("C-<"         . mc/mark-previous-like-this)
+         ("C-M->"       . mc/unmark-next-like-this)
+         ("C-M-<"       . mc/unmark-previous-like-this)
+         ("C-c C-<"     . mc/mark-all-like-this)
+         ("C-!"         . mc/mark-next-symbol-like-this)
+         ("C-x C-m"     . mc/mark-all-dwim))
+  :bind (:map selected-keymap
+              ("C-'" . mc/edit-lines)
+              ("."   . mc/mark-next-like-this)
+              ("<"   . mc/unmark-next-like-this)
+              ("C->" . mc/skip-to-next-like-this)
+              (","   . mc/mark-previous-like-this)
+              (">"   . mc/unmark-previous-like-this)
+              ("C-<" . mc/skip-to-previous-like-this)
+              ("y"   . mc/mark-next-symbol-like-this)
+              ("Y"   . mc/mark-previous-symbol-like-this)
+              ("w"   . mc/mark-next-word-like-this)
+              ("W"   . mc/mark-previous-word-like-this)))
 #+end_src
 
 ** Git
@@ -3314,15 +3314,15 @@ A great interface for git projects. It's much more pleasant to use than the git 
 command line. Use an easy keybinding to access magit.
 
 #+begin_src emacs-lisp
-  (use-package magit
-    :bind (("C-x g" . magit-status))
-    :config
-    (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
-    (setq-default vc-handled-backends '(Git))
-    (setq magit-push-always-verify nil
+(use-package magit
+  :bind (("C-x g" . magit-status))
+  :config
+  (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
+  (setq-default vc-handled-backends '(Git))
+  (setq magit-push-always-verify nil
 
-          ;; only use A and B in Ediff
-          magit-ediff-dwim-show-on-hunks t))
+        ;; only use A and B in Ediff
+        magit-ediff-dwim-show-on-hunks t))
 #+end_src
 
 **** Fullscreen magit
@@ -3379,57 +3379,57 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
   ;; prefix "C-x c", which is inconvenient because you can
   ;; accidentially press "C-x C-c"
   (setq ;;helm-M-x-fuzzy-match                  t
-        ;;helm-bookmark-show-location           t
-        ;;helm-buffers-fuzzy-matching           t
-        ;;helm-completion-in-region-fuzzy-match t
-        ;;helm-file-cache-fuzzy-match           t
-        ;;helm-imenu-fuzzy-match                t
-        ;;helm-mode-fuzzy-match                 t
-        ;;helm-locate-fuzzy-match               t
-        ;;helm-quick-update                     t
-        ;;helm-recentf-fuzzy-match              t
-        ;;helm-semantic-fuzzy-match             t
+   ;;helm-bookmark-show-location           t
+   ;;helm-buffers-fuzzy-matching           t
+   ;;helm-completion-in-region-fuzzy-match t
+   ;;helm-file-cache-fuzzy-match           t
+   ;;helm-imenu-fuzzy-match                t
+   ;;helm-mode-fuzzy-match                 t
+   ;;helm-locate-fuzzy-match               t
+   ;;helm-quick-update                     t
+   ;;helm-recentf-fuzzy-match              t
+   ;;helm-semantic-fuzzy-match             t
 
-        ;;
-        helm-split-window-in-side-p t           ; open helm buffer inside current window,
-        ;; not occupy whole other window
-        helm-ff-newfile-prompt-p nil
-        helm-scroll-amount 4                    ; scroll 4 lines other window using
-        ;; M-<next>/M-<prior>
-        ;;helm-quick-update t                     ; do not display invisible candidates
-        ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
-        ;; updating in delayed sources.
-        ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
-        ;; updating candidate buffer
-        helm-ff-search-library-in-sexp t        ; search for library in `require` and
-        ;; `declare-function` sexp.
+   ;;
+   helm-split-window-in-side-p t           ; open helm buffer inside current window,
+   ;; not occupy whole other window
+   helm-ff-newfile-prompt-p nil
+   helm-scroll-amount 4                    ; scroll 4 lines other window using
+   ;; M-<next>/M-<prior>
+   ;;helm-quick-update t                     ; do not display invisible candidates
+   ;;helm-idle-delay 0.01                    ; be idle for this many seconds, before
+   ;; updating in delayed sources.
+   ;;helm-input-idle-delay 0.01              ; be idle for this many seconds, before
+   ;; updating candidate buffer
+   helm-ff-search-library-in-sexp t        ; search for library in `require` and
+   ;; `declare-function` sexp.
 
-        ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
-        ;;                                    '(picture-mode artist-mode))
-        ;; limit the number of displayed canidates
-        ;;helm-candidate-number-limit 100
-        ;; show all candidates when set to 0
-        ;;helm-M-x-requires-pattern 0
-        helm-ff-file-name-history-use-recentf t
-        ;; move to end or beginning of source when reaching top or bottom of source.
-        helm-move-to-line-cycle-in-source t
-        ;; Needed in helm-buffers-list
-        ;;ido-use-virtual-buffers t
-        ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
-        ;;helm-buffers-fuzzy-matching t
-        ;; truncate long lines
-        ;;helm-truncate-lines t
-        helm-autoresize-min-height 30
-        helm-autoresize-max-height 30
-        helm-display-header-line nil
-        helm-buffer-max-length 45
-        helm-yas-display-key-on-candidate t
-        helm-grep-ag-command "rg --color=always --colors 'match:fg:black' --colors 'match:bg:yellow' --smart-case --no-heading --line-number %s %s %s"
-        helm-grep-ag-pipe-cmd-switches '("--colors 'match:fg:black'" "--colors 'match:bg:yellow'")
-        helm-mini-default-sources '(helm-source-buffers-list
-                                    helm-source-recentf
-                                    helm-source-bookmarks
-                                    helm-source-buffer-not-found))
+   ;;helm-buffers-favorite-modes (append helm-buffers-favorite-modes
+   ;;                                    '(picture-mode artist-mode))
+   ;; limit the number of displayed canidates
+   ;;helm-candidate-number-limit 100
+   ;; show all candidates when set to 0
+   ;;helm-M-x-requires-pattern 0
+   helm-ff-file-name-history-use-recentf t
+   ;; move to end or beginning of source when reaching top or bottom of source.
+   helm-move-to-line-cycle-in-source t
+   ;; Needed in helm-buffers-list
+   ;;ido-use-virtual-buffers t
+   ;; fuzzy matching buffer names when non--nil, useful in helm-mini that lists buffers
+   ;;helm-buffers-fuzzy-matching t
+   ;; truncate long lines
+   ;;helm-truncate-lines t
+   helm-autoresize-min-height 30
+   helm-autoresize-max-height 30
+   helm-display-header-line nil
+   helm-buffer-max-length 45
+   helm-yas-display-key-on-candidate t
+   helm-grep-ag-command "rg --color=always --colors 'match:fg:black' --colors 'match:bg:yellow' --smart-case --no-heading --line-number %s %s %s"
+   helm-grep-ag-pipe-cmd-switches '("--colors 'match:fg:black'" "--colors 'match:bg:yellow'")
+   helm-mini-default-sources '(helm-source-buffers-list
+                               helm-source-recentf
+                               helm-source-bookmarks
+                               helm-source-buffer-not-found))
 
   ;; Save current position to mark ring when jumping to a different place
   (helm-autoresize-mode 1)
@@ -3563,22 +3563,22 @@ instead of ~find-file-other-window~.
   :after helm
   :commands helm-flx-mode
   :config
-    (helm-flx-mode +1)
-    (setq helm-flx-for-helm-find-files t ;; t by default
-          helm-flx-for-helm-locate t))
+  (helm-flx-mode +1)
+  (setq helm-flx-for-helm-find-files t ;; t by default
+        helm-flx-for-helm-locate t))
 #+end_src
 
 *** [[https://github.com/syohex/emacs-helm-gtags][helm-gtags]]
 
 #+begin_src emacs-lisp :tangle no
-  (use-package helm-gtags
-    :commands (helm-gtags-mode)
-    :bind (("M-." . helm-gtags-find-tag)
-           ("M-," . helm-gtags-find-rtag))
-    :custom
-    (helm-gtags-path-style 'relative)
-    (helm-gtags-ignore-case t)
-    (helm-gtags-auto-update t))
+(use-package helm-gtags
+  :commands (helm-gtags-mode)
+  :bind (("M-." . helm-gtags-find-tag)
+         ("M-," . helm-gtags-find-rtag))
+  :custom
+  (helm-gtags-path-style 'relative)
+  (helm-gtags-ignore-case t)
+  (helm-gtags-auto-update t))
 #+end_src
 
 *** [[https://github.com/emacs-lsp/helm-lsp][helm-lsp]]
@@ -3609,22 +3609,22 @@ instead of ~find-file-other-window~.
 (use-package helm-swoop
   :bind (("M-i" . helm-swoop))
   :config
-    ;; When doing isearch, hand the word over to helm-swoop
-    (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
-    ;; From helm-swoop to helm-multi-swoop-all
-    (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
-    ;; Move up and down like isearch
-    (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
-    (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
-    (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
-    (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
-    ;; Save buffer when helm-multi-swoop-edit complete
-    (setq helm-multi-swoop-edit-save t
-          ;; If this value is t, split window inside the current window
-          helm-swoop-split-with-multiple-windows nil
-          ;; Optional face for line numbers
-          ;; Face name is `helm-swoop-line-number-face`
-          helm-swoop-use-line-number-face t))
+  ;; When doing isearch, hand the word over to helm-swoop
+  (define-key isearch-mode-map (kbd "M-i") 'helm-swoop-from-isearch)
+  ;; From helm-swoop to helm-multi-swoop-all
+  (define-key helm-swoop-map (kbd "M-i") 'helm-multi-swoop-all-from-helm-swoop)
+  ;; Move up and down like isearch
+  (define-key helm-swoop-map (kbd "C-r") 'helm-previous-line)
+  (define-key helm-swoop-map (kbd "C-s") 'helm-next-line)
+  (define-key helm-multi-swoop-map (kbd "C-r") 'helm-previous-line)
+  (define-key helm-multi-swoop-map (kbd "C-s") 'helm-next-line)
+  ;; Save buffer when helm-multi-swoop-edit complete
+  (setq helm-multi-swoop-edit-save t
+        ;; If this value is t, split window inside the current window
+        helm-swoop-split-with-multiple-windows nil
+        ;; Optional face for line numbers
+        ;; Face name is `helm-swoop-line-number-face`
+        helm-swoop-use-line-number-face t))
 #+end_src
 
 *** [[https://github.com/brotzeitmacher/helm-xref][helm-xref]]
@@ -3638,7 +3638,7 @@ No longer using this since most development is now using lsp -
   (require 'helm-xref)
   :config
   ;;(setq xref-show-xrefs-function 'helm-xref-show-xrefs)
-)
+  )
 #+end_src
 
 ** Coding
@@ -3672,57 +3672,57 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   ;; keep consistent which other auto-complete backend.
   (ac-emacs-eclim-candidate-face ((t (:inherit ac-candidate-face))))
   (ac-emacs-eclim-selection-face ((t (:inherit ac-selection-face)))))
+:preface
+(defun nl/restart-eclim (workspace-dir)
+  "Restarts the eclim server.  If it is currently active, the server is stopped first."
+  (interactive (list (read-directory-name "Workspace directory: "
+                                          eclimd-default-workspace nil t eclimd-default-workspace)))
+  (if (get-buffer "*eclimd*") (stop-eclimd))
+  (message "workspace dir: %s" workspace-dir)
+  (cd-absolute workspace-dir)
+  (eclimd-start workspace-dir)
+  (switch-to-buffer "*eclimd*"))
+
+(defun nl/gradle-javadoc ()
+  "Uses gradle to build the Javadoc for the project."
+  (interactive)
+  (let* ((current-directory default-directory))
+    (setq default-directory (locate-dominating-file default-directory "build.gradle"))
+    (compile "gradle -q --console=plain javadoc")
+    (setq default-directory current-directory)))
+
+:init (use-package cl)
+:config
+(use-package company-emacs-eclim
+  :commands company-emacs-eclim-setup)
+
+(use-package eclimd
+  ;;:load-path "~/src/github/elisp/emacs-eclim"
   :preface
-  (defun nl/restart-eclim (workspace-dir)
-    "Restarts the eclim server.  If it is currently active, the server is stopped first."
-    (interactive (list (read-directory-name "Workspace directory: "
-                                            eclimd-default-workspace nil t eclimd-default-workspace)))
-    (if (get-buffer "*eclimd*") (stop-eclimd))
-    (message "workspace dir: %s" workspace-dir)
-    (cd-absolute workspace-dir)
-    (eclimd-start workspace-dir)
-    (switch-to-buffer "*eclimd*"))
+  ;;(setq eclimd-autostart t)
+  )
 
-  (defun nl/gradle-javadoc ()
-    "Uses gradle to build the Javadoc for the project."
-    (interactive)
-    (let* ((current-directory default-directory))
-      (setq default-directory (locate-dominating-file default-directory "build.gradle"))
-      (compile "gradle -q --console=plain javadoc")
-      (setq default-directory current-directory)))
+(setq eclim-print-debug-messages t)
+;;eclim-nailgun-port 9092
+;;eclim-eclimrc "~/.eclimrc"
+(let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
+  (if (file-accessible-directory-p eclipse-dir)
+      (progn
+        (add-to-list 'eclim-eclipse-dirs eclipse-dir)
+        (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
+              eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
+              ))))
+(company-emacs-eclim-setup)
+(global-company-mode t)
+(setq eclim-auto-save t
+      eclimd-wait-for-process nil
+      ;;eclimd-default-workspace "~/workspace/"
+      help-at-pt-display-when-idle t
+      help-at-pt-timer-delay 0.1
 
-  :init (use-package cl)
-  :config
-  (use-package company-emacs-eclim
-    :commands company-emacs-eclim-setup)
-
-  (use-package eclimd
-    ;;:load-path "~/src/github/elisp/emacs-eclim"
-    :preface
-    ;;(setq eclimd-autostart t)
-    )
-
-  (setq eclim-print-debug-messages t)
-  ;;eclim-nailgun-port 9092
-  ;;eclim-eclimrc "~/.eclimrc"
-  (let ((eclipse-dir (expand-file-name "~/apps/eclipse/java/oxygen/eclipse")))
-    (if (file-accessible-directory-p eclipse-dir)
-        (progn
-          (add-to-list 'eclim-eclipse-dirs eclipse-dir)
-          (setq eclim-executable (or (concat eclipse-dir "/eclim") (executable-find "eclim"))
-                eclimd-executable (or (concat eclipse-dir "/eclimd") (executable-find "eclimd"))
-                ))))
-  (company-emacs-eclim-setup)
-  (global-company-mode t)
-  (setq eclim-auto-save t
-        eclimd-wait-for-process nil
-        ;;eclimd-default-workspace "~/workspace/"
-        help-at-pt-display-when-idle t
-        help-at-pt-timer-delay 0.1
-
-        )
-  ;; Call the help framework with the settings above & activate eclim-mode
-  (help-at-pt-set-timer))
+      )
+;; Call the help framework with the settings above & activate eclim-mode
+(help-at-pt-set-timer))
 #+end_src
 **** [[https://github.com/jacobono/emacs-gradle-mode][emacs-gradle-mode]]
 
@@ -3731,7 +3731,7 @@ can be downloaded from [[http://eclim.org/install.html][here]].
   :disabled
   :diminish gradle-mode
   :init
-    (gradle-mode 1))
+  (gradle-mode 1))
 #+end_src
 
 **** [[https://github.com/emacs-lsp/lsp-java][lsp-java]]
@@ -3746,121 +3746,121 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 **** [[https://github.com/mooz/js2-mode][js2-mode]]
 
 #+begin_src emacs-lisp
-    (use-package js2-mode
-      :mode "\\.js\\'"
-      :bind (("C-c s j" . nl/counsel-ag-js))
-      :preface
-      (defun js-filename-p (filename)
-        (string-match "\.js$" filename))
+(use-package js2-mode
+  :mode "\\.js\\'"
+  :bind (("C-c s j" . nl/counsel-ag-js))
+  :preface
+  (defun js-filename-p (filename)
+    (string-match "\.js$" filename))
 
-      (defun nl/counsel-ag-js ()
-        "Perform counsel-ag on the project's JavaScript files."
-        (interactive)
-        (counsel-ag "" (projectile-project-root) "--js"))
+  (defun nl/counsel-ag-js ()
+    "Perform counsel-ag on the project's JavaScript files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "--js"))
 
-      (defun nl/counsel-ag-js-spec ()
-        "Perform counsel-ag on the project's JavaScript files."
-        (interactive)
-        (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
+  (defun nl/counsel-ag-js-spec ()
+    "Perform counsel-ag on the project's JavaScript files."
+    (interactive)
+    (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
 
-      (defun nl/webpack-find-file ()
-        "From a webpack failure backtrace, opens the file under the cursor at the line specified."
-        (interactive)
-        (let (p1 p2 err-line filename file-with-proj-path)
-          (save-some-buffers t)
-          (setq p1 (line-beginning-position) )
-          (setq p2 (line-end-position) )
-          (setq err-line (buffer-substring-no-properties p1 p2))
-          (save-match-data ; is usually a good idea
-            (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
-                 (setq filename (match-string 2 err-line))))
-          (message "filename: %s" (expand-file-name filename (projectile-project-root)))
-          (ace-select-window)
-          (find-file (expand-file-name filename (projectile-project-root)))
-          (goto-char (point-min))))
+  (defun nl/webpack-find-file ()
+    "From a webpack failure backtrace, opens the file under the cursor at the line specified."
+    (interactive)
+    (let (p1 p2 err-line filename file-with-proj-path)
+      (save-some-buffers t)
+      (setq p1 (line-beginning-position) )
+      (setq p2 (line-end-position) )
+      (setq err-line (buffer-substring-no-properties p1 p2))
+      (save-match-data ; is usually a good idea
+        (and (string-match "^\\(ERROR\\|WARNING\\) in \\.\\/\\([^$]+\\)" err-line)
+             (setq filename (match-string 2 err-line))))
+      (message "filename: %s" (expand-file-name filename (projectile-project-root)))
+      (ace-select-window)
+      (find-file (expand-file-name filename (projectile-project-root)))
+      (goto-char (point-min))))
 
-      (defun nl/webpack-find-next-error ()
-        "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
-        (interactive)
-        (next-line)
-        (while (re-search-forward "^ERROR" nil t)
-          (goto-char (match-beginning 0))
-          (recenter 0)
-          (nl/webpack-find-file)))
+  (defun nl/webpack-find-next-error ()
+    "searches for the next line starting with ERROR and then calls nl/webpack-find-file."
+    (interactive)
+    (next-line)
+    (while (re-search-forward "^ERROR" nil t)
+      (goto-char (match-beginning 0))
+      (recenter 0)
+      (nl/webpack-find-file)))
 
-      :init
-      (setq js2-global-externs '("define"
-                                 "jasmine"
-                                 "describe"
-                                 "fdescribe"
-                                 "fail"
-                                 "beforeEach"
-                                 "afterEach"
-                                 "inject"
-                                 "expect"
-                                 "spyOn"
-                                 "it"
-                                 "fit"
-                                 "xdescribe"
-                                 "xit"))
-      :config
-      (setq javascript-common-imenu-regex-list
-            '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
-              ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
-              ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
-              ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
-              ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
-              ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
-              ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
-              ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
-              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
-              ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
-              ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
-              ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
-              ))
+  :init
+  (setq js2-global-externs '("define"
+                             "jasmine"
+                             "describe"
+                             "fdescribe"
+                             "fail"
+                             "beforeEach"
+                             "afterEach"
+                             "inject"
+                             "expect"
+                             "spyOn"
+                             "it"
+                             "fit"
+                             "xdescribe"
+                             "xit"))
+  :config
+  (setq javascript-common-imenu-regex-list
+        '(("Controller" "[. \t]controller([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Controller" "[. \t]controllerAs:[ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Filter" "[. \t]filter([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("State" "[. \t]state[(:][ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Factory" "[. \t]factory([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Service" "[. \t]service([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Module" "[. \t]module( *['\"]\\([a-zA-Z0-9_.]+\\)['\"], *\\[" 1)
+          ("ngRoute" "[. \t]when(\\(['\"][a-zA-Z0-9_\/]+['\"]\\)" 1)
+          ("Directive" "[. \t]directive([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Event" "[. \t]\$on([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ("Config" "[. \t]config([ \t]*function *( *\\([^\)]+\\)" 1)
+          ("Config" "[. \t]config([ \t]*\\[ *['\"]\\([^'\"]+\\)" 1)
+          ("OnChange" "[ \t]*\$(['\"]\\([^'\"]*\\)['\"]).*\.change *( *function" 1)
+          ("OnClick" "[ \t]*\$([ \t]*['\"]\\([^'\"]*\\)['\"]).*\.click *( *function" 1)
+          ("Watch" "[. \t]\$watch( *['\"]\\([^'\"]+\\)" 1)
+          ("Function" "function[ \t]+\\([a-zA-Z0-9_$.]+\\)[ \t]*(" 1)
+          ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)[ \t]*=[ \t]*function[ \t]*(" 1)
+          ("Function" "^[ \t]*\\([a-zA-Z0-9_$.]+\\)([^)'\"]*)[ \t]*{[ \t]*$" 1)
+          ("Task" "[. \t]task([ \t]*['\"]\\([^'\"]+\\)" 1)
+          ;;("Testcase" "^[ \t]*it(['\"][^']*['\"][ \t]*,[ \t]*function([^)'\"]*)[ \t]*{$" 1)
+          ))
 
-      ;; js-mode imenu enhancement
-      ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
-      (defun nl-js-imenu-make-index ()
-        (save-excursion
-          (imenu--generic-function javascript-common-imenu-regex-list)))
+  ;; js-mode imenu enhancement
+  ;; @see http://stackoverflow.com/questions/20863386/idomenu-not-working-in-javascript-mode
+  (defun nl-js-imenu-make-index ()
+    (save-excursion
+      (imenu--generic-function javascript-common-imenu-regex-list)))
 
-      (defun nl/javascript-mode-hook ()
-        (nl/setup-indent 2) ; indent 2 spaces width
-        (setq comment-multi-line t
-              mode-name "JS2")
-        (define-key js-mode-map [remap indent-new-comment-line]
-          'c-indent-new-comment-line)
-        (setq indent-tabs-mode nil)
-        (setq imenu-create-index-function 'nl-js-imenu-make-index)
-        (prettier-js-mode)
-        (flycheck-mode t))
+  (defun nl/javascript-mode-hook ()
+    (nl/setup-indent 2) ; indent 2 spaces width
+    (setq comment-multi-line t
+          mode-name "JS2")
+    (define-key js-mode-map [remap indent-new-comment-line]
+      'c-indent-new-comment-line)
+    (setq indent-tabs-mode nil)
+    (setq imenu-create-index-function 'nl-js-imenu-make-index)
+    (prettier-js-mode)
+    (flycheck-mode t))
 
-      ;;(eval-after-load 'js2-mode
-      ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
+  ;;(eval-after-load 'js2-mode
+  ;;  '(define-key js2-mode-map (kbd "RET") 'js2-line-break))
 
-      ;;(setq ac-js2-evaluate-calls t)
+  ;;(setq ac-js2-evaluate-calls t)
 
-      (setq-default js2-mode-show-parse-errors t)
-      (setq-default js2-strict-missing-semi-warning t)
-      (setq-default js2-strict-trailing-comma-warning t)
+  (setq-default js2-mode-show-parse-errors t)
+  (setq-default js2-strict-missing-semi-warning t)
+  (setq-default js2-strict-trailing-comma-warning t)
 
-      :custom
-      (js2-basic-offset 2)
-      (js2-bounce-indent-p nil)
-      (js2-highlight-level 3)
-      :hook ((js2-mode . fic-mode)
-             ;;(js2-mode-hook  . ac-js2-mode)
-             (js2-mode . nl/javascript-mode-hook)
-             (js2-mode . nl/common-prog-mode-settings)))
+  :custom
+  (js2-basic-offset 2)
+  (js2-bounce-indent-p nil)
+  (js2-highlight-level 3)
+  :hook ((js2-mode . fic-mode)
+         ;;(js2-mode-hook  . ac-js2-mode)
+         (js2-mode . nl/javascript-mode-hook)
+         (js2-mode . nl/common-prog-mode-settings)))
 #+end_src
 **** [[https://github.com/magnars/js2-refactor.el][js2-refactor]]
 
@@ -3933,16 +3933,16 @@ checker is loaded.
   (setq c-basic-offset 2)
   (php-set-style "nl/php"))
 
-  ;; this style is based on the symfony2 style
-  (c-add-style
-   "nl/php"
-   '("php"
-     (c-basic-offset . 2)
-     (indent-tabs-mode . nil)
-     (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-     (c-indent-comments-syntactically-p . t)
-     (fill-column . 78)
-     (require-final-newline . t)))
+;; this style is based on the symfony2 style
+(c-add-style
+ "nl/php"
+ '("php"
+   (c-basic-offset . 2)
+   (indent-tabs-mode . nil)
+   (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+   (c-indent-comments-syntactically-p . t)
+   (fill-column . 78)
+   (require-final-newline . t)))
 
 (use-package php-mode
   :mode "\\.php[345]?\\'"
@@ -3999,9 +3999,9 @@ pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_bu
 
 #+begin_src emacs-lisp
 (use-package company-jedi
-    :after company
-    :config
-    (add-to-list 'company-backends #'company-jedi))
+  :after company
+  :config
+  (add-to-list 'company-backends #'company-jedi))
 #+end_src
 
 **** [[https://github.com/jorgenschaefer/elpy][elpy]]
@@ -4045,7 +4045,7 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
 Integrates with IPython.
 
 #+begin_src emacs-lisp :tangle no
-  (use-package python-mode)
+(use-package python-mode)
 #+end_src
 
 *** Rust
@@ -4611,7 +4611,7 @@ Views the same file side by side:
 
 #+begin_src emacs-lisp :tangle no
 (when ostype-windows
-    (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
+  (set-face-attribute 'default nil :font "InputMonoCondensed Medium-9"))
 #+end_src
 
 ** Narrow or widen
@@ -4676,7 +4676,7 @@ From [[http://endlessparentheses.com/quickly-search-for-occurrences-of-the-symbo
 With a prefix argument P, isearch for the symbol at point."
   (interactive "P")
   (let ((current-prefix-arg nil))
-   (call-interactively
+    (call-interactively
      (if p #'isearch-forward-symbol-at-point
        #'isearch-forward))))
 
@@ -4717,7 +4717,7 @@ With a prefix argument P, isearch for the symbol at point."
       (widen)
       (goto-char (point-min))
       (while (re-search-forward "<[^<]*>" (point-max) t)
-    (replace-match "\\1"))
+        (replace-match "\\1"))
       (goto-char (point-min))
       (replace-string "&copy;" "(c)")
       (goto-char (point-min))
@@ -4734,38 +4734,38 @@ With a prefix argument P, isearch for the symbol at point."
 Taken from: https://old.reddit.com/r/emacs/comments/bz9rxn/weekly_tipstricketc_thread/
 
 #+begin_src emacs-lisp :tangle no
-  (defun user/smarter-backward-kill-word ()
-    "Deletes the previous word, respecting:
+(defun user/smarter-backward-kill-word ()
+  "Deletes the previous word, respecting:
   1. If the cursor is at the beginning of line, delete the '\n'.
   2. If there is only whitespace, delete only to beginning of line.
   3. If there is whitespace, delete whitespace and check 4-5.
   4. If there are other characters instead of words, delete one only char.
   5. If it's a word at point, delete it."
-    (interactive)
+  (interactive)
 
-    (if (bolp)
-        ;; 1
-        (delete-char -1)
+  (if (bolp)
+      ;; 1
+      (delete-char -1)
 
-      (if (string-match-p "^[[:space:]]+$"
-                          (buffer-substring-no-properties
-                           (line-beginning-position) (point)))
-          ;; 2
-          (delete-horizontal-space)
+    (if (string-match-p "^[[:space:]]+$"
+                        (buffer-substring-no-properties
+                         (line-beginning-position) (point)))
+        ;; 2
+        (delete-horizontal-space)
 
-        (when (thing-at-point 'whitespace)
-          ;; 3
-          (delete-horizontal-space))
+      (when (thing-at-point 'whitespace)
+        ;; 3
+        (delete-horizontal-space))
 
-        (if (thing-at-point 'word)
-            ;; 5
-            (let ((start (car (bounds-of-thing-at-point 'word)))
-                  (end (point)))
-              (if (> end start)
+      (if (thing-at-point 'word)
+          ;; 5
+          (let ((start (car (bounds-of-thing-at-point 'word)))
+                (end (point)))
+            (if (> end start)
                 (delete-region start end)
               (delete-char -1)))
-          ;; 4
-          (delete-char -1)))))
+        ;; 4
+        (delete-char -1)))))
 (global-set-key [remap backward-kill-word] #'user/smarter-backward-kill-word)
 #+end_src
 ** Quit Current Context
