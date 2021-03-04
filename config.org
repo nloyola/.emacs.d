@@ -2059,13 +2059,14 @@ strings.
 #+begin_src emacs-lisp
 (use-package fic-mode
   :commands fic-mode
-  :hook ((c++-mode    . fic-mode)
-         (c-mode      . fic-mode)
-         (java-mode   . fic-mode)
-         (vala-mode   . fic-mode)
-         (python-mode . fic-mode)
-         (php-mode    . fic-mode)
-         (scala-mode  . fic-mode)))
+  :hook ((c++-mode        . fic-mode)
+         (c-mode          . fic-mode)
+         (java-mode       . fic-mode)
+         (vala-mode       . fic-mode)
+         (python-mode     . fic-mode)
+         (php-mode        . fic-mode)
+         (scala-mode      . fic-mode)
+         (typescript-mode . fic-mode)))
 #+end_src
 
 ** [[https://www.emacswiki.org/emacs/framemove.el][framemove]]
@@ -4018,16 +4019,18 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
         ("M-<down>" . nil)
         ("M-<left>" . nil)
         ("M-<right>" . nil))
-  :hook ((elpy-mode . flycheck-mode)
-         (elpy-mode . (lambda ()
-                        (set (make-local-variable 'company-backends)
-                             '((elpy-company-backend :with company-yasnippet))))))
+  :hook
+  (elpy-mode . flycheck-mode)
+  (elpy-mode . (lambda ()
+                 (set (make-local-variable 'company-backends)
+                      '((elpy-company-backend :with company-yasnippet)))))
   :config
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  ;; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
-  (setq elpy-shell-echo-output nil)
-  (setq elpy-rpc-python-command "python3")
-  (setq elpy-rpc-timeout 2))
+  (setq
+   ;; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
+   elpy-modules (delq 'elpy-module-flymake elpy-modules)
+   elpy-shell-echo-output nil
+   elpy-rpc-python-command "python3"
+   elpy-rpc-timeout 2))
 
 (with-eval-after-load 'python (elpy-enable))
 #+end_src
@@ -4201,67 +4204,30 @@ No longer used since Scala Metals is now being used.
   :hook
   (typescript-mode . column-enforce-mode)
   (typescript-mode . rainbow-delimiters-mode)
+  (typescript-mode . nl/typescript-mode)
+  :preface
+  (defun nl/typescript-mode ()
+    (flycheck-mode +1)
+    (eldoc-mode +1)
+    (company-mode +1)
+    (prettier-js-mode)
+    (nl/common-prog-mode-settings)
+
+    ;; need to override the value set in typescript-mode.el
+    (push '(typescript-tsc-pretty
+            "^\\(?:\\(Error\\|Warning\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
+            2 3 4 1)
+          compilation-error-regexp-alist-alist)
+
+    (setq prettify-symbols-alist nl-typescript-prettify-symbols)
+    (prettify-symbols-mode))
   :config
-  ;; when buiding with Angular CLI, the first error always contains "ERROR in"
-  ;;
-  ;; adjusting this regexp makes 'next-error' work in compilation mode
-  ;;
-  ;; (push `(typescript-tsc-error-regexp
-  ;;         ,(rx line-start
-  ;;              (zero-or-more "[tsl]")
-  ;;              (zero-or-more space)
-  ;;              (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-  ;;              (group-n 1 (one-or-more (not (in space ":" "\n" "("))))
-  ;;              (in ":" "(") (group-n 2 (one-or-more digit))
-  ;;              (in ":" ",") (group-n 3 (one-or-more digit))
-  ;;              (zero-or-more not-newline))
-  ;;         1 2 3 2)
-  ;;       compilation-error-regexp-alist-alist)
+  (setq prettify-symbols-unprettify-at-point 'right-edge
+        company-tooltip-align-annotations t ;; aligns annotation to the right hand side
+        flycheck-check-syntax-automatically '(save mode-enabled))
+  (setq-default typescript-indent-level 2)
 
-  ;; (push 'typescript-tsc-error-regexp compilation-error-regexp-alist)
-
-  (push `(angular-html-error-regexp
-          ,(rx line-start
-               (zero-or-more space)
-               (zero-or-one (* "ERROR" (zero-or-more space) "in" (zero-or-more space)))
-               (group-n 1 (one-or-more (not (in space ":" "\n"))))
-               (syntax open-parenthesis)
-               (group-n 2 (one-or-more digit))
-               "," (group-n 3 (one-or-more digit))
-               (syntax close-parenthesis) ":")
-          1 2 3 2)
-        compilation-error-regexp-alist-alist)
-
-  (push 'angular-html-error-regexp compilation-error-regexp-alist)
-
-  ;; (add-to-list 'compilation-error-regexp-alist-alist
-  ;;              `(typescript-tsc ,typescript-tsc-error-regexp 1 2 3 2))
-
-  (push `(node-error-regexp
-          ,(rx line-start
-               (zero-or-more (not (in "\n")))
-               (one-or-more "at" (one-or-more space))
-               (zero-or-more (not (in "(")))
-               (zero-or-more "(")
-               (group-n 1 (one-or-more (not (in space ":" "\n"))))
-               ":" (group-n 2 (one-or-more digit))
-               ":" (group-n 3 (one-or-more digit))
-               (zero-or-more not-newline))
-          1 2 3 2)
-        compilation-error-regexp-alist-alist)
-
-  (push 'node-error-regexp compilation-error-regexp-alist)
-
-  (add-to-list 'compilation-error-regexp-alist-alist
-               '(typescript-tslint
-                 "^\\(?:\\(Error\\|Warning\\)\\):[[:blank:]]\\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)"
-                 2 3 4 1))
-
-  (setq compilation-error-regexp-alist
-        (cons 'typescript-tslint compilation-error-regexp-alist))
-
-  (defconst
-    nl-typescript-prettify-symbols-alist
+  (defconst nl-typescript-prettify-symbols
     '(("=>" . ?⇒)
       ("<=" . ?≤)
       (">=" . ?≥)
@@ -4270,10 +4236,9 @@ No longer used since Scala Metals is now being used.
       ("!=" . ?≠)
       ("!==" . ?≢)
       ("&&" . ?∧)
-      ("||" . ?∨)))
-
-  (setq prettify-symbols-alist nl-typescript-prettify-symbols-alist))
+      ("||" . ?∨))))
 #+end_src
+
 **** [[https://github.com/ananthakumaran/tide][tide]]
 
 #+begin_src emacs-lisp :tangle no
@@ -4294,8 +4259,6 @@ No longer used since Scala Metals is now being used.
 
   (flycheck-add-next-checker 'javascript-eslint 'javascript-tide 'append)
   (flycheck-add-next-checker 'javascript-eslint 'jsx-tide 'append)
-
-
 
   (defun nl-tide-mode-hook ()
     (interactive)
