@@ -56,7 +56,7 @@ The class name must have the postfix 'Spec' for this function to work."
   ("s" hydra-nl/php-search/body "search" :color blue))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
-(key-chord-define-global "jc" '(lambda () (interactive) (hydra-nl-con-project/body)))
+(key-chord-define php-mode-map "jc" '(lambda () (interactive) (hydra-nl-con-project/body)))
 
 (define-key php-mode-map (kbd "C-c , d") 'nl/phpunit-test-this-package)
 
