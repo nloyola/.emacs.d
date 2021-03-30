@@ -31,12 +31,13 @@
       read-process-output-max (* 1024 1024)
       auto-window-vscroll nil)
 
-(add-hook 'after-init-hook
-          `(lambda ()
-             (setq file-name-handler-alist file-name-handler-alist-old
-                   gc-cons-threshold 200000000
-                   gc-cons-percentage 0.1)
-             (garbage-collect)) t)
+(defun nl/after-init ()
+  (setq file-name-handler-alist file-name-handler-alist-old
+        gc-cons-threshold 200000000
+        gc-cons-percentage 0.1)
+  (garbage-collect))
+
+(add-hook 'after-init-hook `nl/after-init t)
 
 ;; Turn off mouse interface early in startup to avoid momentary display
 (when window-system
