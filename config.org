@@ -55,20 +55,20 @@ customize settings in [[file:init.el][init.el]].
 
 Also see: all-the-icons-dired package installation
 
-#+begin_src  emacs-lisp
+#+begin_src  emacs-lisp :results silent
 ;; (defvar nl/gui-fixed-font-name "Fira Code Retina")
 
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
 ;; (defvar nl/gui-variable-font-name "DejaVu Sans")
 
-(defvar nl/gui-fixed-font-name "Go Mono")
+(defvar nl/gui-fixed-font-name "GoMono Nerd Font Mono")
 (defvar nl/gui-variable-font-name "Go")
 
-(defconst nl/gui-fixed-font-size-normal "12")
-(defconst nl/gui-fixed-font-size-large "22")
+(defconst nl/gui-fixed-font-size-normal "10")
+(defconst nl/gui-fixed-font-size-large "18")
 
-(defconst nl/gui-variable-font-size-normal "16")
-(defconst nl/gui-variable-font-size-large "22")
+(defconst nl/gui-variable-font-size-normal "12")
+(defconst nl/gui-variable-font-size-large "18")
 
 (defvar nl/gui-current-fixed-font-size nl/gui-fixed-font-size-normal)
 (defvar nl/gui-current-variable-font-size nl/gui-variable-font-size-normal)
@@ -91,7 +91,7 @@ Also see: all-the-icons-dired package installation
 
 *** Assigning frame fonts
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results silent
 ;; see: https://github.com/daviwil/emacs-from-scratch/blob/d24357b488862223fecaebdad758b136b0ca96e7/show-notes/Emacs-Tips-08.org#configuring-the-ui-for-new-frames
 (defun nl/set-fonts (frame)
   "Set the desired fonts for a frame. FRAME can be nil."
@@ -104,8 +104,7 @@ Also see: all-the-icons-dired package installation
   (set-face-attribute 'italic frame :font nl/gui-fixed-font-name :weight 'normal :slant 'italic)
   (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
   (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic)
-  (set-fontset-font "fontset-default" nil
-                    (font-spec :size 20 :name "Fira Code Retina")))
+  (set-fontset-font "fontset-default" nil (font-spec :size 20 :name "Fira Code Retina")))
 
 (defun nl/after-make-frame (frame)
   (nl/set-fonts frame))
@@ -523,7 +522,7 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
 ;;   (numberp (string-match "\\(?:\\*\\(?:[Hh]elp\\|grep\\|Warnings\\|Completions\\|xref\\)\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)" buf-name)))
 
 (add-to-list 'display-buffer-alist
-             '("\\(?:\\*\\(?:grep\\|Find\\|Warnings\\|Completions\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\|\\*Flycheck.*\\)\\)"
+             '("\\(?:\\*\\(?:grep\\|Find\\|Warnings\\|xref\\)\\*\\)\\|\\(?:\\(?:HELM.*\\|helm.*\\)\\)"
                display-buffer-in-side-window
                (window-height . 0.15)
                (side . bottom)
@@ -532,9 +531,9 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
                ,nl/side-window-parameters))
 
 (add-to-list 'display-buffer-alist
-             '("\\*\\(?:[Hh]elp\\|Backtrace\\|Warnings\\|Compile-Log\\|shell\\|compilation\\|ng-compile\\|ng-test\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
+             '("\\*\\(?:[Hh]elp\\|Backtrace\\|Warnings\\|Completions\\|Compile-Log\\|\\*Flycheck.*\\|shell\\|compilation\\|ng-compile\\|ng-test\\|tide-references\\|sbt\\|coverlay-stats\\)\\*"
                display-buffer-in-side-window
-               (window-height . 0.2)
+               (window-height . 0.15)
                (side . bottom)
                (slot . 1) ;; right side
                (preserve-size . (nil . t))
@@ -917,7 +916,8 @@ ibuffer is the improved version of list-buffers.
   (define-key org-mode-map (kbd "M-<left>") nil)
   (define-key org-mode-map (kbd "M-<right>") nil)
   (define-key org-mode-map (kbd "M-<down>") nil)
-  (define-key org-mode-map (kbd "M-<up>") nil))
+  (define-key org-mode-map (kbd "M-<up>") nil)
+  (smartparens-mode))
 
 ;; (nl/org-mode-faces 120)
 
@@ -1926,6 +1926,37 @@ indexes (TAGS) or persistent background processes.
   :config
   (editorconfig-mode 1))
 #+end_src
+
+** [[https://github.com/ajgrf/edwina][edwina]]
+
+#+begin_src emacs-lisp :tangle no
+(use-package edwina
+  :demand t
+  :config
+  (setq display-buffer-base-action '(display-buffer-below-selected))
+  (edwina-setup-dwm-keys)
+  (edwina-mode 1))
+#+end_src
+
+*** Key bindings
+
+By default keys are prefixed with =C-c C-w=.
+
+| Binding     | Action                               |
+|-------------+--------------------------------------|
+| r, C-r      | Arrange windows                      |
+| n, C-n, SPC | Move to next window                  |
+| p, C-p      | Move to previous window              |
+| N, C-S-n    | Swap places with the next window     |
+| P, C-S-p    | Swap places with the previous window |
+| %, {, [     | Decrease the size of the master area |
+| ^, }, ]     | Increase the size of the master area |
+| d, C-d      | Decrease number of windows in master |
+| i           | Increase number of windows in master |
+| k, C-k      | Delete window                        |
+| RET         | Cycle window to/from master area     |
+| c, C-c      | Clone current window                 |
+|             |                                      |
 
 ** [[https://github.com/joaotavora/eglot][eglot]]
 
@@ -3035,21 +3066,17 @@ think of it as both something that augments and replaces the standard
   )
 
 (use-package treemacs-projectile
-  :after treemacs projectile
-  :ensure t)
+  :after treemacs projectile)
 
 (use-package treemacs-icons-dired
   :after treemacs dired
-  :ensure t
   :config (treemacs-icons-dired-mode))
 
 (use-package treemacs-magit
-  :after treemacs magit
-  :ensure t)
+  :after treemacs magit)
 
 (use-package treemacs-persp
   :after treemacs persp-mode
-  :ensure t
   :config (treemacs-set-scope-type 'Perspectives))
 #+end_src
 
@@ -3928,42 +3955,42 @@ Flycheck configuration taken from [[https://truongtx.me/2014/07/22/setup-php-dev
 checker is loaded.
 
 #+begin_src emacs-lisp
-(defun nl/php-mode-hook ()
-  "My PHP mode configuration."
-  (flycheck-mode t)
-  (setq c-basic-offset 2)
-  (php-set-style "nl/php"))
-
-;; this style is based on the symfony2 style
-(c-add-style
- "nl/php"
- '("php"
-   (c-basic-offset . 2)
-   (indent-tabs-mode . nil)
-   (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-   (c-indent-comments-syntactically-p . t)
-   (fill-column . 78)
-   (require-final-newline . t)))
-
 (use-package php-mode
   :mode "\\.php[345]?\\'"
   :hook (php-mode . nl/php-mode-hook)
+  :preface
+  (defun nl/php-mode-hook ()
+    "My PHP mode configuration."
+    (flycheck-mode t)
+    (setq c-basic-offset 2)
+    (php-set-style "nl/php"))
+
+  ;; this style is based on the symfony2 style
+  (c-add-style
+   "nl/php"
+   '("php"
+     (c-basic-offset . 2)
+     (indent-tabs-mode . nil)
+     (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+     (c-indent-comments-syntactically-p . t)
+     (fill-column . 78)
+     (require-final-newline . t)))
+
+  (flycheck-define-checker nl/php-checker
+    "A PHP syntax checker using the PHP command line interpreter.
+     See URL http://php.net/manual/en/features.commandline.php."
+    :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
+              "-d" "log_errors=0" source)
+    :error-patterns
+    ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
+            (message) " in " (file-name) " on line " line line-end))
+    :modes (php-mode web-mode))
+
+  (eval-after-load 'flycheck
+    '(add-to-list 'flycheck-checkers 'nl/php-checker))
   :custom
   (php-mode-coding-style (quote nl/php))
   (php-mode-lineup-cascaded-calls t))
-
-(flycheck-define-checker nl/php-checker
-  "A PHP syntax checker using the PHP command line interpreter.
-     See URL http://php.net/manual/en/features.commandline.php."
-  :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-            "-d" "log_errors=0" source)
-  :error-patterns
-  ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-          (message) " in " (file-name) " on line " line line-end))
-  :modes (php-mode web-mode))
-
-(eval-after-load 'flycheck
-  '(add-to-list 'flycheck-checkers 'nl/php-checker))
 #+end_src
 
 **** [[https://github.com/nlamirault/phpunit.el][php-unit]]
