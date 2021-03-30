@@ -111,13 +111,13 @@
 (defun nl/normal-config ()
   "Set the size and position of the Emacs window."
   (interactive)
-  (nl/change-font-size "12" "16")
+  (nl/change-font-size nl/gui-fixed-font-size-normal nl/gui-variable-font-size-normal)
   (nl/main-frame-set-size-and-position))
 
 (defun nl/window-setup-hook ()
   (let ((frame (selected-frame)))
-    (nl/main-frame-set-size-and-position)
-    ;;(resume)
+    ;; (nl/main-frame-set-size-and-position)
+    ;; (resume)
     (select-frame-set-input-focus frame)))
 
 (add-hook 'window-setup-hook 'nl/window-setup-hook)
