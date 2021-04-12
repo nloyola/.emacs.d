@@ -2348,6 +2348,19 @@ short bindings with a common prefix - a Hydra.
                            (list -4)
                          '(4)))))
 
+  (defhydra hydra-files (:columns 2 :color red)
+    "Files hydra"
+    ("h" (dired "~/.") "home" :column "System")
+    ("e" (dired "~/.emacs.d") "Emacs")
+    ("c" (dired "~/.config") "Config")
+    ("l" (dired "~/.local") "Local")
+    ("C" (dired "~/home_config") "My config" :column "Mine")
+    ("S" (dired "~/src/nelson/nlscripts") "My scripts")
+    ("O" (dired "~/Dropbox/orgfiles") "Org")
+    )
+
+  (global-set-key (kbd "C-.") 'hydra-files/body)
+
   (defhydra hydra-window (:color red :hint nil)
     ("h" windmove-left)
     ("j" windmove-down)
