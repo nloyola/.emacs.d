@@ -1274,11 +1274,13 @@ Save command history between sessions (taken from EmacsWiki).
         (ssh-methods '("ssh" "sshx"))))
   (setq tramp-terminal-type "dumb"
         tramp-shell-prompt-pattern "^[^$>\n]*[#$%>] *\\(\[[0-9;]*[a-zA-Z] *\\)*"
-        vc-ignore-dir-regexp
-        (format "\\(%s\\)\\|\\(%s\\)"
-                vc-ignore-dir-regexp
-                tramp-file-name-regexp)))
+        vc-ignore-dir-regexp (format "\\(%s\\)\\|\\(%s\\)" vc-ignore-dir-regexp tramp-file-name-regexp)))
 #+end_src
+
+*** Multi hop with sudo
+
+- ~/ssh:you@remotehost|sudo:remotehost:/path/to/file~
+
 ** =term=
 
 #+begin_src emacs-lisp
