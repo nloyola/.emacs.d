@@ -1146,12 +1146,14 @@ Remember position in a file.
 
 #+begin_src emacs-lisp
 (use-package saveplace
-  :config
-  (setq save-place-file (locate-user-emacs-file "etc/saveplace" ".emacs-places")
-        save-place-forget-unreadable-files nil
-        save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
+  :custom
+  (save-place-file (locate-user-emacs-file "etc/saveplace" "places"))
+  (save-place-forget-unreadable-files nil)
+  (save-place-ignore-files-regexp "\\(?:COMMIT_EDITMSG\\|svn-commit\\.tmp\\|config\\.org\\)$")
   ;; activate it for all buffers
-  (setq-default save-place t))
+  :init
+  ;;(setq-default save-place t)
+  (save-place-mode t))
 #+end_src
 
 ** =shell=
@@ -2472,6 +2474,77 @@ Have never used it: disabling. 2021-02-23
 
 ** [[https://github.com/abo-abo/swiper][ivy]]
 
+*** Key bindings for navigation
+
+| Key | Description                      | function                |
+|-----+----------------------------------+-------------------------|
+| ~M-<~ | selects the first candidate      | ~ivy-beginning-of-buffer~ |
+| ~M->~ | selects the last candidate       | ~ivy-end-of-buffer~       |
+| ~C-v~ | scrolls up by ivy-height lines   | ~ivy-scroll-up-command~   |
+| ~M-v~ | scrolls down by ivy-height lines | ~ivy-scroll-down-command~ |
+
+*** Key bindings for single selection, action, then exit minibuffer
+
+- ~C-j~ (~ivy-alt-done~) :: When completing file names, selects the
+  current directory candidate and starts a new completion session
+  there. Otherwise, it is the same as ~ivy-done~.
+
+- ~C-M-j~ (~ivy-immediate-done~) ::  Exits with the current input instead
+  of the current candidate (like other commands).
+
+  This is useful e.g. when you call find-file to create a new file,
+  but the desired name matches an existing file. In that case, using
+  ~C-j~ would select that existing file, which isn't what you want - use
+  this command instead.
+
+*** Key bindings for multiple selections and actions, keep minibuffer open
+
+- ~C-M-m~ (~ivy-call~) :: Is the non-exiting version of ~C-m~ (~ivy-done~).
+
+     Instead of closing the minibuffer, ~C-M-m~ allows selecting
+     another candidate or another action. For example, ~C-M-m~ on
+     functions list invokes describe-function. When combined with
+     ~C-n~, function descriptions can be invoked quickly in
+     succession.
+
+- ~C-M-n~ (~ivy-next-line-and-call~) :: Combines ~C-n~ and ~C-M-m~.
+     Applies an action and moves to next line.
+
+     Comes in handy when opening multiple files from
+     ~counsel-find-file~, ~counsel-git-grep~, ~counsel-ag~,
+     ~counsel-rg~, or ~counsel-locate~ lists. Just hold ~C-M-n~ for
+     rapid-fire default action on each successive element of the list.
+
+*** Saving the current completion session to a buffer
+
+- ~C-c C-o~ (~ivy-occur~) :: Saves the current candidates to a new buffer
+  and exits completion.
+
+The new buffer is read-only and has a few useful bindings defined.
+
+- ~C-x C-q~ :: Make edits to the buffer. After editing, press ~C-x C-s~ to
+  save changes.
+
+- ~RET~ or ~j~ (~ivy-occur-press~) :: Call the current action on the
+  selected candidate.
+
+- ~mouse-1~ (~ivy-occur-click~) :: Call the current action on the selected
+  candidate.
+
+- ~j~ (~next-line~) :: Move to next line.
+
+- ~k~ (~previous-line~) :: Move to previous line.
+
+- ~a~ (~ivy-occur-read-action~) :: Read an action and make it current for
+  this buffer.
+
+- ~o~ (~ivy-occur-dispatch~) :: Read an action and call it on the selected
+  candidate.
+
+- ~q~ (~quit-window~) :: Bury the current buffer.
+
+*** Package
+
 #+begin_src emacs-lisp
 (use-package ivy
   :diminish (ivy-mode . "")
@@ -2504,7 +2577,7 @@ Have never used it: disabling. 2021-02-23
   :after (ivy hydra))
 #+end_src
 
-*** [[https://github.com/abo-abo/swiper][swiper]]
+**** [[https://github.com/abo-abo/swiper][swiper]]
 
 This blog post has a lot of info: [[http://oremacs.com/2016/04/26/ivy-0.8.0/][Ivy 0.8.0 is out]]
 
@@ -2592,6 +2665,7 @@ Add filler lorem ipsum text to Emacs.
   (lsp-ui-flycheck-enable nil)
   (lsp-enable-snippet t)
   (lsp-enable-file-watchers nil)
+  (lsp-pyls-plugins-pycodestyle-max-line-length 120)
   ;;(setq lsp-response-timeout 25)
   :config
   (setq lsp-prefer-capf t
@@ -3389,6 +3463,11 @@ No more juggling windows after commiting. It's magit bliss.
   (kill-buffer)
   (jump-to-register :magit-fullscreen))
 #+end_src
+
+**** File log
+
+=M-x magit-log-buffer-file=
+
 *** [[https://gitlab.com/pidu/git-timemachine][git-timemachine]]
 
 #+begin_src emacs-lisp
@@ -3397,6 +3476,38 @@ No more juggling windows after commiting. It's magit bliss.
 #+end_src
 
 ** Helm
+*** Notes
+
+- To grep files use ~C-u C-x c M-g s~, select root dir for grep, TAB TAB
+  Enter, enter file type, TAB TAB Enter, enter pattern or press ~C-w~ to
+  select word at point.
+
+- to save the results of the grep use ~C-x C-s~ in a buffer.
+
+- To see minibuffer command history: ~M-x helm-complex-command-history~.
+
+- To see helm find files history use ~C-c h~ in the find file buffer.
+
+- To see the mark ring us ~M-x helm-all-mark-rings~.
+
+- For a quick calculator ~M-x helm-calcul-expression~.
+
+- For a history ~M-x helm-eshell-history~.
+
+- yank current selection ~C-c C-y~.
+
+- add the current candidate to the kill ring with ~C-c C-k~.
+
+- You can insert marked candidates into the current buffer with ~C-c
+  C-i~.
+
+**** Helm Mini
+
+- Mark files: ~C-SPC~
+- Delete buffer (or marked buffers) without leaving Helm: ~C-c d~
+- Delete marked buffers and leave Helm: ~M-D~
+- Grep buffers: ~M-g s~
+
 *** [[https://github.com/emacs-helm/helm][helm]]
 **** Helm Config
 
