@@ -14,21 +14,39 @@ This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 * Installing Emacs
 ** Ubuntu
 
+*** Master branch
+
 I've installed Emacs from source
 (=git://git.savannah.gnu.org/emacs.git=). I used the instructions
 provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]]. But first, the following command has to
 be run.
 
 #+begin_src sh
+git clone git://git.savannah.gnu.org/emacs.git
 ./autogen.sh
 #+end_src
 
 Then to compile and install, do the following.
 
 #+begin_src sh
-./configure
+./configure --prefix=/usr/local --with-modules --with-json --with-cairo --with-rsvg
 make bootstrap
-make
+make -j6
+sudo make install
+#+end_src
+
+*** Gcc
+
+#+begin_src sh
+git clone git://git.savannah.gnu.org/emacs.git -b feature/native-comp
+./autogen.sh
+#+end_src
+
+Then to compile and install, do the following.
+
+#+begin_src sh
+./configure --with-native-compilation --prefix=/usr/local --with-modules --with-json --with-cairo --with-rsvg
+make -j6
 sudo make install
 #+end_src
 
@@ -2702,7 +2720,8 @@ Add filler lorem ipsum text to Emacs.
   (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-show-hover nil)
   (lsp-ui-doc-enable nil)
-  (lsp-ui-peek-enable nil))
+  (lsp-ui-peek-enable nil)
+  (flycheck-add-next-checker 'lsp-ui 'typescript-tslint))
 #+end_src
 
 ** [[https://github.com/joddie/macrostep][macrostep]]
