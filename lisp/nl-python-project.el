@@ -8,11 +8,9 @@
 
 (provide 'nl-python-project)
 
-(defvar python-mode-map)
+(require 'python)
 
-(message "------------------> here")
-
-(defhydra hydra-nl-python-scala (:hint nil)
+(defhydra hydra-nl-python (:hint nil)
   "Project"
   ("a" hydra-nl-align/body "align" :color blue :column "Python")
   ("i" nl/indent-whole-buffer "indent buffer" :color blue)
@@ -21,7 +19,7 @@
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
 (key-chord-define python-mode-map "jc" '(lambda () (interactive)
-                                         (hydra-nl-python-scala/body)))
+                                         (hydra-nl-python/body)))
 
 
 ;; Local Variables:
