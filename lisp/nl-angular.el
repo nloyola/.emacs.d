@@ -10,7 +10,8 @@
 (eval-when-compile
   (require 'seq)
   (require 'projectile)
-  (require 'tide))
+  (require 'typescript-mode)
+  )
 
 (defun angular-project-source-file-p (filename)
   "Return non-nil if FILENAME is for a TypeScript file."
