@@ -1,3 +1,4 @@
+
 #+TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 #+STARTUP: overview
@@ -65,6 +66,12 @@ customize settings in [[file:init.el][init.el]].
 #+begin_src emacs-lisp
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
+#+end_src
+
+Silence compiler warnings in ~native-mode~.
+
+#+begin_src emacs-lisp
+(setq comp-async-report-warnings-errors nil)
 #+end_src
 
 * Font
@@ -418,7 +425,7 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 (global-set-key (kbd "C-c o")         'nl/counsel-git-files)
 #+end_src
 
-** Line numbers.
+** Line numbers
 
 Recently, line numbering has been really slow. Disabling for now.
 
@@ -1365,7 +1372,7 @@ Using doom themes
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-molokai t)
+  (load-theme 'doom-dark+ t)
 
   ;;
   (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
@@ -1807,10 +1814,12 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 #+begin_src elisp
 (use-package dap-mode
   :after lsp-mode
+  :commands dap-debug
   ;;:hook (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
   :config
   (dap-mode t)
   (dap-ui-mode t)
+  (require 'dap-node)
   (require 'dap-java))
 #+end_src
 
@@ -2673,6 +2682,7 @@ Add filler lorem ipsum text to Emacs.
 
 #+begin_src emacs-lisp
 (use-package lsp-mode
+  ;;:load-path "~/src/github/elisp/lsp-mode"
   :pin melpa
   :commands (lsp lsp-deferred)
   :hook
@@ -2693,11 +2703,11 @@ Add filler lorem ipsum text to Emacs.
         lsp-pyls-plugins-flake8-enabled t)
   (setq lsp-clients-angular-language-server-command
         '("node"
-          "/home/nelson/.nvm/versions/node/v14.4.0/lib/node_modules/@angular/language-server"
+          "/home/nelson/.nvm/versions/node/v14.16.1/lib/node_modules/@angular/language-server"
           "--ngProbeLocations"
-          "/home/nelson/.nvm/versions/node/v14.4.0/lib/node_modules"
+          "/home/nelson/.nvm/versions/node/v14.16.1/lib/node_modules"
           "--tsProbeLocations"
-          "/home/nelson/.nvm/versions/node/v14.4.0/lib/node_modules"
+          "/home/nelson/.nvm/versions/node/v14.16.1/lib/node_modules"
           "--stdio"))
   (lsp-register-custom-settings
    '(("pyls.plugins.pyls_mypy.enabled" t t)
@@ -2714,9 +2724,12 @@ Add filler lorem ipsum text to Emacs.
               ([remap xref-find-references] . lsp-ui-peek-find-references)
               ([f10] . lsp-ui-sideline-toggle-symbols-info))
   :custom-face
-  (lsp-ui-peek-peek ((nil :background "#2b538a")))
+  (lsp-ui-peek-peek ((nil :background "gray30")))
+  (lsp-ui-peek-highlight ((nil :foreground "gray60" :background "gray20")))
+  (header-line ((t (:inherit mode-line :background "gray30"))))
   :config
-  (setq lsp-ui-peek-always-show nil):custom
+  (setq lsp-ui-peek-always-show nil)
+  :custom
   (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-show-hover nil)
   (lsp-ui-doc-enable nil)
@@ -2760,7 +2773,7 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
   ;;(add-to-list 'markdown-preview-stylesheets
   ;;             "https://raw.githubusercontent.com/richleland/pygments-css/master/emacs.css")
   (setq markdown-preview-stylesheets (list
-                                      "http://thomasf.github.io/solarized-css/solarized-light.min.css")))
+                                      "http://thomasf.github.io/solarized-css/solarized-dark.min.css")))
 #+end_src
 
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
@@ -4373,7 +4386,9 @@ No longer used since Scala Metals is now being used.
 
 #+begin_src emacs-lisp
 (use-package typescript-mode
+  :mode ("\\.ts\\'" "\\.js\\'")
   :hook
+  (typescript-mode . lsp-deferred)
   (typescript-mode . column-enforce-mode)
   (typescript-mode . rainbow-delimiters-mode)
   (typescript-mode . nl/typescript-mode)
