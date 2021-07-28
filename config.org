@@ -1380,6 +1380,9 @@ Using doom themes
   (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
   (set-face-background 'region (doom-darken 'blue 0.2))
 
+  (set-face-font 'mode-line (nl/gui-variable-font-normal))
+  (set-face-font 'mode-line-inactive (nl/gui-variable-font-normal))
+
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
 
