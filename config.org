@@ -118,6 +118,7 @@ Also see: all-the-icons-dired package installation
 
 #+begin_src emacs-lisp :results silent
 ;; see: https://github.com/daviwil/emacs-from-scratch/blob/d24357b488862223fecaebdad758b136b0ca96e7/show-notes/Emacs-Tips-08.org#configuring-the-ui-for-new-frames
+
 (defun nl/set-fonts (frame)
   "Set the desired fonts for a frame. FRAME can be nil."
   (let ((fixed-font (nl/gui-fixed-font-normal)))
@@ -1293,7 +1294,8 @@ Save command history between sessions (taken from EmacsWiki).
 
 #+begin_src emacs-lisp
 (use-package tramp
-  :init (setq tramp-ssh-controlmaster-options nil)
+  :init
+  (setq tramp-ssh-controlmaster-options nil)
   :config
   (let ((cert-path "~/.ssh/id_dsa")
         (ssh-methods '("ssh" "sshx"))))
@@ -1740,7 +1742,8 @@ Complete anything.
               ("C-n" . company-select-next)
               ("C-p" . company-select-previous)
               ("M-/" . company-complete-common))
-  :init (global-company-mode t)
+  :init
+  (global-company-mode t)
   :custom
   (company-dabbrev-downcase nil "Don't downcase returned candidates.")
   (company-show-numbers t "Numbers are helpful.")
@@ -2259,7 +2262,8 @@ Allow windmove to jump between frames.
   :commands global-flycheck-mode
   :diminish flycheck-mode
   :commands flycheck-define-checker
-  :init (global-flycheck-mode)
+  :init
+  (global-flycheck-mode)
   :config
   (setq flycheck-standard-error-navigation nil)
 
@@ -2454,13 +2458,15 @@ short bindings with a common prefix - a Hydra.
   (use-package key-chord
     :init
     (setq key-chord-one-key-delay 0.16)
-    :config (key-chord-mode 1))
+    :config
+    (key-chord-mode 1))
   :custom
   (hydra-hint-display-type 'posframe)
   :config
   ;;(setq hydra-posframe-show-params (plist-put hydra-posframe-show-params :font "Fira Code Retina"))
   (setq hydra-posframe-show-params
         (plist-put hydra-posframe-show-params :font nl/gui-fixed-font-name))
+
   (defun nl/pull-window ()
     "Pull a window to the window the point is at"
     (interactive)
