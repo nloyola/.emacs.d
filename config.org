@@ -2995,6 +2995,23 @@ Show org-mode bullets as UTF-8 characters.
 (use-package package-utils)
 #+end_src
 
+** [[https://github.com/rlister/org-present][org-present]]
+
+Keys are:
+
+- =left= / =right= keys for movement
+- =C-c C-== for large txt
+- =C-c C--= for small text
+- =C-c C-q= for quit (which will return you back to vanilla org-mode)
+- =C-c <= and =C-c >= to jump to first/last slide
+- =C-c C-r= set slides read only
+- =C-c C-w= allow writing on slides
+
+#+begin_src emacs-lisp
+(use-package org-present
+  :after org)
+#+end_src
+
 ** [[https://github.com/politza/pdf-tools][pdf-tools]]
 
 #+begin_src emacs-lisp :tangle no
