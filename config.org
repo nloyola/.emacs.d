@@ -3090,25 +3090,6 @@ Project navigation and management library for Emacs.
   (purpose-compile-user-configuration))
 #+end_src
 
-** revive
-
-Using revive
-
-- use ~M-x save-current-configuration~ to save window configuration.
-- use ~M-x resume~ to load window configuration.
-
-This package was removed from Melpa on 2017-07-31 due to the author not wanting to
-specify a lincence.
-
-#+begin_src emacs-lisp :tangle no
-(use-package revive
-  :load-path "lisp"
-  :init
-  (autoload 'save-current-configuration "revive" "Save status" t)
-  (autoload 'resume "revive" "Resume Emacs" t)
-  (autoload 'wipe "revive" "Wipe Emacs" t))
-#+end_src
-
 ** [[https://github.com/Fanael/rainbow-delimiters][rainbow-delimiters]]
 
 Highlight brackets according to their depth
