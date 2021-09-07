@@ -2763,7 +2763,7 @@ When using =counsel-ag=:
 
 ** [[https://github.com/tumashu/ivy-posframe][ivy-posframe]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package ivy-posframe
   :after ivy
   :init (ivy-posframe-mode 1)
@@ -3481,16 +3481,16 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode)
          ("\\.json\\'" . web-mode))
-  :bind ("C-c s h" . nl/counsel-ag-html)
+  ;;:bind ("C-c s h" . nl/counsel-ag-html)
   :hook (web-mode  . nl/web-mode-hook)
   :preface
   (defun html-filename-p (filename)
     (string-match "\.html$" filename))
 
-  (defun nl/counsel-ag-html ()
-    "Perform counsel-ag on the project's HTML files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "--html"))
+  ;; (defun nl/counsel-ag-html ()
+  ;;   "Perform counsel-ag on the project's HTML files."
+  ;;   (interactive)
+  ;;   (counsel-ag "" (projectile-project-root) "--html"))
 
   (defun nl/web-mode-hook ()
     "Hooks for Web mode."
@@ -4113,20 +4113,20 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 #+begin_src emacs-lisp
 (use-package js2-mode
   :mode "\\.js\\'"
-  :bind (("C-c s j" . nl/counsel-ag-js))
+  ;;:bind (("C-c s j" . nl/counsel-ag-js))
   :preface
   (defun js-filename-p (filename)
     (string-match "\.js$" filename))
 
-  (defun nl/counsel-ag-js ()
-    "Perform counsel-ag on the project's JavaScript files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "--js"))
+  ;; (defun nl/counsel-ag-js ()
+  ;;   "Perform counsel-ag on the project's JavaScript files."
+  ;;   (interactive)
+  ;;   (counsel-ag "" (projectile-project-root) "--js"))
 
-  (defun nl/counsel-ag-js-spec ()
-    "Perform counsel-ag on the project's JavaScript files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
+  ;; (defun nl/counsel-ag-js-spec ()
+  ;;   "Perform counsel-ag on the project's JavaScript files."
+  ;;   (interactive)
+  ;;   (counsel-ag "" (projectile-project-root) "-G Spec.js$"))
 
   (defun nl/webpack-find-file ()
     "From a webpack failure backtrace, opens the file under the cursor at the line specified."
@@ -4467,12 +4467,12 @@ Integrates with IPython.
 
   (key-chord-define-global "jt" 'hydra-nl-scalatest/body)
 
-  (defun nl/counsel-ag-scala ()
-    "Perform counsel-ag on the project's Scala files."
-    (interactive)
-    (counsel-ag "" (projectile-project-root) "--scala"))
+  ;; (defun nl/counsel-ag-scala ()
+  ;;   "Perform counsel-ag on the project's Scala files."
+  ;;   (interactive)
+  ;;   (counsel-ag "" (projectile-project-root) "--scala"))
 
-  (global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
+  ;; '(global-set-key (kbd "C-c s s") 'nl/counsel-ag-scala)
   :config
   (setq scala-indent:indent-value-expression t
         scala-indent:align-parameters t
@@ -4524,30 +4524,30 @@ No longer used since Scala Metals is now being used.
     (call-interactively 'sbt-command)
     (setq completing-read-function 'ivy-completing-read))
 
-  ;; Ivy and =sbt-command= do not behave well together right now, define
-  ;; our own wrapper function.
-  ;; --testing--
-  (defun sbt-command-ivy ()
-    "Send a command to the sbt process of the current buffer's sbt project.
-  Prompts for the command to send when in interactive mode. You can
-  use tab completion.
+  ;; ;; Ivy and =sbt-command= do not behave well together right now, define
+  ;; ;; our own wrapper function.
+  ;; ;; --testing--
+  ;; (defun sbt-command-ivy ()
+  ;;   "Send a command to the sbt process of the current buffer's sbt project.
+  ;; Prompts for the command to send when in interactive mode. You can
+  ;; use tab completion.
 
-  This command does the following:
-    - displays the buffer moving focus to it if focus is t
-    - erases the buffer
-    - forgets about compilation errors
+  ;; This command does the following:
+  ;;   - displays the buffer moving focus to it if focus is t
+  ;;   - erases the buffer
+  ;;   - forgets about compilation errors
 
-  The command is most usefull for running a compilation command
-  that outputs errors."
-    (interactive)
-    (setq sbt:command-history-temp
-          (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
-    (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
-              #'sbt:get-sbt-completions-for-command
-              :action #'sbt:command
-              :history 'sbt:command-history-temp
-              :preselect (sbt:get-previous-command)
-              :dynamic-collection t))
+  ;; The command is most usefull for running a compilation command
+  ;; that outputs errors."
+  ;;   (interactive)
+  ;;   (setq sbt:command-history-temp
+  ;;         (ignore-errors (with-current-buffer (sbt:buffer-name) (ring-elements comint-input-ring))))
+  ;;   (ivy-read (format "Command to run (default %s): " (sbt:get-previous-command))
+  ;;             #'sbt:get-sbt-completions-for-command
+  ;;             :action #'sbt:command
+  ;;             :history 'sbt:command-history-temp
+  ;;             :preselect (sbt:get-previous-command)
+  ;;             :dynamic-collection t))
 
     ;;; https://github.com/ensime/emacs-sbt-mode/issues/139
   (setq sbt:program-options '("-Djline.terminal=auto"))
