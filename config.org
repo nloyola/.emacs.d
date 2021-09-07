@@ -15,6 +15,9 @@ This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 ** Ubuntu
 
 *** Master branch
+:PROPERTIES:
+:header-args: :dir ~/src/emacs/emacs.master
+:END:
 
 I've installed Emacs from source
 (=git://git.savannah.gnu.org/emacs.git=). I used the instructions
@@ -28,25 +31,9 @@ git clone git://git.savannah.gnu.org/emacs.git
 
 Then to compile and install, do the following.
 
-#+begin_src sh
-./configure --prefix=/usr/local --with-modules --with-json --with-cairo --with-rsvg
-make bootstrap
-make -j6
-sudo make install
-#+end_src
-
-*** Gcc
-
-#+begin_src sh
-git clone git://git.savannah.gnu.org/emacs.git -b feature/native-comp
-./autogen.sh
-#+end_src
-
-Then to compile and install, do the following.
-
-#+begin_src sh
+#+begin_src sh :results output
 ./configure --with-native-compilation --prefix=/usr/local --with-modules --with-json --with-cairo --with-rsvg
-make -j6
+make -j4
 sudo make install
 #+end_src
 
