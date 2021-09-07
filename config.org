@@ -389,20 +389,20 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
   (interactive)
   (kill-buffer (current-buffer)))
 
-(defun nl/helm-compile ()
-  "Use Helm to choose a compile command."
-  (interactive)
-  (let ((selected-command
-         (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
-    ;; move this command to the front of the history
-    (setq compile-history (remove selected-command compile-history))
-    (add-to-list 'compile-history selected-command)
-    (compile selected-command)))
+;; (defun nl/helm-compile ()
+;;   "Use Helm to choose a compile command."
+;;   (interactive)
+;;   (let ((selected-command
+;;          (helm-comp-read "Select a compile command: " compile-history :buffer "Helm compile commands")))
+;;     ;; move this command to the front of the history
+;;     (setq compile-history (remove selected-command compile-history))
+;;     (add-to-list 'compile-history selected-command)
+;;     (compile selected-command)))
 
-(defun nl/counsel-git-files ()
-  (interactive)
-  (let ((counsel-fzf-cmd "git ls-files | fzf -f \"%s\""))
-    (counsel-fzf)))
+;; (defun nl/counsel-git-files ()
+;;   (interactive)
+;;   (let ((counsel-fzf-cmd "git ls-files | fzf -f \"%s\""))
+;;     (counsel-fzf)))
 
 (global-set-key (kbd "M-%")           'query-replace-regexp)
 ;;(global-set-key "\C-x\C-e"          'compile)
@@ -416,14 +416,14 @@ http://pragmaticemacs.com/emacs/dont-kill-buffer-kill-this-buffer-instead/
 (global-set-key (kbd "S-<f1>")        'indent-region)
 (global-set-key (kbd "<f2>")          '(lambda () (interactive) (save-some-buffers t)))
 (global-set-key (kbd "S-<f2>")        '(lambda () (interactive) (revert-buffer t t)))
-(global-set-key (kbd "S-<f3>")        'helm-projectile-rg)
+;;(global-set-key (kbd "S-<f3>")        'helm-projectile-rg)
 (global-set-key (kbd "M-S-<f3>")      'counsel-rg)
 (global-set-key [f5]                  'nl/helm-compile)
 (global-set-key (kbd "S-<f5>")        'toggle-truncate-lines)
 (global-set-key (kbd "<f8>")          'window-toggle-side-windows)
 (global-set-key (kbd "S-<f11>")       'eval-region)
 (global-set-key (kbd "C-S-<f11>")     'align-regexp)
-(global-set-key (kbd "C-c o")         'nl/counsel-git-files)
+;;(global-set-key (kbd "C-c o")         'nl/counsel-git-files)
 #+end_src
 
 ** Line numbers
@@ -2538,7 +2538,7 @@ short bindings with a common prefix - a Hydra.
 
   (defhydra hydra-buffer (:color blue :columns 3)
     ("n" next-buffer "next" :color red)
-    ("b" helm-mini "switch")
+    ;;("b" helm-mini "switch")
     ("B" ibuffer "ibuffer")
     ("p" previous-buffer "prev" :color red)
     ("C-b" buffer-menu "buffer menu")
@@ -2978,7 +2978,7 @@ Project navigation and management library for Emacs.
   (setq projectile-indexing-method 'alien
         projectile-remember-window-configs nil
         projectile-switch-project-action 'projectile-dired
-        projectile-completion-system 'helm
+        projectile-completion-system 'default
         projectile-enable-caching nil
         projectile-create-missing-test-files t
         projectile-mode-line "Projectile")
@@ -3809,7 +3809,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 **** Helm Key bindings
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (with-eval-after-load 'helm-files
   ;; rebind tab to do persistent action
   (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
@@ -3847,7 +3847,7 @@ GNU Global and projectile: use ~C-c p R~ to regenerate tag file.
 
 Highlighting of token matches is a tad slow, let's speed it up.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (with-eval-after-load 'helm
   (setq helm-mp-highlight-delay 0.3))
 #+end_src
@@ -3855,7 +3855,7 @@ Highlighting of token matches is a tad slow, let's speed it up.
 I don't know why, but helm tries doing window management.  Please
 stop:
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (with-eval-after-load 'helm
   (setq helm-display-function 'pop-to-buffer))
 #+end_src
@@ -3865,7 +3865,7 @@ stop:
 Define my own function for ~C-o~ key mapping. Uses ~ace-select-window~
 instead of ~find-file-other-window~.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package helm-ag
   :pin melpa
   :after helm
@@ -3894,7 +3894,7 @@ instead of ~find-file-other-window~.
 
 *** [[https://github.com/emacs-jp/helm-c-yasnippet][helm-c-yasnippet]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package helm-c-yasnippet
   :after helm
   :commands helm-yas-complete
@@ -3906,7 +3906,7 @@ instead of ~find-file-other-window~.
 
 2020-02-03 Disabled for now since it causes problems with Helm.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package helm-fd
   :after helm
   :disabled
@@ -3944,7 +3944,7 @@ instead of ~find-file-other-window~.
 
 *** [[https://github.com/emacs-lsp/helm-lsp][helm-lsp]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package helm-lsp
   :after helm)
 #+end_src
@@ -3961,7 +3961,7 @@ instead of ~find-file-other-window~.
 
 *** [[https://github.com/cosmicexplorer/helm-rg][helm-rg]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package helm-rg
   :after helm)
 #+end_src
@@ -5139,7 +5139,7 @@ behavior added."
 
 ** helm-treemacs-icons
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (with-eval-after-load 'ace-window
   (require 'helm-treemacs-icons)
   (helm-treemacs-icons-enable))
