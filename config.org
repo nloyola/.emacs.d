@@ -2962,7 +2962,12 @@ Quick switching between buffers.
                 nswbuff-display-intermediate-buffers t
                 nswbuff-exclude-buffer-regexps '("^ .*" "^\\*.*\\*")))
 #+end_src
+** [[https://github.com/astahlman/ob-async][ob-async]]
 
+#+begin_src emacs-lisp
+(use-package ob-async
+  :after org)
+#+end_src
 ** [[https://github.com/openscad/openscad/tree/ba38885dcae54336c85bec0ca4ac2a5e7d038bbe][openscad]]
 
 #+begin_src emacs-lisp
@@ -2980,13 +2985,6 @@ Show org-mode bullets as UTF-8 characters.
 #+begin_src emacs-lisp
 (use-package org-bullets
   :hook (org-mode . org-bullets-mode))
-#+end_src
-
-** [[https://github.com/astahlman/ob-async][ob-async]]
-
-#+begin_src emacs-lisp
-(use-package ob-async
-  :after org)
 #+end_src
 
 ** [[https://github.com/Silex/package-utils][package-utils]]
