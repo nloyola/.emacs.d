@@ -2185,6 +2185,49 @@ This package adds support for flow to flycheck.
          ( ycmd-mod-hook . ycmd-setup-completion-at-point-function)))
 #+end_src
 
+** [[https://github.com/oantolin/embark][embark]]
+
+#+begin_src emacs-lisp
+(use-package marginalia
+  ;; Either bind `marginalia-cycle` globally or only in the minibuffer
+  :bind (("M-A" . marginalia-cycle)
+         :map minibuffer-local-map
+         ("M-A" . marginalia-cycle))
+  :init
+  (marginalia-mode))
+
+(use-package embark
+  :ensure t
+
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; good alternative: M-.
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+
+  :init
+
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+
+  :config
+
+  ;; Hide the mode line of the Embark live/completions buffers
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+;; Consult users will also want the embark-consult package.
+(use-package embark-consult
+  :ensure t
+  :after (embark consult)
+  :demand t ; only necessary if you have the hook below
+  ;; if you want to have consult previews as you move around an
+  ;; auto-updating embark collect buffer
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+#+end_src
+
 ** [[https://melpa.org/#/etags-select][etags-select]]
 
 #+BEGIN_QUOTE
@@ -2508,7 +2551,7 @@ short bindings with a common prefix - a Hydra.
     ("O" (dired "~/Dropbox/orgfiles") "Org")
     )
 
-  (global-set-key (kbd "C-.") 'hydra-files/body)
+  (global-set-key (kbd "C-,") 'hydra-files/body)
 
   (defhydra hydra-window (:color red :hint nil)
     ("h" windmove-left)
@@ -2895,6 +2938,13 @@ it from the [[https://www.youtube.com/watch?v%3D2TSKxxYEbII][package highlight t
   ;;             "https://raw.githubusercontent.com/richleland/pygments-css/master/emacs.css")
   (setq markdown-preview-stylesheets (list
                                       "http://thomasf.github.io/solarized-css/solarized-dark.min.css")))
+#+end_src
+
+** [[https://github.com/wentasah/meson-mode][meson-mode]]
+
+#+begin_src emacs-lisp
+(use-package meson-mode
+        :hook ('meson-mode . company-mode))
 #+end_src
 
 ** [[https://github.com/joostkremers/nswbuff][nswbuff]]
