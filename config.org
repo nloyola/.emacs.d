@@ -573,6 +573,13 @@ https://www.gnu.org/software/emacs/manual/html_node/elisp/Side-Windows.html#Side
 (set-default-coding-systems 'utf-8)
 #+end_src
 
+** Widow
+
+#+begin_src emacs-lisp
+(setq split-height-threshold 160
+      split-width-threshold nil)
+#+end_src
+
 * Languages
 
 ** Identation config
@@ -678,10 +685,7 @@ Enable ANSI colors for compilation buffers.
   :config
   (setq compilation-ask-about-save nil
         compilation-always-kill t
-        compilation-scroll-output t
-
-        ;; so that next-error does not open a new window
-        split-width-threshold 200)
+        compilation-scroll-output t)
 
   :hook (compilation-filter . compilation-ansi-color-process-output))
 #+end_src
