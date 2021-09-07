@@ -4424,12 +4424,12 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
                  (set (make-local-variable 'company-backends)
                       '((elpy-company-backend :with company-yasnippet)))))
   :config
-  (setq
-   ;; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
-   elpy-modules (delq 'elpy-module-flymake elpy-modules)
-   elpy-shell-echo-output nil
-   elpy-rpc-python-command "python3"
-   elpy-rpc-timeout 2))
+  (setq elpy-rpc-virtualenv-path 'current
+        ;; fix for MacOS, see https://github.com/jorgenschaefer/elpy/issues/1550
+        elpy-modules (delq 'elpy-module-flymake elpy-modules)
+        elpy-shell-echo-output nil
+        elpy-rpc-python-command "python3"
+        elpy-rpc-timeout 2))
 
 (with-eval-after-load 'python (elpy-enable))
 #+end_src
