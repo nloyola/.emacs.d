@@ -1291,7 +1291,15 @@ Save command history between sessions (taken from EmacsWiki).
         (ssh-methods '("ssh" "sshx"))))
   (setq tramp-terminal-type "dumb"
         tramp-shell-prompt-pattern "^[^$>\n]*[#$%>] *\\(\[[0-9;]*[a-zA-Z] *\\)*"
-        vc-ignore-dir-regexp (format "\\(%s\\)\\|\\(%s\\)" vc-ignore-dir-regexp tramp-file-name-regexp)))
+        vc-ignore-dir-regexp (format "\\(%s\\)\\|\\(%s\\)" vc-ignore-dir-regexp tramp-file-name-regexp)
+        tramp-inline-compress-start-size 1000
+        tramp-copy-size-limit 10000
+        vc-handled-backends '(Git)
+        tramp-verbose 1
+        tramp-default-method "scp"
+        tramp-use-ssh-controlmaster-options nil
+        projectile--mode-line "Projectile"
+        tramp-verbose 1))
 #+end_src
 
 *** Multi hop with sudo
