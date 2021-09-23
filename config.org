@@ -1897,6 +1897,15 @@ Removed due to not displaying properly with ~IBM Plex Mono~ font. 2021-02-16
 )
 #+end_src
 
+*** =consult-buffer=
+
+ | Keys  | Description            |
+ |-------+------------------------|
+ | b SPC | Narrow to buffers      |
+ | f SPC | Narrow to recent files |
+ | m SPC | Narrow to bookmarks    |
+ | p SPC | Narrow to project      |
+
 ** [[https://github.com/twada/coverlay.el][coverlay.el]]
 
 #+begin_src emacs-lisp :tangle no
