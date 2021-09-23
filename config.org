@@ -4451,6 +4451,17 @@ Integrates with IPython.
 (use-package python-mode)
 #+end_src
 
+**** black
+
+The uncompromising Python code formatter.
+
+#+begin_src emacs-lisp
+(use-package python-black
+  :after python
+  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+#+end_src
+
+
 *** Rust
 
 #+begin_src emacs-lisp
