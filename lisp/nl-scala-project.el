@@ -7,7 +7,8 @@
 ;;; Code:
 
 (eval-when-compile
-  (require 'scala-mode))
+  (require 'scala-mode)
+  (require 'lsp-mode))
 
 (defconst scalatest-class-package-regexp
   (rx line-start

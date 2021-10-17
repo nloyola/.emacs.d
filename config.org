@@ -19,13 +19,18 @@ This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 :header-args: :dir ~/src/emacs/emacs.master
 :END:
 
-I've installed Emacs from source
-(=git://git.savannah.gnu.org/emacs.git=). I used the instructions
-provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]]. But first, the following command has to
-be run.
+I've installed Emacs from source (=git://git.savannah.gnu.org/emacs.git=).
 
 #+begin_src sh
 git clone git://git.savannah.gnu.org/emacs.git
+#+end_src
+
+I used the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]].
+
+But first, the following command has to be run.
+
+#+begin_src sh
+git pull
 ./autogen.sh
 #+end_src
 
@@ -67,12 +72,13 @@ Silence compiler warnings in ~native-mode~.
 Also see: all-the-icons-dired package installation
 
 #+begin_src  emacs-lisp :results silent
-;; (defvar nl/gui-fixed-font-name "Fira Code Retina")
+(defvar nl/gui-fixed-font-name "FiraCode Nerd Font")
+;;(defvar nl/gui-fixed-font-name "Ubuntu Nerd Font")
 
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
 ;; (defvar nl/gui-variable-font-name "DejaVu Sans")
 
-(defvar nl/gui-fixed-font-name "GoMono Nerd Font Mono")
+;;(defvar nl/gui-fixed-font-name "GoMono Nerd Font")
 (defvar nl/gui-variable-font-name "Go")
 
 (defconst nl/gui-fixed-font-size-normal "10")
@@ -757,6 +763,7 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
   ;; Move files to trash when deleting
   (delete-by-moving-to-trash t)
   (dired-dwim-target t)
+  (find-file-visit-truename t)
   :config
   (setq dired-listing-switches "-aBhl --group-directories-first")
   ;; Reuse same dired buffer, to prevent numerous buffers while navigating in dired
@@ -1373,7 +1380,7 @@ Using doom themes
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-dark+ t)
+  (load-theme 'doom-gruvbox t)
 
   ;;
   (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
@@ -1946,6 +1953,22 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
   (require 'dap-java))
 #+end_src
 
+** [[https://github.com/emacs-dashboard/emacs-dashboard][dashboard]]
+
+#+begin_src emacs-lisp
+(use-package dashboard
+  :demand t
+  :custom
+  (dashboard-projects-backend 'projectile)
+  :config
+  (setq dashboard-items '((projects . 5)
+                          (recents  . 5)
+                          (bookmarks . 5)
+                          (agenda . 5)
+                          (registers . 5)))
+  (dashboard-setup-startup-hook))
+#+end_src
+
 ** [[https://github.com/patrickt/emacs][deadgrep]]
 
 #+begin_src emacs-lisp
@@ -2153,7 +2176,47 @@ This package adds support for flow to flycheck.
     :commands vterm vterm-other-window
     :config
     (setq vterm-max-scrollback 10000)))
+#+end_src
 
+*** Run shell command in new vterm
+
+https://www.reddit.com/r/emacs/comments/ft84xy/run_shell_command_in_new_vterm/
+
+#+begin_src emacs-lisp
+(defun run-in-vterm-kill (process event)
+  "A process sentinel. Kills PROCESS's buffer if it is live."
+  (let ((b (process-buffer process)))
+    (and (buffer-live-p b)
+         (kill-buffer b))))
+
+(defun run-in-vterm (command)
+  "Execute string COMMAND in a new vterm.
+
+Interactively, prompt for COMMAND with the current buffer's file
+name supplied. When called from Dired, supply the name of the
+file at point.
+
+Like `async-shell-command`, but run in a vterm for full terminal features.
+
+The new vterm buffer is named in the form `*foo bar.baz*`, the
+command and its arguments in earmuffs.
+
+When the command terminates, the shell remains open, but when the
+shell exits, the buffer is killed."
+  (interactive
+   (list
+    (let* ((f (cond (buffer-file-name)
+                    ((eq major-mode 'dired-mode)
+                     (dired-get-filename nil t))))
+           (filename (concat " " (shell-quote-argument (and f (file-relative-name f))))))
+      (read-shell-command "Terminal command: "
+                          (cons filename 0)
+                          (cons 'shell-command-history 1)
+                          (list filename)))))
+  (with-current-buffer (vterm (concat "*" command "*"))
+    (set-process-sentinel vterm--process #'run-in-vterm-kill)
+    (vterm-send-string command)
+    (vterm-send-return)))
 #+end_src
 
 ** [[https://github.com/chrisbarrett/emacs-refactor][emacs-refactor]]
@@ -2194,6 +2257,8 @@ This package adds support for flow to flycheck.
 #+end_src
 
 ** [[https://github.com/oantolin/embark][embark]]
+
+- ~M-x embark-collect-snapshot~ - Within an embark session, save results to a buffer
 
 #+begin_src emacs-lisp
 (use-package marginalia
@@ -2842,6 +2907,37 @@ Disabled since Jest is being used. 2019-10-11
   :commands karma-mode)
 #+end_src
 
+** [[https://github.com/mickeynp/ligature.el][ligatures]]
+
+#+begin_src emacs-lisp
+(use-package ligature
+  :demand t
+  :load-path "~/src/github/elisp/ligature"
+  :config
+  ;; Enable the "www" ligature in every possible major mode
+  (ligature-set-ligatures 't '("www"))
+  ;; Enable traditional ligature support in eww-mode, if the
+  ;; `variable-pitch' face supports it
+  (ligature-set-ligatures 'eww-mode '("ff" "fi" "ffi"))
+  ;; Enable all Cascadia Code ligatures in programming modes
+  (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                       ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                       "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "---" "-<<"
+                                       "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                       "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                       "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                       "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                       "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                       ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                       "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                       "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                       "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                       "\\\\" "://"))
+  ;; Enables ligature checks globally in all buffers. You can also do it
+  ;; per mode with `ligature-mode'.
+  (global-ligature-mode t))
+#+end_src
+
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
 
 Add filler lorem ipsum text to Emacs.
@@ -2858,6 +2954,7 @@ Add filler lorem ipsum text to Emacs.
   :pin melpa
   :commands (lsp lsp-deferred)
   :hook
+  ;;(js-mode . lsp)
   (typescript-mode . lsp)
   (scala-mode . lsp)
   (php-mode . lsp)
@@ -4311,6 +4408,59 @@ can be downloaded from [[http://eclim.org/install.html][here]].
 (use-package company-tern
   :init (add-to-list 'company-backends 'company-tern))
 #+end_src
+*** Haskell
+
+From: https://github.com/jimenezrick/my-emacs.d/blob/master/packages-haskell.el
+
+#+begin_src emacs-lisp
+(use-package haskell-mode
+  :custom
+  (haskell-process-type 'cabal-repl)
+  (haskell-process-load-or-reload-prompt t)
+  (haskell-process-auto-import-loaded-modules t)
+  (haskell-process-log t)
+  (haskell-tags-on-save t)
+  :config
+  (defun haskell-mode-setup ()
+    (haskell-indentation-mode -1)
+    (interactive-haskell-mode)
+
+    (setq-local tab-stop-list '(2 4))
+    (setq indent-line-function 'indent-relative)
+    (setq tab-width 2)
+    (setq-local evil-shift-width 2)
+
+    (define-key evil-insert-state-map (kbd "TAB") 'tab-to-tab-stop)
+    (define-key evil-normal-state-map (kbd "C-]") 'haskell-mode-goto-loc)
+    (define-key evil-normal-state-map (kbd "C-c C-]") 'haskell-mode-tag-find)
+    (define-key evil-normal-state-map (kbd "C-c C-t") 'haskell-mode-show-type-at))
+  (add-hook 'haskell-mode-hook 'haskell-mode-setup)
+  (add-hook 'haskell-mode-hook 'haskell-decl-scan-mode))
+
+(use-package flycheck-haskell
+  :config
+  (setq-default flycheck-disabled-checkers '(haskell-stack-ghc))
+  (add-hook 'haskell-mode-hook #'flycheck-haskell-setup))
+
+(use-package company-ghci
+  :after pos-tip
+  :config
+  (defun show-hoogle-info-in-popup ()
+    (pos-tip-show (company-ghci/hoogle-info (symbol-at-point))))
+  (defun company-ghci-setup ()
+    (push 'company-ghci company-backends)
+    (define-key evil-normal-state-map (kbd "C-;") (lambda () (interactive) (show-hoogle-info-in-popup))))
+  (add-hook 'haskell-interactive-mode-hook 'company-mode)
+  (add-hook 'haskell-mode-hook 'company-ghci-setup))
+
+(use-package ormolu
+  :hook (haskell-mode . ormolu-format-on-save-mode)
+  :bind (:map haskell-mode-map
+              ("C-c r" . ormolu-format-buffer)))
+
+;; (use-package dhall-mode
+;;   :mode "\\.dhall\\'")
+#+end_src
 
 *** Lisp
 **** [[https://github.com/slime/slime][slime]]
@@ -4412,11 +4562,22 @@ checker is loaded.
 
 https://www.mattduck.com/lsp-python-getting-started.html
 
+**** lsp-pyright
+
 pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_but_which_lsp_server/][lsp for python, sure. but which lsp server??]]
+
+#+begin_src emacs-lisp
+(use-package lsp-pyright
+  :preface
+  (defun nl/pyright-hook ()
+    (require 'lsp-pyright)
+    (lsp))
+  :hook (python-mode . nl/pyright-hook))
+#+end_src
 
 **** [[https://github.com/emacsorphanage/company-jedi][company-jedi]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package company-jedi
   :after company
   :config
@@ -4427,7 +4588,7 @@ pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_bu
 
 See [[https://medium.com/analytics-vidhya/managing-a-python-development-environment-in-emacs-43897fd48c6a][here]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package elpy
   :bind
   (:map elpy-mode-map
@@ -4457,6 +4618,7 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
 
 #+begin_src emacs-lisp
 (use-package pyvenv
+  :after python-mode
   :config
   (pyvenv-mode 1))
 #+end_src
@@ -4630,7 +4792,7 @@ No longer used since Scala Metals is now being used.
 
 #+begin_src emacs-lisp
 (use-package typescript-mode
-  :mode ("\\.ts\\'" "\\.js\\'")
+  :mode ("\\.ts\\'" "\\.tsx\\'" "\\.js\\'")
   :hook
   (typescript-mode . lsp-deferred)
   (typescript-mode . column-enforce-mode)
