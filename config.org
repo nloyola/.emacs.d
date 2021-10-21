@@ -1941,16 +1941,21 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 
 ** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
 
-#+begin_src elisp
+#+begin_src emacs-lisp
 (use-package dap-mode
-  :after lsp-mode
-  :commands dap-debug
-  ;;:hook (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
+  :after (lsp-mode)
+  :commands (dap-debug)
+  :hook ((python-mode . dap-ui-mode)
+         (python-mode . dap-mode)
+         (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
+         )
   :config
   (dap-mode t)
   (dap-ui-mode t)
   (require 'dap-node)
-  (require 'dap-java))
+  (require 'dap-java)
+  (require 'dap-python)
+  (require 'dap-lldb))
 #+end_src
 
 ** [[https://github.com/emacs-dashboard/emacs-dashboard][dashboard]]
@@ -3240,7 +3245,7 @@ to overwrite.
 
 ** [[https://github.com/nlamirault/ripgrep.el][ripgrep]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package ripgrep)
 #+end_src
 
@@ -4562,6 +4567,13 @@ checker is loaded.
 
 https://www.mattduck.com/lsp-python-getting-started.html
 
+#+begin_src emacs-lisp
+(use-package python
+  :config
+  (require 'dap-node)
+  (dap-node-setup))
+#+end_src
+
 **** lsp-pyright
 
 pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_but_which_lsp_server/][lsp for python, sure. but which lsp server??]]
@@ -4623,14 +4635,6 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
   (pyvenv-mode 1))
 #+end_src
 
-**** [[https://melpa.org/#/python-mode][python-mode]]
-
-Integrates with IPython.
-
-#+begin_src emacs-lisp :tangle no
-(use-package python-mode)
-#+end_src
-
 **** black
 
 The uncompromising Python code formatter.
@@ -4640,7 +4644,6 @@ The uncompromising Python code formatter.
   :after python
   :hook (python-mode . python-black-on-save-mode-enable-dwim))
 #+end_src
-
 
 *** Rust
 
