@@ -1,7 +1,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Nelson Loyola
 #+STARTUP: overview
-#+INFOJS_OPT: view:t toc:t ltoc:t mouse:underline buttons:0 path:http://thomasf.github.io/solarized-css/org-info.min.js
+#+INFOJS_OPT: view:t toc:t ltoc:t mouse:underline buttons:0 path:http://thomasf.github.io/solarized-css/org-info.min.j
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="http://thomasf.github.io/solarized-css/solarized-light.min.css" />
 #+OPTIONS: broken-links:t
 #+PROPERTY: header-args  :results silent
@@ -2040,6 +2040,15 @@ Provides a simple UI for customizing dired mode to use different faces and color
          (:default
           '(:family "Arial" :height 90)))))
 #+end_src
+
+** [[https://github.com/wbolster/emacs-direnv][direnv]]
+
+#+begin_src emacs-lisp
+(use-package direnv
+ :config
+ (direnv-mode))
+#+end_src
+
 ** [[https://github.com/Silex/docker.el][docker]]
 
 #+begin_src emacs-lisp
