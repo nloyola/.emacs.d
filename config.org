@@ -4626,13 +4626,20 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
 (with-eval-after-load 'python (elpy-enable))
 #+end_src
 
-**** [[https://github.com/jorgenschaefer/pyvenv/tree/0bf4b87068e9040fc99afa85af1992247dd7aacd][pyvenv]]
+**** [[https://github.com/pythonic-emacs/pyenv-mode][pyenv]]
 
 #+begin_src emacs-lisp
-(use-package pyvenv
-  :after python-mode
+(use-package pyenv-mode
+  :hook
+  ((projectile-switch-project . nl/projectile-pyenv-mode-set)
+   (python-mode . nl/projectile-pyenv-mode-set))
   :config
-  (pyvenv-mode 1))
+    (defun nl/projectile-pyenv-mode-set ()
+      "Set pyenv version matching project name."
+      (let ((project (projectile-project-name)))
+        (if (member project (pyenv-mode-versions))
+            (pyenv-mode-set project)
+          (pyenv-mode-unset)))))
 #+end_src
 
 **** black
