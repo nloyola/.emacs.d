@@ -36,6 +36,7 @@
   "Regular expression for a python test function.")
 
 (defun nl/lsp-pyright-organize-imports ()
+  "Use lsp to organize import on this file"
   (interactive)
   (let ((fname (vector (concat "file://" buffer-file-name))))
     (lsp-send-execute-command "pyright.organizeimports" (vector fname))))
@@ -118,6 +119,24 @@
                         (nl/python-test-find-method-name))
                   "::")
      ))
+
+(defun nl/python-source-file-p (filename)
+  "Return non-nil if FILENAME is for a Python file."
+  (string-match "\\.py$" filename))
+
+(defun nl/project-organize-imports ()
+  "Use lsp to organize import on all project files"
+  (interactive)
+  (let ((files (seq-filter 'nl/python-source-file-p (projectile-current-project-files))))
+    (cl-loop for file in files do
+          (progn
+            (setq default-directory (projectile-project-root))
+            (message "formatting: %s" file)
+            (find-file file)
+            (goto-char (point-min))
+            (nl/lsp-pyright-organize-imports)
+            (save-buffer)))
+            ))
 
 
 (defhydra hydra-nl/python-test (:color blue)
