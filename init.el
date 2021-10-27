@@ -187,4 +187,5 @@ See http://emacsninja.com/posts/failing-gracefully.html"
   (setq initial-buffer-choice (lambda () (get-buffer "*Messages*"))))
 
 
+;; comment this line out to show the *Messages* buffer on startup
 ;; (nl/show-messages-on-startup)

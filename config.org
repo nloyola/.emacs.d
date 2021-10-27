@@ -1945,9 +1945,9 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 (use-package dap-mode
   :after (lsp-mode)
   :commands (dap-debug)
-  :hook ((python-mode . dap-ui-mode)
-         (python-mode . dap-mode)
-         (dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
+  :hook ((dap-stopped-hook . (lambda (arg) (call-interactively #'dap-hydra)))
+         ;; (python-mode . dap-ui-mode)
+         ;; (python-mode . dap-mode)
          )
   :config
   (dap-mode t)
@@ -2405,7 +2405,8 @@ Allow windmove to jump between frames.
                         '(javascript-jshint)))
 
   (setq flycheck-checkers (append flycheck-checkers
-                                  '(javascript-eslint)))
+                                  '(javascript-eslint))
+        flycheck-python-flake8-executable "flake8")
   ;; use eslint with web-mode for jsx files
   (flycheck-add-mode 'javascript-eslint 'web-mode)
   (flycheck-add-mode 'javascript-eslint 'js2-mode)
@@ -2972,7 +2973,7 @@ Add filler lorem ipsum text to Emacs.
   (typescript-mode . lsp)
   (scala-mode . lsp)
   (php-mode . lsp)
-  (python-mode . lsp)
+  ;; (python-mode . lsp) ;; commented out because lsp is initialized in lsp-pyright config
   :custom
   (lsp-keymap-prefix "C-c l")
   (lsp-ui-flycheck-enable nil)
@@ -4576,11 +4577,15 @@ checker is loaded.
 
 https://www.mattduck.com/lsp-python-getting-started.html
 
-#+begin_src emacs-lisp
+This config is not needed because the config for lsp-pyright takes care of setting things up.
+
+#+begin_src emacs-lisp :tangle no
 (use-package python
-  :config
-  (require 'dap-node)
-  (dap-node-setup))
+  :hook (python-mode . nl/python-hook)
+  ;; :config
+  ;; (require 'dap-node)
+  ;; (dap-node-setup)
+  )
 #+end_src
 
 **** lsp-pyright
@@ -4592,7 +4597,12 @@ pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_bu
   :preface
   (defun nl/pyright-hook ()
     (require 'lsp-pyright)
-    (lsp))
+    (lsp)
+    ;; for help with enabling python-flake8 see https://github.com/emacs-lsp/lsp-mode/issues/2594
+    (require 'lsp-diagnostics)
+    (lsp-diagnostics-flycheck-enable)
+    (flycheck-add-next-checker 'lsp 'python-flake8)
+    )
   :hook (python-mode . nl/pyright-hook))
 #+end_src
 
@@ -4637,12 +4647,12 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
 
 **** [[https://github.com/pythonic-emacs/pyenv-mode][pyenv]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package pyenv-mode
   :hook
   ((projectile-switch-project . nl/projectile-pyenv-mode-set)
    (python-mode . nl/projectile-pyenv-mode-set))
-  :config
+  :preface
     (defun nl/projectile-pyenv-mode-set ()
       "Set pyenv version matching project name."
       (let ((project (projectile-project-name)))
