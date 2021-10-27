@@ -4658,7 +4658,8 @@ The uncompromising Python code formatter.
 #+begin_src emacs-lisp
 (use-package python-black
   :after python
-  :hook (python-mode . python-black-on-save-mode-enable-dwim))
+  ;;:hook (python-mode . python-black-on-save-mode-enable-dwim)
+  :commands (python-black-buffer))
 #+end_src
 
 *** Rust
