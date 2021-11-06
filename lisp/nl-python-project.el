@@ -70,16 +70,10 @@
 (defun nl/python-module-name ()
   "Return the python's file module name for the file that the buffer is visiting."
   (interactive)
-  (if (buffer-file-name)
-      (let ((file-name (file-name-nondirectory (buffer-file-name))))
-        (if (python-filename-p file-name)
-            (file-name-base (replace-regexp-in-string "\.py" "" file-name))
-          (progn
-            (message "not a python file")
-            nil)))
-    (progn
-      (message "not a file buffer")
-      nil)))
+  (unless (buffer-file-name) (error "not a file buffer"))
+  (let ((file-name (file-name-nondirectory (buffer-file-name))))
+    (unless (python-filename-p file-name) (error "file not in project----------"))
+    (file-name-base (replace-regexp-in-string "\.py$" "" file-name))))
 
 (defun nl/django-command-in-proj-root (command)
   "Run the compile COMMAND at the project's root directory."
@@ -89,7 +83,7 @@
 (defun nl/django-test-command-in-proj-root (command)
   "Run the compile COMMAND at the project's root directory."
   (interactive)
-  (compile (format "cd %s && pytest -s --no-migrations --reuse-db %s" nl/django-project-root command)))
+  (compile (format "cd %s && poetry run pytest -s --no-migrations --reuse-db %s" nl/django-project-root command)))
 
 (defun nl/django-test-project ()
   "For the class the cursor is in, run the Pytest test suite."
