@@ -117,19 +117,39 @@ Also see: all-the-icons-dired package installation
     (set-face-font 'default fixed-font)
     (set-face-font 'fixed-pitch fixed-font))
   (set-face-font 'variable-pitch (nl/gui-variable-font-normal))
+  (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
+  ;;(set-face-background 'region (doom-darken 'green 0.2))
 
-  ;;(set-face-attribute 'default frame :font nl/gui-fixed-font-name)
-  (set-face-attribute 'italic frame :font nl/gui-fixed-font-name :weight 'normal :slant 'italic)
-  (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
-  (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic)
-  (set-fontset-font "fontset-default" nil (font-spec :size 20 :name "Fira Code Retina")))
+  (when frame
+    ;;(set-face-attribute 'default frame :font nl/gui-fixed-font-name)
+    (set-face-attribute 'italic frame :font nl/gui-fixed-font-name :weight 'normal :slant 'italic)
+    (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
+    (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic)
+    (set-fontset-font "fontset-default" nil (font-spec :size 20 :name "Fira Code Retina"))
+
+    )
+
+  (set-face-font 'mode-line (nl/gui-variable-font-normal))
+  (set-face-font 'mode-line-buffer-id (nl/gui-variable-font-normal))
+  (set-face-font 'mode-line-emphasis (nl/gui-variable-font-normal))
+  (set-face-font 'mode-line-highlight (nl/gui-variable-font-normal))
+  (set-face-font 'mode-line-inactive (nl/gui-variable-font-normal))
+  )
 
 (defun nl/after-make-frame (frame)
-  (nl/set-fonts frame))
+  ;; disable the toolbar when in daemon mode
+  ;;
+  ;; https://emacs.stackexchange.com/questions/39359/tool-bar-in-emacsclient
+  (unless frame
+    (setq frame (selected-frame)))
+  (when frame
+    (with-selected-frame frame
+      (when (display-graphic-p)
+        (tool-bar-mode -1)
+        (nl/set-fonts frame)
+        ))))
 
 (add-hook 'after-make-frame-functions 'nl/after-make-frame t)
-
-(nl/set-fonts nil)
 #+end_src
 
 *** Ligatures
@@ -794,10 +814,15 @@ and not give any use feedback (source: [[http://whattheemacsd.com/sane-defaults.
 
 #+begin_src emacs-lisp
 (use-package edit-server
-  :if window-system
+  :if (display-graphic-p)
+  :preface
+  (defun nl/after-init-hook ()
+    (server-start t)
+    (edit-server-start t)
+    (nl/set-fonts nil)
+    )
   :init
-  (add-hook 'after-init-hook 'server-start t)
-  (add-hook 'after-init-hook 'edit-server-start t))
+  (add-hook 'after-init-hook 'nl/after-init-hook))
 #+end_src
 
 ** =flyspell=
@@ -1244,7 +1269,7 @@ Save command history between sessions (taken from EmacsWiki).
 
   (defun nl/sql-connect (product connection)
     "Connects to a database server of type PRODUCT using the CONNECTION type."
-    (require 'nl-passwords (concat user-emacs-directory "nl/password.el.gpg"))
+    (require 'nl-passwords (concat user-emacs-directory "my-password.el.gpg"))
 
     ;; update the password to the sql-connection-alist
     (let ((connection-info (assoc connection sql-connection-alist))
@@ -1261,6 +1286,7 @@ Save command history between sessions (taken from EmacsWiki).
       (sql-connect connection)))
 
   (defun nl/sql-localhost-dev ()
+    (interactive)
     "Connects to the MySQL server running on machine 'localhost'."
     (nl/sql-connect 'mysql 'localhost.dev))
 
@@ -1380,14 +1406,7 @@ Using doom themes
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-gruvbox t)
-
-  ;;
-  (set-face-attribute 'font-lock-comment-face nil :weight 'semi-bold :slant 'italic)
-  (set-face-background 'region (doom-darken 'blue 0.2))
-
-  (set-face-font 'mode-line (nl/gui-variable-font-normal))
-  (set-face-font 'mode-line-inactive (nl/gui-variable-font-normal))
+  (load-theme 'deeper-blue t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1442,7 +1461,6 @@ Loading themes (https://www.reddit.com/r/emacs/comments/fefwpw/show_your_themes/
 
 #+begin_src emacs-lisp :tangle no
 (use-package dracula-theme
-  :disabled
   :config
   (load-theme 'dracula t)
   ;; default region color is too hard to see on my display
@@ -1481,9 +1499,9 @@ Switched to Dracula theme: 2019-04-10
   (ediff-current-diff-B ((nil :background "#2b538a")))
   (ediff-odd-diff-C ((nil :background "#862b27")))
   (ediff-even-diff-C ((nil :background "#1f772c")))
-  (ediff-current-diff-C ((nil :background "#2b538a"))))
-:config
-(load-theme 'bubbleberry t))
+  (ediff-current-diff-C ((nil :background "#2b538a")))
+  :config
+  (load-theme 'bubbleberry t))
 #+end_src
 
 *** [[https://github.com/n3mo/cyberpunk-theme.el][cyberpunk-theme]]
@@ -4653,12 +4671,14 @@ See [[https://medium.com/analytics-vidhya/managing-a-python-development-environm
   ((projectile-switch-project . nl/projectile-pyenv-mode-set)
    (python-mode . nl/projectile-pyenv-mode-set))
   :preface
-    (defun nl/projectile-pyenv-mode-set ()
-      "Set pyenv version matching project name."
-      (let ((project (projectile-project-name)))
-        (if (member project (pyenv-mode-versions))
-            (pyenv-mode-set project)
-          (pyenv-mode-unset)))))
+  (defun nl/projectile-pyenv-mode-set ()
+    "Set pyenv version matching project name."
+    (let ((project (projectile-project-name)))
+      (if (member project (pyenv-mode-versions))
+          (pyenv-mode-set project)
+        (pyenv-mode-unset))))
+  :config
+  (setq exec-path (append exec-path '("~/.pyenv/bin"))))
 #+end_src
 
 **** black
