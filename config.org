@@ -12,6 +12,10 @@ which is a fantastic way to manage package configurations.
 This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 
 * Installing Emacs
+** Debian
+
+https://emacs.stackexchange.com/a/60858
+
 ** Ubuntu
 
 *** Master branch
@@ -78,7 +82,7 @@ Also see: all-the-icons-dired package installation
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
 ;; (defvar nl/gui-variable-font-name "DejaVu Sans")
 
-;;(defvar nl/gui-fixed-font-name "GoMono Nerd Font")
+;;(defvar nl/gui-variable-font-name "GoMono Nerd Font")
 (defvar nl/gui-variable-font-name "Go")
 
 (defconst nl/gui-fixed-font-size-normal "10")
@@ -1959,7 +1963,7 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
 
 ** [[https://github.com/emacs-lsp/dap-mode][dap-mode]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package dap-mode
   :after (lsp-mode)
   :commands (dap-debug)
@@ -1984,8 +1988,8 @@ This package was removed from MELPA since it was only found on Emacs Wiki.
   :custom
   (dashboard-projects-backend 'projectile)
   :config
-  (setq dashboard-items '((projects . 5)
-                          (recents  . 5)
+  (setq dashboard-items '((recents  . 5)
+                          (projects . 5)
                           (bookmarks . 5)
                           (agenda . 5)
                           (registers . 5)))
@@ -2092,7 +2096,7 @@ Provides a simple UI for customizing dired mode to use different faces and color
   :hook (after-init . doom-modeline-mode)
   :custom-face
   (doom-modeline-project-parent-dir ((t (:foreground "#0f3b82"))))
-  :config
+          :config
   (setq doom-modeline-buffer-file-name-style 'buffer-name
         doom-modeline-height 30
         doom-modeline-bar-width 3))
@@ -2942,7 +2946,9 @@ Disabled since Jest is being used. 2019-10-11
 
 ** [[https://github.com/mickeynp/ligature.el][ligatures]]
 
-#+begin_src emacs-lisp
+GitHub [[https://github.com/mickeynp/ligature.el/issues/28][issue]] says it's broken for emacs 27.1.
+
+#+begin_src emacs-lisp :tangle no
 (use-package ligature
   :demand t
   :load-path "~/src/github/elisp/ligature"
@@ -2968,7 +2974,8 @@ Disabled since Jest is being used. 2019-10-11
                                        "\\\\" "://"))
   ;; Enables ligature checks globally in all buffers. You can also do it
   ;; per mode with `ligature-mode'.
-  (global-ligature-mode t))
+  ;;(global-ligature-mode t)
+        )
 #+end_src
 
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
@@ -2990,7 +2997,7 @@ Add filler lorem ipsum text to Emacs.
   ;;(js-mode . lsp)
   (typescript-mode . lsp)
   (scala-mode . lsp)
-  (php-mode . lsp)
+  ;;(php-mode . lsp)
   ;; (python-mode . lsp) ;; commented out because lsp is initialized in lsp-pyright config
   :custom
   (lsp-keymap-prefix "C-c l")
@@ -4530,14 +4537,28 @@ checker is loaded.
 
 #+begin_src emacs-lisp
 (use-package php-mode
+  ;;:after (flycheck)
   :mode "\\.php[345]?\\'"
-  :hook (php-mode . nl/php-mode-hook)
+  :hook (php-mode . nl/nordita-php-mode-hook)
+  :bind (:map php-mode-map
+              ("S-<f1>" . indent-region))
   :preface
   (defun nl/php-mode-hook ()
     "My PHP mode configuration."
     (flycheck-mode t)
     (setq c-basic-offset 2)
     (php-set-style "nl/php"))
+
+  (defun nl/nordita-php-mode-hook ()
+    "My PHP mode configuration."
+    (lsp)
+    (flycheck-mode t)
+    ;; (php-enable-psr2-coding-style) ;; using nl/php-nordita
+    ;; (php-enable-symfony2-coding-style)
+    ;; for help with enabling python-flake8 see https://github.com/emacs-lsp/lsp-mode/issues/2594
+    (require 'lsp-diagnostics)
+    (lsp-diagnostics-flycheck-enable)
+    (flycheck-add-next-checker 'lsp 'php-phpcs))
 
   ;; this style is based on the symfony2 style
   (c-add-style
@@ -4547,23 +4568,34 @@ checker is loaded.
      (indent-tabs-mode . nil)
      (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
      (c-indent-comments-syntactically-p . t)
-     (fill-column . 78)
+     (fill-column . 120)
      (require-final-newline . t)))
 
-  (flycheck-define-checker nl/php-checker
-    "A PHP syntax checker using the PHP command line interpreter.
-     See URL http://php.net/manual/en/features.commandline.php."
-    :command ("php" "-l" "-d" "error_reporting=E_ALL" "-d" "display_errors=1"
-              "-d" "log_errors=0" source)
-    :error-patterns
-    ((error line-start (or "Parse" "Fatal" "syntax") " error" (any ":" ",") " "
-            (message) " in " (file-name) " on line " line line-end))
-    :modes (php-mode web-mode))
+  ;; this style is based on the symfony2 style
+  (c-add-style
+   "nl/php-nordita"
+   '("php"
+     (c-set-style "K&R")
+     (c-basic-offset . 4)
+     (indent-tabs-mode . nil)
+     (c-offsets-alist . ((block-open . -)
+                            (block-close . 0)
+                            (topmost-intro-cont . (first c-lineup-cascaded-calls
+                                                         php-lineup-arglist-intro))
+                            (brace-list-intro . +)
+                            (brace-list-entry . c-lineup-cascaded-calls)
+                            (arglist-close . php-lineup-arglist-close)
+                            (arglist-intro . php-lineup-arglist-intro)
+                            (knr-argdecl . [0])
+                            (statement-cont . (first c-lineup-cascaded-calls +))))
+     (c-indent-comments-syntactically-p . t)
+     (php-mode-lineup-cascaded-calls . nil)
+     (show-trailing-whitespace . nil)
+     (fill-column . 120)
+     (require-final-newline . t)))
 
-  (eval-after-load 'flycheck
-    '(add-to-list 'flycheck-checkers 'nl/php-checker))
   :custom
-  (php-mode-coding-style (quote nl/php))
+  (php-mode-coding-style (quote nl/php-nordita))
   (php-mode-lineup-cascaded-calls t))
 #+end_src
 
@@ -4591,6 +4623,7 @@ checker is loaded.
   :custom
   (phpunit-arg "--stderr --debug"))
 #+end_src
+
 *** Python
 
 https://www.mattduck.com/lsp-python-getting-started.html
