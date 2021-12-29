@@ -1758,7 +1758,7 @@ Disable for now since it is slow when editing Scala code.
 #+begin_src emacs-lisp
 (use-package column-enforce-mode
   :config
-  (setq column-enforce-column 110)
+  (setq column-enforce-column 120)
   :hook (progmode-hook . column-enforce-mode))
 #+end_src
 
@@ -1935,6 +1935,13 @@ Removed due to not displaying properly with ~IBM Plex Mono~ font. 2021-02-16
  | f SPC | Narrow to recent files |
  | m SPC | Narrow to bookmarks    |
  | p SPC | Narrow to project      |
+
+** [[https://gitlab.com/OlMon/consult-projectile][consult-projectile]]
+
+#+begin_src emacs-lisp
+(use-package consult-projectile
+  :after (consult))
+#+end_src
 
 ** [[https://github.com/twada/coverlay.el][coverlay.el]]
 
@@ -4901,7 +4908,7 @@ No longer used since Scala Metals is now being used.
   (setq prettify-symbols-unprettify-at-point 'right-edge
         company-tooltip-align-annotations t ;; aligns annotation to the right hand side
         flycheck-check-syntax-automatically '(save mode-enabled))
-  (setq-default typescript-indent-level 2)
+  (setq-default typescript-indent-level 4)
 
   (defconst nl-typescript-prettify-symbols
     '(("=>" . ?⇒)
