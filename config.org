@@ -280,7 +280,8 @@ using the following:
 ;; the current directory for crash detection, they begin and end with
 ;; =#=.  Change this location to the emacs directory.
 (setq auto-save-list-file-prefix "~/.emacs.d/autosave/"
-      auto-save-file-name-transforms `((".*" "~/.emacs.d/autosave/" t)))
+      auto-save-file-name-transforms `((".*" "~/.emacs.d/autosave/" t))
+      backup-directory-alist `(("." . ,(concat user-emacs-directory "autosave"))))
 
 ;;Set line wrap at column 100.
 (setq fill-column 100)
@@ -717,7 +718,7 @@ Enable ANSI colors for compilation buffers.
   :preface
   (defconst nelson-c-style
     '((c-tab-always-indent . t)
-      (c-set-style "K&R")
+      (c-set-style "k&r")
       (c-offsets-alist . ((statement-block-intro . +)
                           (substatement-open     . 0)
                           (label                 . 0)
@@ -3012,6 +3013,8 @@ Add filler lorem ipsum text to Emacs.
   (lsp-enable-snippet t)
   (lsp-enable-file-watchers nil)
   (lsp-pyls-plugins-pycodestyle-max-line-length 120)
+  (lsp-intelephense-php-version "7.4.25")
+  (lsp-intelephense-format-enable nil)
   ;;(setq lsp-response-timeout 25)
   :config
   (setq lsp-prefer-capf t
@@ -3019,11 +3022,11 @@ Add filler lorem ipsum text to Emacs.
         lsp-pyls-plugins-flake8-enabled t)
   (setq lsp-clients-angular-language-server-command
         '("node"
-          "/home/nelson/.nvm/versions/node/v14.16.1/lib/node_modules/@angular/language-server"
+          "/home/nelson/.nvm/versions/node/v16.13.2/lib/node_modules/@angular/language-server"
           "--ngProbeLocations"
-          "/home/nelson/.nvm/versions/node/v14.16.1/lib/node_modules"
+          "/home/nelson/.nvm/versions/node/v16.13.2/lib/node_modules"
           "--tsProbeLocations"
-          "/home/nelson/.nvm/versions/node/v14.16.1/lib/node_modules"
+          "/home/nelson/.nvm/versions/node/v16.13.2/lib/node_modules"
           "--stdio"))
   (lsp-register-custom-settings
    '(("pyls.plugins.pyls_mypy.enabled" t t)
@@ -3679,7 +3682,6 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode)
          ("\\.json\\'" . web-mode))
-  ;;:bind ("C-c s h" . nl/counsel-ag-html)
   :hook (web-mode  . nl/web-mode-hook)
   :preface
   (defun html-filename-p (filename)
@@ -3692,7 +3694,7 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 
   (defun nl/web-mode-hook ()
     "Hooks for Web mode."
-    (setq web-mode-markup-indent-offset 2)
+    (setq web-mode-markup-indent-offset 4)
     (prettier-js-mode)
     (yas-minor-mode))
 
@@ -4548,7 +4550,7 @@ checker is loaded.
   :mode "\\.php[345]?\\'"
   :hook (php-mode . nl/nordita-php-mode-hook)
   :bind (:map php-mode-map
-              ("S-<f1>" . indent-region))
+              ("<f1>" . indent-region))
   :preface
   (defun nl/php-mode-hook ()
     "My PHP mode configuration."
@@ -4582,7 +4584,7 @@ checker is loaded.
   (c-add-style
    "nl/php-nordita"
    '("php"
-     (c-set-style "K&R")
+     (c-set-style "k&r")
      (c-basic-offset . 4)
      (indent-tabs-mode . nil)
      (c-offsets-alist . ((block-open . -)
@@ -4631,6 +4633,18 @@ checker is loaded.
   (phpunit-arg "--stderr --debug"))
 #+end_src
 
+**** [[https://github.com/OVYA/php-cs-fixer][php-cs-fixer]]
+
+Allows in the Emacs editor to fix most issues in PHP code when you
+want to follow the coding standards PSR-1 and PSR-2.
+
+#+begin_src emacs-lisp
+(use-package php-cs-fixer
+  :load-path "~/src/github/elisp/php-cs-fixer"
+  :init
+  (add-hook 'before-save-hook 'php-cs-fixer-before-save))
+#+end_src
+
 *** Python
 
 https://www.mattduck.com/lsp-python-getting-started.html
@@ -4660,6 +4674,7 @@ pyright? [[https://www.reddit.com/r/emacs/comments/ih3q5x/lsp_for_python_sure_bu
     (require 'lsp-diagnostics)
     (lsp-diagnostics-flycheck-enable)
     (flycheck-add-next-checker 'lsp 'python-flake8)
+    (setq python-indent-offset 4)
     )
   :hook (python-mode . nl/pyright-hook))
 #+end_src
