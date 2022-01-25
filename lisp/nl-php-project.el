@@ -10,6 +10,9 @@
 (eval-and-compile
   (require 'projectile))
 
+(defun nl/php-filename-p (filename)
+  (string-match-p "\\.php$" filename))
+
 (setq projectile-test-suffix-function (lambda (project-type) "" "Spec")
       projectile-find-dir-includes-top-level t)
 
@@ -36,19 +39,20 @@ The class name must have the postfix 'Spec' for this function to work."
   (let ((args (s-concat (file-name-directory (buffer-file-name)))))
     (phpunit-run args)))
 
-(defun nl/counsel-ag-php ()
-  "Perform counsel-ag on the project's PHP files excluding spec files."
-  (interactive)
-  (counsel-ag "" (projectile-project-root) "-G '((?!Test)).php$'"))
+;; (defun nl/counsel-ag-php ()
+;;   "Perform counsel-ag on the project's PHP files excluding spec files."
+;;   (interactive)
+;;   (counsel-ag "" (projectile-project-root) "-G '((?!Test)).php$'"))
 
-(defun nl/counsel-ag-php-test ()
-  "Perform counsel-ag on the project's TypeScript spec files."
-  (interactive)
-  (counsel-ag "" (projectile-project-root) "-G Test.php$"))
+;; (defun nl/counsel-ag-php-test ()
+;;   "Perform counsel-ag on the project's TypeScript spec files."
+;;   (interactive)
+;;   (counsel-ag "" (projectile-project-root) "-G Test.php$"))
 
 (defhydra hydra-nl/php-search (:color blue)
-  ("p" nl/counsel-ag-php "PHP files" :column "Search")
-  ("s" nl/counsel-ag-php-test "PHP test specificaton files"))
+  ;; ("p" nl/counsel-ag-php "PHP files" :column "Search")
+  ;; ("s" nl/counsel-ag-php-test "PHP test specificaton files")
+  )
 
 (defhydra hydra-nl-php-project (:color red :hint nil)
   "PHP project commands"

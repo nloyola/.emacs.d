@@ -5040,6 +5040,10 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
   (interactive "r")
   (align-regexp beg end "\\(\\s-*\\)=" 1 1 t))
 
+(defun align-dollar-sign (beg end)
+  (interactive "r")
+  (align-regexp beg end "\\(\\s-*\\)\\$" 1 1 t))
+
 (defun align-parameters (beg end)
   (interactive "r")
   (align-regexp beg end "\\w+\\(\\s-*\\)\\w+,?" 1 1 t))
@@ -5048,6 +5052,7 @@ http://danconnor.com/post/5028ac91e8891a000000111f/align_and_columnize_key_value
   (":" align-colons "colons" :color blue :column "Align things")
   ("," align-commas "commas" :color blue)
   ("=" align-equals "equals" :color blue)
+  ("$" align-dollar-sign "dollar sign" :color blue)
   ("p" align-parameters "parameters" :color blue))
 
 (key-chord-define-global "aa" 'hydra-nl-align/body)
