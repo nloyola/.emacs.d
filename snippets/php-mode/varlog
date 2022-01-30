@@ -2,4 +2,4 @@
 # name: varlog
 # key: varlog
 # --
-$this->varLog('$1', \$$0);
+ConsoleLogger::createLogger(basename(__FILE__), Logger::DEBUG)->info('$1', [ \$$0 ]);

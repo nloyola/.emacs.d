@@ -65,7 +65,7 @@
   "Run PHPUnit with COMMAND in Norweb docker container."
   (nl/php-command-in-proj-root
    (format
-    "cd /var/www && vendor/bin/phpunit --configuration phpunit.xml --do-not-cache-result --colors=always %s"
+    "cd /var/www && vendor/bin/phpunit --do-not-cache-result --colors=always %s"
     command)))
 
 (defun nl/phpunit-test-this-file ()
@@ -84,14 +84,14 @@ The class name must have the postfix 'Spec' for this function to work."
                       (nl/phpunit-file-name)))
    ))
 
-(defun nl/phpunit-all ()
+(defun nl/phpunit-project ()
   "Run the PHPUnit test suite."
   (interactive)
   (nl/phpunit-run ""))
 
 (defhydra hydra-nl/php-test (:color blue)
   "Test"
-  ("p" nl/phpunit-all "All tests" :column "Test")
+  ("p" nl/phpunit-project "All tests" :column "Test")
   ("f" nl/phpunit-test-this-file "only this file" :column "Test")
   ("m" nl/phpunit-only-this-method "only this file" :column "Test"))
 
@@ -100,6 +100,11 @@ The class name must have the postfix 'Spec' for this function to work."
   ("a" hydra-nl-align/body "align" :color blue :column "PHP")
   ("s" hydra-nl/php-search/body "search" :color blue)
   ("t" hydra-nl/php-test/body "test" :color blue))
+
+(define-key php-mode-map (kbd "C-c , m") 'nl/phpunit-only-this-method)
+(define-key php-mode-map (kbd "C-c , f") 'nl/phpunit-test-this-file)
+(define-key php-mode-map (kbd "C-c , p") 'nl/phpunit-project)
+
 
 (provide 'nl-nordita-php-project)
 ;;; nl-nordita-php-project.el ends here
