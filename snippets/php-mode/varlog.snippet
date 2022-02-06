@@ -1,0 +1,6 @@
+# -*- mode: snippet; eval: (setq require-final-newline nil) -*-
+# name: varlog
+# key: varlog
+# --
+\Nordita\Norweb\Utility\ConsoleLogger::createLogger(basename(__FILE__), \Monolog\Logger::DEBUG)
+    ->info('$1', [ \$$0 ]);

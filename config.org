@@ -721,10 +721,16 @@ Enable ANSI colors for compilation buffers.
       (c-set-style "k&r")
       (c-offsets-alist . ((statement-block-intro . +)
                           (substatement-open     . 0)
+                          (knr-argdecl-intro . 5)
+                          (arglist-intro         . +)
+                          (arglist-close         . c-lineup-close-paren)
                           (label                 . 0)
                           (case-label            . +)
                           (statement-cont        . +)
                           (innamespace           . 0))))
+
+
+
     "Nelson programming style.")
 
   ;; Customizations for all of c-mode, c++-mode, and objc-mode
@@ -3837,6 +3843,7 @@ command line. Use an easy keybinding to access magit.
 #+begin_src emacs-lisp
 (use-package magit
   :bind (("C-x g" . magit-status))
+  :hook (magit-status-sections-hook . magit-insert-modules)
   :config
   (define-key magit-status-mode-map (kbd "q") 'magit-quit-session)
   (setq-default vc-handled-backends '(Git))
@@ -4581,22 +4588,44 @@ checker is loaded.
      (require-final-newline . t)))
 
   ;; this style is based on the symfony2 style
+  ;; see https://github.com/taksatou/dotfiles/blob/037e22d7a31112321b92e11bcbd871b8e2acbc9c/.emacs.d/my/my-codingstyles.el
   (c-add-style
    "nl/php-nordita"
    '("php"
      (c-set-style "k&r")
      (c-basic-offset . 4)
      (indent-tabs-mode . nil)
-     (c-offsets-alist . ((block-open . -)
-                            (block-close . 0)
-                            (topmost-intro-cont . (first c-lineup-cascaded-calls
-                                                         php-lineup-arglist-intro))
-                            (brace-list-intro . +)
-                            (brace-list-entry . c-lineup-cascaded-calls)
-                            (arglist-close . php-lineup-arglist-close)
-                            (arglist-intro . php-lineup-arglist-intro)
-                            (knr-argdecl . [0])
-                            (statement-cont . (first c-lineup-cascaded-calls +))))
+     ;; (c-offsets-alist . ((block-open . -)
+     ;;                     (block-close . 0)
+     ;;                     (topmost-intro-cont . (first c-lineup-cascaded-calls
+     ;;                                                  php-lineup-arglist-intro))
+     ;;                     (brace-list-intro . +)
+     ;;                     (brace-list-entry . c-lineup-cascaded-calls)
+     ;;                     (arglist-close . php-lineup-arglist-close)
+     ;;                     (arglist-intro . php-lineup-arglist-intro)
+     ;;                     (knr-argdecl . [0])
+     ;;                     (statement-cont . (first c-lineup-cascaded-calls +))))
+     (c-offsets-alist . ((defun-open            . 0)
+                         (defun-close           . 0)
+                         (defun-block-intro     . +)
+                         (topmost-intro         . 0)
+                         (topmost-intro-cont    . c-lineup-topmost-intro-cont)
+                         (block-open            . 0)
+                         (block-close           . 0)
+                         (statement             . 0)
+                         (statement-cont        . +)
+                         (statement-block-intro . +)
+                         (statement-case-intro  . +)
+                         (statement-case-open   . 0)
+                         (substatement          . +)
+                         (substatement-open     . 0)
+                         (case-label            . +)
+                         (comment-intro         . (c-lineup-knr-region-comment c-lineup-comment))
+                         (arglist-intro         . +)
+                         (arglist-cont          . (c-lineup-gcc-asm-reg 0))
+                         (arglist-cont-nonempty . +)
+                         (arglist-close         . 0)
+                         ))
      (c-indent-comments-syntactically-p . t)
      (php-mode-lineup-cascaded-calls . nil)
      (show-trailing-whitespace . nil)

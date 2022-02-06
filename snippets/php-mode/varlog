@@ -1,5 +1,0 @@
-# -*- mode: snippet; eval: (setq require-final-newline nil) -*-
-# name: varlog
-# key: varlog
-# --
-ConsoleLogger::createLogger(basename(__FILE__), Logger::DEBUG)->info('$1', [ \$$0 ]);

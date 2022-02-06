@@ -89,11 +89,17 @@ The class name must have the postfix 'Spec' for this function to work."
   (interactive)
   (nl/phpunit-run ""))
 
+(defun nl/phpunit-coverage-report-in-chrome ()
+  "Open the code coverage report in a Google Chrome tab."
+  (interactive)
+  (browse-url-chrome (format "file://%s/test/coverage/report/index.html" (projectile-project-root))))
+
 (defhydra hydra-nl/php-test (:color blue)
   "Test"
   ("p" nl/phpunit-project "All tests" :column "Test")
-  ("f" nl/phpunit-test-this-file "only this file" :column "Test")
-  ("m" nl/phpunit-only-this-method "only this file" :column "Test"))
+  ("f" nl/phpunit-test-this-file "only this file")
+  ("m" nl/phpunit-only-this-method "only this file")
+  ("r" nl/phpunit-coverage-report-in-chrome "Open coverage report in Chrome"))
 
 (defhydra hydra-nl-php-project (:color red :hint nil)
   "PHP project commands"
@@ -105,6 +111,15 @@ The class name must have the postfix 'Spec' for this function to work."
 (define-key php-mode-map (kbd "C-c , f") 'nl/phpunit-test-this-file)
 (define-key php-mode-map (kbd "C-c , p") 'nl/phpunit-project)
 
+(setq projectile-test-suffix-function (lambda (project-type) "" "Test")
+      projectile-find-dir-includes-top-level t)
+
+(projectile-register-project-type 'php '("composer.json" "src" "test" "vendor")
+                                  :project-file "composer.json"
+                                  :src-dir "src"
+				  :test "make test"
+                                  :test-suffix "Test"
+				  :test-dir "test")
 
 (provide 'nl-nordita-php-project)
 ;;; nl-nordita-php-project.el ends here
