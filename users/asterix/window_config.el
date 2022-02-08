@@ -106,7 +106,7 @@
 (defun nl/zoom-config ()
   "Set a large enough font size for all Emacs frames for screensharing on Zoom meetings."
   (interactive)
-  (nl/change-font-size "16" "18"))
+  (nl/change-font-size "18" "19"))
 
 (defun nl/normal-config ()
   "Set the size and position of the Emacs window."
