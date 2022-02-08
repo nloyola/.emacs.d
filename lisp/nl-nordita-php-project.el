@@ -65,7 +65,7 @@
   "Run PHPUnit with COMMAND in Norweb docker container."
   (nl/php-command-in-proj-root
    (format
-    "cd /var/www && vendor/bin/phpunit --do-not-cache-result --colors=always %s"
+    "cd /var/www && vendor/bin/phpunit --testdox --do-not-cache-result --colors=always %s"
     command)))
 
 (defun nl/phpunit-test-this-file ()
