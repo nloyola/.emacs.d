@@ -46,15 +46,9 @@ The class name must have the postfix 'Spec' for this function to work."
 ;;   (interactive)
 ;;   (counsel-ag "" (projectile-project-root) "-G Test.php$"))
 
-(defhydra hydra-nl/php-search (:color blue)
-  ;; ("p" nl/counsel-ag-php "PHP files" :column "Search")
-  ;; ("s" nl/counsel-ag-php-test "PHP test specificaton files")
-  )
-
 (defhydra hydra-nl-php-project (:color red :hint nil)
   "PHP project commands"
-  ("a" hydra-nl-align/body "align" :color blue :column "PHP")
-  ("s" hydra-nl/php-search/body "search" :color blue))
+  ("a" hydra-nl-align/body "align" :color blue :column "PHP"))
 
 ;; this def uses a lambda to show that it is possible, id does not need to use it
 (key-chord-define php-mode-map "jc" '(lambda () (interactive) (hydra-nl-php-project/body)))
