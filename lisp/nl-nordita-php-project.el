@@ -57,16 +57,19 @@
   )
 
 (defun nl/php-command-in-proj-root (command)
+  "Run the compile command in project's root directory."
+  (interactive)
+  (compile (format "cd %s && %s" nl/norweb-project-root command)))
+
+(defun nl/php-docker-command-in-proj-root (command)
   "Run the compile docker-wrapper.sh script at the project's root directory."
   (interactive)
   (compile (format "cd %s && ./docker-wrapper.sh app-cmd \"%s\"" nl/norweb-project-root command)))
 
 (defun nl/phpunit-run (command)
   "Run PHPUnit with COMMAND in Norweb docker container."
-  (nl/php-command-in-proj-root
-   (format
-    "cd /var/www && vendor/bin/phpunit --testdox --do-not-cache-result --colors=always %s"
-    command)))
+  (nl/php-docker-command-in-proj-root
+   (format "cd /var/www && vendor/bin/phpunit -c test/phpunit.xml --no-coverage --color=always %s" command)))
 
 (defun nl/phpunit-test-this-file ()
   "For the class the cursor is in, run the scalatest test suite.
@@ -92,7 +95,12 @@ The class name must have the postfix 'Spec' for this function to work."
 (defun nl/phpunit-coverage-report-in-chrome ()
   "Open the code coverage report in a Google Chrome tab."
   (interactive)
-  (browse-url-chrome (format "file://%s/test/coverage/report/index.html" (projectile-project-root))))
+  (browse-url-chrome (format "file://%stest/coverage/report/index.html" (projectile-project-root))))
+
+(defun nl/php-code-sniffer ()
+  "Run PHP CodeSniffer through the project's Makefile."
+  (interactive)
+  (nl/php-command-in-proj-root "make php-sniff"))
 
 (defhydra hydra-nl/php-test (:color blue)
   "Test"
@@ -105,7 +113,8 @@ The class name must have the postfix 'Spec' for this function to work."
   "PHP project commands"
   ("a" hydra-nl-align/body "align" :color blue :column "PHP")
   ("s" hydra-nl/php-search/body "search" :color blue)
-  ("t" hydra-nl/php-test/body "test" :color blue))
+  ("t" hydra-nl/php-test/body "test" :color blue)
+  ("c" nl/php-code-sniffer "Run PHP CodeSniifer" :column "Make"))
 
 (define-key php-mode-map (kbd "C-c , m") 'nl/phpunit-only-this-method)
 (define-key php-mode-map (kbd "C-c , f") 'nl/phpunit-test-this-file)
