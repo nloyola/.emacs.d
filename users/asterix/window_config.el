@@ -101,6 +101,9 @@
     (set-face-font 'fixed-pitch-serif variable-font)
     (set-face-font 'variable-pitch variable-font)
 
+    (set-face-font 'markdown-pre-face fixed-font)
+    (set-face-font 'markdown-code-face fixed-font)
+
     (nl/org-mode-faces (* 10 (string-to-number fixed-font-size)))))
 
 (defun nl/zoom-config ()

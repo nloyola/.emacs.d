@@ -57,12 +57,12 @@
   )
 
 (defun nl/php-command-in-proj-root (command)
-  "Run the compile command in project's root directory."
+  "Run the compile COMMAND in project's root directory."
   (interactive)
   (compile (format "cd %s && %s" nl/norweb-project-root command)))
 
 (defun nl/php-docker-command-in-proj-root (command)
-  "Run the compile docker-wrapper.sh script at the project's root directory."
+  "Run the compile COMMAND docker-wrapper.sh script at the project's root directory."
   (interactive)
   (compile (format "cd %s && ./docker-wrapper.sh app-cmd \"%s\"" nl/norweb-project-root command)))
 
@@ -72,8 +72,7 @@
    (format "cd /var/www && vendor/bin/phpunit -c test/phpunit.xml --no-coverage --color=always %s" command)))
 
 (defun nl/phpunit-test-this-file ()
-  "For the class the cursor is in, run the scalatest test suite.
-The class name must have the postfix 'Spec' for this function to work."
+  "For the class the cursor is in, run the scalatest test suite."
   (interactive)
   (nl/phpunit-run (nl/phpunit-file-name)))
 
@@ -120,15 +119,40 @@ The class name must have the postfix 'Spec' for this function to work."
 (define-key php-mode-map (kbd "C-c , f") 'nl/phpunit-test-this-file)
 (define-key php-mode-map (kbd "C-c , p") 'nl/phpunit-project)
 
-(setq projectile-test-suffix-function (lambda (project-type) "" "Test")
+(defun nl/projectile-test-suffix-function (project-type)
+  "Return the suffix for test files for PROJECT-TYPE."
+  (message "%s" project-type)
+  (cond
+   ((string-equal "php-symfony" project-type) "Test")))
+
+(setq projectile-test-suffix-function 'nl/projectile-test-suffix-function
       projectile-find-dir-includes-top-level t)
 
-(projectile-register-project-type 'php '("composer.json" "src" "test" "vendor")
-                                  :project-file "composer.json"
-                                  :src-dir "src"
-				  :test "make test"
-                                  :test-suffix "Test"
-				  :test-dir "test")
+;; (projectile-update-project-type
+;;  'php
+;;  :related-files-fn
+;;  (list
+;;   (projectile-related-files-fn-test-with-suffix "php" ".spec")
+;;   (projectile-related-files-fn-test-with-suffix "php" "Test")))
+
+;;
+;; override this function, from the projectile package, so that tests are created in the proper
+;; location for this project
+;;
+(defun projectile-create-test-file-for (impl-file-path)
+  "Create a test file for the file given by IMPL-FILE-PATH."
+  (let* ((test-file (projectile--test-name-for-impl-name impl-file-path))
+         (test-file-extension (file-name-extension impl-file-path))
+         (test-dir))
+    (cond
+     ((string= test-file-extension "ts")
+      (setq test-dir (file-name-directory impl-file-path)))
+     ((string= test-file-extension "php")
+      (setq test-dir (replace-regexp-in-string "src/" "test/" (file-name-directory impl-file-path)))))
+    (unless (file-exists-p (expand-file-name test-file test-dir))
+      (progn (unless (file-exists-p test-dir)
+               (make-directory test-dir :create-parents))
+             (concat test-dir test-file)))))
 
 (provide 'nl-nordita-php-project)
 ;;; nl-nordita-php-project.el ends here

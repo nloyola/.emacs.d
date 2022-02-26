@@ -26,7 +26,7 @@ https://emacs.stackexchange.com/a/60858
 I've installed Emacs from source (=git://git.savannah.gnu.org/emacs.git=).
 
 #+begin_src sh
-git clone git://git.savannah.gnu.org/emacs.git
+git clone --depth 1 https://git.savannah.gnu.org/git/emacs.git
 #+end_src
 
 I used the instructions provided by Xah Lee given [[http://ergoemacs.org/emacs/building_emacs_on_linux.html][here]].
@@ -130,7 +130,6 @@ Also see: all-the-icons-dired package installation
     (set-face-attribute 'bold frame :font nl/gui-fixed-font-name :weight 'bold :weight 'normal)
     (set-face-attribute 'bold-italic frame :font nl/gui-fixed-font-name :weight 'bold :slant 'italic)
     (set-fontset-font "fontset-default" nil (font-spec :size 20 :name "Fira Code Retina"))
-
     )
 
   (set-face-font 'mode-line (nl/gui-variable-font-normal))
@@ -394,6 +393,8 @@ using the following:
 
 ;; Use the directory name to make buffer names unique.
 (setq uniquify-buffer-name-style 'forward)
+
+(global-so-long-mode 1)
 #+end_src
 
 ** Key bindings
@@ -968,6 +969,18 @@ ibuffer is the improved version of list-buffers.
 ** =org-mode=
 
 #+begin_src emacs-lisp
+
+;; https://irreal.org/blog/?p=69
+(defun babel-confirm (flag)
+  "Report the setting of org-confirm-babel-evaluate.
+If invoked with C-u, toggle the setting"
+  (interactive "P")
+  (if (equal flag '(4))
+      (setq org-confirm-babel-evaluate (not org-confirm-babel-evaluate)))
+  (message "Babel evaluation confirmation is %s"
+           (if org-confirm-babel-evaluate "on" "off")))
+
+
 (defun nl/org-mode-setup ()
   (org-indent-mode)
   (variable-pitch-mode)
@@ -1034,15 +1047,15 @@ ibuffer is the improved version of list-buffers.
         org-src-tab-acts-natively t)
 
   (setq org-capture-templates
-        '(("t" "Todo" entry (file+headline "~/Dropbox/orgfiles/todo.org" "Tasks")
+        '(("t" "Todo" entry (file+headline "~/Sync/orgfiles/todo.org" "Tasks")
            "* TODO %?\n  %i\n  %a")
-          ("l" "Link" entry (file+headline "~/Dropbox/orgfiles/links.org" "Links")
+          ("l" "Link" entry (file+headline "~/Sync/orgfiles/links.org" "Links")
            "* %? %^L %^g \n%T" :prepend t)
-          ("n" "Note" entry (file "~/Dropbox/orgfiles/notes.org")
+          ("n" "Note" entry (file "~/Sync/orgfiles/notes.org")
            "* NOTE %?\n%U" :empty-lines 1)
-          ("N" "Note with Clipboard" entry (file "~/Dropbox/orgfiles/notes.org")
+          ("N" "Note with Clipboard" entry (file "~/Sync/orgfiles/notes.org")
            "* NOTE %?\n%U\n   %c" :empty-lines 1)
-          ("j" "Journal" entry (file+datetree "~/Dropbox/orgfiles/journal.org")
+          ("j" "Journal" entry (file+datetree "~/Sync/orgfiles/journal.org")
            "* %?\nEntered on %U\n  %i\n  %a")))
   (nl/org-mode-faces (* 10 (string-to-number nl/gui-fixed-font-size-normal))))
 #+end_src
@@ -1055,7 +1068,7 @@ Learned about [[https://github.com/sachac/.emacs.d/blob/83d21e473368adb1f63e582a
 (setq org-agenda-files
       (delq nil
             (mapcar (lambda (x) (and (file-exists-p x) x))
-                    '("~/Dropbox/orgfiles/todo.org"
+                    '("~//orgfiles/todo.org"
                       "~/Dropbox/orgfiles/cbsr_todo.org"))))
 #+end_src
 
@@ -1742,7 +1755,9 @@ Makes the cursor stay vertically in a defined position (usually
 centered) while scrolling. So instead of moving the cursor up and down
 it moves the page like a pager.
 
-#+begin_src emacs-lisp
+2022-02-17 - Removed, does not play well with Company
+
+#+begin_src emacs-lisp :tangle no
 (use-package centered-cursor-mode
         :init
         (global-centered-cursor-mode +1))
@@ -2854,6 +2869,10 @@ Add filler lorem ipsum text to Emacs.
 ** [[https://github.com/emacs-lsp/lsp-mode][lsp-mode]]
 
 #+begin_src emacs-lisp
+(use-package which-key
+  :config
+  (which-key-mode))
+
 (use-package lsp-mode
   ;;:load-path "~/src/github/elisp/lsp-mode"
   :pin melpa
@@ -2874,9 +2893,16 @@ Add filler lorem ipsum text to Emacs.
   (lsp-intelephense-format-enable nil)
   ;;(setq lsp-response-timeout 25)
   :config
+  (lsp-enable-which-key-integration t)
   (setq lsp-prefer-capf t
         lsp-idle-delay 0.5
-        lsp-pyls-plugins-flake8-enabled t)
+        lsp-pyls-plugins-flake8-enabled t
+        ;; lsp-serenata-server-path (substitute-in-file-name "$HOME/apps/serenata.phar")
+        ;; lsp-serenata-index-database-uri (substitute-in-file-name "$HOME/.emacs.d/serenata-index.sqlite")
+        ;; lsp--tcp-server-port 11111
+        ;; lsp-enabled-clients '(serenata)
+        ;; lsp-serenata-php-version 7.4
+        lsp-ensabled-clients '(intelephense))
   (setq lsp-clients-angular-language-server-command
         '("node"
           "/home/nelson/.nvm/versions/node/v16.13.2/lib/node_modules/@angular/language-server"
@@ -3049,8 +3075,8 @@ Project navigation and management library for Emacs.
   :init (projectile-mode +1)
   :config
   ;; tramp-fix: https://github.com/syl20bnr/spacemacs/issues/11381
-  (defadvice projectile-project-root (around ignore-remote first activate)
-    (unless (file-remote-p default-directory) ad-do-it))
+  ;; (defadvice projectile-project-root (around ignore-remote first activate)
+  ;;   (unless (file-remote-p default-directory) ad-do-it))
 
   (setq projectile-indexing-method 'alien
         projectile-remember-window-configs nil

@@ -2,5 +2,5 @@
 # name: varlog
 # key: varlog
 # --
-\Nordita\Norweb\Utility\ConsoleLogger::createLogger(basename(__FILE__ . ':' . __LINE__), \Monolog\Logger::DEBUG)
+\Nordita\Norweb\Utility\ConsoleLogger::createLogger(basename(__FILE__) . ':' . __LINE__, \Monolog\Logger::DEBUG)
     ->info('$1', [ \$$0 ]);
