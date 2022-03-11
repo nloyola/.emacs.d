@@ -215,7 +215,9 @@ unzip symbola.zip
 ** OSX
 
 #+begin_src emacs-lisp
-(when (featurep 'ns-win) (set-face-font 'default "Monaco-15"))
+(when (featurep 'ns-win)
+  (setq nl/gui-fixed-font-size-normal "16"
+        nl/gui-variable-font-size-normal "18"))
 #+end_src
 
 * Sane defaults
@@ -1445,7 +1447,7 @@ Using doom themes
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-material-dark t)
+  (load-theme 'doom-city-lights t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)

@@ -187,6 +187,10 @@ See http://emacsninja.com/posts/failing-gracefully.html"
   "Show the *Messages* buffer after starting Emacs."
   (setq initial-buffer-choice (lambda () (get-buffer "*Messages*"))))
 
+(when (eq system-type 'darwin)
+  (require 'ls-lisp)
+  (setq ls-lisp-use-insert-directory-program nil))
+
 
 ;; comment this line out to show the *Messages* buffer on startup
 ;; (nl/show-messages-on-startup)
