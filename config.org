@@ -14,7 +14,28 @@ This file is used to generate ~config.el~ using ~org-babel~ in ~init.el~.
 * Installing Emacs
 ** Debian
 
-https://emacs.stackexchange.com/a/60858
+Install packages:
+
+#+begin_src sh
+sudo apt install libxpm-dev libgif-dev libjpeg-dev libpng-dev libtiff-dev libx11-dev libncurses5-dev automake autoconf texinfo libgtk2.0-dev
+sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+sudo apt install gcc-10 g++-10 libgccjit0 libgccjit-10-dev libjansson4 libjansson-dev
+#+end_src
+
+Build Emacs:
+
+#+begin_src sh
+git clone --depth 1 https://git.savannah.gnu.org/git/emacs.git && cd emacs
+export CC=/usr/bin/gcc-10 CXX=/usr/bin/gcc-10
+./autogen.sh
+
+#./configure --with-nativecomp --with-json CFLAGS="-O3 -mtune=native -march=native -fomit-frame-pointer"
+./configure --with-native-compilation --prefix=/usr/local --with-modules --with-json --with-cairo --with-rsvg CFLAGS="-O3 -mtune=native -march=native -fomit-frame-pointer"
+
+make -j6
+#+end_src
+
+Also, see here: https://emacs.stackexchange.com/a/60858
 
 ** Ubuntu
 
@@ -1447,7 +1468,7 @@ Using doom themes
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-city-lights t)
+  (load-theme 'doom-moonlight t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1700,9 +1721,11 @@ Use silver surfer to search.
   :commands ag)
 #+end_src
 
-** [[https://github.com/jtbm37/all-the-icons-dired][all-the-icons-dired]]
+** [[https://github.com/wyuenho/all-the-icons-dired][all-the-icons-dired]]
 
 #+begin_src emacs-lisp
+(use-package all-the-icons)
+
 (use-package all-the-icons-dired
   ;; M-x all-the-icons-install-fonts
   :hook (dired-mode . all-the-icons-dired-mode))
@@ -3622,6 +3645,13 @@ Ztree is a project dedicated to implementation of several text-tree applications
   :bind ("M-z" . zzz-up-to-char))
 #+end_src
 
+** [[https://gitlab.com/Vonfry/zoxide.el][zoxide]]
+
+Find file and open directory in special directory with zoxide.
+
+#+begin_src
+(use-package zoxide)
+#+end_src
 
 ** Text Editing
 *** [[https://github.com/emacsfodder/move-text][move-text]]
@@ -4732,14 +4762,7 @@ want to follow the coding standards PSR-1 and PSR-2.
 #+begin_src emacs-lisp
 (use-package php-cs-fixer
   :load-path "~/src/github/elisp/php-cs-fixer"
-  :preface
-  (defun nl/php-before-save-hook ()
-    (when (eq major-mode 'php-mode)
-        (delete-trailing-whitespace)
-        (php-cs-fixer-before-save)))
-
-  :init
-  (add-hook 'before-save-hook 'nl/php-before-save-hook))
+  :hook ((before-save . php-cs-fixer-before-save)))
 #+end_src
 
 *** Python
