@@ -68,8 +68,8 @@
 
 (defun nl/phpunit-run (command)
   "Run PHPUnit with COMMAND in Norweb docker container."
-  (nl/php-docker-command-in-proj-root
-   (format "cd /var/www && vendor/bin/phpunit -c test/phpunit.xml --no-coverage --color=always %s" command)))
+  (nl/php-command-in-proj-root
+   (format "vendor/bin/phpunit -c test/phpunit.xml --no-coverage --color=always %s" command)))
 
 (defun nl/phpunit-test-this-file ()
   "For the class the cursor is in, run the scalatest test suite."
