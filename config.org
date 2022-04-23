@@ -30,7 +30,7 @@ export CC=/usr/bin/gcc-10 CXX=/usr/bin/gcc-10
 ./autogen.sh
 
 #./configure --with-nativecomp --with-json CFLAGS="-O3 -mtune=native -march=native -fomit-frame-pointer"
-./configure --with-native-compilation --prefix=/usr/local --with-modules --with-json --with-cairo --with-rsvg CFLAGS="-O3 -mtune=native -march=native -fomit-frame-pointer"
+./configure --with-native-compilation --prefix=/usr/local --with-modules --with-json --with-cairo --with-imagemagick --with-rsvg CFLAGS="-O3 -mtune=native -march=native -fomit-frame-pointer"
 
 make -j6
 #+end_src
@@ -1456,19 +1456,25 @@ See https://github.com/doomemacs/themes/tree/screenshots for screenshots.
 
 ** Current
 
-Using doom themes
+#+begin_src emacs-lisp
+(use-package cherry-blossom-theme
+  :init
+  (load-theme 'cherry-blossom t))
+#+end_src
 
 ** [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
 
+https://github.com/doomemacs/themes/tree/screenshots
+
 #+begin_src emacs-lisp
 (use-package doom-themes
-  :demand t
+  :disabled
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-moonlight t)
+  (load-theme 'doom-horizon t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1482,6 +1488,7 @@ Using doom themes
   :custom-face
   ;;(ansi-color-blue ((t (:foreground "#4f57f9"))))
   (ansi-color-blue ((t (:foreground "DeepSkyBlue1"))))
+  ;;(lsp-face-highlight-read ((t (:foreground "DeepSkyBlue1"))))
   )
 
 (with-eval-after-load 'markdown-mode
@@ -2954,14 +2961,27 @@ Add filler lorem ipsum text to Emacs.
   (lsp-ui-peek-peek ((nil :background "gray30")))
   (lsp-ui-peek-highlight ((nil :foreground "gray60" :background "gray20")))
   (header-line ((t (:inherit mode-line :background "gray30"))))
-  :config
-  (setq lsp-ui-peek-always-show nil)
   :custom
   (lsp-ui-sideline-enable t)
   (lsp-ui-sideline-show-hover nil)
   (lsp-ui-doc-enable nil)
   (lsp-ui-peek-enable nil)
-  (flycheck-add-next-checker 'lsp-ui 'typescript-tslint))
+  (flycheck-add-next-checker 'lsp-ui 'typescript-tslint)
+  :config
+  ;;(setq lsp-ui-peek-always-show nil)
+  (setq lsp-ui-doc-enable t
+        lsp-ui-doc-use-childframe t
+        lsp-ui-doc-position 'top
+        lsp-ui-doc-include-signature t
+        lsp-ui-sideline-enable nil
+        lsp-ui-flycheck-enable t
+        lsp-ui-flycheck-list-position 'right
+        lsp-ui-flycheck-live-reporting t
+        lsp-ui-peek-enable t
+        lsp-ui-peek-list-width 60
+        lsp-ui-peek-peek-height 25
+        lsp-ui-sideline-enable nil)
+  )
 #+end_src
 
 ** [[https://github.com/joddie/macrostep][macrostep]]
@@ -3097,6 +3117,7 @@ Project navigation and management library for Emacs.
   :diminish projectile-mode
   :bind-keymap
   ("C-c p" . projectile-command-map)
+  :bind (:map projectile-command-map ("f" . consult-projectile))
   :init (projectile-mode +1)
   :config
   ;; tramp-fix: https://github.com/syl20bnr/spacemacs/issues/11381
@@ -3254,10 +3275,15 @@ Declarative popup window rules.
 #+begin_src emacs-lisp
 (use-package smartparens
   :diminish smartparens-mode
+  :custom
+  (sp-base-key-bindings 'paredit)
+  :custom-face
+  (sp-show-pair-match-face ((t (:foreground "White")))) ;; Could also have :background "Grey" for example.
   :config
   (require 'smartparens-config)
   ;; https://github.com/Fuco1/smartparens/issues/783
   (setq sp-escape-quotes-after-insert nil)
+  (setq sp-show-pair-from-inside t)
 
   ;; Set up some pairings for org mode markup. These pairings won't
   ;; activate by default; they'll only apply for wrapping regions.
@@ -3843,7 +3869,18 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
   :bind
   (("C-." . embark-act)         ;; pick some comfortable binding
    ("C-;" . embark-dwim)        ;; good alternative: M-.
-   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings'
+   ("C-h B" . embark-bindings))  ;; alternative for `describe-bindings'
+
+  :preface
+
+  (defmacro my/embark-ace-action (fn)
+    `(defun ,(intern (concat "my/embark-ace-" (symbol-name fn))) ()
+       (interactive)
+       (with-demoted-errors "%s"
+         (require 'ace-window)
+         (let ((aw-dispatch-always t))
+           (aw-switch-to-window (aw-select nil))
+           (call-interactively (symbol-function ',fn))))))
 
   :init
 
@@ -3856,7 +3893,13 @@ the screen to center on each cursor with ~C-v~ and ~M-v~.
   (add-to-list 'display-buffer-alist
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
-                 (window-parameters (mode-line-format . none)))))
+                 (window-parameters (mode-line-format . none))))
+
+
+  (define-key embark-file-map     (kbd "o") (my/embark-ace-action find-file))
+  (define-key embark-buffer-map   (kbd "o") (my/embark-ace-action switch-to-buffer))
+  (define-key embark-bookmark-map (kbd "o") (my/embark-ace-action bookmark-jump))
+  )
 
 ;; Consult users will also want the embark-consult package.
 (use-package embark-consult
