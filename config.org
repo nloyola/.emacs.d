@@ -97,7 +97,8 @@ Silence compiler warnings in ~native-mode~.
 Also see: all-the-icons-dired package installation
 
 #+begin_src  emacs-lisp :results silent
-(defvar nl/gui-fixed-font-name "FiraCode Nerd Font")
+(defvar nl/gui-fixed-font-name "CaskaydiaCove Nerd Font Mono")
+;;(defvar nl/gui-fixed-font-name "FiraCode Nerd Font")
 ;;(defvar nl/gui-fixed-font-name "Ubuntu Nerd Font")
 
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
@@ -174,16 +175,6 @@ Also see: all-the-icons-dired package installation
         ))))
 
 (add-hook 'after-make-frame-functions 'nl/after-make-frame t)
-#+end_src
-
-*** Ligatures
-
-Does not really work when not using Fira Code fonts.
-
-#+begin_src emacs-lisp :tangle no
-(use-package fira-code-mode
-  :custom (fira-code-mode-disabled-ligatures '("[]" "#{" "#(" "#_" "#_(" "x")) ;; List of ligatures to turn off
-  :hook prog-mode) ;; Enables fira-code-mode automatically for programming major modes
 #+end_src
 
 *** Input font Installation
@@ -553,9 +544,9 @@ possible.
   (setq line-number-mode t
         column-number-mode t
         comment-column 0)
-  (push '(">=" . ?≥) prettify-symbols-alist)
-  (push '("<=" . ?≤) prettify-symbols-alist)
-  (push '("->" . ?→) prettify-symbols-alist)
+  ;;(push '(">=" . ?≥) prettify-symbols-alist)
+  ;;(push '("<=" . ?≤) prettify-symbols-alist)
+  ;;(push '("->" . ?→) prettify-symbols-alist)
   (smartparens-mode))
 
 (add-hook 'makefile-mode-hook 'nl/common-prog-mode-settings)
@@ -2858,9 +2849,7 @@ Disabled since Jest is being used. 2019-10-11
 
 ** [[https://github.com/mickeynp/ligature.el][ligatures]]
 
-GitHub [[https://github.com/mickeynp/ligature.el/issues/28][issue]] says it's broken for emacs 27.1.
-
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package ligature
   :demand t
   :load-path "~/src/github/elisp/ligature"
@@ -2886,8 +2875,8 @@ GitHub [[https://github.com/mickeynp/ligature.el/issues/28][issue]] says it's br
                                        "\\\\" "://"))
   ;; Enables ligature checks globally in all buffers. You can also do it
   ;; per mode with `ligature-mode'.
-  ;;(global-ligature-mode t)
-        )
+  (global-ligature-mode t)
+  )
 #+end_src
 
 ** [[https://github.com/jschaf/emacs-lorem-ipsum][lorem-ipsum]]
@@ -2917,7 +2906,6 @@ Add filler lorem ipsum text to Emacs.
   ;; (python-mode . lsp) ;; commented out because lsp is initialized in lsp-pyright config
   :custom
   (lsp-keymap-prefix "C-c l")
-  (lsp-ui-flycheck-enable nil)
   (lsp-enable-snippet t)
   (lsp-enable-file-watchers nil)
   (lsp-pyls-plugins-pycodestyle-max-line-length 120)
@@ -2968,19 +2956,14 @@ Add filler lorem ipsum text to Emacs.
   (lsp-ui-peek-enable nil)
   (flycheck-add-next-checker 'lsp-ui 'typescript-tslint)
   :config
-  ;;(setq lsp-ui-peek-always-show nil)
-  (setq lsp-ui-doc-enable t
+  (setq lsp-ui-peek-always-show nil
+        lsp-ui-doc-enable t
         lsp-ui-doc-use-childframe t
         lsp-ui-doc-position 'top
         lsp-ui-doc-include-signature t
-        lsp-ui-sideline-enable nil
-        lsp-ui-flycheck-enable t
         lsp-ui-flycheck-list-position 'right
-        lsp-ui-flycheck-live-reporting t
-        lsp-ui-peek-enable t
         lsp-ui-peek-list-width 60
-        lsp-ui-peek-peek-height 25
-        lsp-ui-sideline-enable nil)
+        lsp-ui-peek-peek-height 25)
   )
 #+end_src
 
@@ -3275,8 +3258,14 @@ Declarative popup window rules.
 #+begin_src emacs-lisp
 (use-package smartparens
   :diminish smartparens-mode
-  :custom
-  (sp-base-key-bindings 'paredit)
+  :bind (:map smartparens-mode-map
+              ("C-)" . sp-forward-slurp-sexp)
+              ("C-(" . sp-backward-slurp-sexp)
+              ("C-}" . sp-forward-barf-sexp)
+              ("C-{" . sp-backward-barf-sexp)
+              )
+  ;;:custom
+  ;;(sp-base-key-bindings 'paredit)
   :custom-face
   (sp-show-pair-match-face ((t (:foreground "White")))) ;; Could also have :background "Grey" for example.
   :config
@@ -4952,9 +4941,11 @@ The uncompromising Python code formatter.
     (yas-minor-mode)
     (setq-default indent-tabs-mode nil)
     (setq compilation-ask-about-save nil
-          prettify-symbols-alist scala-prettify-symbols-alist)
+          ;;prettify-symbols-alist scala-prettify-symbols-alist
+        )
     (nl/common-prog-mode-settings)
-    (prettify-symbols-mode))
+    ;;(prettify-symbols-mode)
+        )
 
   (defun nl/scala-before-save ()
     (when (eq major-mode 'scala-mode)
@@ -5079,24 +5070,25 @@ No longer used since Scala Metals is now being used.
             2 3 4 1)
           compilation-error-regexp-alist-alist)
 
-    (setq prettify-symbols-alist nl-typescript-prettify-symbols)
+    ;;(setq prettify-symbols-alist nl-typescript-prettify-symbols)
     (prettify-symbols-mode))
   :config
-  (setq prettify-symbols-unprettify-at-point 'right-edge
-        company-tooltip-align-annotations t ;; aligns annotation to the right hand side
-        flycheck-check-syntax-automatically '(save mode-enabled))
+  (setq ;;prettify-symbols-unprettify-at-point 'right-edge
+   company-tooltip-align-annotations t ;; aligns annotation to the right hand side
+   flycheck-check-syntax-automatically '(save mode-enabled))
   (setq-default typescript-indent-level 4)
 
-  (defconst nl-typescript-prettify-symbols
-    '(("=>" . ?⇒)
-      ("<=" . ?≤)
-      (">=" . ?≥)
-      ("===" . ?≡)
-      ("!" . ?¬)
-      ("!=" . ?≠)
-      ("!==" . ?≢)
-      ("&&" . ?∧)
-      ("||" . ?∨))))
+  ;;(defconst nl-typescript-prettify-symbols
+  ;;  '(("=>" . ?⇒)
+  ;;    ("<=" . ?≤)
+  ;;    (">=" . ?≥)
+  ;;    ("===" . ?≡)
+  ;;    ("!" . ?¬)
+  ;;    ("!=" . ?≠)
+  ;;    ("!==" . ?≢)
+  ;;    ("&&" . ?∧)
+  ;;    ("||" . ?∨)))
+  )
 #+end_src
 
 **** [[https://github.com/ananthakumaran/tide][tide]]
@@ -5130,8 +5122,8 @@ No longer used since Scala Metals is now being used.
     (company-mode +1)
     (prettier-js-mode)
     (nl/common-prog-mode-settings)
-    (setq prettify-symbols-alist nl-typescript-prettify-symbols-alist
-          prettify-symbols-unprettify-at-point 'right-edge
+    (setq ;;prettify-symbols-alist nl-typescript-prettify-symbols-alist
+          ;;prettify-symbols-unprettify-at-point 'right-edge
           company-tooltip-align-annotations t) ;; aligns annotation to the right hand side
     (setq-default typescript-indent-level 2))
 
