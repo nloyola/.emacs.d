@@ -97,9 +97,8 @@ Silence compiler warnings in ~native-mode~.
 Also see: all-the-icons-dired package installation
 
 #+begin_src  emacs-lisp :results silent
-(defvar nl/gui-fixed-font-name "CaskaydiaCove Nerd Font Mono")
-;;(defvar nl/gui-fixed-font-name "FiraCode Nerd Font")
-;;(defvar nl/gui-fixed-font-name "Ubuntu Nerd Font")
+(defvar nl/gui-fixed-font-name "FuraCode Nerd Font")
+;;(defvar nl/gui-fixed-font-name "CaskaydiaCove Nerd Font Mono")
 
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
 ;; (defvar nl/gui-variable-font-name "DejaVu Sans")
@@ -1450,7 +1449,10 @@ See https://github.com/doomemacs/themes/tree/screenshots for screenshots.
 #+begin_src emacs-lisp
 (use-package cherry-blossom-theme
   :init
-  (load-theme 'cherry-blossom t))
+  (load-theme 'cherry-blossom t)
+  :custom-face
+  (mode-line-inactive ((t (:foreground "#808080"))))
+  )
 #+end_src
 
 ** [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
@@ -1724,9 +1726,13 @@ Use silver surfer to search.
 #+begin_src emacs-lisp
 (use-package all-the-icons)
 
+;; disable hook for now
+;;
+;; now done in treemacs-icons-dired config
 (use-package all-the-icons-dired
   ;; M-x all-the-icons-install-fonts
-  :hook (dired-mode . all-the-icons-dired-mode))
+  ;;:hook (dired-mode . all-the-icons-dired-mode)
+        )
 #+end_src
 
 ** [[https://github.com/syohex/emacs-anzu][anzu]]
@@ -1974,7 +1980,7 @@ Could not get this package to display changes (2017-10-15).
 #+begin_src emacs-lisp :tangle no
 (use-package diff-hl
   :init
-  (add-hook 'prog-mode-hook #'diff-hl-mode)
+  (add-hook 'prog-mode-hooko #'diff-hl-mode)
   (add-hook 'org-mode-hook #'diff-hl-mode)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
@@ -2003,7 +2009,7 @@ Provides a simple UI for customizing dired mode to use different faces and color
 
 ** [[https://github.com/jojojames/dired-sidebar][dired-sidebar]]
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package dired-sidebar
   :bind (("C-c C-n" . dired-sidebar-toggle-sidebar))
   :commands (dired-sidebar-toggle-sidebar)
@@ -2871,7 +2877,7 @@ Disabled since Jest is being used. 2019-10-11
                                        ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
                                        "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
                                        "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
-                                       "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                       "?=" "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
                                        "\\\\" "://"))
   ;; Enables ligature checks globally in all buffers. You can also do it
   ;; per mode with `ligature-mode'.
@@ -3375,7 +3381,7 @@ think of it as both something that augments and replaces the standard
         ("C-x t t"   . treemacs)
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
-        ("C-x t M-t" . treemacs-find-tag))
+       ("C-x t M-t" . treemacs-find-tag))
   :config
   (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
         treemacs-deferred-git-apply-delay      0.5
@@ -3435,8 +3441,9 @@ think of it as both something that augments and replaces the standard
   :after treemacs projectile)
 
 (use-package treemacs-icons-dired
-  :after treemacs dired
-  :config (treemacs-icons-dired-mode))
+  ;;:after treemacs dired
+  :hook
+  (dired-mode . treemacs-icons-dired-mode))
 
 (use-package treemacs-magit
   :after treemacs magit)
@@ -4708,57 +4715,93 @@ checker is loaded.
     ;; for help with enabling python-flake8 see https://github.com/emacs-lsp/lsp-mode/issues/2594
     (require 'lsp-diagnostics)
     (lsp-diagnostics-flycheck-enable)
-    (flycheck-add-next-checker 'lsp 'php-phpcs))
+    (flycheck-add-next-checker 'lsp 'php-phpcs)
+    (cond ((string= (projectile-project-root) (expand-file-name "~/src/nordita/norweb-2021/"))
+           (setq lsp-intelephense-files-exclude
+                 (vconcat lsp-intelephense-files-exclude
+                          ["public/wire/**"
+                           "public/wire.old/**"
+                           "**/AppApi/**"
+                           "**/FieldtypeCombo/**"
+                           "**/FieldtypeFieldsetGroup/**"
+                           "**/FieldtypeRepeaterMatrix/**"
+                           "**/FieldtypeTextareas/**"
+                           "**/FileValidatorSvgSanitizer/**"
+                           "**/InputfieldCKEditor/**"
+                           "**/ProcessHannaCode/**"
+                           "**/pw-fieldtype-yaml/**"
+                           "**/RockMigrations/**"
+                           "**/TracyDebugger/**"
+                           ])
+                 lsp-intelephense-rename-exclude
+                 (vconcat lsp-intelephense-rename-exclude
+                          ["public/wire/**"
+                           "public/wire.old/**"
+                           "**/AppApi/**"
+                           "**/FieldtypeCombo/**"
+                           "**/FieldtypeFieldsetGroup/**"
+                           "**/FieldtypeRepeaterMatrix/**"
+                           "**/FieldtypeTextareas/**"
+                           "**/FileValidatorSvgSanitizer/**"
+                           "**/InputfieldCKEditor/**"
+                           "**/ProcessHannaCode/**"
+                           "**/pw-fieldtype-yaml/**"
+                           "**/RockMigrations/**"
+                           "**/TracyDebugger/**"
+                           ])
+                 lsp-intelephense-php-version "7.4")
+           ))
+        )
 
-  ;; this style is based on the symfony2 style
-  (c-add-style
-   "nl/php"
-   '("php"
-     (c-basic-offset . 2)
-     (indent-tabs-mode . nil)
-     (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
-     (c-indent-comments-syntactically-p . t)
-     (fill-column . 120)
-     (require-final-newline . t)))
+    ;; this style is based on the symfony2 style
+    (c-add-style
+     "nl/php"
+     '("php"
+       (c-basic-offset . 2)
+       (indent-tabs-mode . nil)
+       (c-offsets-alist . ((statement-cont . php-lineup-hanging-semicolon)))
+       (c-indent-comments-syntactically-p . t)
+       (fill-column . 120)
+       (require-final-newline . t)))
 
-  ;; this style is based on the symfony2 style
-  ;; see https://github.com/taksatou/dotfiles/blob/037e22d7a31112321b92e11bcbd871b8e2acbc9c/.emacs.d/my/my-codingstyles.el
-  (c-add-style
-   "nl/php-nordita"
-   '("php"
-     (c-set-style "k&r")
-     (c-basic-offset . 4)
-     (indent-tabs-mode . nil)
-     (c-offsets-alist . ((defun-open            . 0)
-                         (defun-close           . 0)
-                         (defun-block-intro     . +)
-                         (topmost-intro         . 0)
-                         (topmost-intro-cont    . c-lineup-topmost-intro-cont)
-                         (block-open            . 0)
-                         (block-close           . 0)
-                         (statement             . 0)
-                         (statement-cont        . +)
-                         (statement-block-intro . +)
-                         (statement-case-intro  . +)
-                         (statement-case-open   . 0)
-                         (substatement          . +)
-                         (substatement-open     . 0)
-                         (case-label            . +)
-                         (comment-intro         . (c-lineup-knr-region-comment c-lineup-comment))
-                         (arglist-intro         . +)
-                         (arglist-cont          . (c-lineup-gcc-asm-reg 0))
-                         (arglist-cont-nonempty . +)
-                         (arglist-close         . 0)
-                         ))
-     (c-indent-comments-syntactically-p . t)
-     (php-mode-lineup-cascaded-calls . nil)
-     (show-trailing-whitespace . nil)
-     (fill-column . 120)
-     (require-final-newline . t)))
+    ;; this style is based on the symfony2 style
+    ;; see https://github.com/taksatou/dotfiles/blob/037e22d7a31112321b92e11bcbd871b8e2acbc9c/.emacs.d/my/my-codingstyles.el
+    (c-add-style
+     "nl/php-nordita"
+     '("php"
+       (c-set-style "k&r")
+       (c-basic-offset . 4)
+       (indent-tabs-mode . nil)
+       (c-offsets-alist . ((defun-open            . 0)
+                           (defun-close           . 0)
+                           (defun-block-intro     . +)
+                           (topmost-intro         . 0)
+                           (topmost-intro-cont    . c-lineup-topmost-intro-cont)
+                           (block-open            . 0)
+                           (block-close           . 0)
+                           (statement             . 0)
+                           (statement-cont        . +)
+                           (statement-block-intro . +)
+                           (statement-case-intro  . +)
+                           (statement-case-open   . 0)
+                           (substatement          . +)
+                           (substatement-open     . 0)
+                           (case-label            . +)
+                           (comment-intro         . (c-lineup-knr-region-comment c-lineup-comment))
+                           (arglist-intro         . +)
+                           (arglist-cont          . (c-lineup-gcc-asm-reg 0))
+                           (arglist-cont-nonempty . +)
+                           (arglist-close         . 0)
+                           ))
+       (c-indent-comments-syntactically-p . t)
+       (php-mode-lineup-cascaded-calls . nil)
+       (show-trailing-whitespace . nil)
+       (fill-column . 120)
+       (require-final-newline . t)))
 
-  :custom
-  (php-mode-coding-style (quote nl/php-nordita))
-  (php-mode-lineup-cascaded-calls t))
+    :custom
+    (php-mode-coding-style (quote nl/php-nordita))
+    (php-mode-lineup-cascaded-calls t))
 #+end_src
 
 **** [[https://github.com/nlamirault/phpunit.el][php-unit]]
