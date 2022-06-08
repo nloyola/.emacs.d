@@ -2,8 +2,8 @@
   "Set the size and position of the Emacs window."
   (interactive)
   (let ((frame (selected-frame)))
-    (set-frame-position frame -1 0)
-    (set-frame-size frame 135 (/ (x-display-pixel-height) (frame-char-height)))
+    (set-frame-position frame 784 0)
+    (set-frame-size frame 240 (/ (x-display-pixel-height) (frame-char-height)))
     ))
 
 (defun nl/frame-set-size-and-position ()
@@ -22,6 +22,5 @@
 
 (add-hook 'window-setup-hook (lambda ()
                                (nl/main-frame-set-size-and-position)
-                               (resume)
-                               (make-frame-command)
+                               ;;(make-frame-command)
                                ))

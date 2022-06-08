@@ -97,7 +97,7 @@ Silence compiler warnings in ~native-mode~.
 Also see: all-the-icons-dired package installation
 
 #+begin_src  emacs-lisp :results silent
-(defvar nl/gui-fixed-font-name "FuraCode Nerd Font")
+(defvar nl/gui-fixed-font-name "FiraCode Nerd Font")
 ;;(defvar nl/gui-fixed-font-name "CaskaydiaCove Nerd Font Mono")
 
 ;; (defvar nl/gui-fixed-font-name "IBM Plex Mono Medium")
@@ -1459,7 +1459,7 @@ See https://github.com/doomemacs/themes/tree/screenshots for screenshots.
 
 https://github.com/doomemacs/themes/tree/screenshots
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package doom-themes
   :disabled
   :config
@@ -1485,8 +1485,8 @@ https://github.com/doomemacs/themes/tree/screenshots
   )
 
 (with-eval-after-load 'markdown-mode
-  (set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
-  (set-face-background 'markdown-code-face (doom-color 'brightblack))
+  ;;(set-face-foreground 'markdown-code-face (doom-darken 'green 0.2))
+  ;;(set-face-background 'markdown-code-face (doom-color 'brightblack))
   ;;(set-face-background 'org-block (doom-color 'brightblack))
   (set-face-attribute 'markdown-header-face
                       nil
@@ -1863,7 +1863,7 @@ Complete anything.
   (company-show-numbers t "Numbers are helpful.")
   (company-abort-manual-when-too-short t "Be less enthusiastic about completion.")
   :custom-face
-  (company-tooltip ((t (:family "IBM Plex Mono Medium" :height 120))))
+  (company-tooltip ((t (:family "FiraCode Nerd Font" :height 140))))
   :config
   (setq company-idle-delay 0              ;; no delay no autocomplete
         company-minimum-prefix-length 1
@@ -1873,12 +1873,10 @@ Complete anything.
 
 ** [[https://github.com/tumashu/company-posframe/][company-posframe]]
 
-Removed due to not displaying properly with ~IBM Plex Mono~ font. 2021-02-16
-
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package company-posframe
   :custom-face
-  (company-posframe-active-backend-name ((t (:family "Fira Code Retina"))))
+  (company-posframe-active-backend-name ((t (:family "FiraCode Nerd Font" :height 140))))
   :custom
   (company-posframe-font nl/gui-fixed-font-name)
   :config
