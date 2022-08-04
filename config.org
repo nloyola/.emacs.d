@@ -83,7 +83,6 @@ customize settings in [[file:init.el][init.el]].
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 #+end_src
-
 Silence compiler warnings in ~native-mode~.
 
 #+begin_src emacs-lisp
@@ -693,8 +692,9 @@ Enable ANSI colors for compilation buffers.
 
 #+begin_src emacs-lisp
 (use-package compile
-  ;;:bind (("C-c c" . compile)
-  ;;       ("M-O"   . show-compilation))
+  :bind (("M-O"   . show-compilation)
+         ;;("C-c c" . compile)
+         )
   :preface
   (defun show-compilation ()
     (interactive)
@@ -707,10 +707,15 @@ Enable ANSI colors for compilation buffers.
           (switch-to-buffer-other-window compile-buf)
         (call-interactively 'compile))))
 
-  (defun compilation-ansi-color-process-output ()
+  (defun nl/compilation-ansi-color-process-output ()
     (ansi-color-process-output nil)
     (set (make-local-variable 'comint-last-output-start)
          (point-marker)))
+
+  (defun nl/compile-hook ()
+    (setq-local compilation-scroll-output t)
+    (setq-local scroll-conservatively most-positive-fixnum)
+    (setq-local scroll-margin 0))
 
   ;; (defun colorize-compilation-buffer ()
   ;;   (let ((inhibit-read-only t))
@@ -719,9 +724,10 @@ Enable ANSI colors for compilation buffers.
   :config
   (setq compilation-ask-about-save nil
         compilation-always-kill t
-        compilation-scroll-output t)
+        compilation-max-output-line-length nil)
 
-  :hook (compilation-filter . compilation-ansi-color-process-output))
+  :hook ((compilation-filter . nl/compilation-ansi-color-process-output)
+         (compilation-mode . nl/compile-hook)))
 #+end_src
 
 ** =cc-mode=
@@ -1057,6 +1063,7 @@ If invoked with C-u, toggle the setting"
         ;; org-link-frame-setup '((file . find-file))
         org-export-backends '(ascii html icalendar latex md)
         org-log-into-drawer t
+        ;; org-duration-format (quote h:mm)
         org-src-tab-acts-natively t)
 
   (setq org-capture-templates
@@ -1446,28 +1453,21 @@ See https://github.com/doomemacs/themes/tree/screenshots for screenshots.
 
 ** Current
 
-#+begin_src emacs-lisp
-(use-package cherry-blossom-theme
-  :init
-  (load-theme 'cherry-blossom t)
-  :custom-face
-  (mode-line-inactive ((t (:foreground "#808080"))))
-  )
-#+end_src
+*** [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
 
-** [[https://github.com/hlissner/emacs-doom-themes][doom-themes]]
+https://peach-melpa.org/
 
 https://github.com/doomemacs/themes/tree/screenshots
 
-#+begin_src emacs-lisp :tangle no
+#+begin_src emacs-lisp
 (use-package doom-themes
-  :disabled
+  :demand t
   :config
   ;; Global settings (defaults)
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
 
-  (load-theme 'doom-horizon t)
+  (load-theme 'doom-acario-dark t)
 
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
@@ -1692,6 +1692,16 @@ Tried out 2020-01-20
   (org-block-end-line ((nil :overline nil :foreground "#ffff7f" :background "#25202a")))
   (show-paren-match ((nil :background "#ffad65"))))
 #+end_src
+*** cherry-blossom
+
+#+begin_src emacs-lisp :tangle no
+(use-package cherry-blossom-theme
+  :init
+  (load-theme 'cherry-blossom t)
+  :custom-face
+  (mode-line-inactive ((t (:foreground "#808080"))))
+  )
+#+end_src
 
 * ELPA packages
 
@@ -1863,7 +1873,7 @@ Complete anything.
   (company-show-numbers t "Numbers are helpful.")
   (company-abort-manual-when-too-short t "Be less enthusiastic about completion.")
   :custom-face
-  (company-tooltip ((t (:family "FiraCode Nerd Font" :height 140))))
+  (company-tooltip ((t (:family "FiraCode Nerd Font" :height 100))))
   :config
   (setq company-idle-delay 0              ;; no delay no autocomplete
         company-minimum-prefix-length 1
@@ -3210,6 +3220,13 @@ to overwrite.
 (use-package ripgrep)
 #+end_src
 
+** [[https://github.com/felipeochoa/rjsx-mode][rjsx-mode]]
+
+#+begin_src emacs-lisp
+(use-package rjsx-mode
+        :mode "\\.jsx$")
+#+end_src
+
 ** [[https://github.com/ieure/scratch-el][scratch]]
 
 Convenient package to create =*scratch*= buffers that are based on the current buffer's major mode.
@@ -3557,7 +3574,8 @@ Large collection of snippets: [[https://github.com/AndreaCrotti/yasnippet-snippe
 #+begin_src emacs-lisp
 (use-package web-mode
   :mode (("\\.html?\\'" . web-mode)
-         ("\\.json\\'" . web-mode))
+         ("\\.json\\'" . web-mode)
+         ("\\.tsx\\'" . web-mode))
   :hook (web-mode  . nl/web-mode-hook)
   :preface
   (defun html-filename-p (filename)

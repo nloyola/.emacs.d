@@ -267,7 +267,7 @@
 (defun nl/format-project-files ()
   (interactive)
   (let ((files (seq-filter 'angular-project-source-file-p (projectile-current-project-files))))
-    (loop for file in files do
+    (cl-loop for file in files do
           (progn
             (setq default-directory (projectile-project-root))
             (message "formatting: %s" file)
